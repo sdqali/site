@@ -1,12 +1,141 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Tomcat on {code that works}</title>
-    <link>https://sdqali.in/tags/tomcat/?utm_source=site&amp;utm_medium=feed</link>
-    <description>Recent content in Tomcat on {code that works}</description>
+    <title>{code that works}</title>
+    <link>https://sdqali.in/tags/tomcat/index.xml?utm_source=site&amp;utm_medium=feed</link>
+    <description>Recent content on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
-    <lastBuildDate>Tue, 09 Jun 2015 01:11:05 -0400</lastBuildDate>
-    <atom:link href="/tags/tomcat/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    <atom:link href="/tags/tomcat/index.xml?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Implementing feature toggles for a Spring Boot application - Part 4</title>
+      <link>https://sdqali.in/blog/2016/11/29/implementing-feature-toggles-for-a-spring-boot-application---part-4/?utm_source=site&amp;utm_medium=feed</link>
+      <pubDate>Tue, 29 Nov 2016 15:30:03 -0800</pubDate>
+      
+      <guid>https://sdqali.in/blog/2016/11/29/implementing-feature-toggles-for-a-spring-boot-application---part-4/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;In the fourth part of this &lt;a href=&#34;https://sdqali.in/series/feature-toggles/&#34;&gt;series&lt;/a&gt; about implementing &lt;a href=&#34;https://sdqali.in/blog/2016/11/21/implementing-feature-toggles-for-a-spring-boot-application---part-1/&#34;&gt;feature toggles&lt;/a&gt; for a Spring Boot application, we will take a look at how our implementation so far introduced a dependency on the application being restarted for changes to take place.&lt;/p&gt;
+
+&lt;!--More--&gt;
+
+&lt;p&gt;In &lt;a href=&#34;https://sdqali.in/blog/2016/11/21/implementing-feature-toggles-for-a-spring-boot-application---part-1/&#34;&gt;part 1&lt;/a&gt;, we modified the &lt;code&gt;FeatureToggle&lt;/code&gt; annotation to support toggling beans and decided to use that for toggling features at the controller level. If we had a system capable of providing the feature toggle information to the application without restarts, the change in the state of the controller level toggles will have no effect because the controller is not going to be re-wired for request mapping, unless the application is restarted.&lt;/p&gt;
+
+&lt;p&gt;This raises the interesting question - Are bean level switches really feature toggles, considering that they can never be altered without application restarts? A better approach would be to consider bean switches as purely configurations and use facades that route commands to either of the beans based on a feature flag. In the example configuration provided, is treating the choice between storing sessions in-memory / Redis an actual feature, considering it does not provide any value to the end-user?&lt;/p&gt;
+
+&lt;p&gt;To ensure that we are not tying feature toggling to restarts, we will remove the meta-annotation we introduced to &lt;code&gt;FeatureToggle&lt;/code&gt; in &lt;a href=&#34;https://sdqali.in/blog/2016/11/21/implementing-feature-toggles-for-a-spring-boot-application---part-1/&#34;&gt;part 1&lt;/a&gt;.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #9999FF&#34;&gt;@Target&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;({&lt;/span&gt;ElementType&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;TYPE&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; ElementType&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;METHOD&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;})&lt;/span&gt;
+&lt;span style=&#34;color: #9999FF&#34;&gt;@Retention&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;RetentionPolicy&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;RUNTIME&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
+&lt;span style=&#34;color: #9999FF&#34;&gt;@Documented&lt;/span&gt;
+&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #9999FF&#34;&gt;@interface&lt;/span&gt; FeatureToggle &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+  String &lt;span style=&#34;color: #CC00FF&#34;&gt;feature&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;();&lt;/span&gt;
+
+  &lt;span style=&#34;color: #007788; font-weight: bold&#34;&gt;boolean&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;expectedToBeOn&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;default&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;true&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
+&lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;With this change, we no longer have the ability to toggle off an entire controller. Having to annotate all handler methods in a controller is going to be a painful, error-prone approach. In order to provide the ability to toggle entire controllers, we can modify the &lt;code&gt;FeatureInterceptor&lt;/code&gt; to look for annotations present on the controller class in addition to annotations present on the handler methods.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #00AA88; font-weight: bold&#34;&gt;FeatureInterceptor&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;implements&lt;/span&gt; HandlerInterceptor &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+  &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;final&lt;/span&gt; FeatureRepository featureRepository&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
+
+  &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;FeatureInterceptor&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;FeatureRepository featureRepository&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;this&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;featureRepository&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; featureRepository&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
+  &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+
+  &lt;span style=&#34;color: #9999FF&#34;&gt;@Override&lt;/span&gt;
+  &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007788; font-weight: bold&#34;&gt;boolean&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;preHandle&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;HttpServletRequest httpServletRequest&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; HttpServletResponse httpServletResponse&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; Object handler&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;throws&lt;/span&gt; Exception &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+    HandlerMethod handlerMethod &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;HandlerMethod&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt; handler&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
+    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;handleMethodAnnotation&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;handlerMethod&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt;
+        handleTypeAnnotation&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;handlerMethod&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;getBeanType&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()))&lt;/span&gt;  &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+      &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;true&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
+    &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+    httpServletResponse&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;setStatus&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;HttpServletResponse&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;SC_NOT_FOUND&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;);&lt;/span&gt;
+    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;false&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
+  &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+
+  &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color: #007788; font-weight: bold&#34;&gt;boolean&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;handleTypeAnnotation&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;Class&lt;span style=&#34;color: #555555&#34;&gt;&amp;lt;?&amp;gt;&lt;/span&gt; controllerType&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+    FeatureToggle controllerTypeAnnotation &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; controllerType&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;getAnnotation&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;FeatureToggle&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;);&lt;/span&gt;
+    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; checkFeatureState&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;controllerTypeAnnotation&lt;span style=&#34;color: #555555&#34;&gt;);&lt;/span&gt;
+  &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+
+  &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color: #007788; font-weight: bold&#34;&gt;boolean&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;handleMethodAnnotation&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;HandlerMethod handlerMethod&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+    FeatureToggle methodAnnotation &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; handlerMethod&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;getMethodAnnotation&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;FeatureToggle&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;);&lt;/span&gt;
+    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; checkFeatureState&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;methodAnnotation&lt;span style=&#34;color: #555555&#34;&gt;);&lt;/span&gt;
+  &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+
+  &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color: #007788; font-weight: bold&#34;&gt;boolean&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;checkFeatureState&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;FeatureToggle methodAnnotation&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;methodAnnotation &lt;span style=&#34;color: #555555&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;null&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+      &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;true&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
+    &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+
+    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;if&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;featureRepository&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;isOn&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;methodAnnotation&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;feature&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;())&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;null&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+      &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;true&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
+    &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+
+    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;if&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;methodAnnotation&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;expectedToBeOn&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;==&lt;/span&gt; featureRepository&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;isOn&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;methodAnnotation&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;feature&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()))&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+      &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;true&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
+    &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;false&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
+  &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+
+  &lt;span style=&#34;color: #9999FF&#34;&gt;@Override&lt;/span&gt;
+  &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007788; font-weight: bold&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;postHandle&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;HttpServletRequest httpServletRequest&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; HttpServletResponse httpServletResponse&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; Object o&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; ModelAndView modelAndView&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;throws&lt;/span&gt; Exception &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+
+  &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+
+  &lt;span style=&#34;color: #9999FF&#34;&gt;@Override&lt;/span&gt;
+  &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007788; font-weight: bold&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;afterCompletion&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;HttpServletRequest httpServletRequest&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; HttpServletResponse httpServletResponse&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; Object o&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; Exception e&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;throws&lt;/span&gt; Exception &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+
+  &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This will correctly intercept requests routed to handler methods even if the annotation is at the controller level instead of the method level.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #9999FF&#34;&gt;@RestController&lt;/span&gt;
+&lt;span style=&#34;color: #9999FF&#34;&gt;@RequestMapping&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;/foo&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
+&lt;span style=&#34;color: #9999FF&#34;&gt;@FeatureToggle&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;feature &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;feature.foo&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
+&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #00AA88; font-weight: bold&#34;&gt;FooController&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+  &lt;span style=&#34;color: #9999FF&#34;&gt;@RequestMapping&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
+  &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; Map &lt;span style=&#34;color: #CC00FF&#34;&gt;hello&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; Collections&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;singletonMap&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;message&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;hello foo!&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;);&lt;/span&gt;
+  &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;div class=&#34;signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0&#34;&gt;
+  &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 signup-desc&#34;&gt;
+    &lt;h3&gt;Programming problems explained:&lt;/h3&gt;
+    &lt;div&gt;
+      &lt;ul&gt;
+        &lt;li&gt;Working&lt;/li&gt;
+        &lt;li&gt;Tested&lt;/li&gt;
+        &lt;li&gt;Reusable&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0&#34; id=&#34;mc_embed_signup&#34;&gt;
+    &lt;form action=&#34;//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;amp;id=b7e69e463e&#34; method=&#34;post&#34; id=&#34;mc-embedded-subscribe-form&#34; name=&#34;mc-embedded-subscribe-form&#34; class=&#34;validate&#34; target=&#34;_blank&#34; novalidate&gt;
+      &lt;div id=&#34;mc_embed_signup_scroll&#34;&gt;
+        &lt;div class=&#34;mc-field-group form-group&#34;&gt;
+          &lt;input type=&#34;text&#34; value=&#34;&#34; name=&#34;FNAME&#34; class=&#34;form-control&#34; id=&#34;mce-FNAME&#34; placeholder=&#34;First name&#34;&gt;
+        &lt;/div&gt;
+        &lt;div class=&#34;mc-field-group form-group&#34;&gt;
+          &lt;input type=&#34;email&#34; value=&#34;&#34; name=&#34;EMAIL&#34; class=&#34;email form-control&#34; id=&#34;mce-EMAIL&#34; placeholder=&#34;Email&#34;&gt;
+        &lt;/div&gt;
+        &lt;div id=&#34;mce-responses&#34; class=&#34;form-group&#34;&gt;
+          &lt;div class=&#34;response&#34; id=&#34;mce-error-response&#34; style=&#34;display:none&#34; class=&#34;alert alert-success&#34; role=&#34;alert&#34;&gt;&lt;/div&gt;
+          &lt;div class=&#34;response&#34; id=&#34;mce-success-response&#34; style=&#34;display:none&#34; class=&#34;alert alert-success&#34; role=&#34;alert&#34;&gt;&lt;/div&gt;
+        &lt;/div&gt;
+        &lt;button type=&#34;submit&#34; class=&#34;btn btn-success&#34; id=&#34;mc-embedded-subscribe&#34; name=&#34;subscribe&#34;&gt;Subscribe to my blog&lt;/button&gt;
+        &lt;div style=&#34;position: absolute; left: -5000px;&#34; aria-hidden=&#34;true&#34;&gt;&lt;input type=&#34;text&#34; name=&#34;b_52d266a23636b031a38de6d70_b7e69e463e&#34; tabindex=&#34;-1&#34; value=&#34;&#34;&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/form&gt;
+    &lt;p class=&#34;no-spam&#34;&gt;I won&#39;t send you spam. Unsubscribe at any time.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+
+&lt;p&gt;Now that we have a feature toggling mechanism in place that no longer depends on application restarts, in the next part, we will look at providing this information to the application from a source that does not require restarts.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Running multiple applications in the same Tomcat installation</title>
@@ -78,7 +207,7 @@ HTTP/1.1 &lt;span style=&#34;color: #FF6600&#34;&gt;200&lt;/span&gt; OK
 Server: Apache-Coyote/1.1
 Content-Type: text/html;&lt;span style=&#34;color: #003333&#34;&gt;charset&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;UTF-8
 Transfer-Encoding: chunked
-Date: Tue, &lt;span style=&#34;color: #FF6600&#34;&gt;09&lt;/span&gt; Jun &lt;span style=&#34;color: #FF6600&#34;&gt;2015&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;07&lt;/span&gt;:37:43 GMT
+Date: Tue, &lt;span style=&#34;color: #FF6600&#34;&gt;09&lt;/span&gt; Jun &lt;span style=&#34;color: #FF6600&#34;&gt;2015&lt;/span&gt; 07:37:43 GMT
 &lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Let&amp;rsquo;s try and deploy a second application &lt;code&gt;app2&lt;/code&gt; running on port &lt;code&gt;9090&lt;/code&gt;.&lt;/p&gt;
@@ -99,7 +228,7 @@ HTTP/1.1 &lt;span style=&#34;color: #FF6600&#34;&gt;200&lt;/span&gt; OK
 Server: Apache-Coyote/1.1
 Content-Type: text/html;&lt;span style=&#34;color: #003333&#34;&gt;charset&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;UTF-8
 Transfer-Encoding: chunked
-Date: Tue, &lt;span style=&#34;color: #FF6600&#34;&gt;09&lt;/span&gt; Jun &lt;span style=&#34;color: #FF6600&#34;&gt;2015&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;07&lt;/span&gt;:41:02 GMT
+Date: Tue, &lt;span style=&#34;color: #FF6600&#34;&gt;09&lt;/span&gt; Jun &lt;span style=&#34;color: #FF6600&#34;&gt;2015&lt;/span&gt; 07:41:02 GMT
 &lt;/pre&gt;&lt;/div&gt;
 
 &lt;h2 id=&#34;tying-it-all-together&#34;&gt;Tying it all together&lt;/h2&gt;
@@ -112,7 +241,7 @@ Date: Tue, &lt;span style=&#34;color: #FF6600&#34;&gt;09&lt;/span&gt; Jun &lt;sp
 
 show_usage&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
     &lt;span style=&#34;color: #336666&#34;&gt;echo&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Usage: ./start.sh &amp;lt;app-name&amp;gt;&amp;quot;&lt;/span&gt;;
-    &lt;span style=&#34;color: #336666&#34;&gt;exit&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt;;
+    &lt;span style=&#34;color: #336666&#34;&gt;exit&lt;/span&gt; 1;
 &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
 
 &lt;span style=&#34;color: #336666&#34;&gt;declare&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;app_name&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #003333&#34;&gt;$1&lt;/span&gt;;
@@ -135,7 +264,7 @@ show_usage&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt; &lt;span st
 
 show_usage&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
     &lt;span style=&#34;color: #336666&#34;&gt;echo&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Usage: ./stop.sh &amp;lt;app-name&amp;gt;&amp;quot;&lt;/span&gt;;
-    &lt;span style=&#34;color: #336666&#34;&gt;exit&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt;;
+    &lt;span style=&#34;color: #336666&#34;&gt;exit&lt;/span&gt; 1;
 &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
 
 &lt;span style=&#34;color: #336666&#34;&gt;declare&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;app_name&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #003333&#34;&gt;$1&lt;/span&gt;;
@@ -159,15 +288,15 @@ Using JRE_HOME:        /Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Content
 Using CLASSPATH:       /Users/sdqali/src/sandbox/tomcat/bin/bootstrap.jar:/Users/sdqali/src/sandbox/tomcat/bin/tomcat-juli.jar
 Tomcat started.
 
-$ nc -z  &lt;span style=&#34;color: #FF6600&#34;&gt;127&lt;/span&gt;.0.0.1 &lt;span style=&#34;color: #FF6600&#34;&gt;9090&lt;/span&gt;
-Connection to &lt;span style=&#34;color: #FF6600&#34;&gt;127&lt;/span&gt;.0.0.1 port &lt;span style=&#34;color: #FF6600&#34;&gt;9090&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;[&lt;/span&gt;tcp/websm&lt;span style=&#34;color: #555555&#34;&gt;]&lt;/span&gt; succeeded!
+$ nc -z  127.0.0.1 9090
+Connection to 127.0.0.1 port &lt;span style=&#34;color: #FF6600&#34;&gt;9090&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;[&lt;/span&gt;tcp/websm&lt;span style=&#34;color: #555555&#34;&gt;]&lt;/span&gt; succeeded!
 
 $ curl -s -D - -o /dev/null http://127.0.0.1:9090
 HTTP/1.1 &lt;span style=&#34;color: #FF6600&#34;&gt;200&lt;/span&gt; OK
 Server: Apache-Coyote/1.1
 Content-Type: text/html;&lt;span style=&#34;color: #003333&#34;&gt;charset&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;UTF-8
 Transfer-Encoding: chunked
-Date: Tue, &lt;span style=&#34;color: #FF6600&#34;&gt;09&lt;/span&gt; Jun &lt;span style=&#34;color: #FF6600&#34;&gt;2015&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;08&lt;/span&gt;:16:05 GMT
+Date: Tue, &lt;span style=&#34;color: #FF6600&#34;&gt;09&lt;/span&gt; Jun &lt;span style=&#34;color: #FF6600&#34;&gt;2015&lt;/span&gt; 08:16:05 GMT
 
 
 $ ./management/stop.sh app2
@@ -177,13 +306,13 @@ Using CATALINA_TMPDIR: /Users/sdqali/src/sandbox/app2/temp
 Using JRE_HOME:        /Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home
 Using CLASSPATH:       /Users/sdqali/src/sandbox/tomcat/bin/bootstrap.jar:/Users/sdqali/src/sandbox/tomcat/bin/tomcat-juli.jar
 
-$ nc -z  &lt;span style=&#34;color: #FF6600&#34;&gt;127&lt;/span&gt;.0.0.1 &lt;span style=&#34;color: #FF6600&#34;&gt;9090&lt;/span&gt;
+$ nc -z  127.0.0.1 9090
 
 $ curl -v http://127.0.0.1:9090
 * Rebuilt URL to: http://127.0.0.1:9090/
 * Hostname was NOT found in DNS cache
-*   Trying &lt;span style=&#34;color: #FF6600&#34;&gt;127&lt;/span&gt;.0.0.1...
-* connect to &lt;span style=&#34;color: #FF6600&#34;&gt;127&lt;/span&gt;.0.0.1 port &lt;span style=&#34;color: #FF6600&#34;&gt;9090&lt;/span&gt; failed: Connection refused
+*   Trying 127.0.0.1...
+* connect to 127.0.0.1 port &lt;span style=&#34;color: #FF6600&#34;&gt;9090&lt;/span&gt; failed: Connection refused
 &lt;/pre&gt;&lt;/div&gt;</description>
     </item>
     
