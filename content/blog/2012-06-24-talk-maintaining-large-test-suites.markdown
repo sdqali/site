@@ -1,6 +1,5 @@
 ---
 image: "/images/threaded-blue-on-black-cropped.jpg"
-layout: post
 title: "VodQA NCR: Maintaining Large Test Suites"
 date: 2012-06-24
 comments: true

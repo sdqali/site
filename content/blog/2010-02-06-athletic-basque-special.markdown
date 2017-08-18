@@ -1,6 +1,5 @@
 ---
 image: /images/threaded-blue-on-black-cropped.jpg
-layout: post
 title: Athletic - The European campaign and a Basque special
 date: 2010-02-06
 comments: true

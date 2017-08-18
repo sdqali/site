@@ -1,6 +1,5 @@
 ---
 image: /images/threaded-blue-on-black-cropped.jpg
-layout: post
 title: "Implementing Rate Limiting in Rails - Part 2"
 date: 2013-10-13
 comments: true

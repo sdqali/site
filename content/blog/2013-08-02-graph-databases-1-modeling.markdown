@@ -1,6 +1,5 @@
 ---
 image: /images/threaded-blue-on-black-cropped.jpg
-layout: post
 title: "Graph databases 1 - Modeling"
 date: 2013-08-02
 comments: true

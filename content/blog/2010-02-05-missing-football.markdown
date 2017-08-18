@@ -1,6 +1,5 @@
 ---
 image: /images/threaded-blue-on-black-cropped.jpg
-layout: post
 title: Missing the game
 date: 2010-02-05
 comments: true

@@ -1,6 +1,5 @@
 ---
 image: /images/threaded-blue-on-black-cropped.jpg
-layout: post
 title: "Tough Love"
 date: 2009-01-18
 comments: true

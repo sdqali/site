@@ -1,6 +1,5 @@
 ---
 image: /images/threaded-blue-on-black-cropped.jpg
-layout: post
 title: Yet another week in Bangalore
 date: 2009-08-16
 comments: true

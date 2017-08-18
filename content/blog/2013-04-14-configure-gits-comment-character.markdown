@@ -1,6 +1,5 @@
 ---
 image: /images/threaded-blue-on-black-cropped.jpg
-layout: post
 title: "Configure Git's comment character"
 date: 2013-04-14
 comments: true

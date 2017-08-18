@@ -1,6 +1,5 @@
 ---
 image: /images/threaded-blue-on-black-cropped.jpg
-layout: post
 title: "A list of GIS tools"
 date: 2014-08-03
 comments: true

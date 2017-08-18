@@ -1,6 +1,5 @@
 ---
 image: /images/threaded-blue-on-black-cropped.jpg
-layout: post
 title: "Reducing Emacs startup time while committing"
 date: 2013-01-22
 comments: true

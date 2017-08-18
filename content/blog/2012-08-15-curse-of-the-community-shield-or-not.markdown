@@ -1,6 +1,5 @@
 ---
 image: /images/threaded-blue-on-black-cropped.jpg
-layout: post
 title: "Curse of the Community Shield?"
 date: 2012-08-15
 comments: true

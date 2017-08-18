@@ -1,6 +1,5 @@
 ---
 image: /images/threaded-blue-on-black-cropped.jpg
-layout: post
 title: "Know Your Tools - Don't Shoot Yourself in the Foot"
 date: 2012-06-06
 comments: true

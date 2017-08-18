@@ -1,6 +1,5 @@
 ---
 image: /images/threaded-blue-on-black-cropped.jpg
-layout: post
 title: "Social Networks and their URL Shorteners"
 date: 2012-07-17
 comments: true

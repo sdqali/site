@@ -1,6 +1,5 @@
 ---
 image: /images/threaded-blue-on-black-cropped.jpg
-layout: post
 title: "Fireworks in the paddy fields - memories of a summer"
 date: 2013-05-27
 comments: true

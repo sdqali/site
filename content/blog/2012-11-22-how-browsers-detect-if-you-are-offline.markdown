@@ -1,6 +1,5 @@
 ---
 image: /images/threaded-blue-on-black-cropped.jpg
-layout: post
 title: "How Browsers Detect If You Are Offline"
 date: 2012-11-22
 comments: true

@@ -1,6 +1,5 @@
 ---
 image: /images/threaded-blue-on-black-cropped.jpg
-layout: post
 title: "Navigating Stacktraces in Emacs"
 date: 2013-08-22
 comments: true

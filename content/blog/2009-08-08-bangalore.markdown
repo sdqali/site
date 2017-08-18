@@ -1,6 +1,5 @@
 ---
 image: /images/threaded-blue-on-black-cropped.jpg
-layout: post
 title: "Bangalore Journal"
 date: 2009-08-08
 comments: true

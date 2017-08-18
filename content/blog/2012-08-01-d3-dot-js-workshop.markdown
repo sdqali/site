@@ -1,6 +1,5 @@
 ---
 image: /images/threaded-blue-on-black-cropped.jpg
-layout: post
 title: "D3.js Workshop"
 date: 2012-08-01
 comments: true

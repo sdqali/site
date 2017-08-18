@@ -1,6 +1,5 @@
 ---
 image: /images/threaded-blue-on-black-cropped.jpg
-layout: post
 title: Wikipedia Page Hopping
 date: 2011-05-17
 comments: true

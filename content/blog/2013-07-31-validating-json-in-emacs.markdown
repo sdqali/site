@@ -1,6 +1,5 @@
 ---
 image: /images/threaded-blue-on-black-cropped.jpg
-layout: post
 title: "Validating JSON in Emacs"
 date: 2013-07-31
 comments: true

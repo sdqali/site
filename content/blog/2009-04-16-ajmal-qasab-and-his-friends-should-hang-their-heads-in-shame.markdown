@@ -1,6 +1,5 @@
 ---
 image: /images/threaded-blue-on-black-cropped.jpg
-layout: post
 title: "Ajmal Qasab and his friends should hang their heads in shame"
 date: 2009-04-16
 comments: true

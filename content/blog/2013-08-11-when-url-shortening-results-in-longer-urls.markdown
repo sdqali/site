@@ -1,6 +1,5 @@
 ---
 image: /images/threaded-blue-on-black-cropped.jpg
-layout: post
 title: "When URL shortening results in longer URLs"
 date: 2013-08-11
 comments: true

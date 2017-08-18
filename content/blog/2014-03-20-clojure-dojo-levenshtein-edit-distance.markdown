@@ -1,6 +1,5 @@
 ---
 image: /images/threaded-blue-on-black-cropped.jpg
-layout: post
 title: "Clojure Dojo - Levenshtein edit distance"
 date: 2014-03-20
 comments: true

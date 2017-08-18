@@ -1,6 +1,5 @@
 ---
 image: /images/threaded-blue-on-black-cropped.jpg
-layout: post
 title: "My experience working remotely"
 date: 2013-04-11
 comments: true

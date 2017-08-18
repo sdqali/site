@@ -1,6 +1,5 @@
 ---
 image: /images/threaded-blue-on-black-cropped.jpg
-layout: post
 title: "The Spiral of Learning"
 date: 2012-05-30
 comments: true

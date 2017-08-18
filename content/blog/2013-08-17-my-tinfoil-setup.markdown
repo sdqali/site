@@ -1,6 +1,5 @@
 ---
 image: /images/threaded-blue-on-black-cropped.jpg
-layout: post
 title: "My Tinfoil setup"
 date: 2013-08-17
 comments: true

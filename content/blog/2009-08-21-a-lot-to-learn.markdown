@@ -1,6 +1,5 @@
 ---
 image: /images/threaded-blue-on-black-cropped.jpg
-layout: post
 title: A lot to learn
 date: 2009-08-21
 comments: true

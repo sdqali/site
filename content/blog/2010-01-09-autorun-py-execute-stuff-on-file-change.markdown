@@ -1,6 +1,5 @@
 ---
 image: /images/threaded-blue-on-black-cropped.jpg
-layout: post
 title: Autorun.py - Execute stuff on file change
 date: 2010-01-09
 comments: true

@@ -1,6 +1,5 @@
 ---
 image: /images/threaded-blue-on-black-cropped.jpg
-layout: post
 title: "Shared history in Bash"
 date: 2013-09-15
 comments: true

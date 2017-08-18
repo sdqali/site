@@ -1,6 +1,5 @@
 ---
 image: /images/threaded-blue-on-black-cropped.jpg
-layout: post
 title: "Of Birthdays and Anniversaries"
 date: 2009-01-30
 comments: true

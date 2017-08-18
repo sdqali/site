@@ -1,6 +1,5 @@
 ---
 image: /images/threaded-blue-on-black-cropped.jpg
-layout: post
 title: "Fitting an Image in to a Canvas object"
 date: 2013-10-03
 comments: true

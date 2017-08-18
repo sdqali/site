@@ -1,6 +1,5 @@
 ---
 image: /images/threaded-blue-on-black-cropped.jpg
-layout: post
 title: "When I used to love Cricket"
 date: 2009-02-26
 comments: true

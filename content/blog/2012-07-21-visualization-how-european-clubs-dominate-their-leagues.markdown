@@ -1,6 +1,5 @@
 ---
 image: /images/threaded-blue-on-black-cropped.jpg
-layout: post
 title: "Visualisation - How European clubs dominate their leagues"
 date: 2012-07-21
 comments: true

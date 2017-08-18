@@ -1,6 +1,5 @@
 ---
 image: /images/threaded-blue-on-black-cropped.jpg
-layout: post
 title: "Emacs hack: Viewing Git logs while composing commit messages"
 date: 2013-04-29
 comments: true

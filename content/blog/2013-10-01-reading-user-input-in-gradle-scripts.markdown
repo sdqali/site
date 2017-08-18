@@ -1,6 +1,5 @@
 ---
 image: /images/threaded-blue-on-black-cropped.jpg
-layout: post
 title: "Reading user input in Gradle scripts"
 date: 2013-10-01
 comments: true

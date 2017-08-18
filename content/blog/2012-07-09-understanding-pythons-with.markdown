@@ -1,6 +1,5 @@
 ---
 image: /images/threaded-blue-on-black-cropped.jpg
-layout: post
 title: Understanding Python's "with" statement
 date: 2012-07-09
 comments: true

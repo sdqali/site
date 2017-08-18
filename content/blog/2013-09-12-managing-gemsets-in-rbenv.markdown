@@ -1,6 +1,5 @@
 ---
 image: /images/threaded-blue-on-black-cropped.jpg
-layout: post
 title: "Managing Gemsets in Rbenv"
 date: 2013-09-12
 comments: true
