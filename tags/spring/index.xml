@@ -1,399 +1,12 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>{code that works}</title>
-    <link>https://sdqali.in/tags/spring/index.xml?utm_source=site&amp;utm_medium=feed</link>
-    <description>Recent content on {code that works}</description>
+    <title>Spring on {code that works}</title>
+    <link>https://sdqali.in/tags/spring/?utm_source=site&amp;utm_medium=feed</link>
+    <description>Recent content in Spring on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
-    <atom:link href="/tags/spring/index.xml?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
-    
-    <item>
-      <title>Implementing feature toggles for a Spring Boot application - Part 4</title>
-      <link>https://sdqali.in/blog/2016/11/29/implementing-feature-toggles-for-a-spring-boot-application---part-4/?utm_source=site&amp;utm_medium=feed</link>
-      <pubDate>Tue, 29 Nov 2016 15:30:03 -0800</pubDate>
-      
-      <guid>https://sdqali.in/blog/2016/11/29/implementing-feature-toggles-for-a-spring-boot-application---part-4/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>&lt;p&gt;In the fourth part of this &lt;a href=&#34;https://sdqali.in/series/feature-toggles/&#34;&gt;series&lt;/a&gt; about implementing &lt;a href=&#34;https://sdqali.in/blog/2016/11/21/implementing-feature-toggles-for-a-spring-boot-application---part-1/&#34;&gt;feature toggles&lt;/a&gt; for a Spring Boot application, we will take a look at how our implementation so far introduced a dependency on the application being restarted for changes to take place.&lt;/p&gt;
-
-&lt;!--More--&gt;
-
-&lt;p&gt;In &lt;a href=&#34;https://sdqali.in/blog/2016/11/21/implementing-feature-toggles-for-a-spring-boot-application---part-1/&#34;&gt;part 1&lt;/a&gt;, we modified the &lt;code&gt;FeatureToggle&lt;/code&gt; annotation to support toggling beans and decided to use that for toggling features at the controller level. If we had a system capable of providing the feature toggle information to the application without restarts, the change in the state of the controller level toggles will have no effect because the controller is not going to be re-wired for request mapping, unless the application is restarted.&lt;/p&gt;
-
-&lt;p&gt;This raises the interesting question - Are bean level switches really feature toggles, considering that they can never be altered without application restarts? A better approach would be to consider bean switches as purely configurations and use facades that route commands to either of the beans based on a feature flag. In the example configuration provided, is treating the choice between storing sessions in-memory / Redis an actual feature, considering it does not provide any value to the end-user?&lt;/p&gt;
-
-&lt;p&gt;To ensure that we are not tying feature toggling to restarts, we will remove the meta-annotation we introduced to &lt;code&gt;FeatureToggle&lt;/code&gt; in &lt;a href=&#34;https://sdqali.in/blog/2016/11/21/implementing-feature-toggles-for-a-spring-boot-application---part-1/&#34;&gt;part 1&lt;/a&gt;.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #9999FF&#34;&gt;@Target&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;({&lt;/span&gt;ElementType&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;TYPE&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; ElementType&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;METHOD&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;})&lt;/span&gt;
-&lt;span style=&#34;color: #9999FF&#34;&gt;@Retention&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;RetentionPolicy&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;RUNTIME&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
-&lt;span style=&#34;color: #9999FF&#34;&gt;@Documented&lt;/span&gt;
-&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #9999FF&#34;&gt;@interface&lt;/span&gt; FeatureToggle &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-  String &lt;span style=&#34;color: #CC00FF&#34;&gt;feature&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;();&lt;/span&gt;
-
-  &lt;span style=&#34;color: #007788; font-weight: bold&#34;&gt;boolean&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;expectedToBeOn&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;default&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;true&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
-&lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;With this change, we no longer have the ability to toggle off an entire controller. Having to annotate all handler methods in a controller is going to be a painful, error-prone approach. In order to provide the ability to toggle entire controllers, we can modify the &lt;code&gt;FeatureInterceptor&lt;/code&gt; to look for annotations present on the controller class in addition to annotations present on the handler methods.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #00AA88; font-weight: bold&#34;&gt;FeatureInterceptor&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;implements&lt;/span&gt; HandlerInterceptor &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-  &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;final&lt;/span&gt; FeatureRepository featureRepository&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
-
-  &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;FeatureInterceptor&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;FeatureRepository featureRepository&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;this&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;featureRepository&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; featureRepository&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
-  &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-
-  &lt;span style=&#34;color: #9999FF&#34;&gt;@Override&lt;/span&gt;
-  &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007788; font-weight: bold&#34;&gt;boolean&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;preHandle&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;HttpServletRequest httpServletRequest&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; HttpServletResponse httpServletResponse&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; Object handler&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;throws&lt;/span&gt; Exception &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-    HandlerMethod handlerMethod &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;HandlerMethod&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt; handler&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;handleMethodAnnotation&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;handlerMethod&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt;
-        handleTypeAnnotation&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;handlerMethod&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;getBeanType&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()))&lt;/span&gt;  &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-      &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;true&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
-    &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-    httpServletResponse&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;setStatus&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;HttpServletResponse&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;SC_NOT_FOUND&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;);&lt;/span&gt;
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;false&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
-  &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-
-  &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color: #007788; font-weight: bold&#34;&gt;boolean&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;handleTypeAnnotation&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;Class&lt;span style=&#34;color: #555555&#34;&gt;&amp;lt;?&amp;gt;&lt;/span&gt; controllerType&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-    FeatureToggle controllerTypeAnnotation &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; controllerType&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;getAnnotation&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;FeatureToggle&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;);&lt;/span&gt;
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; checkFeatureState&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;controllerTypeAnnotation&lt;span style=&#34;color: #555555&#34;&gt;);&lt;/span&gt;
-  &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-
-  &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color: #007788; font-weight: bold&#34;&gt;boolean&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;handleMethodAnnotation&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;HandlerMethod handlerMethod&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-    FeatureToggle methodAnnotation &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; handlerMethod&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;getMethodAnnotation&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;FeatureToggle&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;);&lt;/span&gt;
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; checkFeatureState&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;methodAnnotation&lt;span style=&#34;color: #555555&#34;&gt;);&lt;/span&gt;
-  &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-
-  &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color: #007788; font-weight: bold&#34;&gt;boolean&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;checkFeatureState&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;FeatureToggle methodAnnotation&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;methodAnnotation &lt;span style=&#34;color: #555555&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;null&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-      &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;true&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
-    &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;if&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;featureRepository&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;isOn&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;methodAnnotation&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;feature&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;())&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;null&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-      &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;true&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
-    &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;if&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;methodAnnotation&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;expectedToBeOn&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;==&lt;/span&gt; featureRepository&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;isOn&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;methodAnnotation&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;feature&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()))&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-      &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;true&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
-    &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;false&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
-  &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-
-  &lt;span style=&#34;color: #9999FF&#34;&gt;@Override&lt;/span&gt;
-  &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007788; font-weight: bold&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;postHandle&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;HttpServletRequest httpServletRequest&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; HttpServletResponse httpServletResponse&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; Object o&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; ModelAndView modelAndView&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;throws&lt;/span&gt; Exception &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-
-  &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-
-  &lt;span style=&#34;color: #9999FF&#34;&gt;@Override&lt;/span&gt;
-  &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007788; font-weight: bold&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;afterCompletion&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;HttpServletRequest httpServletRequest&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; HttpServletResponse httpServletResponse&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; Object o&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; Exception e&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;throws&lt;/span&gt; Exception &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-
-  &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-&lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;This will correctly intercept requests routed to handler methods even if the annotation is at the controller level instead of the method level.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #9999FF&#34;&gt;@RestController&lt;/span&gt;
-&lt;span style=&#34;color: #9999FF&#34;&gt;@RequestMapping&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;/foo&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
-&lt;span style=&#34;color: #9999FF&#34;&gt;@FeatureToggle&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;feature &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;feature.foo&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
-&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #00AA88; font-weight: bold&#34;&gt;FooController&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-  &lt;span style=&#34;color: #9999FF&#34;&gt;@RequestMapping&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
-  &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; Map &lt;span style=&#34;color: #CC00FF&#34;&gt;hello&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; Collections&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;singletonMap&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;message&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;hello foo!&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;);&lt;/span&gt;
-  &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-&lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;div class=&#34;signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0&#34;&gt;
-  &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 signup-desc&#34;&gt;
-    &lt;h3&gt;Programming problems explained:&lt;/h3&gt;
-    &lt;div&gt;
-      &lt;ul&gt;
-        &lt;li&gt;Working&lt;/li&gt;
-        &lt;li&gt;Tested&lt;/li&gt;
-        &lt;li&gt;Reusable&lt;/li&gt;
-      &lt;/ul&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-  &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0&#34; id=&#34;mc_embed_signup&#34;&gt;
-    &lt;form action=&#34;//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;amp;id=b7e69e463e&#34; method=&#34;post&#34; id=&#34;mc-embedded-subscribe-form&#34; name=&#34;mc-embedded-subscribe-form&#34; class=&#34;validate&#34; target=&#34;_blank&#34; novalidate&gt;
-      &lt;div id=&#34;mc_embed_signup_scroll&#34;&gt;
-        &lt;div class=&#34;mc-field-group form-group&#34;&gt;
-          &lt;input type=&#34;text&#34; value=&#34;&#34; name=&#34;FNAME&#34; class=&#34;form-control&#34; id=&#34;mce-FNAME&#34; placeholder=&#34;First name&#34;&gt;
-        &lt;/div&gt;
-        &lt;div class=&#34;mc-field-group form-group&#34;&gt;
-          &lt;input type=&#34;email&#34; value=&#34;&#34; name=&#34;EMAIL&#34; class=&#34;email form-control&#34; id=&#34;mce-EMAIL&#34; placeholder=&#34;Email&#34;&gt;
-        &lt;/div&gt;
-        &lt;div id=&#34;mce-responses&#34; class=&#34;form-group&#34;&gt;
-          &lt;div class=&#34;response&#34; id=&#34;mce-error-response&#34; style=&#34;display:none&#34; class=&#34;alert alert-success&#34; role=&#34;alert&#34;&gt;&lt;/div&gt;
-          &lt;div class=&#34;response&#34; id=&#34;mce-success-response&#34; style=&#34;display:none&#34; class=&#34;alert alert-success&#34; role=&#34;alert&#34;&gt;&lt;/div&gt;
-        &lt;/div&gt;
-        &lt;button type=&#34;submit&#34; class=&#34;btn btn-success&#34; id=&#34;mc-embedded-subscribe&#34; name=&#34;subscribe&#34;&gt;Subscribe to my blog&lt;/button&gt;
-        &lt;div style=&#34;position: absolute; left: -5000px;&#34; aria-hidden=&#34;true&#34;&gt;&lt;input type=&#34;text&#34; name=&#34;b_52d266a23636b031a38de6d70_b7e69e463e&#34; tabindex=&#34;-1&#34; value=&#34;&#34;&gt;&lt;/div&gt;
-      &lt;/div&gt;
-    &lt;/form&gt;
-    &lt;p class=&#34;no-spam&#34;&gt;I won&#39;t send you spam. Unsubscribe at any time.&lt;/p&gt;
-  &lt;/div&gt;
-&lt;/div&gt;
-
-
-&lt;p&gt;Now that we have a feature toggling mechanism in place that no longer depends on application restarts, in the next part, we will look at providing this information to the application from a source that does not require restarts.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Implementing feature toggles for a Spring Boot application - Part 3</title>
-      <link>https://sdqali.in/blog/2016/11/28/implementing-feature-toggles-for-a-spring-boot-application---part-3/?utm_source=site&amp;utm_medium=feed</link>
-      <pubDate>Mon, 28 Nov 2016 08:30:03 -0800</pubDate>
-      
-      <guid>https://sdqali.in/blog/2016/11/28/implementing-feature-toggles-for-a-spring-boot-application---part-3/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>&lt;p&gt;In the third part of this &lt;a href=&#34;https://sdqali.in/series/feature-toggles/&#34;&gt;series&lt;/a&gt; about implementing feature toggles for a Spring Boot application, we will take a look at exposing the state of feature flags as a Spring Boot management end point for monitoring and testing purposes.&lt;/p&gt;
-
-&lt;p&gt;&lt;/p&gt;
-
-&lt;p&gt;Spring Boot Actuator exposes a number of &lt;a href=&#34;http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-endpoints.html&#34;&gt;end points&lt;/a&gt; to monitor and administer the application. The most commonly used of these in my experience are the &lt;code&gt;info&lt;/code&gt; and &lt;code&gt;health&lt;/code&gt; end points. These end points are used to communicate to load balancers that a particular instance is ready to accept traffic and to monitor the state of the application.&lt;/p&gt;
-
-&lt;h2 id=&#34;features-management-end-point&#34;&gt;Features management end point&lt;/h2&gt;
-
-&lt;p&gt;In our case, this end point will be used by administrators, QA engineers and sometimes business stake holders to see what features are available in a particular environment running the application. Of course, we could have re-used the end point we built in the [last blog post]() for this purpose, but creating an management end point allows us to:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Control the HTTP end point together with other end points by using the &lt;code&gt;management.context-path&lt;/code&gt; property. This will allow us to provide certain nodes in our network access to only the management end points without having to expose application behavior to them.&lt;/li&gt;
-&lt;li&gt;Make this information available in a more human readable form for it&amp;rsquo;s consumers. Even though the information exposed in the &lt;code&gt;/features&lt;/code&gt; end point is detailed, the format was designed for consumption by code.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;div class=&#34;signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0&#34;&gt;
-  &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 signup-desc&#34;&gt;
-    &lt;h3&gt;Programming problems explained:&lt;/h3&gt;
-    &lt;div&gt;
-      &lt;ul&gt;
-        &lt;li&gt;Working&lt;/li&gt;
-        &lt;li&gt;Tested&lt;/li&gt;
-        &lt;li&gt;Reusable&lt;/li&gt;
-      &lt;/ul&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-  &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0&#34; id=&#34;mc_embed_signup&#34;&gt;
-    &lt;form action=&#34;//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;amp;id=b7e69e463e&#34; method=&#34;post&#34; id=&#34;mc-embedded-subscribe-form&#34; name=&#34;mc-embedded-subscribe-form&#34; class=&#34;validate&#34; target=&#34;_blank&#34; novalidate&gt;
-      &lt;div id=&#34;mc_embed_signup_scroll&#34;&gt;
-        &lt;div class=&#34;mc-field-group form-group&#34;&gt;
-          &lt;input type=&#34;text&#34; value=&#34;&#34; name=&#34;FNAME&#34; class=&#34;form-control&#34; id=&#34;mce-FNAME&#34; placeholder=&#34;First name&#34;&gt;
-        &lt;/div&gt;
-        &lt;div class=&#34;mc-field-group form-group&#34;&gt;
-          &lt;input type=&#34;email&#34; value=&#34;&#34; name=&#34;EMAIL&#34; class=&#34;email form-control&#34; id=&#34;mce-EMAIL&#34; placeholder=&#34;Email&#34;&gt;
-        &lt;/div&gt;
-        &lt;div id=&#34;mce-responses&#34; class=&#34;form-group&#34;&gt;
-          &lt;div class=&#34;response&#34; id=&#34;mce-error-response&#34; style=&#34;display:none&#34; class=&#34;alert alert-success&#34; role=&#34;alert&#34;&gt;&lt;/div&gt;
-          &lt;div class=&#34;response&#34; id=&#34;mce-success-response&#34; style=&#34;display:none&#34; class=&#34;alert alert-success&#34; role=&#34;alert&#34;&gt;&lt;/div&gt;
-        &lt;/div&gt;
-        &lt;button type=&#34;submit&#34; class=&#34;btn btn-success&#34; id=&#34;mc-embedded-subscribe&#34; name=&#34;subscribe&#34;&gt;Subscribe to my blog&lt;/button&gt;
-        &lt;div style=&#34;position: absolute; left: -5000px;&#34; aria-hidden=&#34;true&#34;&gt;&lt;input type=&#34;text&#34; name=&#34;b_52d266a23636b031a38de6d70_b7e69e463e&#34; tabindex=&#34;-1&#34; value=&#34;&#34;&gt;&lt;/div&gt;
-      &lt;/div&gt;
-    &lt;/form&gt;
-    &lt;p class=&#34;no-spam&#34;&gt;I won&#39;t send you spam. Unsubscribe at any time.&lt;/p&gt;
-  &lt;/div&gt;
-&lt;/div&gt;
-
-
-&lt;p&gt;Because this is for human consumption, the end point will display the feature state in the following format:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;{
-  &lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;available&amp;quot;&lt;/span&gt;: [
-    &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;feature.hello&amp;quot;&lt;/span&gt;,
-    &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;feature.bar&amp;quot;&lt;/span&gt;
-    &lt;span style=&#34;color: #AA0000; background-color: #FFAAAA&#34;&gt;...&lt;/span&gt;
-  ],
-  &lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;enabled&amp;quot;&lt;/span&gt;: [
-    &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;feature.hello&amp;quot;&lt;/span&gt;
-    &lt;span style=&#34;color: #AA0000; background-color: #FFAAAA&#34;&gt;...&lt;/span&gt;
-  ]
-}
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;Management end points in Spring Boot are created by implementing the &lt;code&gt;EndPoint&lt;/code&gt; interface. In our case, the end point will depend on &lt;code&gt;FeatureRepository&lt;/code&gt; to do the heavy lifting.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #00AA88; font-weight: bold&#34;&gt;FeatureEndpoint&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;implements&lt;/span&gt; Endpoint&lt;span style=&#34;color: #555555&#34;&gt;&amp;lt;&lt;/span&gt;HashMap&lt;span style=&#34;color: #555555&#34;&gt;&amp;lt;&lt;/span&gt;String&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; Set&lt;span style=&#34;color: #555555&#34;&gt;&amp;lt;&lt;/span&gt;String&lt;span style=&#34;color: #555555&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-
-  &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;static&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;final&lt;/span&gt; String ID &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;features&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
-  &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;final&lt;/span&gt; FeatureRepository featureRepository&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
-
-  &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;FeatureEndpoint&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;FeatureRepository featureRepository&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;this&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;featureRepository&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; featureRepository&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
-  &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-
-  &lt;span style=&#34;color: #9999FF&#34;&gt;@Override&lt;/span&gt;
-  &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; String &lt;span style=&#34;color: #CC00FF&#34;&gt;getId&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; ID&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
-  &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-
-  &lt;span style=&#34;color: #9999FF&#34;&gt;@Override&lt;/span&gt;
-  &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007788; font-weight: bold&#34;&gt;boolean&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;isEnabled&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;true&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
-  &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-
-  &lt;span style=&#34;color: #9999FF&#34;&gt;@Override&lt;/span&gt;
-  &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007788; font-weight: bold&#34;&gt;boolean&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;isSensitive&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;false&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
-  &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-
-  &lt;span style=&#34;color: #9999FF&#34;&gt;@Override&lt;/span&gt;
-  &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; HashMap&lt;span style=&#34;color: #555555&#34;&gt;&amp;lt;&lt;/span&gt;String&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; Set&lt;span style=&#34;color: #555555&#34;&gt;&amp;lt;&lt;/span&gt;String&lt;span style=&#34;color: #555555&#34;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;invoke&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-    HashMap&lt;span style=&#34;color: #555555&#34;&gt;&amp;lt;&lt;/span&gt;String&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; Set&lt;span style=&#34;color: #555555&#34;&gt;&amp;lt;&lt;/span&gt;String&lt;span style=&#34;color: #555555&#34;&gt;&amp;gt;&amp;gt;&lt;/span&gt; map &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;new&lt;/span&gt; HashMap&lt;span style=&#34;color: #555555&#34;&gt;&amp;lt;&amp;gt;();&lt;/span&gt;
-    map&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;put&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;enabled&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; featureRepository&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;enabledKeys&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;());&lt;/span&gt;
-    map&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;put&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;available&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; featureRepository&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;featureKeys&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;());&lt;/span&gt;
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; map&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
-  &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-&lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;In order to retrieve the keys for features that are toggled on, we will create an &lt;code&gt;enabledKeys&lt;/code&gt; method in the repository.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #00AA88; font-weight: bold&#34;&gt;FeatureRepository&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-  &lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;// ...&lt;/span&gt;
-  &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; Set&lt;span style=&#34;color: #555555&#34;&gt;&amp;lt;&lt;/span&gt;String&lt;span style=&#34;color: #555555&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;enabledKeys&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; featureKeys&lt;span style=&#34;color: #555555&#34;&gt;().&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;stream&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt;
-        &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;filter&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;f &lt;span style=&#34;color: #555555&#34;&gt;-&amp;gt;&lt;/span&gt; isOn&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;f&lt;span style=&#34;color: #555555&#34;&gt;))&lt;/span&gt;
-        &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;collect&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;Collectors&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;toSet&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;());&lt;/span&gt;
-  &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-&lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;With this end point in place and the &lt;code&gt;management.context-path&lt;/code&gt; set to &lt;code&gt;management&lt;/code&gt; in our properties, this end point will produce the following output.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&amp;gt; curl -s &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;http://localhost:8080/management/features&amp;quot;&lt;/span&gt; | jq .
-&lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-  &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;available&amp;quot;&lt;/span&gt;: &lt;span style=&#34;color: #555555&#34;&gt;[&lt;/span&gt;
-    &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;feature.foo&amp;quot;&lt;/span&gt;,
-    &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;feature.hello&amp;quot;&lt;/span&gt;
-  &lt;span style=&#34;color: #555555&#34;&gt;]&lt;/span&gt;,
-  &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;enabled&amp;quot;&lt;/span&gt;: &lt;span style=&#34;color: #555555&#34;&gt;[&lt;/span&gt;
-    &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;feature.hello&amp;quot;&lt;/span&gt;
-  &lt;span style=&#34;color: #555555&#34;&gt;]&lt;/span&gt;
-&lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;It is important to note that our end point has it&amp;rsquo;s sensitivity flag set to false by default. You should consider the &lt;a href=&#34;http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-endpoints.html#_security_with_healthindicators&#34;&gt;security implications&lt;/a&gt; of that before choosing to leave it false.&lt;/p&gt;
-
-&lt;p&gt;In the next blog post in this &lt;a href=&#34;https://sdqali.in/series/feature-toggles/&#34;&gt;series&lt;/a&gt;, we will explore how our feature toggle mechanism so far have introduced a dependency on the application being restarted and how to eliminate this dependency.&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>Implementing feature toggles for a Spring Boot application - Part 2</title>
-      <link>https://sdqali.in/blog/2016/11/26/implementing-feature-toggles-for-a-spring-boot-application---part-2/?utm_source=site&amp;utm_medium=feed</link>
-      <pubDate>Sat, 26 Nov 2016 15:30:03 -0800</pubDate>
-      
-      <guid>https://sdqali.in/blog/2016/11/26/implementing-feature-toggles-for-a-spring-boot-application---part-2/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>&lt;p&gt;In the second part of this &lt;a href=&#34;https://sdqali.in/series/feature-toggles/&#34;&gt;series&lt;/a&gt; about implementing feature toggles for a Spring Boot application, we will look at exposing the features to the Angular front-end so that features can be toggled in UI components.
-&lt;/p&gt;
-
-&lt;h2 id=&#34;toggling-at-the-front-end&#34;&gt;Toggling at the front end&lt;/h2&gt;
-
-&lt;p&gt;We decided to use the &lt;a href=&#34;https://github.com/mjt01/angular-feature-flags&#34;&gt;angular-feature-flags&lt;/a&gt; library to toggle features at the front end because it provided us the three features that we were looking for:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;The ability to load the state of feature flags &lt;a href=&#34;https://github.com/mjt01/angular-feature-flags#setting-flag-data&#34;&gt;from an HTTP end point&lt;/a&gt; instead of having to generate JS code through templates.&lt;/li&gt;
-&lt;li&gt;The ability to toggle entire html components through the &lt;code&gt;feature-flag&lt;/code&gt; attribute directive.&lt;/li&gt;
-&lt;li&gt;The ability to expose these features to services and components to make if-else decisions through &lt;code&gt;featureFlagsProvider&lt;/code&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;features-end-point&#34;&gt;Features end point&lt;/h2&gt;
-
-&lt;p&gt;The library expects feature flags to be provided to &lt;code&gt;featureFlagsProvider&lt;/code&gt; in the following format:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;[
-    { &lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;key&amp;quot;&lt;/span&gt;: &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;...&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;active&amp;quot;&lt;/span&gt;: &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;...&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;name&amp;quot;&lt;/span&gt;: &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;...&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;description&amp;quot;&lt;/span&gt;: &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;...&amp;quot;&lt;/span&gt; },
-    &lt;span style=&#34;color: #AA0000; background-color: #FFAAAA&#34;&gt;...&lt;/span&gt;
-]
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;div class=&#34;signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0&#34;&gt;
-  &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 signup-desc&#34;&gt;
-    &lt;h3&gt;Programming problems explained:&lt;/h3&gt;
-    &lt;div&gt;
-      &lt;ul&gt;
-        &lt;li&gt;Working&lt;/li&gt;
-        &lt;li&gt;Tested&lt;/li&gt;
-        &lt;li&gt;Reusable&lt;/li&gt;
-      &lt;/ul&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-  &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0&#34; id=&#34;mc_embed_signup&#34;&gt;
-    &lt;form action=&#34;//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;amp;id=b7e69e463e&#34; method=&#34;post&#34; id=&#34;mc-embedded-subscribe-form&#34; name=&#34;mc-embedded-subscribe-form&#34; class=&#34;validate&#34; target=&#34;_blank&#34; novalidate&gt;
-      &lt;div id=&#34;mc_embed_signup_scroll&#34;&gt;
-        &lt;div class=&#34;mc-field-group form-group&#34;&gt;
-          &lt;input type=&#34;text&#34; value=&#34;&#34; name=&#34;FNAME&#34; class=&#34;form-control&#34; id=&#34;mce-FNAME&#34; placeholder=&#34;First name&#34;&gt;
-        &lt;/div&gt;
-        &lt;div class=&#34;mc-field-group form-group&#34;&gt;
-          &lt;input type=&#34;email&#34; value=&#34;&#34; name=&#34;EMAIL&#34; class=&#34;email form-control&#34; id=&#34;mce-EMAIL&#34; placeholder=&#34;Email&#34;&gt;
-        &lt;/div&gt;
-        &lt;div id=&#34;mce-responses&#34; class=&#34;form-group&#34;&gt;
-          &lt;div class=&#34;response&#34; id=&#34;mce-error-response&#34; style=&#34;display:none&#34; class=&#34;alert alert-success&#34; role=&#34;alert&#34;&gt;&lt;/div&gt;
-          &lt;div class=&#34;response&#34; id=&#34;mce-success-response&#34; style=&#34;display:none&#34; class=&#34;alert alert-success&#34; role=&#34;alert&#34;&gt;&lt;/div&gt;
-        &lt;/div&gt;
-        &lt;button type=&#34;submit&#34; class=&#34;btn btn-success&#34; id=&#34;mc-embedded-subscribe&#34; name=&#34;subscribe&#34;&gt;Subscribe to my blog&lt;/button&gt;
-        &lt;div style=&#34;position: absolute; left: -5000px;&#34; aria-hidden=&#34;true&#34;&gt;&lt;input type=&#34;text&#34; name=&#34;b_52d266a23636b031a38de6d70_b7e69e463e&#34; tabindex=&#34;-1&#34; value=&#34;&#34;&gt;&lt;/div&gt;
-      &lt;/div&gt;
-    &lt;/form&gt;
-    &lt;p class=&#34;no-spam&#34;&gt;I won&#39;t send you spam. Unsubscribe at any time.&lt;/p&gt;
-  &lt;/div&gt;
-&lt;/div&gt;
-
-
-&lt;p&gt;The &lt;code&gt;FeatureController&lt;/code&gt; will use the &lt;code&gt;FeatureRepository&lt;/code&gt; to expose this will look like this:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #9999FF&#34;&gt;@RestController&lt;/span&gt;
-&lt;span style=&#34;color: #9999FF&#34;&gt;@RequestMapping&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;/features&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
-&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #00AA88; font-weight: bold&#34;&gt;FeatureController&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-  &lt;span style=&#34;color: #9999FF&#34;&gt;@Autowired&lt;/span&gt;
-  FeatureRepository featureRepository&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
-
-  &lt;span style=&#34;color: #9999FF&#34;&gt;@RequestMapping&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
-  &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; List&lt;span style=&#34;color: #555555&#34;&gt;&amp;lt;&lt;/span&gt;Map&lt;span style=&#34;color: #555555&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;features&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; featureRepository&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;allFeatures&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt;
-        &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;entrySet&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt;
-        &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;stream&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt;
-        &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;map&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;entry &lt;span style=&#34;color: #555555&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;new&lt;/span&gt; HashMap&lt;span style=&#34;color: #555555&#34;&gt;&amp;lt;&lt;/span&gt;String&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; Object&lt;span style=&#34;color: #555555&#34;&gt;&amp;gt;()&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-          &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-            put&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;key&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; entry&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;getKey&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;());&lt;/span&gt;
-            put&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;active&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; entry&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;getValue&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;());&lt;/span&gt;
-            put&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; entry&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;getKey&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;());&lt;/span&gt;
-            put&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;description&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; entry&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;getKey&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;());&lt;/span&gt;
-          &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-        &lt;span style=&#34;color: #555555&#34;&gt;})&lt;/span&gt;
-        &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;collect&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;Collectors&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;toList&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;());&lt;/span&gt;
-  &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-&lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;We are using the double brace initialization technique to construct the map representing each feature. Initializing a map given a set of keys and values is still an exercise that requires a bunch of &lt;a href=&#34;https://minborgsjavapot.blogspot.com/2014/12/java-8-initializing-maps-in-smartest-way.html&#34;&gt;boiler plate&lt;/a&gt; code in Java. You can get around this by using the convenient ImmutableMap.of() provided by &lt;a href=&#34;https://mvnrepository.com/artifact/com.google.collections/google-collections/1.0&#34;&gt;Google Collections&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;It is also important to change our &lt;code&gt;AppConfig&lt;/code&gt; to initialize the instance of &lt;code&gt;Featurerepository&lt;/code&gt; as a bean.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #9999FF&#34;&gt;@Configuration&lt;/span&gt;
-&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #00AA88; font-weight: bold&#34;&gt;AppConfig&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;extends&lt;/span&gt; WebMvcConfigurerAdapter &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-  &lt;span style=&#34;color: #9999FF&#34;&gt;@Autowired&lt;/span&gt;
-  Environment env&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
-
-  &lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;// ...&lt;/span&gt;
-
-  &lt;span style=&#34;color: #9999FF&#34;&gt;@Bean&lt;/span&gt;
-  &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; FeatureRepository &lt;span style=&#34;color: #CC00FF&#34;&gt;featureRepository&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;new&lt;/span&gt; FeatureRepository&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;env&lt;span style=&#34;color: #555555&#34;&gt;);&lt;/span&gt;
-  &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-&lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;With this configuration, we can get the feature state from the end point:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&amp;gt; curl -s &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;http://localhost:8080/features&amp;quot;&lt;/span&gt; | jq .
-&lt;span style=&#34;color: #555555&#34;&gt;[&lt;/span&gt;
-  &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-    &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;name&amp;quot;&lt;/span&gt;: &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;feature.foo&amp;quot;&lt;/span&gt;,
-    &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;active&amp;quot;&lt;/span&gt;: false,
-    &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;description&amp;quot;&lt;/span&gt;: &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;feature.foo&amp;quot;&lt;/span&gt;,
-    &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;key&amp;quot;&lt;/span&gt;: &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;feature.foo&amp;quot;&lt;/span&gt;
-  &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;,
-  &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-    &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;name&amp;quot;&lt;/span&gt;: &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;feature.hello&amp;quot;&lt;/span&gt;,
-    &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;active&amp;quot;&lt;/span&gt;: true,
-    &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;description&amp;quot;&lt;/span&gt;: &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;feature.hello&amp;quot;&lt;/span&gt;,
-    &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;key&amp;quot;&lt;/span&gt;: &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;feature.hello&amp;quot;&lt;/span&gt;
-  &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-&lt;span style=&#34;color: #555555&#34;&gt;]&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;For our use case, we were comfortable re-using the feature key as the name and description of the feature. You may want to capture these meta data in your application configuration and expose this using Spring Boot&amp;rsquo;s &lt;a href=&#34;http://docs.spring.io/spring-boot/docs/1.1.7.RELEASE/api/org/springframework/boot/context/properties/ConfigurationProperties.html&#34;&gt;ConfigurationProperties&lt;/a&gt;. You can find an example of how use structured configurations in &lt;a href=&#34;https://github.com/sdqali/config-properties&#34;&gt;my example project&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;In the next part of this &lt;a href=&#34;https://sdqali.in/series/feature-toggles/&#34;&gt;series&lt;/a&gt;, we will take a look at how to expose the feature information as an &lt;a href=&#34;http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-endpoints.html&#34;&gt;admin end point&lt;/a&gt;.&lt;/p&gt;</description>
-    </item>
+    <lastBuildDate>Mon, 21 Nov 2016 17:03:03 -0800</lastBuildDate>
+    <atom:link href="/tags/spring/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
     
     <item>
       <title>Implementing feature toggles for a Spring Boot application - Part 1</title>
@@ -508,30 +121,28 @@
 
 &lt;p&gt;The &lt;code&gt;FeatureRepository&lt;/code&gt; has to look at all the properties that are available in the applications environment and filter out the ones that start with &lt;code&gt;feature.&lt;/code&gt;.
 &lt;div class=&#34;signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0&#34;&gt;
-  &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 signup-desc&#34;&gt;
-    &lt;h3&gt;Programming problems explained:&lt;/h3&gt;
+  &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0&#34;&gt;
+    &lt;h3&gt;Finding this article useful?&lt;/h3&gt;
     &lt;div&gt;
-      &lt;ul&gt;
-        &lt;li&gt;Working&lt;/li&gt;
-        &lt;li&gt;Tested&lt;/li&gt;
-        &lt;li&gt;Reusable&lt;/li&gt;
-      &lt;/ul&gt;
+      My posts with working code - tested and verified - and actionable explanations for specific programming problems. Delivered each week for free.
     &lt;/div&gt;
   &lt;/div&gt;
   &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0&#34; id=&#34;mc_embed_signup&#34;&gt;
     &lt;form action=&#34;//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;amp;id=b7e69e463e&#34; method=&#34;post&#34; id=&#34;mc-embedded-subscribe-form&#34; name=&#34;mc-embedded-subscribe-form&#34; class=&#34;validate&#34; target=&#34;_blank&#34; novalidate&gt;
       &lt;div id=&#34;mc_embed_signup_scroll&#34;&gt;
         &lt;div class=&#34;mc-field-group form-group&#34;&gt;
-          &lt;input type=&#34;text&#34; value=&#34;&#34; name=&#34;FNAME&#34; class=&#34;form-control&#34; id=&#34;mce-FNAME&#34; placeholder=&#34;First name&#34;&gt;
+          &lt;label for=&#34;mce-FNAME&#34;&gt;First Name&lt;/label&gt;
+          &lt;input type=&#34;text&#34; value=&#34;&#34; name=&#34;FNAME&#34; class=&#34;form-control&#34; id=&#34;mce-FNAME&#34;&gt;
         &lt;/div&gt;
         &lt;div class=&#34;mc-field-group form-group&#34;&gt;
-          &lt;input type=&#34;email&#34; value=&#34;&#34; name=&#34;EMAIL&#34; class=&#34;email form-control&#34; id=&#34;mce-EMAIL&#34; placeholder=&#34;Email&#34;&gt;
+          &lt;label for=&#34;mce-EMAIL&#34;&gt;Email Address&lt;/label&gt;
+          &lt;input type=&#34;email&#34; value=&#34;&#34; name=&#34;EMAIL&#34; class=&#34;email form-control&#34; id=&#34;mce-EMAIL&#34;&gt;
         &lt;/div&gt;
         &lt;div id=&#34;mce-responses&#34; class=&#34;form-group&#34;&gt;
           &lt;div class=&#34;response&#34; id=&#34;mce-error-response&#34; style=&#34;display:none&#34; class=&#34;alert alert-success&#34; role=&#34;alert&#34;&gt;&lt;/div&gt;
           &lt;div class=&#34;response&#34; id=&#34;mce-success-response&#34; style=&#34;display:none&#34; class=&#34;alert alert-success&#34; role=&#34;alert&#34;&gt;&lt;/div&gt;
         &lt;/div&gt;
-        &lt;button type=&#34;submit&#34; class=&#34;btn btn-success&#34; id=&#34;mc-embedded-subscribe&#34; name=&#34;subscribe&#34;&gt;Subscribe to my blog&lt;/button&gt;
+        &lt;button type=&#34;submit&#34; class=&#34;btn btn-success&#34; id=&#34;mc-embedded-subscribe&#34; name=&#34;subscribe&#34;&gt;Join the Newsletter&lt;/button&gt;
         &lt;div style=&#34;position: absolute; left: -5000px;&#34; aria-hidden=&#34;true&#34;&gt;&lt;input type=&#34;text&#34; name=&#34;b_52d266a23636b031a38de6d70_b7e69e463e&#34; tabindex=&#34;-1&#34; value=&#34;&#34;&gt;&lt;/div&gt;
       &lt;/div&gt;
     &lt;/form&gt;
@@ -712,30 +323,28 @@ Collecting all the properties available in an environment is &lt;a href=&#34;htt
 
 &lt;p&gt;This happens because the serialized object in the session and the current structure of the session differ.
 &lt;div class=&#34;signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0&#34;&gt;
-  &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 signup-desc&#34;&gt;
-    &lt;h3&gt;Programming problems explained:&lt;/h3&gt;
+  &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0&#34;&gt;
+    &lt;h3&gt;Finding this article useful?&lt;/h3&gt;
     &lt;div&gt;
-      &lt;ul&gt;
-        &lt;li&gt;Working&lt;/li&gt;
-        &lt;li&gt;Tested&lt;/li&gt;
-        &lt;li&gt;Reusable&lt;/li&gt;
-      &lt;/ul&gt;
+      My posts with working code - tested and verified - and actionable explanations for specific programming problems. Delivered each week for free.
     &lt;/div&gt;
   &lt;/div&gt;
   &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0&#34; id=&#34;mc_embed_signup&#34;&gt;
     &lt;form action=&#34;//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;amp;id=b7e69e463e&#34; method=&#34;post&#34; id=&#34;mc-embedded-subscribe-form&#34; name=&#34;mc-embedded-subscribe-form&#34; class=&#34;validate&#34; target=&#34;_blank&#34; novalidate&gt;
       &lt;div id=&#34;mc_embed_signup_scroll&#34;&gt;
         &lt;div class=&#34;mc-field-group form-group&#34;&gt;
-          &lt;input type=&#34;text&#34; value=&#34;&#34; name=&#34;FNAME&#34; class=&#34;form-control&#34; id=&#34;mce-FNAME&#34; placeholder=&#34;First name&#34;&gt;
+          &lt;label for=&#34;mce-FNAME&#34;&gt;First Name&lt;/label&gt;
+          &lt;input type=&#34;text&#34; value=&#34;&#34; name=&#34;FNAME&#34; class=&#34;form-control&#34; id=&#34;mce-FNAME&#34;&gt;
         &lt;/div&gt;
         &lt;div class=&#34;mc-field-group form-group&#34;&gt;
-          &lt;input type=&#34;email&#34; value=&#34;&#34; name=&#34;EMAIL&#34; class=&#34;email form-control&#34; id=&#34;mce-EMAIL&#34; placeholder=&#34;Email&#34;&gt;
+          &lt;label for=&#34;mce-EMAIL&#34;&gt;Email Address&lt;/label&gt;
+          &lt;input type=&#34;email&#34; value=&#34;&#34; name=&#34;EMAIL&#34; class=&#34;email form-control&#34; id=&#34;mce-EMAIL&#34;&gt;
         &lt;/div&gt;
         &lt;div id=&#34;mce-responses&#34; class=&#34;form-group&#34;&gt;
           &lt;div class=&#34;response&#34; id=&#34;mce-error-response&#34; style=&#34;display:none&#34; class=&#34;alert alert-success&#34; role=&#34;alert&#34;&gt;&lt;/div&gt;
           &lt;div class=&#34;response&#34; id=&#34;mce-success-response&#34; style=&#34;display:none&#34; class=&#34;alert alert-success&#34; role=&#34;alert&#34;&gt;&lt;/div&gt;
         &lt;/div&gt;
-        &lt;button type=&#34;submit&#34; class=&#34;btn btn-success&#34; id=&#34;mc-embedded-subscribe&#34; name=&#34;subscribe&#34;&gt;Subscribe to my blog&lt;/button&gt;
+        &lt;button type=&#34;submit&#34; class=&#34;btn btn-success&#34; id=&#34;mc-embedded-subscribe&#34; name=&#34;subscribe&#34;&gt;Join the Newsletter&lt;/button&gt;
         &lt;div style=&#34;position: absolute; left: -5000px;&#34; aria-hidden=&#34;true&#34;&gt;&lt;input type=&#34;text&#34; name=&#34;b_52d266a23636b031a38de6d70_b7e69e463e&#34; tabindex=&#34;-1&#34; value=&#34;&#34;&gt;&lt;/div&gt;
       &lt;/div&gt;
     &lt;/form&gt;
@@ -928,30 +537,28 @@ Caused by: java.net.ConnectException: Connection refused
 
 &lt;p&gt;It appears that the application is trying to make connections to Redis, even though we configured it not to. What is going on? It looks like some where along the chain, some configuration with the annotation &lt;code&gt;@EnableSpringHttpSession&lt;/code&gt; is being loaded. Why could that happen?
 &lt;div class=&#34;signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0&#34;&gt;
-  &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 signup-desc&#34;&gt;
-    &lt;h3&gt;Programming problems explained:&lt;/h3&gt;
+  &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0&#34;&gt;
+    &lt;h3&gt;Finding this article useful?&lt;/h3&gt;
     &lt;div&gt;
-      &lt;ul&gt;
-        &lt;li&gt;Working&lt;/li&gt;
-        &lt;li&gt;Tested&lt;/li&gt;
-        &lt;li&gt;Reusable&lt;/li&gt;
-      &lt;/ul&gt;
+      My posts with working code - tested and verified - and actionable explanations for specific programming problems. Delivered each week for free.
     &lt;/div&gt;
   &lt;/div&gt;
   &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0&#34; id=&#34;mc_embed_signup&#34;&gt;
     &lt;form action=&#34;//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;amp;id=b7e69e463e&#34; method=&#34;post&#34; id=&#34;mc-embedded-subscribe-form&#34; name=&#34;mc-embedded-subscribe-form&#34; class=&#34;validate&#34; target=&#34;_blank&#34; novalidate&gt;
       &lt;div id=&#34;mc_embed_signup_scroll&#34;&gt;
         &lt;div class=&#34;mc-field-group form-group&#34;&gt;
-          &lt;input type=&#34;text&#34; value=&#34;&#34; name=&#34;FNAME&#34; class=&#34;form-control&#34; id=&#34;mce-FNAME&#34; placeholder=&#34;First name&#34;&gt;
+          &lt;label for=&#34;mce-FNAME&#34;&gt;First Name&lt;/label&gt;
+          &lt;input type=&#34;text&#34; value=&#34;&#34; name=&#34;FNAME&#34; class=&#34;form-control&#34; id=&#34;mce-FNAME&#34;&gt;
         &lt;/div&gt;
         &lt;div class=&#34;mc-field-group form-group&#34;&gt;
-          &lt;input type=&#34;email&#34; value=&#34;&#34; name=&#34;EMAIL&#34; class=&#34;email form-control&#34; id=&#34;mce-EMAIL&#34; placeholder=&#34;Email&#34;&gt;
+          &lt;label for=&#34;mce-EMAIL&#34;&gt;Email Address&lt;/label&gt;
+          &lt;input type=&#34;email&#34; value=&#34;&#34; name=&#34;EMAIL&#34; class=&#34;email form-control&#34; id=&#34;mce-EMAIL&#34;&gt;
         &lt;/div&gt;
         &lt;div id=&#34;mce-responses&#34; class=&#34;form-group&#34;&gt;
           &lt;div class=&#34;response&#34; id=&#34;mce-error-response&#34; style=&#34;display:none&#34; class=&#34;alert alert-success&#34; role=&#34;alert&#34;&gt;&lt;/div&gt;
           &lt;div class=&#34;response&#34; id=&#34;mce-success-response&#34; style=&#34;display:none&#34; class=&#34;alert alert-success&#34; role=&#34;alert&#34;&gt;&lt;/div&gt;
         &lt;/div&gt;
-        &lt;button type=&#34;submit&#34; class=&#34;btn btn-success&#34; id=&#34;mc-embedded-subscribe&#34; name=&#34;subscribe&#34;&gt;Subscribe to my blog&lt;/button&gt;
+        &lt;button type=&#34;submit&#34; class=&#34;btn btn-success&#34; id=&#34;mc-embedded-subscribe&#34; name=&#34;subscribe&#34;&gt;Join the Newsletter&lt;/button&gt;
         &lt;div style=&#34;position: absolute; left: -5000px;&#34; aria-hidden=&#34;true&#34;&gt;&lt;input type=&#34;text&#34; name=&#34;b_52d266a23636b031a38de6d70_b7e69e463e&#34; tabindex=&#34;-1&#34; value=&#34;&#34;&gt;&lt;/div&gt;
       &lt;/div&gt;
     &lt;/form&gt;
@@ -1193,30 +800,28 @@ These are the blog posts in this series:&lt;/p&gt;
 
 &lt;p&gt;The &lt;code&gt;LoginController&lt;/code&gt; has two methods - login and logout. The login method uses the &lt;code&gt;LoginService&lt;/code&gt; to make a request and saves the JWT and user profile returned up on successful login. It also sets the &lt;code&gt;Authorization&lt;/code&gt; header default to the JWT returned so that every subsequent request uses it to authenticate. The user is then navigated to the home page. Logout is performed by removing the JWT and profile from local storage and clearing the header defaults.
 &lt;div class=&#34;signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0&#34;&gt;
-  &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 signup-desc&#34;&gt;
-    &lt;h3&gt;Programming problems explained:&lt;/h3&gt;
+  &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0&#34;&gt;
+    &lt;h3&gt;Finding this article useful?&lt;/h3&gt;
     &lt;div&gt;
-      &lt;ul&gt;
-        &lt;li&gt;Working&lt;/li&gt;
-        &lt;li&gt;Tested&lt;/li&gt;
-        &lt;li&gt;Reusable&lt;/li&gt;
-      &lt;/ul&gt;
+      My posts with working code - tested and verified - and actionable explanations for specific programming problems. Delivered each week for free.
     &lt;/div&gt;
   &lt;/div&gt;
   &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0&#34; id=&#34;mc_embed_signup&#34;&gt;
     &lt;form action=&#34;//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;amp;id=b7e69e463e&#34; method=&#34;post&#34; id=&#34;mc-embedded-subscribe-form&#34; name=&#34;mc-embedded-subscribe-form&#34; class=&#34;validate&#34; target=&#34;_blank&#34; novalidate&gt;
       &lt;div id=&#34;mc_embed_signup_scroll&#34;&gt;
         &lt;div class=&#34;mc-field-group form-group&#34;&gt;
-          &lt;input type=&#34;text&#34; value=&#34;&#34; name=&#34;FNAME&#34; class=&#34;form-control&#34; id=&#34;mce-FNAME&#34; placeholder=&#34;First name&#34;&gt;
+          &lt;label for=&#34;mce-FNAME&#34;&gt;First Name&lt;/label&gt;
+          &lt;input type=&#34;text&#34; value=&#34;&#34; name=&#34;FNAME&#34; class=&#34;form-control&#34; id=&#34;mce-FNAME&#34;&gt;
         &lt;/div&gt;
         &lt;div class=&#34;mc-field-group form-group&#34;&gt;
-          &lt;input type=&#34;email&#34; value=&#34;&#34; name=&#34;EMAIL&#34; class=&#34;email form-control&#34; id=&#34;mce-EMAIL&#34; placeholder=&#34;Email&#34;&gt;
+          &lt;label for=&#34;mce-EMAIL&#34;&gt;Email Address&lt;/label&gt;
+          &lt;input type=&#34;email&#34; value=&#34;&#34; name=&#34;EMAIL&#34; class=&#34;email form-control&#34; id=&#34;mce-EMAIL&#34;&gt;
         &lt;/div&gt;
         &lt;div id=&#34;mce-responses&#34; class=&#34;form-group&#34;&gt;
           &lt;div class=&#34;response&#34; id=&#34;mce-error-response&#34; style=&#34;display:none&#34; class=&#34;alert alert-success&#34; role=&#34;alert&#34;&gt;&lt;/div&gt;
           &lt;div class=&#34;response&#34; id=&#34;mce-success-response&#34; style=&#34;display:none&#34; class=&#34;alert alert-success&#34; role=&#34;alert&#34;&gt;&lt;/div&gt;
         &lt;/div&gt;
-        &lt;button type=&#34;submit&#34; class=&#34;btn btn-success&#34; id=&#34;mc-embedded-subscribe&#34; name=&#34;subscribe&#34;&gt;Subscribe to my blog&lt;/button&gt;
+        &lt;button type=&#34;submit&#34; class=&#34;btn btn-success&#34; id=&#34;mc-embedded-subscribe&#34; name=&#34;subscribe&#34;&gt;Join the Newsletter&lt;/button&gt;
         &lt;div style=&#34;position: absolute; left: -5000px;&#34; aria-hidden=&#34;true&#34;&gt;&lt;input type=&#34;text&#34; name=&#34;b_52d266a23636b031a38de6d70_b7e69e463e&#34; tabindex=&#34;-1&#34; value=&#34;&#34;&gt;&lt;/div&gt;
       &lt;/div&gt;
     &lt;/form&gt;
@@ -1438,30 +1043,28 @@ These are the blog posts in this series:&lt;/p&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;&lt;div class=&#34;signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0&#34;&gt;
-  &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 signup-desc&#34;&gt;
-    &lt;h3&gt;Programming problems explained:&lt;/h3&gt;
+  &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0&#34;&gt;
+    &lt;h3&gt;Finding this article useful?&lt;/h3&gt;
     &lt;div&gt;
-      &lt;ul&gt;
-        &lt;li&gt;Working&lt;/li&gt;
-        &lt;li&gt;Tested&lt;/li&gt;
-        &lt;li&gt;Reusable&lt;/li&gt;
-      &lt;/ul&gt;
+      My posts with working code - tested and verified - and actionable explanations for specific programming problems. Delivered each week for free.
     &lt;/div&gt;
   &lt;/div&gt;
   &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0&#34; id=&#34;mc_embed_signup&#34;&gt;
     &lt;form action=&#34;//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;amp;id=b7e69e463e&#34; method=&#34;post&#34; id=&#34;mc-embedded-subscribe-form&#34; name=&#34;mc-embedded-subscribe-form&#34; class=&#34;validate&#34; target=&#34;_blank&#34; novalidate&gt;
       &lt;div id=&#34;mc_embed_signup_scroll&#34;&gt;
         &lt;div class=&#34;mc-field-group form-group&#34;&gt;
-          &lt;input type=&#34;text&#34; value=&#34;&#34; name=&#34;FNAME&#34; class=&#34;form-control&#34; id=&#34;mce-FNAME&#34; placeholder=&#34;First name&#34;&gt;
+          &lt;label for=&#34;mce-FNAME&#34;&gt;First Name&lt;/label&gt;
+          &lt;input type=&#34;text&#34; value=&#34;&#34; name=&#34;FNAME&#34; class=&#34;form-control&#34; id=&#34;mce-FNAME&#34;&gt;
         &lt;/div&gt;
         &lt;div class=&#34;mc-field-group form-group&#34;&gt;
-          &lt;input type=&#34;email&#34; value=&#34;&#34; name=&#34;EMAIL&#34; class=&#34;email form-control&#34; id=&#34;mce-EMAIL&#34; placeholder=&#34;Email&#34;&gt;
+          &lt;label for=&#34;mce-EMAIL&#34;&gt;Email Address&lt;/label&gt;
+          &lt;input type=&#34;email&#34; value=&#34;&#34; name=&#34;EMAIL&#34; class=&#34;email form-control&#34; id=&#34;mce-EMAIL&#34;&gt;
         &lt;/div&gt;
         &lt;div id=&#34;mce-responses&#34; class=&#34;form-group&#34;&gt;
           &lt;div class=&#34;response&#34; id=&#34;mce-error-response&#34; style=&#34;display:none&#34; class=&#34;alert alert-success&#34; role=&#34;alert&#34;&gt;&lt;/div&gt;
           &lt;div class=&#34;response&#34; id=&#34;mce-success-response&#34; style=&#34;display:none&#34; class=&#34;alert alert-success&#34; role=&#34;alert&#34;&gt;&lt;/div&gt;
         &lt;/div&gt;
-        &lt;button type=&#34;submit&#34; class=&#34;btn btn-success&#34; id=&#34;mc-embedded-subscribe&#34; name=&#34;subscribe&#34;&gt;Subscribe to my blog&lt;/button&gt;
+        &lt;button type=&#34;submit&#34; class=&#34;btn btn-success&#34; id=&#34;mc-embedded-subscribe&#34; name=&#34;subscribe&#34;&gt;Join the Newsletter&lt;/button&gt;
         &lt;div style=&#34;position: absolute; left: -5000px;&#34; aria-hidden=&#34;true&#34;&gt;&lt;input type=&#34;text&#34; name=&#34;b_52d266a23636b031a38de6d70_b7e69e463e&#34; tabindex=&#34;-1&#34; value=&#34;&#34;&gt;&lt;/div&gt;
       &lt;/div&gt;
     &lt;/form&gt;
@@ -1730,30 +1333,28 @@ These are the blog posts in this series:&lt;/p&gt;
 
 &lt;p&gt;We use the login service to verify the credentials and it returns an &lt;code&gt;Optional&amp;lt;MinimalProfile&amp;gt;&lt;/code&gt;. If there is a valid &lt;code&gt;MinimalProfile&lt;/code&gt;, we ask the &lt;code&gt;JwtService&lt;/code&gt; to issue a token.
 &lt;div class=&#34;signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0&#34;&gt;
-  &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 signup-desc&#34;&gt;
-    &lt;h3&gt;Programming problems explained:&lt;/h3&gt;
+  &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0&#34;&gt;
+    &lt;h3&gt;Finding this article useful?&lt;/h3&gt;
     &lt;div&gt;
-      &lt;ul&gt;
-        &lt;li&gt;Working&lt;/li&gt;
-        &lt;li&gt;Tested&lt;/li&gt;
-        &lt;li&gt;Reusable&lt;/li&gt;
-      &lt;/ul&gt;
+      My posts with working code - tested and verified - and actionable explanations for specific programming problems. Delivered each week for free.
     &lt;/div&gt;
   &lt;/div&gt;
   &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0&#34; id=&#34;mc_embed_signup&#34;&gt;
     &lt;form action=&#34;//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;amp;id=b7e69e463e&#34; method=&#34;post&#34; id=&#34;mc-embedded-subscribe-form&#34; name=&#34;mc-embedded-subscribe-form&#34; class=&#34;validate&#34; target=&#34;_blank&#34; novalidate&gt;
       &lt;div id=&#34;mc_embed_signup_scroll&#34;&gt;
         &lt;div class=&#34;mc-field-group form-group&#34;&gt;
-          &lt;input type=&#34;text&#34; value=&#34;&#34; name=&#34;FNAME&#34; class=&#34;form-control&#34; id=&#34;mce-FNAME&#34; placeholder=&#34;First name&#34;&gt;
+          &lt;label for=&#34;mce-FNAME&#34;&gt;First Name&lt;/label&gt;
+          &lt;input type=&#34;text&#34; value=&#34;&#34; name=&#34;FNAME&#34; class=&#34;form-control&#34; id=&#34;mce-FNAME&#34;&gt;
         &lt;/div&gt;
         &lt;div class=&#34;mc-field-group form-group&#34;&gt;
-          &lt;input type=&#34;email&#34; value=&#34;&#34; name=&#34;EMAIL&#34; class=&#34;email form-control&#34; id=&#34;mce-EMAIL&#34; placeholder=&#34;Email&#34;&gt;
+          &lt;label for=&#34;mce-EMAIL&#34;&gt;Email Address&lt;/label&gt;
+          &lt;input type=&#34;email&#34; value=&#34;&#34; name=&#34;EMAIL&#34; class=&#34;email form-control&#34; id=&#34;mce-EMAIL&#34;&gt;
         &lt;/div&gt;
         &lt;div id=&#34;mce-responses&#34; class=&#34;form-group&#34;&gt;
           &lt;div class=&#34;response&#34; id=&#34;mce-error-response&#34; style=&#34;display:none&#34; class=&#34;alert alert-success&#34; role=&#34;alert&#34;&gt;&lt;/div&gt;
           &lt;div class=&#34;response&#34; id=&#34;mce-success-response&#34; style=&#34;display:none&#34; class=&#34;alert alert-success&#34; role=&#34;alert&#34;&gt;&lt;/div&gt;
         &lt;/div&gt;
-        &lt;button type=&#34;submit&#34; class=&#34;btn btn-success&#34; id=&#34;mc-embedded-subscribe&#34; name=&#34;subscribe&#34;&gt;Subscribe to my blog&lt;/button&gt;
+        &lt;button type=&#34;submit&#34; class=&#34;btn btn-success&#34; id=&#34;mc-embedded-subscribe&#34; name=&#34;subscribe&#34;&gt;Join the Newsletter&lt;/button&gt;
         &lt;div style=&#34;position: absolute; left: -5000px;&#34; aria-hidden=&#34;true&#34;&gt;&lt;input type=&#34;text&#34; name=&#34;b_52d266a23636b031a38de6d70_b7e69e463e&#34; tabindex=&#34;-1&#34; value=&#34;&#34;&gt;&lt;/div&gt;
       &lt;/div&gt;
     &lt;/form&gt;
@@ -2078,30 +1679,28 @@ These are the blog posts in this series:&lt;/p&gt;
 
 &lt;p&gt;It delegates querying for profiles to the &lt;code&gt;ProfileService&lt;/code&gt; and throws exceptions if a Profile is not present. Notice the use of Java&amp;rsquo;s &lt;code&gt;Optional&lt;/code&gt; to throw exceptions.
 &lt;div class=&#34;signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0&#34;&gt;
-  &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 signup-desc&#34;&gt;
-    &lt;h3&gt;Programming problems explained:&lt;/h3&gt;
+  &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0&#34;&gt;
+    &lt;h3&gt;Finding this article useful?&lt;/h3&gt;
     &lt;div&gt;
-      &lt;ul&gt;
-        &lt;li&gt;Working&lt;/li&gt;
-        &lt;li&gt;Tested&lt;/li&gt;
-        &lt;li&gt;Reusable&lt;/li&gt;
-      &lt;/ul&gt;
+      My posts with working code - tested and verified - and actionable explanations for specific programming problems. Delivered each week for free.
     &lt;/div&gt;
   &lt;/div&gt;
   &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0&#34; id=&#34;mc_embed_signup&#34;&gt;
     &lt;form action=&#34;//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;amp;id=b7e69e463e&#34; method=&#34;post&#34; id=&#34;mc-embedded-subscribe-form&#34; name=&#34;mc-embedded-subscribe-form&#34; class=&#34;validate&#34; target=&#34;_blank&#34; novalidate&gt;
       &lt;div id=&#34;mc_embed_signup_scroll&#34;&gt;
         &lt;div class=&#34;mc-field-group form-group&#34;&gt;
-          &lt;input type=&#34;text&#34; value=&#34;&#34; name=&#34;FNAME&#34; class=&#34;form-control&#34; id=&#34;mce-FNAME&#34; placeholder=&#34;First name&#34;&gt;
+          &lt;label for=&#34;mce-FNAME&#34;&gt;First Name&lt;/label&gt;
+          &lt;input type=&#34;text&#34; value=&#34;&#34; name=&#34;FNAME&#34; class=&#34;form-control&#34; id=&#34;mce-FNAME&#34;&gt;
         &lt;/div&gt;
         &lt;div class=&#34;mc-field-group form-group&#34;&gt;
-          &lt;input type=&#34;email&#34; value=&#34;&#34; name=&#34;EMAIL&#34; class=&#34;email form-control&#34; id=&#34;mce-EMAIL&#34; placeholder=&#34;Email&#34;&gt;
+          &lt;label for=&#34;mce-EMAIL&#34;&gt;Email Address&lt;/label&gt;
+          &lt;input type=&#34;email&#34; value=&#34;&#34; name=&#34;EMAIL&#34; class=&#34;email form-control&#34; id=&#34;mce-EMAIL&#34;&gt;
         &lt;/div&gt;
         &lt;div id=&#34;mce-responses&#34; class=&#34;form-group&#34;&gt;
           &lt;div class=&#34;response&#34; id=&#34;mce-error-response&#34; style=&#34;display:none&#34; class=&#34;alert alert-success&#34; role=&#34;alert&#34;&gt;&lt;/div&gt;
           &lt;div class=&#34;response&#34; id=&#34;mce-success-response&#34; style=&#34;display:none&#34; class=&#34;alert alert-success&#34; role=&#34;alert&#34;&gt;&lt;/div&gt;
         &lt;/div&gt;
-        &lt;button type=&#34;submit&#34; class=&#34;btn btn-success&#34; id=&#34;mc-embedded-subscribe&#34; name=&#34;subscribe&#34;&gt;Subscribe to my blog&lt;/button&gt;
+        &lt;button type=&#34;submit&#34; class=&#34;btn btn-success&#34; id=&#34;mc-embedded-subscribe&#34; name=&#34;subscribe&#34;&gt;Join the Newsletter&lt;/button&gt;
         &lt;div style=&#34;position: absolute; left: -5000px;&#34; aria-hidden=&#34;true&#34;&gt;&lt;input type=&#34;text&#34; name=&#34;b_52d266a23636b031a38de6d70_b7e69e463e&#34; tabindex=&#34;-1&#34; value=&#34;&#34;&gt;&lt;/div&gt;
       &lt;/div&gt;
     &lt;/form&gt;
@@ -2204,7 +1803,8 @@ These are the blog posts in this series:&lt;/p&gt;
       <pubDate>Sat, 02 Jul 2016 18:42:04 -0700</pubDate>
       
       <guid>https://sdqali.in/blog/2016/07/02/jwt-authentication-with-spring-web---part-1/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>&lt;p&gt;JSON Web Tokens (JWTs) are signed tokens issued by a server that it can use to verify a claim made by a client. This blog post is the first in a series where I implement authentication based on JWT in a Spring Web application with an Angular JS front end.&lt;/p&gt;
+      <description>&lt;p&gt;&lt;meta content=&#34;jwt authentication example&#34; name=&#34;keywords&#34;&gt;
+JSON Web Tokens (JWTs) are signed tokens issued by a server that it can use to verify a claim made by a client. This blog post is the first in a series where I implement authentication based on JWT in a Spring Web application with an Angular JS front end.&lt;/p&gt;
 
 &lt;p&gt;
 These are the blog posts in this series:&lt;/p&gt;
@@ -2247,30 +1847,28 @@ These are the blog posts in this series:&lt;/p&gt;
 &lt;/ul&gt;
 
 &lt;div class=&#34;signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0&#34;&gt;
-  &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 signup-desc&#34;&gt;
-    &lt;h3&gt;Programming problems explained:&lt;/h3&gt;
+  &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0&#34;&gt;
+    &lt;h3&gt;Finding this article useful?&lt;/h3&gt;
     &lt;div&gt;
-      &lt;ul&gt;
-        &lt;li&gt;Working&lt;/li&gt;
-        &lt;li&gt;Tested&lt;/li&gt;
-        &lt;li&gt;Reusable&lt;/li&gt;
-      &lt;/ul&gt;
+      My posts with working code - tested and verified - and actionable explanations for specific programming problems. Delivered each week for free.
     &lt;/div&gt;
   &lt;/div&gt;
   &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0&#34; id=&#34;mc_embed_signup&#34;&gt;
     &lt;form action=&#34;//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;amp;id=b7e69e463e&#34; method=&#34;post&#34; id=&#34;mc-embedded-subscribe-form&#34; name=&#34;mc-embedded-subscribe-form&#34; class=&#34;validate&#34; target=&#34;_blank&#34; novalidate&gt;
       &lt;div id=&#34;mc_embed_signup_scroll&#34;&gt;
         &lt;div class=&#34;mc-field-group form-group&#34;&gt;
-          &lt;input type=&#34;text&#34; value=&#34;&#34; name=&#34;FNAME&#34; class=&#34;form-control&#34; id=&#34;mce-FNAME&#34; placeholder=&#34;First name&#34;&gt;
+          &lt;label for=&#34;mce-FNAME&#34;&gt;First Name&lt;/label&gt;
+          &lt;input type=&#34;text&#34; value=&#34;&#34; name=&#34;FNAME&#34; class=&#34;form-control&#34; id=&#34;mce-FNAME&#34;&gt;
         &lt;/div&gt;
         &lt;div class=&#34;mc-field-group form-group&#34;&gt;
-          &lt;input type=&#34;email&#34; value=&#34;&#34; name=&#34;EMAIL&#34; class=&#34;email form-control&#34; id=&#34;mce-EMAIL&#34; placeholder=&#34;Email&#34;&gt;
+          &lt;label for=&#34;mce-EMAIL&#34;&gt;Email Address&lt;/label&gt;
+          &lt;input type=&#34;email&#34; value=&#34;&#34; name=&#34;EMAIL&#34; class=&#34;email form-control&#34; id=&#34;mce-EMAIL&#34;&gt;
         &lt;/div&gt;
         &lt;div id=&#34;mce-responses&#34; class=&#34;form-group&#34;&gt;
           &lt;div class=&#34;response&#34; id=&#34;mce-error-response&#34; style=&#34;display:none&#34; class=&#34;alert alert-success&#34; role=&#34;alert&#34;&gt;&lt;/div&gt;
           &lt;div class=&#34;response&#34; id=&#34;mce-success-response&#34; style=&#34;display:none&#34; class=&#34;alert alert-success&#34; role=&#34;alert&#34;&gt;&lt;/div&gt;
         &lt;/div&gt;
-        &lt;button type=&#34;submit&#34; class=&#34;btn btn-success&#34; id=&#34;mc-embedded-subscribe&#34; name=&#34;subscribe&#34;&gt;Subscribe to my blog&lt;/button&gt;
+        &lt;button type=&#34;submit&#34; class=&#34;btn btn-success&#34; id=&#34;mc-embedded-subscribe&#34; name=&#34;subscribe&#34;&gt;Join the Newsletter&lt;/button&gt;
         &lt;div style=&#34;position: absolute; left: -5000px;&#34; aria-hidden=&#34;true&#34;&gt;&lt;input type=&#34;text&#34; name=&#34;b_52d266a23636b031a38de6d70_b7e69e463e&#34; tabindex=&#34;-1&#34; value=&#34;&#34;&gt;&lt;/div&gt;
       &lt;/div&gt;
     &lt;/form&gt;
@@ -2326,7 +1924,8 @@ These are the blog posts in this series:&lt;/p&gt;
       <pubDate>Thu, 30 Jun 2016 19:43:07 -0400</pubDate>
       
       <guid>https://sdqali.in/blog/2016/06/30/json-logging-for-spring-applications/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>&lt;p&gt;If you have an application that writes logs, there are many reasons to make it write the log in JSON format. It makes it easier to search and analyze them when using tools such as the ELK Stack &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:1&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;. JSON formatted logs make it easier to look at them when looking at how the app is behaving in real time using tools like jq &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:2&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:2&#34;&gt;2&lt;/a&gt;&lt;/sup&gt;. This blog post documents how to format logs as JSON in a Spring application.&lt;/p&gt;
+      <description>&lt;p&gt;&lt;meta content=&#34;logstash spring boot example&#34; name=&#34;keywords&#34;&gt;
+If you have an application that writes logs, there are many reasons to make it write the log in JSON format. It makes it easier to search and analyze them when using tools such as the ELK Stack &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:1&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;. JSON formatted logs make it easier to look at them when looking at how the app is behaving in real time using tools like jq &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:2&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:2&#34;&gt;2&lt;/a&gt;&lt;/sup&gt;. This blog post documents how to format logs as JSON in a Spring application.&lt;/p&gt;
 
 &lt;p&gt;&lt;/p&gt;
 
@@ -2340,30 +1939,28 @@ These are the blog posts in this series:&lt;/p&gt;
 
 &lt;p&gt;The next step is to configure logback to log using the new encoder. This can be done by placing a &lt;code&gt;logback.xml&lt;/code&gt; configuration file in the application&amp;rsquo;s class path - for example in the &lt;code&gt;main/resources&lt;/code&gt; directory.
 &lt;div class=&#34;signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0&#34;&gt;
-  &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 signup-desc&#34;&gt;
-    &lt;h3&gt;Programming problems explained:&lt;/h3&gt;
+  &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0&#34;&gt;
+    &lt;h3&gt;Finding this article useful?&lt;/h3&gt;
     &lt;div&gt;
-      &lt;ul&gt;
-        &lt;li&gt;Working&lt;/li&gt;
-        &lt;li&gt;Tested&lt;/li&gt;
-        &lt;li&gt;Reusable&lt;/li&gt;
-      &lt;/ul&gt;
+      My posts with working code - tested and verified - and actionable explanations for specific programming problems. Delivered each week for free.
     &lt;/div&gt;
   &lt;/div&gt;
   &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0&#34; id=&#34;mc_embed_signup&#34;&gt;
     &lt;form action=&#34;//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;amp;id=b7e69e463e&#34; method=&#34;post&#34; id=&#34;mc-embedded-subscribe-form&#34; name=&#34;mc-embedded-subscribe-form&#34; class=&#34;validate&#34; target=&#34;_blank&#34; novalidate&gt;
       &lt;div id=&#34;mc_embed_signup_scroll&#34;&gt;
         &lt;div class=&#34;mc-field-group form-group&#34;&gt;
-          &lt;input type=&#34;text&#34; value=&#34;&#34; name=&#34;FNAME&#34; class=&#34;form-control&#34; id=&#34;mce-FNAME&#34; placeholder=&#34;First name&#34;&gt;
+          &lt;label for=&#34;mce-FNAME&#34;&gt;First Name&lt;/label&gt;
+          &lt;input type=&#34;text&#34; value=&#34;&#34; name=&#34;FNAME&#34; class=&#34;form-control&#34; id=&#34;mce-FNAME&#34;&gt;
         &lt;/div&gt;
         &lt;div class=&#34;mc-field-group form-group&#34;&gt;
-          &lt;input type=&#34;email&#34; value=&#34;&#34; name=&#34;EMAIL&#34; class=&#34;email form-control&#34; id=&#34;mce-EMAIL&#34; placeholder=&#34;Email&#34;&gt;
+          &lt;label for=&#34;mce-EMAIL&#34;&gt;Email Address&lt;/label&gt;
+          &lt;input type=&#34;email&#34; value=&#34;&#34; name=&#34;EMAIL&#34; class=&#34;email form-control&#34; id=&#34;mce-EMAIL&#34;&gt;
         &lt;/div&gt;
         &lt;div id=&#34;mce-responses&#34; class=&#34;form-group&#34;&gt;
           &lt;div class=&#34;response&#34; id=&#34;mce-error-response&#34; style=&#34;display:none&#34; class=&#34;alert alert-success&#34; role=&#34;alert&#34;&gt;&lt;/div&gt;
           &lt;div class=&#34;response&#34; id=&#34;mce-success-response&#34; style=&#34;display:none&#34; class=&#34;alert alert-success&#34; role=&#34;alert&#34;&gt;&lt;/div&gt;
         &lt;/div&gt;
-        &lt;button type=&#34;submit&#34; class=&#34;btn btn-success&#34; id=&#34;mc-embedded-subscribe&#34; name=&#34;subscribe&#34;&gt;Subscribe to my blog&lt;/button&gt;
+        &lt;button type=&#34;submit&#34; class=&#34;btn btn-success&#34; id=&#34;mc-embedded-subscribe&#34; name=&#34;subscribe&#34;&gt;Join the Newsletter&lt;/button&gt;
         &lt;div style=&#34;position: absolute; left: -5000px;&#34; aria-hidden=&#34;true&#34;&gt;&lt;input type=&#34;text&#34; name=&#34;b_52d266a23636b031a38de6d70_b7e69e463e&#34; tabindex=&#34;-1&#34; value=&#34;&#34;&gt;&lt;/div&gt;
       &lt;/div&gt;
     &lt;/form&gt;
@@ -2505,30 +2102,28 @@ For the purposes of this blog post, the response of the end point will be a coll
 
 &lt;p&gt;What we want to do is to provide a convenient mechanism so that this end point can respond for request made with url parameters which it uses to filter repositories. For example, we expect the request to &lt;code&gt;http://localhost:8080/repos?fork=true&amp;amp;language=Ruby&lt;/code&gt; to have a JSON response with an array containing only those repositories that are forks and have Ruby as their primary language. Of course, it is worth pointing out that in actual system, you would want to do these kind of filtering at the data layer instead of the web layer, but this is an exercise to see how we could do it at the Spring layer.
 &lt;div class=&#34;signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0&#34;&gt;
-  &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 signup-desc&#34;&gt;
-    &lt;h3&gt;Programming problems explained:&lt;/h3&gt;
+  &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0&#34;&gt;
+    &lt;h3&gt;Finding this article useful?&lt;/h3&gt;
     &lt;div&gt;
-      &lt;ul&gt;
-        &lt;li&gt;Working&lt;/li&gt;
-        &lt;li&gt;Tested&lt;/li&gt;
-        &lt;li&gt;Reusable&lt;/li&gt;
-      &lt;/ul&gt;
+      My posts with working code - tested and verified - and actionable explanations for specific programming problems. Delivered each week for free.
     &lt;/div&gt;
   &lt;/div&gt;
   &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0&#34; id=&#34;mc_embed_signup&#34;&gt;
     &lt;form action=&#34;//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;amp;id=b7e69e463e&#34; method=&#34;post&#34; id=&#34;mc-embedded-subscribe-form&#34; name=&#34;mc-embedded-subscribe-form&#34; class=&#34;validate&#34; target=&#34;_blank&#34; novalidate&gt;
       &lt;div id=&#34;mc_embed_signup_scroll&#34;&gt;
         &lt;div class=&#34;mc-field-group form-group&#34;&gt;
-          &lt;input type=&#34;text&#34; value=&#34;&#34; name=&#34;FNAME&#34; class=&#34;form-control&#34; id=&#34;mce-FNAME&#34; placeholder=&#34;First name&#34;&gt;
+          &lt;label for=&#34;mce-FNAME&#34;&gt;First Name&lt;/label&gt;
+          &lt;input type=&#34;text&#34; value=&#34;&#34; name=&#34;FNAME&#34; class=&#34;form-control&#34; id=&#34;mce-FNAME&#34;&gt;
         &lt;/div&gt;
         &lt;div class=&#34;mc-field-group form-group&#34;&gt;
-          &lt;input type=&#34;email&#34; value=&#34;&#34; name=&#34;EMAIL&#34; class=&#34;email form-control&#34; id=&#34;mce-EMAIL&#34; placeholder=&#34;Email&#34;&gt;
+          &lt;label for=&#34;mce-EMAIL&#34;&gt;Email Address&lt;/label&gt;
+          &lt;input type=&#34;email&#34; value=&#34;&#34; name=&#34;EMAIL&#34; class=&#34;email form-control&#34; id=&#34;mce-EMAIL&#34;&gt;
         &lt;/div&gt;
         &lt;div id=&#34;mce-responses&#34; class=&#34;form-group&#34;&gt;
           &lt;div class=&#34;response&#34; id=&#34;mce-error-response&#34; style=&#34;display:none&#34; class=&#34;alert alert-success&#34; role=&#34;alert&#34;&gt;&lt;/div&gt;
           &lt;div class=&#34;response&#34; id=&#34;mce-success-response&#34; style=&#34;display:none&#34; class=&#34;alert alert-success&#34; role=&#34;alert&#34;&gt;&lt;/div&gt;
         &lt;/div&gt;
-        &lt;button type=&#34;submit&#34; class=&#34;btn btn-success&#34; id=&#34;mc-embedded-subscribe&#34; name=&#34;subscribe&#34;&gt;Subscribe to my blog&lt;/button&gt;
+        &lt;button type=&#34;submit&#34; class=&#34;btn btn-success&#34; id=&#34;mc-embedded-subscribe&#34; name=&#34;subscribe&#34;&gt;Join the Newsletter&lt;/button&gt;
         &lt;div style=&#34;position: absolute; left: -5000px;&#34; aria-hidden=&#34;true&#34;&gt;&lt;input type=&#34;text&#34; name=&#34;b_52d266a23636b031a38de6d70_b7e69e463e&#34; tabindex=&#34;-1&#34; value=&#34;&#34;&gt;&lt;/div&gt;
       &lt;/div&gt;
     &lt;/form&gt;
@@ -2674,30 +2269,28 @@ Camel&amp;rsquo;s HTTP component allows http resources to be added as Camel end 
 
 &lt;p&gt;Our challenge is to ensure that this continue to work when the HTTP end point in question requires authentication. For the purposes of this blog post, we will be restricting our discussion to Basic Authentication. There are three ways to do this authentication–through Camel authentication query parameters, through the use of the &lt;code&gt;Authorization&lt;/code&gt; header and by overriding the &lt;code&gt;HttpConfiguration&lt;/code&gt; in the current Camel context.
 &lt;div class=&#34;signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0&#34;&gt;
-  &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 signup-desc&#34;&gt;
-    &lt;h3&gt;Programming problems explained:&lt;/h3&gt;
+  &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0&#34;&gt;
+    &lt;h3&gt;Finding this article useful?&lt;/h3&gt;
     &lt;div&gt;
-      &lt;ul&gt;
-        &lt;li&gt;Working&lt;/li&gt;
-        &lt;li&gt;Tested&lt;/li&gt;
-        &lt;li&gt;Reusable&lt;/li&gt;
-      &lt;/ul&gt;
+      My posts with working code - tested and verified - and actionable explanations for specific programming problems. Delivered each week for free.
     &lt;/div&gt;
   &lt;/div&gt;
   &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0&#34; id=&#34;mc_embed_signup&#34;&gt;
     &lt;form action=&#34;//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;amp;id=b7e69e463e&#34; method=&#34;post&#34; id=&#34;mc-embedded-subscribe-form&#34; name=&#34;mc-embedded-subscribe-form&#34; class=&#34;validate&#34; target=&#34;_blank&#34; novalidate&gt;
       &lt;div id=&#34;mc_embed_signup_scroll&#34;&gt;
         &lt;div class=&#34;mc-field-group form-group&#34;&gt;
-          &lt;input type=&#34;text&#34; value=&#34;&#34; name=&#34;FNAME&#34; class=&#34;form-control&#34; id=&#34;mce-FNAME&#34; placeholder=&#34;First name&#34;&gt;
+          &lt;label for=&#34;mce-FNAME&#34;&gt;First Name&lt;/label&gt;
+          &lt;input type=&#34;text&#34; value=&#34;&#34; name=&#34;FNAME&#34; class=&#34;form-control&#34; id=&#34;mce-FNAME&#34;&gt;
         &lt;/div&gt;
         &lt;div class=&#34;mc-field-group form-group&#34;&gt;
-          &lt;input type=&#34;email&#34; value=&#34;&#34; name=&#34;EMAIL&#34; class=&#34;email form-control&#34; id=&#34;mce-EMAIL&#34; placeholder=&#34;Email&#34;&gt;
+          &lt;label for=&#34;mce-EMAIL&#34;&gt;Email Address&lt;/label&gt;
+          &lt;input type=&#34;email&#34; value=&#34;&#34; name=&#34;EMAIL&#34; class=&#34;email form-control&#34; id=&#34;mce-EMAIL&#34;&gt;
         &lt;/div&gt;
         &lt;div id=&#34;mce-responses&#34; class=&#34;form-group&#34;&gt;
           &lt;div class=&#34;response&#34; id=&#34;mce-error-response&#34; style=&#34;display:none&#34; class=&#34;alert alert-success&#34; role=&#34;alert&#34;&gt;&lt;/div&gt;
           &lt;div class=&#34;response&#34; id=&#34;mce-success-response&#34; style=&#34;display:none&#34; class=&#34;alert alert-success&#34; role=&#34;alert&#34;&gt;&lt;/div&gt;
         &lt;/div&gt;
-        &lt;button type=&#34;submit&#34; class=&#34;btn btn-success&#34; id=&#34;mc-embedded-subscribe&#34; name=&#34;subscribe&#34;&gt;Subscribe to my blog&lt;/button&gt;
+        &lt;button type=&#34;submit&#34; class=&#34;btn btn-success&#34; id=&#34;mc-embedded-subscribe&#34; name=&#34;subscribe&#34;&gt;Join the Newsletter&lt;/button&gt;
         &lt;div style=&#34;position: absolute; left: -5000px;&#34; aria-hidden=&#34;true&#34;&gt;&lt;input type=&#34;text&#34; name=&#34;b_52d266a23636b031a38de6d70_b7e69e463e&#34; tabindex=&#34;-1&#34; value=&#34;&#34;&gt;&lt;/div&gt;
       &lt;/div&gt;
     &lt;/form&gt;
@@ -2844,30 +2437,28 @@ Camel&amp;rsquo;s HTTP component allows http resources to be added as Camel end 
 
 &lt;p&gt;That test is straightforward—it loads the Spring context with all the beans, runs the application with parameters and expects the parameter to be printed to the console.
 &lt;div class=&#34;signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0&#34;&gt;
-  &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0 signup-desc&#34;&gt;
-    &lt;h3&gt;Programming problems explained:&lt;/h3&gt;
+  &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0&#34;&gt;
+    &lt;h3&gt;Finding this article useful?&lt;/h3&gt;
     &lt;div&gt;
-      &lt;ul&gt;
-        &lt;li&gt;Working&lt;/li&gt;
-        &lt;li&gt;Tested&lt;/li&gt;
-        &lt;li&gt;Reusable&lt;/li&gt;
-      &lt;/ul&gt;
+      My posts with working code - tested and verified - and actionable explanations for specific programming problems. Delivered each week for free.
     &lt;/div&gt;
   &lt;/div&gt;
   &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0&#34; id=&#34;mc_embed_signup&#34;&gt;
     &lt;form action=&#34;//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;amp;id=b7e69e463e&#34; method=&#34;post&#34; id=&#34;mc-embedded-subscribe-form&#34; name=&#34;mc-embedded-subscribe-form&#34; class=&#34;validate&#34; target=&#34;_blank&#34; novalidate&gt;
       &lt;div id=&#34;mc_embed_signup_scroll&#34;&gt;
         &lt;div class=&#34;mc-field-group form-group&#34;&gt;
-          &lt;input type=&#34;text&#34; value=&#34;&#34; name=&#34;FNAME&#34; class=&#34;form-control&#34; id=&#34;mce-FNAME&#34; placeholder=&#34;First name&#34;&gt;
+          &lt;label for=&#34;mce-FNAME&#34;&gt;First Name&lt;/label&gt;
+          &lt;input type=&#34;text&#34; value=&#34;&#34; name=&#34;FNAME&#34; class=&#34;form-control&#34; id=&#34;mce-FNAME&#34;&gt;
         &lt;/div&gt;
         &lt;div class=&#34;mc-field-group form-group&#34;&gt;
-          &lt;input type=&#34;email&#34; value=&#34;&#34; name=&#34;EMAIL&#34; class=&#34;email form-control&#34; id=&#34;mce-EMAIL&#34; placeholder=&#34;Email&#34;&gt;
+          &lt;label for=&#34;mce-EMAIL&#34;&gt;Email Address&lt;/label&gt;
+          &lt;input type=&#34;email&#34; value=&#34;&#34; name=&#34;EMAIL&#34; class=&#34;email form-control&#34; id=&#34;mce-EMAIL&#34;&gt;
         &lt;/div&gt;
         &lt;div id=&#34;mce-responses&#34; class=&#34;form-group&#34;&gt;
           &lt;div class=&#34;response&#34; id=&#34;mce-error-response&#34; style=&#34;display:none&#34; class=&#34;alert alert-success&#34; role=&#34;alert&#34;&gt;&lt;/div&gt;
           &lt;div class=&#34;response&#34; id=&#34;mce-success-response&#34; style=&#34;display:none&#34; class=&#34;alert alert-success&#34; role=&#34;alert&#34;&gt;&lt;/div&gt;
         &lt;/div&gt;
-        &lt;button type=&#34;submit&#34; class=&#34;btn btn-success&#34; id=&#34;mc-embedded-subscribe&#34; name=&#34;subscribe&#34;&gt;Subscribe to my blog&lt;/button&gt;
+        &lt;button type=&#34;submit&#34; class=&#34;btn btn-success&#34; id=&#34;mc-embedded-subscribe&#34; name=&#34;subscribe&#34;&gt;Join the Newsletter&lt;/button&gt;
         &lt;div style=&#34;position: absolute; left: -5000px;&#34; aria-hidden=&#34;true&#34;&gt;&lt;input type=&#34;text&#34; name=&#34;b_52d266a23636b031a38de6d70_b7e69e463e&#34; tabindex=&#34;-1&#34; value=&#34;&#34;&gt;&lt;/div&gt;
       &lt;/div&gt;
     &lt;/form&gt;
@@ -2878,7 +2469,7 @@ Camel&amp;rsquo;s HTTP component allows http resources to be added as Camel end 
 
 &lt;p&gt;Except, it does not work. If we were to execute the above test, we will get the following error:&lt;/p&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;...
-Caused by: java.lang.ArrayIndexOutOfBoundsException: 0
+Caused by: java.lang.ArrayIndexOutOfBoundsException: &lt;span style=&#34;color: #FF6600&#34;&gt;0&lt;/span&gt;
 at in.sdqali.springapps.Application.run&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;Application.java:24&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt; ~&lt;span style=&#34;color: #555555&#34;&gt;[&lt;/span&gt;main/:na&lt;span style=&#34;color: #555555&#34;&gt;]&lt;/span&gt;
 ...
 &lt;/pre&gt;&lt;/div&gt;
@@ -2929,6 +2520,316 @@ ConfigurableApplicationContext applicationContext &lt;span style=&#34;color: #55
  &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:1&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;/div&gt;</description>
+    </item>
+    
+    <item>
+      <title>Implementing custom annotations for Spring MVC</title>
+      <link>https://sdqali.in/blog/2015/12/06/implementing-custom-annotations-for-spring-mvc/?utm_source=site&amp;utm_medium=feed</link>
+      <pubDate>Sun, 06 Dec 2015 13:28:26 -0800</pubDate>
+      
+      <guid>https://sdqali.in/blog/2015/12/06/implementing-custom-annotations-for-spring-mvc/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;&lt;meta content=&#34;spring, annotation, custom annotation, spring mvc, spring boot&#34; name=&#34;keywords&#34;&gt;
+I often have to work with Spring MVC based code bases that have been living for a while. One of the common trait of these code bases I have observed is the repeated use of the same Spring annotations to achieve the same effect again and again. A really good example of this is annotating a controller method with a combination of &lt;code&gt;@RequestMapping&lt;/code&gt; and &lt;code&gt;@ResponseStatus&lt;/code&gt; to set the expected request and response &lt;code&gt;Content-Type&lt;/code&gt;, the request Method, response status etc. This blog post describes how to create custom Spring annotationshow to create custom annotation in spring mvc that produce the same effect as multiple Spring annotations acting together.
+
+Among the new things introduced in Spring 4 was the idea of meta-annotations. &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:1&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; Meta annotations are annotations that can act up on other annotations by modifying and overriding attributes of the target annotations.&lt;/p&gt;
+
+&lt;p&gt;This allows us to build composed annotations &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:2&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:2&#34;&gt;2&lt;/a&gt;&lt;/sup&gt; that combine the behavior of multiple annotations. The &lt;code&gt;@AliasFor&lt;/code&gt; annotation allows us to override attribute names, thereby adding great flexibility while composing.&lt;/p&gt;
+
+&lt;p&gt;This is a common pattern in code bases that use Spring MVC.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;    &lt;span style=&#34;color: #9999FF&#34;&gt;@RequestMapping&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;path &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;/register&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt;
+            method &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; RequestMethod&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;POST&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt;
+            consumes &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; MediaType&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;APPLICATION_JSON_VALUE&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt;
+            produces &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; MediaType&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;APPLICATION_JSON_VALUE&lt;/span&gt;
+    &lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
+    &lt;span style=&#34;color: #9999FF&#34;&gt;@ResponseStatus&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;HttpStatus&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;CREATED&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
+    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; Map &lt;span style=&#34;color: #CC00FF&#34;&gt;register&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #9999FF&#34;&gt;@RequestBody&lt;/span&gt; &lt;span style=&#34;color: #9999FF&#34;&gt;@Valid&lt;/span&gt; EmailRequest emailRequest&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+        &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; registrationService&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;register&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;emailRequest&lt;span style=&#34;color: #555555&#34;&gt;);&lt;/span&gt;
+    &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The two annotations as applied on this method represent the fact that this is an end point that a client can &lt;code&gt;POST&lt;/code&gt; JSON to and produces JSON and a &lt;code&gt;201 Created&lt;/code&gt; HTTP status when it succeeds. If we had 20 end points that did the similar operations, it would be really useful to have a &lt;code&gt;@PostJson&lt;/code&gt; annotation that did the same thing.&lt;/p&gt;
+
+&lt;p&gt;The following is one way of writing such an annotation.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #9999FF&#34;&gt;@Target&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;METHOD&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
+&lt;span style=&#34;color: #9999FF&#34;&gt;@Retention&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;RUNTIME&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
+&lt;span style=&#34;color: #9999FF&#34;&gt;@Documented&lt;/span&gt;
+&lt;span style=&#34;color: #9999FF&#34;&gt;@RequestMapping&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;method &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; RequestMethod&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;POST&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt;
+        consumes &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; MediaType&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;APPLICATION_JSON_VALUE&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt;
+        produces &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; MediaType&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;APPLICATION_JSON_VALUE&lt;/span&gt;
+&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
+&lt;span style=&#34;color: #9999FF&#34;&gt;@ResponseStatus&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;HttpStatus&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;CREATED&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
+&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #9999FF&#34;&gt;@interface&lt;/span&gt; PostJson &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+    &lt;span style=&#34;color: #9999FF&#34;&gt;@AliasFor&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;annotation &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; RequestMapping&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; attribute &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;path&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
+    String&lt;span style=&#34;color: #555555&#34;&gt;[]&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;path&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;default&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{};&lt;/span&gt;
+&lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This annotation takes a single parameter &lt;code&gt;path&lt;/code&gt; that represents that URL path to which it will respond to. This can now be applied on the register end point.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;    &lt;span style=&#34;color: #9999FF&#34;&gt;@PostJson&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;path &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;/register&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
+    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; Map &lt;span style=&#34;color: #CC00FF&#34;&gt;register&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #9999FF&#34;&gt;@RequestBody&lt;/span&gt; &lt;span style=&#34;color: #9999FF&#34;&gt;@Valid&lt;/span&gt; EmailRequest emailRequest&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+        &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; registrationService&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;register&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;emailRequest&lt;span style=&#34;color: #555555&#34;&gt;);&lt;/span&gt;
+    &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;If we wanted to allow the consumers of &lt;code&gt;@PostJson&lt;/code&gt; to override other parameters of &lt;code&gt;@RequestMapping&lt;/code&gt; or &lt;code&gt;@ResponseStatus&lt;/code&gt;, it can be achieved by adding more aliases. For example, the following will allow users to specify a reason phrase.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;    &lt;span style=&#34;color: #9999FF&#34;&gt;@AliasFor&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;annotation &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; ResponseStatus&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; attribute &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;reason&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
+    String&lt;span style=&#34;color: #555555&#34;&gt;[]&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;reason&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;default&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{};&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This pattern can easily be extended to introduce annotations like &lt;code&gt;@GetJson&lt;/code&gt;, &lt;code&gt;@PutJson&lt;/code&gt;, &lt;code&gt;@PostXml&lt;/code&gt; and so on and so forth.&lt;/p&gt;
+&lt;div class=&#34;footnotes&#34;&gt;
+
+&lt;hr /&gt;
+
+&lt;ol&gt;
+&lt;li id=&#34;fn:1&#34;&gt;Meta annotations. &lt;a href=&#34;http://docs.spring.io/spring/docs/current/spring-framework-reference/html/beans.html#beans-meta-annotations&#34;&gt;Spring documentation&lt;/a&gt;.
+ &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:1&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li id=&#34;fn:2&#34;&gt;Composed annotations. &lt;a href=&#34;https://github.com/spring-projects/spring-framework/wiki/Spring-Annotation-Programming-Model#composed-annotations&#34;&gt;Spring documentation&lt;/a&gt;.
+ &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:2&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;</description>
+    </item>
+    
+    <item>
+      <title>Validating RequestParams and PathVariables in Spring MVC</title>
+      <link>https://sdqali.in/blog/2015/12/04/validating-requestparams-and-pathvariables-in-spring-mvc/?utm_source=site&amp;utm_medium=feed</link>
+      <pubDate>Fri, 04 Dec 2015 22:50:24 -0800</pubDate>
+      
+      <guid>https://sdqali.in/blog/2015/12/04/validating-requestparams-and-pathvariables-in-spring-mvc/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;&lt;meta content=&#34;spring, validate, request, parameters, @requestparam, spring mvc, param, validation&#34; name=&#34;keywords&#34;&gt;
+Spring MVC provides a convenient way to validate inputs to API end points through the use of &lt;code&gt;JSR-303&lt;/code&gt; annotations. While this mechanism works great for end points that consume a &lt;code&gt;RequestBody&lt;/code&gt; (as is the case with most &lt;code&gt;POST&lt;/code&gt; and &lt;code&gt;PUT&lt;/code&gt; requests), it is not easy to achieve the same effect for end points that consume primitives in the form of path variables or request parameters (as is the case with most &lt;code&gt;GET&lt;/code&gt; requests).&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s take a look at how to validate RequestBody inputs using JSR-303.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;    &lt;span style=&#34;color: #9999FF&#34;&gt;@RequestMapping&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;method &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; RequestMethod&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;POST&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt;
+            consumes &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; MediaType&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;APPLICATION_JSON_VALUE&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt;
+            produces &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; MediaType&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;APPLICATION_JSON_VALUE&lt;/span&gt;
+    &lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
+    &lt;span style=&#34;color: #9999FF&#34;&gt;@ResponseStatus&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;HttpStatus&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;OK&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
+    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; Map &lt;span style=&#34;color: #CC00FF&#34;&gt;register&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #9999FF&#34;&gt;@RequestBody&lt;/span&gt; &lt;span style=&#34;color: #9999FF&#34;&gt;@Valid&lt;/span&gt; EmailRequest emailRequest&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+        &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; registrationService&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;register&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;emailRequest&lt;span style=&#34;color: #555555&#34;&gt;);&lt;/span&gt;
+    &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The value object &lt;code&gt;EmailRequest&lt;/code&gt; is annotated with the appropriate constraint annotations.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #00AA88; font-weight: bold&#34;&gt;EmailRequest&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+    &lt;span style=&#34;color: #9999FF&#34;&gt;@Email&lt;/span&gt;
+    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; String email&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
+
+    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;EmailRequest&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+    &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+
+    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; String &lt;span style=&#34;color: #CC00FF&#34;&gt;getEmail&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+        &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; email&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
+    &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;If we were to attempt a similar approach for a &lt;code&gt;GET&lt;/code&gt; end point that accepts a &lt;code&gt;RequestParam&lt;/code&gt;, the validation would simply not happen.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;    &lt;span style=&#34;color: #9999FF&#34;&gt;@RequestMapping&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;method &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; RequestMethod&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;GET&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt;
+            consumes &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; MediaType&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;APPLICATION_JSON_VALUE&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt;
+            produces &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; MediaType&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;APPLICATION_JSON_VALUE&lt;/span&gt;
+    &lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
+    &lt;span style=&#34;color: #9999FF&#34;&gt;@ResponseStatus&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;HttpStatus&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;OK&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
+    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; Map &lt;span style=&#34;color: #CC00FF&#34;&gt;search&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #9999FF&#34;&gt;@Email&lt;/span&gt;
+                   &lt;span style=&#34;color: #9999FF&#34;&gt;@Valid&lt;/span&gt;
+                   &lt;span style=&#34;color: #9999FF&#34;&gt;@RequestParam&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;email&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
+                   String email&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+        &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; emailMessage&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;email&lt;span style=&#34;color: #555555&#34;&gt;);&lt;/span&gt;
+    &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;div class=&#34;signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0&#34;&gt;
+  &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0&#34;&gt;
+    &lt;h3&gt;Finding this article useful?&lt;/h3&gt;
+    &lt;div&gt;
+      My posts with working code - tested and verified - and actionable explanations for specific programming problems. Delivered each week for free.
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0&#34; id=&#34;mc_embed_signup&#34;&gt;
+    &lt;form action=&#34;//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;amp;id=b7e69e463e&#34; method=&#34;post&#34; id=&#34;mc-embedded-subscribe-form&#34; name=&#34;mc-embedded-subscribe-form&#34; class=&#34;validate&#34; target=&#34;_blank&#34; novalidate&gt;
+      &lt;div id=&#34;mc_embed_signup_scroll&#34;&gt;
+        &lt;div class=&#34;mc-field-group form-group&#34;&gt;
+          &lt;label for=&#34;mce-FNAME&#34;&gt;First Name&lt;/label&gt;
+          &lt;input type=&#34;text&#34; value=&#34;&#34; name=&#34;FNAME&#34; class=&#34;form-control&#34; id=&#34;mce-FNAME&#34;&gt;
+        &lt;/div&gt;
+        &lt;div class=&#34;mc-field-group form-group&#34;&gt;
+          &lt;label for=&#34;mce-EMAIL&#34;&gt;Email Address&lt;/label&gt;
+          &lt;input type=&#34;email&#34; value=&#34;&#34; name=&#34;EMAIL&#34; class=&#34;email form-control&#34; id=&#34;mce-EMAIL&#34;&gt;
+        &lt;/div&gt;
+        &lt;div id=&#34;mce-responses&#34; class=&#34;form-group&#34;&gt;
+          &lt;div class=&#34;response&#34; id=&#34;mce-error-response&#34; style=&#34;display:none&#34; class=&#34;alert alert-success&#34; role=&#34;alert&#34;&gt;&lt;/div&gt;
+          &lt;div class=&#34;response&#34; id=&#34;mce-success-response&#34; style=&#34;display:none&#34; class=&#34;alert alert-success&#34; role=&#34;alert&#34;&gt;&lt;/div&gt;
+        &lt;/div&gt;
+        &lt;button type=&#34;submit&#34; class=&#34;btn btn-success&#34; id=&#34;mc-embedded-subscribe&#34; name=&#34;subscribe&#34;&gt;Join the Newsletter&lt;/button&gt;
+        &lt;div style=&#34;position: absolute; left: -5000px;&#34; aria-hidden=&#34;true&#34;&gt;&lt;input type=&#34;text&#34; name=&#34;b_52d266a23636b031a38de6d70_b7e69e463e&#34; tabindex=&#34;-1&#34; value=&#34;&#34;&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/form&gt;
+    &lt;p class=&#34;no-spam&#34;&gt;I won&#39;t send you spam. Unsubscribe at any time.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+
+&lt;p&gt;This is where Spring&amp;rsquo;s &lt;code&gt;@Validated&lt;/code&gt; annotation is useful. With &lt;code&gt;@Validated&lt;/code&gt;, we can validate request parameters and path variables.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #9999FF&#34;&gt;@RestController&lt;/span&gt;
+&lt;span style=&#34;color: #9999FF&#34;&gt;@Validated&lt;/span&gt;
+&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #00AA88; font-weight: bold&#34;&gt;RegistrationController&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+    &lt;span style=&#34;color: #9999FF&#34;&gt;@RequestMapping&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;method &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; RequestMethod&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;GET&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt;
+            consumes &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; MediaType&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;APPLICATION_JSON_VALUE&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt;
+            produces &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; MediaType&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;APPLICATION_JSON_VALUE&lt;/span&gt;
+    &lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
+    &lt;span style=&#34;color: #9999FF&#34;&gt;@ResponseStatus&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;HttpStatus&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;OK&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
+    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; Map &lt;span style=&#34;color: #CC00FF&#34;&gt;search&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #9999FF&#34;&gt;@Email&lt;/span&gt;
+                   &lt;span style=&#34;color: #9999FF&#34;&gt;@RequestParam&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;email&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
+                   String email&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+        &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; emailMessage&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;email&lt;span style=&#34;color: #555555&#34;&gt;);&lt;/span&gt;
+    &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;An important thing to note here is that using &lt;code&gt;@Valid&lt;/code&gt; annotation results in &lt;code&gt;MethodArgumentNotValidException&lt;/code&gt; being thrown when validation fails, but &lt;code&gt;@Validated&lt;/code&gt; results in &lt;code&gt;ConstraintViolationException&lt;/code&gt; being thrown. Since these exceptions have different ways of abstracting the error messages associated with validation, it is important to have different error handlers for both of these. An example pattern using &lt;code&gt;ExceptionHandler&lt;/code&gt; will be as follows:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #9999FF&#34;&gt;@ControllerAdvice&lt;/span&gt;
+&lt;span style=&#34;color: #9999FF&#34;&gt;@Component&lt;/span&gt;
+&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #00AA88; font-weight: bold&#34;&gt;GlobalExceptionHandler&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+    &lt;span style=&#34;color: #9999FF&#34;&gt;@ExceptionHandler&lt;/span&gt;
+    &lt;span style=&#34;color: #9999FF&#34;&gt;@ResponseBody&lt;/span&gt;
+    &lt;span style=&#34;color: #9999FF&#34;&gt;@ResponseStatus&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;HttpStatus&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;BAD_REQUEST&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
+    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; Map &lt;span style=&#34;color: #CC00FF&#34;&gt;handle&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;MethodArgumentNotValidException exception&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+        &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; error&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;exception&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;getBindingResult&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;().&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;getFieldErrors&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt;
+                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;stream&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt;
+                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;map&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;FieldError&lt;span style=&#34;color: #555555&#34;&gt;::&lt;/span&gt;getDefaultMessage&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
+                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;collect&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;Collectors&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;toList&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()));&lt;/span&gt;
+    &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+
+
+    &lt;span style=&#34;color: #9999FF&#34;&gt;@ExceptionHandler&lt;/span&gt;
+    &lt;span style=&#34;color: #9999FF&#34;&gt;@ResponseBody&lt;/span&gt;
+    &lt;span style=&#34;color: #9999FF&#34;&gt;@ResponseStatus&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;HttpStatus&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;BAD_REQUEST&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
+    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; Map &lt;span style=&#34;color: #CC00FF&#34;&gt;handle&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;ConstraintViolationException exception&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+        &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; error&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;exception&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;getConstraintViolations&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt;
+                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;stream&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt;
+                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;map&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;ConstraintViolation&lt;span style=&#34;color: #555555&#34;&gt;::&lt;/span&gt;getMessage&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
+                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;collect&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;Collectors&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;toList&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()));&lt;/span&gt;
+    &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+
+    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;private&lt;/span&gt; Map &lt;span style=&#34;color: #CC00FF&#34;&gt;error&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;Object message&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+        &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; Collections&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;singletonMap&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;error&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; message&lt;span style=&#34;color: #555555&#34;&gt;);&lt;/span&gt;
+    &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;</description>
+    </item>
+    
+    <item>
+      <title>Testing async responses using MockMvc</title>
+      <link>https://sdqali.in/blog/2015/11/24/testing-async-responses-using-mockmvc/?utm_source=site&amp;utm_medium=feed</link>
+      <pubDate>Tue, 24 Nov 2015 05:45:06 -0500</pubDate>
+      
+      <guid>https://sdqali.in/blog/2015/11/24/testing-async-responses-using-mockmvc/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;There are times when a Spring MVC end point performs asynchronous operations. Testing these end points using MockMvc can be tricky because of the asynchronous nature in which the result of the operation is eventually returned. This blog post describes how to write tests in such scenarios.&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s take a look at the following example. In this example, we have a simple end point that responds with a JSON object when invoked.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #9999FF&#34;&gt;@RestController&lt;/span&gt;
+&lt;span style=&#34;color: #9999FF&#34;&gt;@RequestMapping&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;/test&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
+&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #00AA88; font-weight: bold&#34;&gt;ExampleController&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+    &lt;span style=&#34;color: #9999FF&#34;&gt;@RequestMapping&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;value &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;/hello&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt;
+            method &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; GET&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt;
+            consumes &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; APPLICATION_JSON_VALUE&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt;
+            produces &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; APPLICATION_JSON_VALUE&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
+    &lt;span style=&#34;color: #9999FF&#34;&gt;@ResponseStatus&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;OK&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
+    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; Map&lt;span style=&#34;color: #555555&#34;&gt;&amp;lt;&lt;/span&gt;String&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; Object&lt;span style=&#34;color: #555555&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;hello&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(){&lt;/span&gt;
+        &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; helloMessage&lt;span style=&#34;color: #555555&#34;&gt;();&lt;/span&gt;
+    &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+
+    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;private&lt;/span&gt; Map&lt;span style=&#34;color: #555555&#34;&gt;&amp;lt;&lt;/span&gt;String&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; Object&lt;span style=&#34;color: #555555&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;helloMessage&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+        &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; Collections&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;singletonMap&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;message&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;hello&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;);&lt;/span&gt;
+    &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Writing a MockMvc test for this controller is fairly simple. The following test invokes the end point and asserts that the end point returns:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;The right HTTP response code &lt;code&gt;200&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;The right Content-Type &lt;code&gt;application/json&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;The right JSON message&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #9999FF&#34;&gt;@RunWith&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;MockitoJUnitRunner&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
+&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #00AA88; font-weight: bold&#34;&gt;ExampleControllerTest&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+
+    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;static&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;final&lt;/span&gt; String CONTENT_TYPE &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Content-Type&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
+    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;private&lt;/span&gt; ExampleController controller&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
+    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;private&lt;/span&gt; MockMvc mockMvc&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
+
+    &lt;span style=&#34;color: #9999FF&#34;&gt;@Before&lt;/span&gt;
+    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007788; font-weight: bold&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;setUp&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+        controller &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;new&lt;/span&gt; ExampleController&lt;span style=&#34;color: #555555&#34;&gt;();&lt;/span&gt;
+        mockMvc &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; MockMvcBuilders
+                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;standaloneSetup&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;controller&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
+                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;build&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;();&lt;/span&gt;
+    &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+
+    &lt;span style=&#34;color: #9999FF&#34;&gt;@Test&lt;/span&gt;
+    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007788; font-weight: bold&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;shouldHaveAMessageInResponse&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;throws&lt;/span&gt; Exception &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+        mockMvc
+                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;perform&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;get&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;/test/hello&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
+                        &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;contentType&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;APPLICATION_JSON&lt;span style=&#34;color: #555555&#34;&gt;))&lt;/span&gt;
+                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;andDo&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;print&lt;span style=&#34;color: #555555&#34;&gt;())&lt;/span&gt;
+                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;andExpect&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;status&lt;span style=&#34;color: #555555&#34;&gt;().&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;isOk&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;())&lt;/span&gt;
+                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;andExpect&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;header&lt;span style=&#34;color: #555555&#34;&gt;().&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;string&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;CONTENT_TYPE&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; APPLICATION_JSON_VALUE&lt;span style=&#34;color: #555555&#34;&gt;))&lt;/span&gt;
+                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;andExpect&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;jsonPath&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;message&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;).&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;hello&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;));&lt;/span&gt;
+    &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Now, lets try and write a similar test for an end point uses &lt;code&gt;DeferredResult&lt;/code&gt; to do asynchronous request processing. The end point in this example just wraps the JSON structure in &lt;code&gt;DeferredResult&lt;/code&gt; and returns, whereas there will be a long running asynchronous process in a more useful case. But the idea remains the same.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;    &lt;span style=&#34;color: #9999FF&#34;&gt;@RequestMapping&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;value &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;/deferred&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt;
+            method &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; GET&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt;
+            consumes &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; APPLICATION_JSON_VALUE&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt;
+            produces &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; APPLICATION_JSON_VALUE
+    &lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
+    &lt;span style=&#34;color: #9999FF&#34;&gt;@ResponseStatus&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;OK&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
+    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; DeferredResult&lt;span style=&#34;color: #555555&#34;&gt;&amp;lt;&lt;/span&gt;Map&lt;span style=&#34;color: #555555&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;deferred&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+        DeferredResult&lt;span style=&#34;color: #555555&#34;&gt;&amp;lt;&lt;/span&gt;Map&lt;span style=&#34;color: #555555&#34;&gt;&amp;gt;&lt;/span&gt; deferredResult &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;new&lt;/span&gt; DeferredResult&lt;span style=&#34;color: #555555&#34;&gt;&amp;lt;&amp;gt;();&lt;/span&gt;
+        deferredResult&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;setResult&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;helloMessage&lt;span style=&#34;color: #555555&#34;&gt;());&lt;/span&gt;
+        &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; deferredResult&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
+    &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;If our test for this end point were to use the same mechanism as the previous test, we will start observing an interesting error.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;    &lt;span style=&#34;color: #9999FF&#34;&gt;@Test&lt;/span&gt;
+    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007788; font-weight: bold&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;shouldHaveAMessageInDeferredResponse&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;throws&lt;/span&gt; Exception &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+        mockMvc
+                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;perform&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;get&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;/test/deferred&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
+                        &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;contentType&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;APPLICATION_JSON&lt;span style=&#34;color: #555555&#34;&gt;))&lt;/span&gt;
+                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;andExpect&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;status&lt;span style=&#34;color: #555555&#34;&gt;().&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;isOk&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;())&lt;/span&gt;
+                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;andExpect&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;header&lt;span style=&#34;color: #555555&#34;&gt;().&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;string&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;CONTENT_TYPE&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; APPLICATION_JSON_VALUE&lt;span style=&#34;color: #555555&#34;&gt;))&lt;/span&gt;
+                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;andExpect&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;jsonPath&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;message&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;).&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;hello&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;));&lt;/span&gt;
+    &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;Response header Content-Type expected:&amp;lt;application/json&amp;gt; but was:&amp;lt;null&amp;gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This happened because MockMvc did not wait for the asynchronous process to finish. The solution to this involves using MockMvc&amp;rsquo;s &lt;code&gt;asyncDispatch&lt;/code&gt;. AsyncDispatch creates a new request that continues from the result of a previous MockMvc request that started the asynchronous process.
+The test re-written using &lt;code&gt;asyncDispatch&lt;/code&gt; would be as follows:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;    &lt;span style=&#34;color: #9999FF&#34;&gt;@Test&lt;/span&gt;
+    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007788; font-weight: bold&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;shouldHaveAMessageInDeferredResponseWithAsyncDispatch&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;throws&lt;/span&gt; Exception &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
+        MvcResult result &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; mockMvc
+                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;perform&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;get&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;/test/deferred&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
+                        &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;contentType&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;APPLICATION_JSON&lt;span style=&#34;color: #555555&#34;&gt;))&lt;/span&gt;
+                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;andReturn&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;();&lt;/span&gt;
+
+        mockMvc
+                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;perform&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;asyncDispatch&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;result&lt;span style=&#34;color: #555555&#34;&gt;))&lt;/span&gt;
+                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;andExpect&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;status&lt;span style=&#34;color: #555555&#34;&gt;().&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;isOk&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;())&lt;/span&gt;
+                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;andExpect&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;header&lt;span style=&#34;color: #555555&#34;&gt;().&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;string&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;CONTENT_TYPE&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; APPLICATION_JSON_VALUE&lt;span style=&#34;color: #555555&#34;&gt;))&lt;/span&gt;
+                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;andExpect&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;jsonPath&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;message&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;).&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;hello&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;));&lt;/span&gt;
+    &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The same approach can be employed to test when controllers use Java 8&amp;rsquo;s &lt;code&gt;CompletableFuture&lt;/code&gt;.&lt;/p&gt;</description>
     </item>
     
   </channel>

@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>{code that works}</title>
-    <link>https://sdqali.in/categories/rails/index.xml?utm_source=site&amp;utm_medium=feed</link>
-    <description>Recent content on {code that works}</description>
+    <title>Rails on {code that works}</title>
+    <link>https://sdqali.in/categories/rails/?utm_source=site&amp;utm_medium=feed</link>
+    <description>Recent content in Rails on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
-    <atom:link href="/categories/rails/index.xml?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 13 Oct 2013 00:00:00 +0000</lastBuildDate>
+    <atom:link href="/categories/rails/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
     
     <item>
       <title>Implementing Rate Limiting in Rails - Part 2</title>
@@ -135,28 +136,28 @@
 &lt;p&gt;This computes the time remaining till the limit is reset and the number of requests remaining and sets the appropriate headers.&lt;/p&gt;
 
 &lt;p&gt;Let&amp;rsquo;s test this.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;bash$ &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;for&lt;/span&gt; i in &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;1..100&lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;bash$ &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;for&lt;/span&gt; i in &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt;..100&lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
 &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;do&lt;/span&gt;
 curl -i http://localhost:3000/foo.json &amp;gt;&amp;gt; /tmp/headers.log
 &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;done&lt;/span&gt;
 
 bash$ less /tmp/headers.log | grep X-Rate-Limit
-X-Rate-Limit-Limit: 60
-X-Rate-Limit-Remaining: 59
-X-Rate-Limit-Reset: 1381717125
-X-Rate-Limit-Limit: 60
-X-Rate-Limit-Remaining: 58
-X-Rate-Limit-Reset: 1381717125
+X-Rate-Limit-Limit: &lt;span style=&#34;color: #FF6600&#34;&gt;60&lt;/span&gt;
+X-Rate-Limit-Remaining: &lt;span style=&#34;color: #FF6600&#34;&gt;59&lt;/span&gt;
+X-Rate-Limit-Reset: &lt;span style=&#34;color: #FF6600&#34;&gt;1381717125&lt;/span&gt;
+X-Rate-Limit-Limit: &lt;span style=&#34;color: #FF6600&#34;&gt;60&lt;/span&gt;
+X-Rate-Limit-Remaining: &lt;span style=&#34;color: #FF6600&#34;&gt;58&lt;/span&gt;
+X-Rate-Limit-Reset: &lt;span style=&#34;color: #FF6600&#34;&gt;1381717125&lt;/span&gt;
 ...
-X-Rate-Limit-Limit: 60
-X-Rate-Limit-Remaining: 1
-X-Rate-Limit-Reset: 1381717124
-X-Rate-Limit-Limit: 60
-X-Rate-Limit-Remaining: 0
-X-Rate-Limit-Reset: 1381717124
-X-Rate-Limit-Limit: 60
-X-Rate-Limit-Remaining: 0
-X-Rate-Limit-Reset: 1381717124
+X-Rate-Limit-Limit: &lt;span style=&#34;color: #FF6600&#34;&gt;60&lt;/span&gt;
+X-Rate-Limit-Remaining: &lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt;
+X-Rate-Limit-Reset: &lt;span style=&#34;color: #FF6600&#34;&gt;1381717124&lt;/span&gt;
+X-Rate-Limit-Limit: &lt;span style=&#34;color: #FF6600&#34;&gt;60&lt;/span&gt;
+X-Rate-Limit-Remaining: &lt;span style=&#34;color: #FF6600&#34;&gt;0&lt;/span&gt;
+X-Rate-Limit-Reset: &lt;span style=&#34;color: #FF6600&#34;&gt;1381717124&lt;/span&gt;
+X-Rate-Limit-Limit: &lt;span style=&#34;color: #FF6600&#34;&gt;60&lt;/span&gt;
+X-Rate-Limit-Remaining: &lt;span style=&#34;color: #FF6600&#34;&gt;0&lt;/span&gt;
+X-Rate-Limit-Reset: &lt;span style=&#34;color: #FF6600&#34;&gt;1381717124&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;The code for this implementation is on my &lt;a href=&#34;https://github.com/sdqali/rails_throttle&#34;&gt;GitHub profile&lt;/a&gt;.&lt;/p&gt;
@@ -303,16 +304,16 @@ THROTTLE_MAX_REQUESTS = 60
 &lt;p&gt;When the limit is reached, subsequent requests will be responded with an error message and the HTTP status code &lt;code&gt;429&lt;/code&gt;. The 429 &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:4&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:4&#34;&gt;4&lt;/a&gt;&lt;/sup&gt; status code indicates that the user has sent too many requests in a given amount of time.&lt;/p&gt;
 
 &lt;p&gt;Let&amp;rsquo;s go ahead and test this.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;bash$ &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;for&lt;/span&gt; i in &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;1..100&lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;bash$ &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;for&lt;/span&gt; i in &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt;..100&lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
 &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;do&lt;/span&gt;
 curl -i http://localhost:3000/foo.json &amp;gt;&amp;gt; /dev/null
 &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;done&lt;/span&gt;
 
 bash$ less log/development.log | grep &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;200 OK&amp;quot;&lt;/span&gt; | wc -l
-      60
+      &lt;span style=&#34;color: #FF6600&#34;&gt;60&lt;/span&gt;
 
 bash$ less log/development.log | grep &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;429 Too Many Requests&amp;quot;&lt;/span&gt; | wc -l
-      40
+      &lt;span style=&#34;color: #FF6600&#34;&gt;40&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;As you can see after &lt;code&gt;60&lt;/code&gt; requests, all requests get the &lt;code&gt;429&lt;/code&gt; response.&lt;/p&gt;
