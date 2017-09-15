@@ -31,7 +31,7 @@ While debugging our build, our new developer discovered that certain tasks that 
 
 ### Rake's redefining behavior
 Rake treats redefining a Task as akin to appending actions to the same Task. To see this in action, add the following to a Rakefile:
-{% codeblock lang:ruby %}
+```ruby
 task :foo do
   puts "foo " * 10
 end
@@ -39,17 +39,17 @@ end
 task :foo do
   puts "bar " * 10
 end
-{% endcodeblock %}
+```
 
 If you run the `foo` task, you would get:
-{% codeblock lang:console %}
+```bash
 $rake foo
 foo foo foo foo foo foo foo foo foo foo
 bar bar bar bar bar bar bar bar bar bar
-{% endcodeblock %}
+```
 
 This is far removed from behaviors of Ruby and [Make](http://www.gnu.org/software/make/ "Make"), the tools that inspired Rake. For clarity's sake, this is how Ruby treats redefinitions:
-{% codeblock lang:ruby %}
+```ruby
 #!/usr/bin/env ruby
 #example.rb
 
@@ -62,31 +62,31 @@ def example
 end
 
 example
-{% endcodeblock %}
+```
 
 When run:
-{% codeblock lang:console %}
+```bash
 $ruby example.rb
 foobar foobar foobar foobar foobar foobar foobar foobar foobar foobar
-{% endcodeblock %}
+```
 
 Lets take a look at Make's behavior. This is how Make treats redefinitions:
-{% codeblock lang:make %}
+```make
 # Example Makefile
 
 foo:
     @echo Foo target
 foo:
     @echo Redefined foo target
-{% endcodeblock %}
+```
 
 When run:
-{% codeblock lang:console %}
+```bash
 $make foo
 Makefile:6: warning: overriding commands for target `foo'
 Makefile:4: warning: ignoring old commands for target `foo'
 Redefined foo target
-{% endcodeblock %}
+```
 
 
 While this behavior of Rake may seem weird, there are some advantages to it like the ability to add custom behavior to third party Rake tasks. I asked [Jim Weirich](https://twitter.com/#!/jimweirich), the creator of Rake and he was [of the opinion](http://www.quora.com/Ruby-programming-language/Why-did-Rake-choose-to-treat-a-re-definition-as-a-multiple-definition-instead-of-an-overwrite) that it was a useful choice. *We were <strong>not</strong> aware of this particular behavior of Rake.*
@@ -99,37 +99,38 @@ It turns out that in Ruby 1.8.7, whenever a file is `require`d multiple times, R
 Again, this can be best demonstrated with an example. Consider the following scenario. There is a paent directory with `Rakefile`, `zoo.rb` and a directory `subdir` with the file `bar.rb` inside it.
 
 `zoo.rb` defines a Rake task `print_zoo`:
-{% codeblock lang:ruby%}
+
+```ruby
 # zoo.rb
 
 desc "prints zoo"
 task :print_zoo do
   puts "zoo " * 10
 end
-{% endcodeblock %}
+```
 
 `bar.rb` in the directory `subdir` does nothing but require `zoo` in the parent directory.
-{% codeblock lang:ruby %}
+```ruby
 #subdir/bar.rb
 
 require File.dirname(__FILE__) + "/../zoo"
-{% endcodeblock %}
+```
 
 The Rakefile requires both `zoo.rb` and `bar.rb` and defines a task to show the behavior.
-{% codeblock lang:ruby%}
+```ruby
 require File.dirname(__FILE__) + "/zoo"
 require File.dirname(__FILE__) + "/subdir/bar"
 
 desc "show weirdness"
 task :test => :print_zoo
-{% endcodeblock %}
+```
 
 Now if we run the `test` task:
-{% codeblock lang:console %}
+```bash
 $rake test
 zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo
 zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo
-{% endcodeblock %}
+```
 
 Lets take a step back and think about that. If we load Ruby files multiple times using `require` we can easily end up repeating a build step that would take 30 minutes to complete.
 
