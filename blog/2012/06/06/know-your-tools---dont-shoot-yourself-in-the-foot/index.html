@@ -140,64 +140,57 @@ This happened to us recently, and the subsequent debugging/postmortem revealed t
 
 <h3 id="rake-s-redefining-behavior">Rake&rsquo;s redefining behavior</h3>
 
-<p>Rake treats redefining a Task as akin to appending actions to the same Task. To see this in action, add the following to a Rakefile:
-{% codeblock lang:ruby %}
-task :foo do
-  puts &ldquo;foo &rdquo; * 10
-end</p>
+<p>Rake treats redefining a Task as akin to appending actions to the same Task. To see this in action, add the following to a Rakefile:</p>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>task <span style="color: #FFCC33">:foo</span> <span style="color: #006699; font-weight: bold">do</span>
+  <span style="color: #336666">puts</span> <span style="color: #CC3300">&quot;foo &quot;</span> <span style="color: #555555">*</span> <span style="color: #FF6600">10</span>
+<span style="color: #006699; font-weight: bold">end</span>
 
-<p>task :foo do
-  puts &ldquo;bar &rdquo; * 10
-end
-{% endcodeblock %}</p>
+task <span style="color: #FFCC33">:foo</span> <span style="color: #006699; font-weight: bold">do</span>
+  <span style="color: #336666">puts</span> <span style="color: #CC3300">&quot;bar &quot;</span> <span style="color: #555555">*</span> <span style="color: #FF6600">10</span>
+<span style="color: #006699; font-weight: bold">end</span>
+</pre></div>
 
-<p>If you run the <code>foo</code> task, you would get:
-{% codeblock lang:console %}
-$rake foo
+<p>If you run the <code>foo</code> task, you would get:</p>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #003333">$rake</span> foo
 foo foo foo foo foo foo foo foo foo foo
 bar bar bar bar bar bar bar bar bar bar
-{% endcodeblock %}</p>
+</pre></div>
 
-<p>This is far removed from behaviors of Ruby and <a href="http://www.gnu.org/software/make/" title="Make">Make</a>, the tools that inspired Rake. For clarity&rsquo;s sake, this is how Ruby treats redefinitions:
-{% codeblock lang:ruby %}
-#!/usr/bin/env ruby
-#example.rb</p>
+<p>This is far removed from behaviors of Ruby and <a href="http://www.gnu.org/software/make/" title="Make">Make</a>, the tools that inspired Rake. For clarity&rsquo;s sake, this is how Ruby treats redefinitions:</p>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #0099FF; font-style: italic">#!/usr/bin/env ruby</span>
+<span style="color: #0099FF; font-style: italic">#example.rb</span>
 
-<p>def example
-  puts &ldquo;example &rdquo; * 10
-end</p>
+<span style="color: #006699; font-weight: bold">def</span> <span style="color: #CC00FF">example</span>
+  <span style="color: #336666">puts</span> <span style="color: #CC3300">&quot;example &quot;</span> <span style="color: #555555">*</span> <span style="color: #FF6600">10</span>
+<span style="color: #006699; font-weight: bold">end</span>
 
-<p>def example
-  puts &ldquo;foobar &rdquo; * 10
-end</p>
+<span style="color: #006699; font-weight: bold">def</span> <span style="color: #CC00FF">example</span>
+  <span style="color: #336666">puts</span> <span style="color: #CC3300">&quot;foobar &quot;</span> <span style="color: #555555">*</span> <span style="color: #FF6600">10</span>
+<span style="color: #006699; font-weight: bold">end</span>
 
-<p>example
-{% endcodeblock %}</p>
+example
+</pre></div>
 
-<p>When run:
-{% codeblock lang:console %}
-$ruby example.rb
+<p>When run:</p>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #003333">$ruby</span> example.rb
 foobar foobar foobar foobar foobar foobar foobar foobar foobar foobar
-{% endcodeblock %}</p>
+</pre></div>
 
-<p>Lets take a look at Make&rsquo;s behavior. This is how Make treats redefinitions:
-{% codeblock lang:make %}</p>
+<p>Lets take a look at Make&rsquo;s behavior. This is how Make treats redefinitions:</p>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #0099FF; font-style: italic"># Example Makefile</span>
 
-<h1 id="example-makefile">Example Makefile</h1>
-
-<p>foo:
+<span style="color: #CC00FF">foo</span><span style="color: #555555">:</span>
     @echo Foo target
-foo:
+<span style="color: #CC00FF">foo</span><span style="color: #555555">:</span>
     @echo Redefined foo target
-{% endcodeblock %}</p>
+</pre></div>
 
-<p>When run:
-{% codeblock lang:console %}
-$make foo
-Makefile:6: warning: overriding commands for target <code>foo'
-Makefile:4: warning: ignoring old commands for target</code>foo&rsquo;
+<p>When run:</p>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #003333">$make</span> foo
+Makefile:6: warning: overriding commands <span style="color: #006699; font-weight: bold">for</span> target <span style="color: #CC3300">`</span>foo<span style="color: #CC3300">&#39;</span>
+<span style="color: #CC3300">Makefile:4: warning: ignoring old commands for target `foo&#39;</span>
 Redefined foo target
-{% endcodeblock %}</p>
+</pre></div>
 
 <p>While this behavior of Rake may seem weird, there are some advantages to it like the ability to add custom behavior to third party Rake tasks. I asked <a href="https://twitter.com/#!/jimweirich">Jim Weirich</a>, the creator of Rake and he was <a href="http://www.quora.com/Ruby-programming-language/Why-did-Rake-choose-to-treat-a-re-definition-as-a-multiple-definition-instead-of-an-overwrite">of the opinion</a> that it was a useful choice. <em>We were <strong>not</strong> aware of this particular behavior of Rake.</em></p>
 
@@ -209,39 +202,34 @@ Redefined foo target
 
 <p>Again, this can be best demonstrated with an example. Consider the following scenario. There is a paent directory with <code>Rakefile</code>, <code>zoo.rb</code> and a directory <code>subdir</code> with the file <code>bar.rb</code> inside it.</p>
 
-<p><code>zoo.rb</code> defines a Rake task <code>print_zoo</code>:
-{% codeblock lang:ruby%}</p>
+<p><code>zoo.rb</code> defines a Rake task <code>print_zoo</code>:</p>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #0099FF; font-style: italic"># zoo.rb</span>
 
-<h1 id="zoo-rb">zoo.rb</h1>
+desc <span style="color: #CC3300">&quot;prints zoo&quot;</span>
+task <span style="color: #FFCC33">:print_zoo</span> <span style="color: #006699; font-weight: bold">do</span>
+  <span style="color: #336666">puts</span> <span style="color: #CC3300">&quot;zoo &quot;</span> <span style="color: #555555">*</span> <span style="color: #FF6600">10</span>
+<span style="color: #006699; font-weight: bold">end</span>
+</pre></div>
 
-<p>desc &ldquo;prints zoo&rdquo;
-task :print_zoo do
-  puts &ldquo;zoo &rdquo; * 10
-end
-{% endcodeblock %}</p>
+<p><code>bar.rb</code> in the directory <code>subdir</code> does nothing but require <code>zoo</code> in the parent directory.</p>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #0099FF; font-style: italic">#subdir/bar.rb</span>
 
-<p><code>bar.rb</code> in the directory <code>subdir</code> does nothing but require <code>zoo</code> in the parent directory.
-{% codeblock lang:ruby %}
-#subdir/bar.rb</p>
+<span style="color: #336666">require</span> <span style="color: #336600">File</span><span style="color: #555555">.</span>dirname(<span style="color: #336666">__FILE__</span>) <span style="color: #555555">+</span> <span style="color: #CC3300">&quot;/../zoo&quot;</span>
+</pre></div>
 
-<p>require File.dirname(<strong>FILE</strong>) + &ldquo;/../zoo&rdquo;
-{% endcodeblock %}</p>
+<p>The Rakefile requires both <code>zoo.rb</code> and <code>bar.rb</code> and defines a task to show the behavior.</p>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #336666">require</span> <span style="color: #336600">File</span><span style="color: #555555">.</span>dirname(<span style="color: #336666">__FILE__</span>) <span style="color: #555555">+</span> <span style="color: #CC3300">&quot;/zoo&quot;</span>
+<span style="color: #336666">require</span> <span style="color: #336600">File</span><span style="color: #555555">.</span>dirname(<span style="color: #336666">__FILE__</span>) <span style="color: #555555">+</span> <span style="color: #CC3300">&quot;/subdir/bar&quot;</span>
 
-<p>The Rakefile requires both <code>zoo.rb</code> and <code>bar.rb</code> and defines a task to show the behavior.
-{% codeblock lang:ruby%}
-require File.dirname(<strong>FILE</strong>) + &ldquo;/zoo&rdquo;
-require File.dirname(<strong>FILE</strong>) + &ldquo;/subdir/bar&rdquo;</p>
+desc <span style="color: #CC3300">&quot;show weirdness&quot;</span>
+task <span style="color: #FFCC33">:test</span> <span style="color: #555555">=&gt;</span> <span style="color: #FFCC33">:print_zoo</span>
+</pre></div>
 
-<p>desc &ldquo;show weirdness&rdquo;
-task :test =&gt; :print_zoo
-{% endcodeblock %}</p>
-
-<p>Now if we run the <code>test</code> task:
-{% codeblock lang:console %}
-$rake test
+<p>Now if we run the <code>test</code> task:</p>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #003333">$rake</span> <span style="color: #336666">test</span>
 zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo
 zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo
-{% endcodeblock %}</p>
+</pre></div>
 
 <p>Lets take a step back and think about that. If we load Ruby files multiple times using <code>require</code> we can easily end up repeating a build step that would take 30 minutes to complete.</p>
 

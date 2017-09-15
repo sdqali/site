@@ -32,64 +32,57 @@
 
 &lt;h3 id=&#34;rake-s-redefining-behavior&#34;&gt;Rake&amp;rsquo;s redefining behavior&lt;/h3&gt;
 
-&lt;p&gt;Rake treats redefining a Task as akin to appending actions to the same Task. To see this in action, add the following to a Rakefile:
-{% codeblock lang:ruby %}
-task :foo do
-  puts &amp;ldquo;foo &amp;rdquo; * 10
-end&lt;/p&gt;
+&lt;p&gt;Rake treats redefining a Task as akin to appending actions to the same Task. To see this in action, add the following to a Rakefile:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;task &lt;span style=&#34;color: #FFCC33&#34;&gt;:foo&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;do&lt;/span&gt;
+  &lt;span style=&#34;color: #336666&#34;&gt;puts&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;foo &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;10&lt;/span&gt;
+&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;end&lt;/span&gt;
 
-&lt;p&gt;task :foo do
-  puts &amp;ldquo;bar &amp;rdquo; * 10
-end
-{% endcodeblock %}&lt;/p&gt;
+task &lt;span style=&#34;color: #FFCC33&#34;&gt;:foo&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;do&lt;/span&gt;
+  &lt;span style=&#34;color: #336666&#34;&gt;puts&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;bar &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;10&lt;/span&gt;
+&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;end&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;If you run the &lt;code&gt;foo&lt;/code&gt; task, you would get:
-{% codeblock lang:console %}
-$rake foo
+&lt;p&gt;If you run the &lt;code&gt;foo&lt;/code&gt; task, you would get:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #003333&#34;&gt;$rake&lt;/span&gt; foo
 foo foo foo foo foo foo foo foo foo foo
 bar bar bar bar bar bar bar bar bar bar
-{% endcodeblock %}&lt;/p&gt;
+&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;This is far removed from behaviors of Ruby and &lt;a href=&#34;http://www.gnu.org/software/make/&#34; title=&#34;Make&#34;&gt;Make&lt;/a&gt;, the tools that inspired Rake. For clarity&amp;rsquo;s sake, this is how Ruby treats redefinitions:
-{% codeblock lang:ruby %}
-#!/usr/bin/env ruby
-#example.rb&lt;/p&gt;
+&lt;p&gt;This is far removed from behaviors of Ruby and &lt;a href=&#34;http://www.gnu.org/software/make/&#34; title=&#34;Make&#34;&gt;Make&lt;/a&gt;, the tools that inspired Rake. For clarity&amp;rsquo;s sake, this is how Ruby treats redefinitions:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;#!/usr/bin/env ruby&lt;/span&gt;
+&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;#example.rb&lt;/span&gt;
 
-&lt;p&gt;def example
-  puts &amp;ldquo;example &amp;rdquo; * 10
-end&lt;/p&gt;
+&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;example&lt;/span&gt;
+  &lt;span style=&#34;color: #336666&#34;&gt;puts&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;example &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;10&lt;/span&gt;
+&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;end&lt;/span&gt;
 
-&lt;p&gt;def example
-  puts &amp;ldquo;foobar &amp;rdquo; * 10
-end&lt;/p&gt;
+&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;example&lt;/span&gt;
+  &lt;span style=&#34;color: #336666&#34;&gt;puts&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;foobar &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;10&lt;/span&gt;
+&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;end&lt;/span&gt;
 
-&lt;p&gt;example
-{% endcodeblock %}&lt;/p&gt;
+example
+&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;When run:
-{% codeblock lang:console %}
-$ruby example.rb
+&lt;p&gt;When run:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #003333&#34;&gt;$ruby&lt;/span&gt; example.rb
 foobar foobar foobar foobar foobar foobar foobar foobar foobar foobar
-{% endcodeblock %}&lt;/p&gt;
+&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;Lets take a look at Make&amp;rsquo;s behavior. This is how Make treats redefinitions:
-{% codeblock lang:make %}&lt;/p&gt;
+&lt;p&gt;Lets take a look at Make&amp;rsquo;s behavior. This is how Make treats redefinitions:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;# Example Makefile&lt;/span&gt;
 
-&lt;h1 id=&#34;example-makefile&#34;&gt;Example Makefile&lt;/h1&gt;
-
-&lt;p&gt;foo:
+&lt;span style=&#34;color: #CC00FF&#34;&gt;foo&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;:&lt;/span&gt;
     @echo Foo target
-foo:
+&lt;span style=&#34;color: #CC00FF&#34;&gt;foo&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;:&lt;/span&gt;
     @echo Redefined foo target
-{% endcodeblock %}&lt;/p&gt;
+&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;When run:
-{% codeblock lang:console %}
-$make foo
-Makefile:6: warning: overriding commands for target &lt;code&gt;foo&#39;
-Makefile:4: warning: ignoring old commands for target&lt;/code&gt;foo&amp;rsquo;
+&lt;p&gt;When run:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #003333&#34;&gt;$make&lt;/span&gt; foo
+Makefile:6: warning: overriding commands &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;for&lt;/span&gt; target &lt;span style=&#34;color: #CC3300&#34;&gt;`&lt;/span&gt;foo&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;&lt;/span&gt;
+&lt;span style=&#34;color: #CC3300&#34;&gt;Makefile:4: warning: ignoring old commands for target `foo&amp;#39;&lt;/span&gt;
 Redefined foo target
-{% endcodeblock %}&lt;/p&gt;
+&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;While this behavior of Rake may seem weird, there are some advantages to it like the ability to add custom behavior to third party Rake tasks. I asked &lt;a href=&#34;https://twitter.com/#!/jimweirich&#34;&gt;Jim Weirich&lt;/a&gt;, the creator of Rake and he was &lt;a href=&#34;http://www.quora.com/Ruby-programming-language/Why-did-Rake-choose-to-treat-a-re-definition-as-a-multiple-definition-instead-of-an-overwrite&#34;&gt;of the opinion&lt;/a&gt; that it was a useful choice. &lt;em&gt;We were &lt;strong&gt;not&lt;/strong&gt; aware of this particular behavior of Rake.&lt;/em&gt;&lt;/p&gt;
 
@@ -101,39 +94,34 @@ Redefined foo target
 
 &lt;p&gt;Again, this can be best demonstrated with an example. Consider the following scenario. There is a paent directory with &lt;code&gt;Rakefile&lt;/code&gt;, &lt;code&gt;zoo.rb&lt;/code&gt; and a directory &lt;code&gt;subdir&lt;/code&gt; with the file &lt;code&gt;bar.rb&lt;/code&gt; inside it.&lt;/p&gt;
 
-&lt;p&gt;&lt;code&gt;zoo.rb&lt;/code&gt; defines a Rake task &lt;code&gt;print_zoo&lt;/code&gt;:
-{% codeblock lang:ruby%}&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;zoo.rb&lt;/code&gt; defines a Rake task &lt;code&gt;print_zoo&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;# zoo.rb&lt;/span&gt;
 
-&lt;h1 id=&#34;zoo-rb&#34;&gt;zoo.rb&lt;/h1&gt;
+desc &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;prints zoo&amp;quot;&lt;/span&gt;
+task &lt;span style=&#34;color: #FFCC33&#34;&gt;:print_zoo&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;do&lt;/span&gt;
+  &lt;span style=&#34;color: #336666&#34;&gt;puts&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;zoo &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;10&lt;/span&gt;
+&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;end&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;desc &amp;ldquo;prints zoo&amp;rdquo;
-task :print_zoo do
-  puts &amp;ldquo;zoo &amp;rdquo; * 10
-end
-{% endcodeblock %}&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;bar.rb&lt;/code&gt; in the directory &lt;code&gt;subdir&lt;/code&gt; does nothing but require &lt;code&gt;zoo&lt;/code&gt; in the parent directory.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;#subdir/bar.rb&lt;/span&gt;
 
-&lt;p&gt;&lt;code&gt;bar.rb&lt;/code&gt; in the directory &lt;code&gt;subdir&lt;/code&gt; does nothing but require &lt;code&gt;zoo&lt;/code&gt; in the parent directory.
-{% codeblock lang:ruby %}
-#subdir/bar.rb&lt;/p&gt;
+&lt;span style=&#34;color: #336666&#34;&gt;require&lt;/span&gt; &lt;span style=&#34;color: #336600&#34;&gt;File&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;dirname(&lt;span style=&#34;color: #336666&#34;&gt;__FILE__&lt;/span&gt;) &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;/../zoo&amp;quot;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;require File.dirname(&lt;strong&gt;FILE&lt;/strong&gt;) + &amp;ldquo;/../zoo&amp;rdquo;
-{% endcodeblock %}&lt;/p&gt;
+&lt;p&gt;The Rakefile requires both &lt;code&gt;zoo.rb&lt;/code&gt; and &lt;code&gt;bar.rb&lt;/code&gt; and defines a task to show the behavior.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #336666&#34;&gt;require&lt;/span&gt; &lt;span style=&#34;color: #336600&#34;&gt;File&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;dirname(&lt;span style=&#34;color: #336666&#34;&gt;__FILE__&lt;/span&gt;) &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;/zoo&amp;quot;&lt;/span&gt;
+&lt;span style=&#34;color: #336666&#34;&gt;require&lt;/span&gt; &lt;span style=&#34;color: #336600&#34;&gt;File&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;dirname(&lt;span style=&#34;color: #336666&#34;&gt;__FILE__&lt;/span&gt;) &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;/subdir/bar&amp;quot;&lt;/span&gt;
 
-&lt;p&gt;The Rakefile requires both &lt;code&gt;zoo.rb&lt;/code&gt; and &lt;code&gt;bar.rb&lt;/code&gt; and defines a task to show the behavior.
-{% codeblock lang:ruby%}
-require File.dirname(&lt;strong&gt;FILE&lt;/strong&gt;) + &amp;ldquo;/zoo&amp;rdquo;
-require File.dirname(&lt;strong&gt;FILE&lt;/strong&gt;) + &amp;ldquo;/subdir/bar&amp;rdquo;&lt;/p&gt;
+desc &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;show weirdness&amp;quot;&lt;/span&gt;
+task &lt;span style=&#34;color: #FFCC33&#34;&gt;:test&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #FFCC33&#34;&gt;:print_zoo&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;desc &amp;ldquo;show weirdness&amp;rdquo;
-task :test =&amp;gt; :print_zoo
-{% endcodeblock %}&lt;/p&gt;
-
-&lt;p&gt;Now if we run the &lt;code&gt;test&lt;/code&gt; task:
-{% codeblock lang:console %}
-$rake test
+&lt;p&gt;Now if we run the &lt;code&gt;test&lt;/code&gt; task:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #003333&#34;&gt;$rake&lt;/span&gt; &lt;span style=&#34;color: #336666&#34;&gt;test&lt;/span&gt;
 zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo
 zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo
-{% endcodeblock %}&lt;/p&gt;
+&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Lets take a step back and think about that. If we load Ruby files multiple times using &lt;code&gt;require&lt;/code&gt; we can easily end up repeating a build step that would take 30 minutes to complete.&lt;/p&gt;
 
