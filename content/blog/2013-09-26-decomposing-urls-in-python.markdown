@@ -12,7 +12,7 @@ tags:
 ---
 Python's `urlparse` module breaks down URLs in to components. It supports all the URL schemes specified in RFC 3986 [^1].
 
-```bash linenos:false
+```bash
 >>> import urlparse
 >>>
 >>> urlparse.urlparse("https://example.com/foo?param=bar")
