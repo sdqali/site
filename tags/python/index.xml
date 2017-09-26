@@ -5,8 +5,65 @@
     <link>https://sdqali.in/tags/python/?utm_source=site&amp;utm_medium=feed</link>
     <description>Recent content in Python on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
-    <lastBuildDate>Mon, 07 Oct 2013 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 25 Sep 2017 21:22:39 -0700</lastBuildDate>
     <atom:link href="/tags/python/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Python URL manipulation revisited</title>
+      <link>https://sdqali.in/blog/2017/09/25/python-url-manipulation-revisited/?utm_source=site&amp;utm_medium=feed</link>
+      <pubDate>Mon, 25 Sep 2017 21:22:39 -0700</pubDate>
+      
+      <guid>https://sdqali.in/blog/2017/09/25/python-url-manipulation-revisited/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;My &lt;a href=&#34;https://sdqali.in/blog/2017/08/17/uploading-a-standalone-artifact-to-nexus-3/&#34;&gt;last blog post&lt;/a&gt; about publishing standalone files to Nexus repositories prompted me to revisit URL manipulation in Python. When I did this &lt;a href=&#34;https://sdqali.in/blog/2013/09/26/decomposing-urls-in-python/&#34;&gt;the last time&lt;/a&gt;, I used Python stand library&amp;rsquo;s &lt;code&gt;urlparse&lt;/code&gt; and it did the job. This time around, I needed to do a different kind of manipulation. Given a URL, I had to set credentials on it.&lt;/p&gt;
+
+&lt;p&gt;I started at &lt;code&gt;urlparse&lt;/code&gt; and soon realized that Python3 moved this module to &lt;a href=&#34;https://docs.python.org/3/library/urllib.parse.html&#34;&gt;urllib.parse&lt;/a&gt;. That is not too bad, I thought. After playing around with it, it became clear that &lt;code&gt;urllib.parse&lt;/code&gt; can&amp;rsquo;t manipulate credentials in a URL.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;In [&lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt;]: &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color: #00CCFF; font-weight: bold&#34;&gt;urllib&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;import&lt;/span&gt; parse
+
+In [&lt;span style=&#34;color: #FF6600&#34;&gt;2&lt;/span&gt;]: url &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; parse&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;urlparse(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;http://example.com&amp;#39;&lt;/span&gt;)
+
+In [&lt;span style=&#34;color: #FF6600&#34;&gt;3&lt;/span&gt;]: &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;print&lt;/span&gt;(url)
+ParseResult(scheme&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;http&amp;#39;&lt;/span&gt;, netloc&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;example.com&amp;#39;&lt;/span&gt;, path&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;, params&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;, query&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;, fragment&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;)
+
+In [&lt;span style=&#34;color: #FF6600&#34;&gt;4&lt;/span&gt;]: url&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;username &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;username&amp;quot;&lt;/span&gt;
+&lt;span style=&#34;color: #555555&#34;&gt;---------------------------------------------------------------------------&lt;/span&gt;
+&lt;span style=&#34;color: #CC0000; font-weight: bold&#34;&gt;AttributeError&lt;/span&gt;                            Traceback (most recent call last)
+&lt;span style=&#34;color: #555555&#34;&gt;&amp;lt;&lt;/span&gt;ipython&lt;span style=&#34;color: #555555&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #336666&#34;&gt;input&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;4&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;60e52&lt;/span&gt;fe02603&lt;span style=&#34;color: #555555&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;&amp;lt;&lt;/span&gt;module&lt;span style=&#34;color: #555555&#34;&gt;&amp;gt;&lt;/span&gt;()
+&lt;span style=&#34;color: #555555&#34;&gt;----&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt; url&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;username &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;username&amp;quot;&lt;/span&gt;
+
+&lt;span style=&#34;color: #CC0000; font-weight: bold&#34;&gt;AttributeError&lt;/span&gt;: can&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;t set attribute&lt;/span&gt;
+
+In [&lt;span style=&#34;color: #FF6600&#34;&gt;5&lt;/span&gt;]: url&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;password &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;password&amp;quot;&lt;/span&gt;
+&lt;span style=&#34;color: #555555&#34;&gt;---------------------------------------------------------------------------&lt;/span&gt;
+&lt;span style=&#34;color: #CC0000; font-weight: bold&#34;&gt;AttributeError&lt;/span&gt;                            Traceback (most recent call last)
+&lt;span style=&#34;color: #555555&#34;&gt;&amp;lt;&lt;/span&gt;ipython&lt;span style=&#34;color: #555555&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #336666&#34;&gt;input&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;5&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;4&lt;/span&gt;f64c7192b99&lt;span style=&#34;color: #555555&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;&amp;lt;&lt;/span&gt;module&lt;span style=&#34;color: #555555&#34;&gt;&amp;gt;&lt;/span&gt;()
+&lt;span style=&#34;color: #555555&#34;&gt;----&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt; url&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;password &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;password&amp;quot;&lt;/span&gt;
+
+&lt;span style=&#34;color: #CC0000; font-weight: bold&#34;&gt;AttributeError&lt;/span&gt;: can&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;t set attribute&lt;/span&gt;
+
+In [&lt;span style=&#34;color: #FF6600&#34;&gt;6&lt;/span&gt;]: url&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;username &lt;span style=&#34;color: #555555&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color: #336666&#34;&gt;None&lt;/span&gt;
+Out[&lt;span style=&#34;color: #FF6600&#34;&gt;6&lt;/span&gt;]: &lt;span style=&#34;color: #336666&#34;&gt;True&lt;/span&gt;
+
+In [&lt;span style=&#34;color: #FF6600&#34;&gt;7&lt;/span&gt;]: url&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;password &lt;span style=&#34;color: #555555&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color: #336666&#34;&gt;None&lt;/span&gt;
+Out[&lt;span style=&#34;color: #FF6600&#34;&gt;7&lt;/span&gt;]: &lt;span style=&#34;color: #336666&#34;&gt;True&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;After spending time with various URL manipulation libraries in Python, &lt;a href=&#34;https://github.com/gruns/furl&#34;&gt;furl&lt;/a&gt; was the only library that I found to be capable of this seemingly simple and common enough operation.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;In [&lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt;]: &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color: #00CCFF; font-weight: bold&#34;&gt;furl&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;import&lt;/span&gt; furl
+
+In [&lt;span style=&#34;color: #FF6600&#34;&gt;2&lt;/span&gt;]: url &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; furl(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;http://example.com&amp;#39;&lt;/span&gt;)
+
+In [&lt;span style=&#34;color: #FF6600&#34;&gt;3&lt;/span&gt;]: url
+Out[&lt;span style=&#34;color: #FF6600&#34;&gt;3&lt;/span&gt;]: furl(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;http://example.com&amp;#39;&lt;/span&gt;)
+
+In [&lt;span style=&#34;color: #FF6600&#34;&gt;4&lt;/span&gt;]: url&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;password &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;password&amp;quot;&lt;/span&gt;
+
+In [&lt;span style=&#34;color: #FF6600&#34;&gt;5&lt;/span&gt;]: url&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;username &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;user&amp;quot;&lt;/span&gt;
+
+In [&lt;span style=&#34;color: #FF6600&#34;&gt;6&lt;/span&gt;]: url&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;tostr()
+Out[&lt;span style=&#34;color: #FF6600&#34;&gt;6&lt;/span&gt;]: &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;http://user:password@example.com&amp;#39;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+</description>
+    </item>
     
     <item>
       <title>Python Hack - Dynamically override an object&#39;s attribute</title>
