@@ -135,108 +135,70 @@
 <h2 id="features-end-point">Features end point</h2>
 
 <p>The library expects feature flags to be provided to <code>featureFlagsProvider</code> in the following format:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>[
-    { <span style="color: #330099; font-weight: bold">&quot;key&quot;</span>: <span style="color: #CC3300">&quot;...&quot;</span>, <span style="color: #330099; font-weight: bold">&quot;active&quot;</span>: <span style="color: #CC3300">&quot;...&quot;</span>, <span style="color: #330099; font-weight: bold">&quot;name&quot;</span>: <span style="color: #CC3300">&quot;...&quot;</span>, <span style="color: #330099; font-weight: bold">&quot;description&quot;</span>: <span style="color: #CC3300">&quot;...&quot;</span> },
-    <span style="color: #AA0000; background-color: #FFAAAA">...</span>
-]
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">[
+    { <span style="color:#309;font-weight:bold">&#34;key&#34;</span>: <span style="color:#c30">&#34;...&#34;</span>, <span style="color:#309;font-weight:bold">&#34;active&#34;</span>: <span style="color:#c30">&#34;...&#34;</span>, <span style="color:#309;font-weight:bold">&#34;name&#34;</span>: <span style="color:#c30">&#34;...&#34;</span>, <span style="color:#309;font-weight:bold">&#34;description&#34;</span>: <span style="color:#c30">&#34;...&#34;</span> },
+    <span style="color:#a00;background-color:#faa">...</span>
+]</code></pre></div>
 <p>The <code>FeatureController</code> will use the <code>FeatureRepository</code> to expose this will look like this:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@RestController</span>
-<span style="color: #9999FF">@RequestMapping</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;/features&quot;</span><span style="color: #555555">)</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">FeatureController</span> <span style="color: #555555">{</span>
-  <span style="color: #9999FF">@Autowired</span>
-  FeatureRepository featureRepository<span style="color: #555555">;</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@RestController</span>
+<span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span><span style="color:#c30">&#34;/features&#34;</span><span style="color:#555">)</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">FeatureController</span> <span style="color:#555">{</span>
+  <span style="color:#99f">@Autowired</span>
+  FeatureRepository featureRepository<span style="color:#555">;</span>
 
-  <span style="color: #9999FF">@RequestMapping</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;&quot;</span><span style="color: #555555">)</span>
-  <span style="color: #006699; font-weight: bold">public</span> List<span style="color: #555555">&lt;</span>Map<span style="color: #555555">&gt;</span> <span style="color: #CC00FF">features</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">return</span> featureRepository<span style="color: #555555">.</span><span style="color: #330099">allFeatures</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">entrySet</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">stream</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">map</span><span style="color: #555555">(</span>entry <span style="color: #555555">-&gt;</span> <span style="color: #006699; font-weight: bold">new</span> HashMap<span style="color: #555555">&lt;</span>String<span style="color: #555555">,</span> Object<span style="color: #555555">&gt;()</span> <span style="color: #555555">{</span>
-          <span style="color: #555555">{</span>
-            put<span style="color: #555555">(</span><span style="color: #CC3300">&quot;key&quot;</span><span style="color: #555555">,</span> entry<span style="color: #555555">.</span><span style="color: #330099">getKey</span><span style="color: #555555">());</span>
-            put<span style="color: #555555">(</span><span style="color: #CC3300">&quot;active&quot;</span><span style="color: #555555">,</span> entry<span style="color: #555555">.</span><span style="color: #330099">getValue</span><span style="color: #555555">());</span>
-            put<span style="color: #555555">(</span><span style="color: #CC3300">&quot;name&quot;</span><span style="color: #555555">,</span> entry<span style="color: #555555">.</span><span style="color: #330099">getKey</span><span style="color: #555555">());</span>
-            put<span style="color: #555555">(</span><span style="color: #CC3300">&quot;description&quot;</span><span style="color: #555555">,</span> entry<span style="color: #555555">.</span><span style="color: #330099">getKey</span><span style="color: #555555">());</span>
-          <span style="color: #555555">}</span>
-        <span style="color: #555555">})</span>
-        <span style="color: #555555">.</span><span style="color: #330099">collect</span><span style="color: #555555">(</span>Collectors<span style="color: #555555">.</span><span style="color: #330099">toList</span><span style="color: #555555">());</span>
-  <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+  <span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span><span style="color:#c30">&#34;&#34;</span><span style="color:#555">)</span>
+  <span style="color:#069;font-weight:bold">public</span> List<span style="color:#555">&lt;</span>Map<span style="color:#555">&gt;</span> <span style="color:#c0f">features</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">return</span> featureRepository<span style="color:#555">.</span><span style="color:#309">allFeatures</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">entrySet</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">stream</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">map</span><span style="color:#555">(</span>entry <span style="color:#555">-&gt;</span> <span style="color:#069;font-weight:bold">new</span> HashMap<span style="color:#555">&lt;</span>String<span style="color:#555">,</span> Object<span style="color:#555">&gt;()</span> <span style="color:#555">{</span>
+          <span style="color:#555">{</span>
+            put<span style="color:#555">(</span><span style="color:#c30">&#34;key&#34;</span><span style="color:#555">,</span> entry<span style="color:#555">.</span><span style="color:#309">getKey</span><span style="color:#555">());</span>
+            put<span style="color:#555">(</span><span style="color:#c30">&#34;active&#34;</span><span style="color:#555">,</span> entry<span style="color:#555">.</span><span style="color:#309">getValue</span><span style="color:#555">());</span>
+            put<span style="color:#555">(</span><span style="color:#c30">&#34;name&#34;</span><span style="color:#555">,</span> entry<span style="color:#555">.</span><span style="color:#309">getKey</span><span style="color:#555">());</span>
+            put<span style="color:#555">(</span><span style="color:#c30">&#34;description&#34;</span><span style="color:#555">,</span> entry<span style="color:#555">.</span><span style="color:#309">getKey</span><span style="color:#555">());</span>
+          <span style="color:#555">}</span>
+        <span style="color:#555">})</span>
+        <span style="color:#555">.</span><span style="color:#309">collect</span><span style="color:#555">(</span>Collectors<span style="color:#555">.</span><span style="color:#309">toList</span><span style="color:#555">());</span>
+  <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>We are using the double brace initialization technique to construct the map representing each feature. Initializing a map given a set of keys and values is still an exercise that requires a bunch of <a href="https://minborgsjavapot.blogspot.com/2014/12/java-8-initializing-maps-in-smartest-way.html">boiler plate</a> code in Java. You can get around this by using the convenient ImmutableMap.of() provided by <a href="https://mvnrepository.com/artifact/com.google.collections/google-collections/1.0">Google Collections</a>.</p>
 
 <p>It is also important to change our <code>AppConfig</code> to initialize the instance of <code>Featurerepository</code> as a bean.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@Configuration</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">AppConfig</span> <span style="color: #006699; font-weight: bold">extends</span> WebMvcConfigurerAdapter <span style="color: #555555">{</span>
-  <span style="color: #9999FF">@Autowired</span>
-  Environment env<span style="color: #555555">;</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Configuration</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">AppConfig</span> <span style="color:#069;font-weight:bold">extends</span> WebMvcConfigurerAdapter <span style="color:#555">{</span>
+  <span style="color:#99f">@Autowired</span>
+  Environment env<span style="color:#555">;</span>
 
-  <span style="color: #0099FF; font-style: italic">// ...</span>
-
-  <span style="color: #9999FF">@Bean</span>
-  <span style="color: #006699; font-weight: bold">public</span> FeatureRepository <span style="color: #CC00FF">featureRepository</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">new</span> FeatureRepository<span style="color: #555555">(</span>env<span style="color: #555555">);</span>
-  <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+  <span style="color:#09f;font-style:italic">// ...
+</span><span style="color:#09f;font-style:italic"></span>
+  <span style="color:#99f">@Bean</span>
+  <span style="color:#069;font-weight:bold">public</span> FeatureRepository <span style="color:#c0f">featureRepository</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">new</span> FeatureRepository<span style="color:#555">(</span>env<span style="color:#555">);</span>
+  <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>With this configuration, we can get the feature state from the end point:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>&gt; curl -s <span style="color: #CC3300">&quot;http://localhost:8080/features&quot;</span> | jq .
-<span style="color: #555555">[</span>
-  <span style="color: #555555">{</span>
-    <span style="color: #CC3300">&quot;name&quot;</span>: <span style="color: #CC3300">&quot;feature.foo&quot;</span>,
-    <span style="color: #CC3300">&quot;active&quot;</span>: false,
-    <span style="color: #CC3300">&quot;description&quot;</span>: <span style="color: #CC3300">&quot;feature.foo&quot;</span>,
-    <span style="color: #CC3300">&quot;key&quot;</span>: <span style="color: #CC3300">&quot;feature.foo&quot;</span>
-  <span style="color: #555555">}</span>,
-  <span style="color: #555555">{</span>
-    <span style="color: #CC3300">&quot;name&quot;</span>: <span style="color: #CC3300">&quot;feature.hello&quot;</span>,
-    <span style="color: #CC3300">&quot;active&quot;</span>: true,
-    <span style="color: #CC3300">&quot;description&quot;</span>: <span style="color: #CC3300">&quot;feature.hello&quot;</span>,
-    <span style="color: #CC3300">&quot;key&quot;</span>: <span style="color: #CC3300">&quot;feature.hello&quot;</span>
-  <span style="color: #555555">}</span>
-<span style="color: #555555">]</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">&gt; curl -s <span style="color:#c30">&#34;http://localhost:8080/features&#34;</span> | jq .
+<span style="color:#555">[</span>
+  <span style="color:#555">{</span>
+    <span style="color:#c30">&#34;name&#34;</span>: <span style="color:#c30">&#34;feature.foo&#34;</span>,
+    <span style="color:#c30">&#34;active&#34;</span>: false,
+    <span style="color:#c30">&#34;description&#34;</span>: <span style="color:#c30">&#34;feature.foo&#34;</span>,
+    <span style="color:#c30">&#34;key&#34;</span>: <span style="color:#c30">&#34;feature.foo&#34;</span>
+  <span style="color:#555">}</span>,
+  <span style="color:#555">{</span>
+    <span style="color:#c30">&#34;name&#34;</span>: <span style="color:#c30">&#34;feature.hello&#34;</span>,
+    <span style="color:#c30">&#34;active&#34;</span>: true,
+    <span style="color:#c30">&#34;description&#34;</span>: <span style="color:#c30">&#34;feature.hello&#34;</span>,
+    <span style="color:#c30">&#34;key&#34;</span>: <span style="color:#c30">&#34;feature.hello&#34;</span>
+  <span style="color:#555">}</span>
+<span style="color:#555">]</span></code></pre></div>
 <p>For our use case, we were comfortable re-using the feature key as the name and description of the feature. You may want to capture these meta data in your application configuration and expose this using Spring Boot’s <a href="http://docs.spring.io/spring-boot/docs/1.1.7.RELEASE/api/org/springframework/boot/context/properties/ConfigurationProperties.html">ConfigurationProperties</a>. You can find an example of how use structured configurations in <a href="https://github.com/sdqali/config-properties">my example project</a>.</p>
 
 <p>In the next part of this <a href="/series/feature-toggles/">series</a>, we will take a look at how to expose the feature information as an <a href="http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-endpoints.html">admin end point</a>.</p>
             <p class="comments">
   If you have questions or comments about this blog post, you can get in touch with me on Twitter <a href="https://twitter.com/sdqali">@sdqali</a>.
 </p>
-
-            <div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Found this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and explanations for specific Java, Spring and other programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
 
           </div>
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">

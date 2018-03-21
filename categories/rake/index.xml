@@ -2,134 +2,25 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Rake on {code that works}</title>
-    <link>https://sdqali.in/categories/rake/?utm_source=site&amp;utm_medium=feed</link>
+    <link>https://sdqali.in/categories/rake/</link>
     <description>Recent content in Rake on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
     <lastBuildDate>Wed, 06 Jun 2012 00:00:00 +0000</lastBuildDate>
-    <atom:link href="/categories/rake/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    
+	<atom:link href="https://sdqali.in/categories/rake/index.xml" rel="self" type="application/rss+xml" />
+    
     
     <item>
       <title>Know Your Tools - Don&#39;t Shoot Yourself in the Foot</title>
-      <link>https://sdqali.in/blog/2012/06/06/know-your-tools---dont-shoot-yourself-in-the-foot/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sdqali.in/blog/2012/06/06/know-your-tools---dont-shoot-yourself-in-the-foot/</link>
       <pubDate>Wed, 06 Jun 2012 00:00:00 +0000</pubDate>
       
-      <guid>https://sdqali.in/blog/2012/06/06/know-your-tools---dont-shoot-yourself-in-the-foot/?utm_source=site&amp;utm_medium=feed</guid>
+      <guid>https://sdqali.in/blog/2012/06/06/know-your-tools---dont-shoot-yourself-in-the-foot/</guid>
       <description>&lt;p&gt;Imagine this - Your build is taking forever. You put in a lot of effort and restructure it. Things improve a lot, but it is far from where you would like it to be. You try hard to identify things that could improve the build time, but fail. You blame the platforms you use, you blame Ruby and you even blame the relative position of the Moon to Venus. Slowly you learn to accept the slow build as a part of your life. Months later a new developer joins the team and proves that there is a bug in the build scripts that causes certain tasks to be run twice.&lt;/p&gt;
 
 &lt;p&gt;This happened to us recently, and the subsequent debugging/postmortem revealed that there were things about our tools that we simply did not know.&lt;/p&gt;
 
-&lt;p&gt;&lt;/p&gt;
-
-&lt;h2 id=&#34;a-bit-of-context&#34;&gt;A bit of context&lt;/h2&gt;
-
-&lt;p&gt;Ours is a Java code base, but we use Rake for our build scripts. We have been using Ruby 1.8.7 and Rake 0.8.7. We never got around to upgrading the Ruby versions due to a number of reasons including one of our gems breaking on 1.9.3 and more importantly our laziness. Well, laziness will cause you damage in the end and that is what happened to us.&lt;/p&gt;
-
-&lt;h2 id=&#34;what-is-the-issue&#34;&gt;What is the issue ?&lt;/h2&gt;
-
-&lt;h3 id=&#34;that-step-is-not-running-multiple-times-is-it&#34;&gt;&amp;ldquo;That step is not running multiple times, is it?&amp;rdquo;&lt;/h3&gt;
-
-&lt;p&gt;While debugging our build, our new developer discovered that certain tasks that take up 10 minutes to complete were being executed twice. We soon started trying to figure out where in the chain of Rake task calls did we end up repeating a task. There were none. After some time, we would learn that we did not know enough about Rake and Ruby 1.8.7&lt;/p&gt;
-
-&lt;h3 id=&#34;rake-s-redefining-behavior&#34;&gt;Rake&amp;rsquo;s redefining behavior&lt;/h3&gt;
-
-&lt;p&gt;Rake treats redefining a Task as akin to appending actions to the same Task. To see this in action, add the following to a Rakefile:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;task &lt;span style=&#34;color: #FFCC33&#34;&gt;:foo&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;do&lt;/span&gt;
-  &lt;span style=&#34;color: #336666&#34;&gt;puts&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;foo &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;10&lt;/span&gt;
-&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;end&lt;/span&gt;
-
-task &lt;span style=&#34;color: #FFCC33&#34;&gt;:foo&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;do&lt;/span&gt;
-  &lt;span style=&#34;color: #336666&#34;&gt;puts&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;bar &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;10&lt;/span&gt;
-&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;end&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;If you run the &lt;code&gt;foo&lt;/code&gt; task, you would get:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #003333&#34;&gt;$rake&lt;/span&gt; foo
-foo foo foo foo foo foo foo foo foo foo
-bar bar bar bar bar bar bar bar bar bar
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;This is far removed from behaviors of Ruby and &lt;a href=&#34;http://www.gnu.org/software/make/&#34; title=&#34;Make&#34;&gt;Make&lt;/a&gt;, the tools that inspired Rake. For clarity&amp;rsquo;s sake, this is how Ruby treats redefinitions:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;#!/usr/bin/env ruby&lt;/span&gt;
-&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;#example.rb&lt;/span&gt;
-
-&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;example&lt;/span&gt;
-  &lt;span style=&#34;color: #336666&#34;&gt;puts&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;example &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;10&lt;/span&gt;
-&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;end&lt;/span&gt;
-
-&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;example&lt;/span&gt;
-  &lt;span style=&#34;color: #336666&#34;&gt;puts&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;foobar &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;10&lt;/span&gt;
-&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;end&lt;/span&gt;
-
-example
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;When run:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #003333&#34;&gt;$ruby&lt;/span&gt; example.rb
-foobar foobar foobar foobar foobar foobar foobar foobar foobar foobar
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;Lets take a look at Make&amp;rsquo;s behavior. This is how Make treats redefinitions:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;# Example Makefile&lt;/span&gt;
-
-&lt;span style=&#34;color: #CC00FF&#34;&gt;foo&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;:&lt;/span&gt;
-    @echo Foo target
-&lt;span style=&#34;color: #CC00FF&#34;&gt;foo&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;:&lt;/span&gt;
-    @echo Redefined foo target
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;When run:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #003333&#34;&gt;$make&lt;/span&gt; foo
-Makefile:6: warning: overriding commands &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;for&lt;/span&gt; target &lt;span style=&#34;color: #CC3300&#34;&gt;`&lt;/span&gt;foo&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;&lt;/span&gt;
-&lt;span style=&#34;color: #CC3300&#34;&gt;Makefile:4: warning: ignoring old commands for target `foo&amp;#39;&lt;/span&gt;
-Redefined foo target
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;While this behavior of Rake may seem weird, there are some advantages to it like the ability to add custom behavior to third party Rake tasks. I asked &lt;a href=&#34;https://twitter.com/#!/jimweirich&#34;&gt;Jim Weirich&lt;/a&gt;, the creator of Rake and he was &lt;a href=&#34;http://www.quora.com/Ruby-programming-language/Why-did-Rake-choose-to-treat-a-re-definition-as-a-multiple-definition-instead-of-an-overwrite&#34;&gt;of the opinion&lt;/a&gt; that it was a useful choice. &lt;em&gt;We were &lt;strong&gt;not&lt;/strong&gt; aware of this particular behavior of Rake.&lt;/em&gt;&lt;/p&gt;
-
-&lt;p&gt;Under normal situations, this behavior should not cause us trouble, as it is unlikely that we would redefine our own Rake tasks. But this combined with the next issue led to some of our build tasks running twice.&lt;/p&gt;
-
-&lt;h3 id=&#34;ruby-1-8-7-s-multiple-require-issue&#34;&gt;Ruby 1.8.7&amp;rsquo;s multiple require issue&lt;/h3&gt;
-
-&lt;p&gt;It turns out that in Ruby 1.8.7, whenever a file is &lt;code&gt;require&lt;/code&gt;d multiple times, Ruby decides whether to reload it based on the path of the file provided. So if you have the same file being required twice, but using different paths, the file will be loaded twice. If there are Rake tasks defined in that file, the effect of actions in the Rake task will be multiplied.&lt;/p&gt;
-
-&lt;p&gt;Again, this can be best demonstrated with an example. Consider the following scenario. There is a paent directory with &lt;code&gt;Rakefile&lt;/code&gt;, &lt;code&gt;zoo.rb&lt;/code&gt; and a directory &lt;code&gt;subdir&lt;/code&gt; with the file &lt;code&gt;bar.rb&lt;/code&gt; inside it.&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;zoo.rb&lt;/code&gt; defines a Rake task &lt;code&gt;print_zoo&lt;/code&gt;:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;# zoo.rb&lt;/span&gt;
-
-desc &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;prints zoo&amp;quot;&lt;/span&gt;
-task &lt;span style=&#34;color: #FFCC33&#34;&gt;:print_zoo&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;do&lt;/span&gt;
-  &lt;span style=&#34;color: #336666&#34;&gt;puts&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;zoo &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;10&lt;/span&gt;
-&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;end&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;&lt;code&gt;bar.rb&lt;/code&gt; in the directory &lt;code&gt;subdir&lt;/code&gt; does nothing but require &lt;code&gt;zoo&lt;/code&gt; in the parent directory.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;#subdir/bar.rb&lt;/span&gt;
-
-&lt;span style=&#34;color: #336666&#34;&gt;require&lt;/span&gt; &lt;span style=&#34;color: #336600&#34;&gt;File&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;dirname(&lt;span style=&#34;color: #336666&#34;&gt;__FILE__&lt;/span&gt;) &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;/../zoo&amp;quot;&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;The Rakefile requires both &lt;code&gt;zoo.rb&lt;/code&gt; and &lt;code&gt;bar.rb&lt;/code&gt; and defines a task to show the behavior.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #336666&#34;&gt;require&lt;/span&gt; &lt;span style=&#34;color: #336600&#34;&gt;File&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;dirname(&lt;span style=&#34;color: #336666&#34;&gt;__FILE__&lt;/span&gt;) &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;/zoo&amp;quot;&lt;/span&gt;
-&lt;span style=&#34;color: #336666&#34;&gt;require&lt;/span&gt; &lt;span style=&#34;color: #336600&#34;&gt;File&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;dirname(&lt;span style=&#34;color: #336666&#34;&gt;__FILE__&lt;/span&gt;) &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;/subdir/bar&amp;quot;&lt;/span&gt;
-
-desc &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;show weirdness&amp;quot;&lt;/span&gt;
-task &lt;span style=&#34;color: #FFCC33&#34;&gt;:test&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #FFCC33&#34;&gt;:print_zoo&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;Now if we run the &lt;code&gt;test&lt;/code&gt; task:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #003333&#34;&gt;$rake&lt;/span&gt; &lt;span style=&#34;color: #336666&#34;&gt;test&lt;/span&gt;
-zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo
-zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;Lets take a step back and think about that. If we load Ruby files multiple times using &lt;code&gt;require&lt;/code&gt; we can easily end up repeating a build step that would take 30 minutes to complete.&lt;/p&gt;
-
-&lt;p&gt;I must note that this issue does not happen on Ruby 1.9.3, where files are being loaded only once. All the code I showed here is available &lt;a href=&#34;https://github.com/sdqali/rake_sandbox&#34;&gt;here&lt;/a&gt;, if you want to take a closer look.&lt;/p&gt;
-
-&lt;h2 id=&#34;learning&#34;&gt;Learning&lt;/h2&gt;
-
-&lt;p&gt;This is not meant to be a criticism of Rake or Ruby. Although Rake&amp;rsquo;s behavior in this scenario looks weird, there are good reasons why Jim chose that behavior. And we should have moved to Ruby 1.9.3 anyway.  Certainly the learning is that we need to have a better understanding of the tools we use daily.&lt;/p&gt;</description>
+&lt;p&gt;&lt;/p&gt;</description>
     </item>
     
   </channel>

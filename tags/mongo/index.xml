@@ -2,87 +2,23 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Mongo on {code that works}</title>
-    <link>https://sdqali.in/tags/mongo/?utm_source=site&amp;utm_medium=feed</link>
+    <link>https://sdqali.in/tags/mongo/</link>
     <description>Recent content in Mongo on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
     <lastBuildDate>Sat, 02 Aug 2014 00:00:00 +0000</lastBuildDate>
-    <atom:link href="/tags/mongo/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    
+	<atom:link href="https://sdqali.in/tags/mongo/index.xml" rel="self" type="application/rss+xml" />
+    
     
     <item>
       <title>Importing the Yelp dataset into MongoDB</title>
-      <link>https://sdqali.in/blog/2014/08/02/importing-the-yelp-dataset-into-mongodb/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sdqali.in/blog/2014/08/02/importing-the-yelp-dataset-into-mongodb/</link>
       <pubDate>Sat, 02 Aug 2014 00:00:00 +0000</pubDate>
       
-      <guid>https://sdqali.in/blog/2014/08/02/importing-the-yelp-dataset-into-mongodb/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>&lt;p&gt;Today Yelp announced their dataset challenge &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:1&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;. The dataset they released includes data from 5 cities (Phoenix, Las Vegas, Madison, Waterloo and Edinburgh) and consists of&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;42,153 businesses&lt;/li&gt;
-&lt;li&gt;320,002 business attributes&lt;/li&gt;
-&lt;li&gt;31,617 check-in sets&lt;/li&gt;
-&lt;li&gt;252,898 users&lt;/li&gt;
-&lt;li&gt;955,999 edge social graph&lt;/li&gt;
-&lt;li&gt;403,210 tips&lt;/li&gt;
-&lt;li&gt;1,125,458 reviews&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;The data is available for public consumption, although Yelp owns any derivative dataset you create from the original &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:2&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:2&#34;&gt;2&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
-
-&lt;p&gt;The data is available as files with each line representing a JSON object. Since I am using MongoDB these days to analyze geospatial data, I wanted to convert this into an easy format that I could import into Mongo. Mongo puts a strict constraint on how a location needs to be specified - It expects a location field in a document to be an array in the format &lt;code&gt;[longitude, latitude]&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;With this in mind, the first step is to convert and transform the objects into objects that Mongo can make sense of. The following Ruby script does the job:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;#!/usr/bin/env ruby&lt;/span&gt;
-
-&lt;span style=&#34;color: #336666&#34;&gt;require&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;json&amp;quot;&lt;/span&gt;
-
-businesses &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #336600&#34;&gt;IO&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;readlines(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;yelp.business.json&amp;quot;&lt;/span&gt;)&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;map &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;do&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;|&lt;/span&gt;line&lt;span style=&#34;color: #555555&#34;&gt;|&lt;/span&gt;
-  b &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #336600&#34;&gt;JSON&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;parse(line)
-  b&lt;span style=&#34;color: #555555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;location&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; {
-    &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;type&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Point&amp;quot;&lt;/span&gt;,
-    &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;coordinates&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;[&lt;/span&gt;b&lt;span style=&#34;color: #555555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;longitude&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;]&lt;/span&gt;, b&lt;span style=&#34;color: #555555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;latitude&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;]]&lt;/span&gt;
-  }
-  b
-&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;end&lt;/span&gt;
-&lt;span style=&#34;color: #336600&#34;&gt;IO&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;write &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;businesses.mongo.json&amp;quot;&lt;/span&gt;, businesses&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;to_json
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;The next step is to import this data into Mongo using the &lt;code&gt;mongoimport&lt;/code&gt; tool.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;mongoimport --collection businesses --file businesses.mongo.json --jsonArray
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;We need the &lt;code&gt;--jsonArray&lt;/code&gt; parameter because our data is an array.&lt;/p&gt;
-
-&lt;p&gt;Since there are 42153 businesses, it will take some time. On my Macbook Pro, it took around 2 minutes, 10 seconds. Once the import is done, make sure that we have a Geospatial index on the &lt;code&gt;location&lt;/code&gt; field.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;db.businesses.ensureIndex({location&lt;span style=&#34;color: #555555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;2dsphere&amp;quot;&lt;/span&gt;})
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;Once the indexing is done, we can use Mongo&amp;rsquo;s Geospatial queries to find interesting things. As an example, here we look up all the restaurants within 1 kilometer distance from downtown Phoenix.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;db.businesses.find({
-  location&lt;span style=&#34;color: #555555&#34;&gt;:&lt;/span&gt; {
-    $near&lt;span style=&#34;color: #555555&#34;&gt;:&lt;/span&gt; {
-      $geometry&lt;span style=&#34;color: #555555&#34;&gt;:&lt;/span&gt; {
-	type&lt;span style=&#34;color: #555555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Point&amp;quot;&lt;/span&gt;,
-	coordinates&lt;span style=&#34;color: #555555&#34;&gt;:&lt;/span&gt; [&lt;span style=&#34;color: #555555&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;112.0667&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;33.4500&lt;/span&gt;]
-      },
-      $maxDistance&lt;span style=&#34;color: #555555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;1000&lt;/span&gt;
-    }
-  }
-})
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;Happy hacking.&lt;/p&gt;
-&lt;div class=&#34;footnotes&#34;&gt;
-
-&lt;hr /&gt;
-
-&lt;ol&gt;
-&lt;li id=&#34;fn:1&#34;&gt;&lt;a href=&#34;http://www.yelp.com/dataset_challenge&#34;&gt;Yelp Dataset Challenge, 2014&lt;/a&gt;.
- &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:1&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;li id=&#34;fn:2&#34;&gt;DATASET CHALLENGE ACADEMIC DATASET TERMS OF USE &lt;a href=&#34;https://www.yelp.com/html/pdf/Dataset_Challenge_Academic_Dataset_Agreement.pdf&#34;&gt;Section 5, Ownership&lt;/a&gt;.
- &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:2&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/div&gt;
-</description>
+      <guid>https://sdqali.in/blog/2014/08/02/importing-the-yelp-dataset-into-mongodb/</guid>
+      <description>Today Yelp announced their dataset challenge 1. The dataset they released includes data from 5 cities (Phoenix, Las Vegas, Madison, Waterloo and Edinburgh) and consists of
+ 42,153 businesses 320,002 business attributes 31,617 check-in sets 252,898 users 955,999 edge social graph 403,210 tips 1,125,458 reviews  The data is available for public consumption, although Yelp owns any derivative dataset you create from the original 2.
+The data is available as files with each line representing a JSON object.</description>
     </item>
     
   </channel>

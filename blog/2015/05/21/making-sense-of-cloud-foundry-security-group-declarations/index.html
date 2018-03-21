@@ -123,78 +123,38 @@
 <p></p>
 
 <p>The Cloud Foundry command line tool allows the creation of security groups from JSON declarations. The <code>create-security-group</code> command works like so:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>&gt; cf create-security-group SECURITY_GROUP PATH_TO_JSON_RULES_FILE
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">&gt; cf create-security-group SECURITY_GROUP PATH_TO_JSON_RULES_FILE</code></pre></div>
 <p>The JSON file needs to declare an array of rules where each rule has the following structure:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>{
-   <span style="color: #330099; font-weight: bold">&quot;protocol&quot;</span>: <span style="color: #CC3300">&quot;tcp&quot;</span>,
-   <span style="color: #330099; font-weight: bold">&quot;destination&quot;</span>: <span style="color: #CC3300">&quot;10.244.1.18&quot;</span>,
-   <span style="color: #330099; font-weight: bold">&quot;ports&quot;</span>: <span style="color: #CC3300">&quot;3306&quot;</span>,
-   <span style="color: #330099; font-weight: bold">&quot;log&quot;</span>: <span style="color: #006699; font-weight: bold">true</span>
-}
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+   <span style="color:#309;font-weight:bold">&#34;protocol&#34;</span>: <span style="color:#c30">&#34;tcp&#34;</span>,
+   <span style="color:#309;font-weight:bold">&#34;destination&#34;</span>: <span style="color:#c30">&#34;10.244.1.18&#34;</span>,
+   <span style="color:#309;font-weight:bold">&#34;ports&#34;</span>: <span style="color:#c30">&#34;3306&#34;</span>,
+   <span style="color:#309;font-weight:bold">&#34;log&#34;</span>: <span style="color:#069;font-weight:bold">true</span>
+}</code></pre></div>
 <p>In my Cloud Foundry environment, I have a security group assigned to a <code>Space</code> with the following declaration:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>[
-  {<span style="color: #330099; font-weight: bold">&quot;protocol&quot;</span>:<span style="color: #CC3300">&quot;tcp&quot;</span>,<span style="color: #330099; font-weight: bold">&quot;destination&quot;</span>:<span style="color: #CC3300">&quot;&lt;ip-foo&gt;&quot;</span>,<span style="color: #330099; font-weight: bold">&quot;ports&quot;</span>:<span style="color: #CC3300">&quot;3306&quot;</span>},
-  {<span style="color: #330099; font-weight: bold">&quot;protocol&quot;</span>:<span style="color: #CC3300">&quot;tcp&quot;</span>,<span style="color: #330099; font-weight: bold">&quot;destination&quot;</span>:<span style="color: #CC3300">&quot;&lt;some-ip&gt;-&lt;another-ip&gt;&quot;</span>,<span style="color: #330099; font-weight: bold">&quot;ports&quot;</span>:<span style="color: #CC3300">&quot;55882&quot;</span>},
-  {<span style="color: #330099; font-weight: bold">&quot;protocol&quot;</span>:<span style="color: #CC3300">&quot;tcp&quot;</span>,<span style="color: #330099; font-weight: bold">&quot;destination&quot;</span>:<span style="color: #CC3300">&quot;&lt;ip-bar&gt;&quot;</span>,<span style="color: #330099; font-weight: bold">&quot;ports&quot;</span>:<span style="color: #CC3300">&quot;443&quot;</span>}
-]
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">[
+  {<span style="color:#309;font-weight:bold">&#34;protocol&#34;</span>:<span style="color:#c30">&#34;tcp&#34;</span>,<span style="color:#309;font-weight:bold">&#34;destination&#34;</span>:<span style="color:#c30">&#34;&lt;ip-foo&gt;&#34;</span>,<span style="color:#309;font-weight:bold">&#34;ports&#34;</span>:<span style="color:#c30">&#34;3306&#34;</span>},
+  {<span style="color:#309;font-weight:bold">&#34;protocol&#34;</span>:<span style="color:#c30">&#34;tcp&#34;</span>,<span style="color:#309;font-weight:bold">&#34;destination&#34;</span>:<span style="color:#c30">&#34;&lt;some-ip&gt;-&lt;another-ip&gt;&#34;</span>,<span style="color:#309;font-weight:bold">&#34;ports&#34;</span>:<span style="color:#c30">&#34;55882&#34;</span>},
+  {<span style="color:#309;font-weight:bold">&#34;protocol&#34;</span>:<span style="color:#c30">&#34;tcp&#34;</span>,<span style="color:#309;font-weight:bold">&#34;destination&#34;</span>:<span style="color:#c30">&#34;&lt;ip-bar&gt;&#34;</span>,<span style="color:#309;font-weight:bold">&#34;ports&#34;</span>:<span style="color:#c30">&#34;443&#34;</span>}
+]</code></pre></div>
 <p>With only 3 rules in place, it is already confusing what service each rule is for and why they are there.</p>
 
 <p>I believe this can be easily improved by allowing an extra field <code>comment</code> that provides context about each rule. With this in place, the rules will look like this:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>[
-  {<span style="color: #330099; font-weight: bold">&quot;protocol&quot;</span>:<span style="color: #CC3300">&quot;tcp&quot;</span>,<span style="color: #330099; font-weight: bold">&quot;destination&quot;</span>:<span style="color: #CC3300">&quot;&lt;ip-foo&gt;&quot;</span>,<span style="color: #330099; font-weight: bold">&quot;ports&quot;</span>:<span style="color: #CC3300">&quot;3306&quot;</span>, <span style="color: #330099; font-weight: bold">&quot;comment&quot;</span>: <span style="color: #CC3300">&quot;Allow database connection to PostgreSQL at hosted-postgres-service.com&quot;</span>},
-  {<span style="color: #330099; font-weight: bold">&quot;protocol&quot;</span>:<span style="color: #CC3300">&quot;tcp&quot;</span>,<span style="color: #330099; font-weight: bold">&quot;destination&quot;</span>:<span style="color: #CC3300">&quot;&lt;some-ip&gt;-&lt;another-ip&gt;&quot;</span>,<span style="color: #330099; font-weight: bold">&quot;ports&quot;</span>:<span style="color: #CC3300">&quot;55882&quot;</span>, <span style="color: #330099; font-weight: bold">&quot;comment&quot;</span>: <span style="color: #CC3300">&quot;Allow logging to hosted-logging-service.com&quot;</span>},
-  {<span style="color: #330099; font-weight: bold">&quot;protocol&quot;</span>:<span style="color: #CC3300">&quot;tcp&quot;</span>,<span style="color: #330099; font-weight: bold">&quot;destination&quot;</span>:<span style="color: #CC3300">&quot;&lt;ip-bar&gt;&quot;</span>,<span style="color: #330099; font-weight: bold">&quot;ports&quot;</span>:<span style="color: #CC3300">&quot;443&quot;</span>, <span style="color: #330099; font-weight: bold">&quot;comment&quot;</span>: <span style="color: #CC3300">&quot;Allow monitoring service at hosted-monitoring-service.com&quot;</span>}
-]
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">[
+  {<span style="color:#309;font-weight:bold">&#34;protocol&#34;</span>:<span style="color:#c30">&#34;tcp&#34;</span>,<span style="color:#309;font-weight:bold">&#34;destination&#34;</span>:<span style="color:#c30">&#34;&lt;ip-foo&gt;&#34;</span>,<span style="color:#309;font-weight:bold">&#34;ports&#34;</span>:<span style="color:#c30">&#34;3306&#34;</span>, <span style="color:#309;font-weight:bold">&#34;comment&#34;</span>: <span style="color:#c30">&#34;Allow database connection to PostgreSQL at hosted-postgres-service.com&#34;</span>},
+  {<span style="color:#309;font-weight:bold">&#34;protocol&#34;</span>:<span style="color:#c30">&#34;tcp&#34;</span>,<span style="color:#309;font-weight:bold">&#34;destination&#34;</span>:<span style="color:#c30">&#34;&lt;some-ip&gt;-&lt;another-ip&gt;&#34;</span>,<span style="color:#309;font-weight:bold">&#34;ports&#34;</span>:<span style="color:#c30">&#34;55882&#34;</span>, <span style="color:#309;font-weight:bold">&#34;comment&#34;</span>: <span style="color:#c30">&#34;Allow logging to hosted-logging-service.com&#34;</span>},
+  {<span style="color:#309;font-weight:bold">&#34;protocol&#34;</span>:<span style="color:#c30">&#34;tcp&#34;</span>,<span style="color:#309;font-weight:bold">&#34;destination&#34;</span>:<span style="color:#c30">&#34;&lt;ip-bar&gt;&#34;</span>,<span style="color:#309;font-weight:bold">&#34;ports&#34;</span>:<span style="color:#c30">&#34;443&#34;</span>, <span style="color:#309;font-weight:bold">&#34;comment&#34;</span>: <span style="color:#c30">&#34;Allow monitoring service at hosted-monitoring-service.com&#34;</span>}
+]</code></pre></div>
 <p>As things stand, Cloud Foundry Cloud Controller does not allow any extra fields to exist in a rule. For example, the above declaration will cause an error while trying to create a security group.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>&gt; cf create-security-group sample-space-security-group spec.json
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">&gt; cf create-security-group sample-space-security-group spec.json
 
-Server error, status code: <span style="color: #FF6600">400</span>, error code: <span style="color: #FF6600">300001</span>, message: The security group is invalid: rules rule number <span style="color: #FF6600">1</span> contains the invalid field <span style="color: #CC3300">&#39;comment&#39;</span>, rules rule number <span style="color: #FF6600">2</span> contains the invalid field <span style="color: #CC3300">&#39;comment&#39;</span>, rules rule number <span style="color: #FF6600">3</span> contains the invalid field <span style="color: #CC3300">&#39;comment&#39;</span>
-</pre></div>
-
+Server error, status code: <span style="color:#f60">400</span>, error code: <span style="color:#f60">300001</span>, message: The security group is invalid: rules rule number <span style="color:#f60">1</span> contains the invalid field <span style="color:#c30">&#39;comment&#39;</span>, rules rule number <span style="color:#f60">2</span> contains the invalid field <span style="color:#c30">&#39;comment&#39;</span>, rules rule number <span style="color:#f60">3</span> contains the invalid field <span style="color:#c30">&#39;comment&#39;</span></code></pre></div>
 <p>If JSON allowed comments, commenting would result in a slightly more readable declaration file, although it won&rsquo;t be stored in the Cloud Controller database and hence won&rsquo;t be available upon querying with <code>cf security-group &lt;security-group-name&gt;</code>. This is a moot point anyway, as JSON <a href="https://plus.google.com/+DouglasCrockfordEsq/posts/RK8qyGVaGSr">explicitly</a> doesn&rsquo;t allow comments. There are workarounds that involve minifying the JSON input before parsing the configurations, but I don&rsquo;t think that is the right direction to head to.</p>
 
 <p>I have filed a <a href="https://github.com/cloudfoundry/cloud_controller_ng/issues/382">ticket</a> against Cloud Controller to address this issue. It <a href="https://github.com/cloudfoundry/cloud_controller_ng/blob/cacb5563264208e920f4b7fecc7060f89b929fbb/lib/cloud_controller/rule_validator.rb#L6">doesn&rsquo;t look like a difficult</a> feature to implement. Hopefully this is available in Cloud Controller soon.</p>
             <p class="comments">
   If you have questions or comments about this blog post, you can get in touch with me on Twitter <a href="https://twitter.com/sdqali">@sdqali</a>.
 </p>
-
-            <div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Found this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and explanations for specific Java, Spring and other programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
 
           </div>
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">

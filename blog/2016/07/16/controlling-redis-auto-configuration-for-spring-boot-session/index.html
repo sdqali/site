@@ -119,86 +119,72 @@
 <h3 id="the-application">The application</h3>
 
 <p>The application we will be using to demonstrate this behavior is a Spring Boot 1.3.6 application with a single controller.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@RestController</span>
-<span style="color: #9999FF">@RequestMapping</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;/hello&quot;</span><span style="color: #555555">)</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">HelloController</span> <span style="color: #555555">{</span>
-  <span style="color: #9999FF">@RequestMapping</span><span style="color: #555555">(</span>method <span style="color: #555555">=</span> GET<span style="color: #555555">,</span>
-      path <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;&quot;</span><span style="color: #555555">,</span>
-      produces <span style="color: #555555">=</span> APPLICATION_JSON_VALUE<span style="color: #555555">)</span>
-  <span style="color: #006699; font-weight: bold">public</span> Map<span style="color: #555555">&lt;</span>String<span style="color: #555555">,</span> String<span style="color: #555555">&gt;</span> <span style="color: #CC00FF">hello</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">return</span> Collections<span style="color: #555555">.</span><span style="color: #330099">singletonMap</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;message&quot;</span><span style="color: #555555">,</span> <span style="color: #CC3300">&quot;hello&quot;</span><span style="color: #555555">);</span>
-  <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@RestController</span>
+<span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span><span style="color:#c30">&#34;/hello&#34;</span><span style="color:#555">)</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">HelloController</span> <span style="color:#555">{</span>
+  <span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span>method <span style="color:#555">=</span> GET<span style="color:#555">,</span>
+      path <span style="color:#555">=</span> <span style="color:#c30">&#34;&#34;</span><span style="color:#555">,</span>
+      produces <span style="color:#555">=</span> APPLICATION_JSON_VALUE<span style="color:#555">)</span>
+  <span style="color:#069;font-weight:bold">public</span> Map<span style="color:#555">&lt;</span>String<span style="color:#555">,</span> String<span style="color:#555">&gt;</span> <span style="color:#c0f">hello</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">return</span> Collections<span style="color:#555">.</span><span style="color:#309">singletonMap</span><span style="color:#555">(</span><span style="color:#c30">&#34;message&#34;</span><span style="color:#555">,</span> <span style="color:#c30">&#34;hello&#34;</span><span style="color:#555">);</span>
+  <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>The application also has Spring Security configured to allow authentication for a single user named <code>user</code>.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@EnableWebSecurity</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">SecurityConfig</span> <span style="color: #006699; font-weight: bold">extends</span> WebSecurityConfigurerAdapter <span style="color: #555555">{</span>
-  <span style="color: #9999FF">@Override</span>
-  <span style="color: #006699; font-weight: bold">protected</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">configure</span><span style="color: #555555">(</span>HttpSecurity http<span style="color: #555555">)</span> <span style="color: #006699; font-weight: bold">throws</span> Exception <span style="color: #555555">{</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@EnableWebSecurity</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">SecurityConfig</span> <span style="color:#069;font-weight:bold">extends</span> WebSecurityConfigurerAdapter <span style="color:#555">{</span>
+  <span style="color:#99f">@Override</span>
+  <span style="color:#069;font-weight:bold">protected</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">configure</span><span style="color:#555">(</span>HttpSecurity http<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
     http
-        <span style="color: #555555">.</span><span style="color: #330099">authorizeRequests</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">antMatchers</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;/hello/**&quot;</span><span style="color: #555555">).</span><span style="color: #330099">hasRole</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;USER&quot;</span><span style="color: #555555">)</span>
-        <span style="color: #555555">.</span><span style="color: #330099">and</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">httpBasic</span><span style="color: #555555">();</span>
-  <span style="color: #555555">}</span>
+        <span style="color:#555">.</span><span style="color:#309">authorizeRequests</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">antMatchers</span><span style="color:#555">(</span><span style="color:#c30">&#34;/hello/**&#34;</span><span style="color:#555">).</span><span style="color:#309">hasRole</span><span style="color:#555">(</span><span style="color:#c30">&#34;USER&#34;</span><span style="color:#555">)</span>
+        <span style="color:#555">.</span><span style="color:#309">and</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">httpBasic</span><span style="color:#555">();</span>
+  <span style="color:#555">}</span>
 
-  <span style="color: #9999FF">@Autowired</span>
-  <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">configureGlobal</span><span style="color: #555555">(</span>AuthenticationManagerBuilder auth<span style="color: #555555">)</span> <span style="color: #006699; font-weight: bold">throws</span> Exception <span style="color: #555555">{</span>
+  <span style="color:#99f">@Autowired</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">configureGlobal</span><span style="color:#555">(</span>AuthenticationManagerBuilder auth<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
     auth
-        <span style="color: #555555">.</span><span style="color: #330099">inMemoryAuthentication</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">withUser</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;user&quot;</span><span style="color: #555555">).</span><span style="color: #330099">password</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;password&quot;</span><span style="color: #555555">).</span><span style="color: #330099">roles</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;USER&quot;</span><span style="color: #555555">);</span>
-  <span style="color: #555555">}</span>
+        <span style="color:#555">.</span><span style="color:#309">inMemoryAuthentication</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">withUser</span><span style="color:#555">(</span><span style="color:#c30">&#34;user&#34;</span><span style="color:#555">).</span><span style="color:#309">password</span><span style="color:#555">(</span><span style="color:#c30">&#34;password&#34;</span><span style="color:#555">).</span><span style="color:#309">roles</span><span style="color:#555">(</span><span style="color:#c30">&#34;USER&#34;</span><span style="color:#555">);</span>
+  <span style="color:#555">}</span>
 
-  <span style="color: #9999FF">@Bean</span>
-  <span style="color: #006699; font-weight: bold">public</span> HeaderHttpSessionStrategy <span style="color: #CC00FF">sessionStrategy</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">new</span> HeaderHttpSessionStrategy<span style="color: #555555">();</span>
-  <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
-<p>This forces clients to authenticate for access to resources under <code>/hello</code> and configures an in memory user <code>user</code> with password <code>password</code>. In this example, we will also be using <code>HeaderHttpSessionStrategy</code> <sup class="footnote-ref" id="fnref:1"><a rel="footnote" href="#fn:1">1</a></sup> to pass the session value between client and server using the <code>x-auth-token</code> header instead of a Cookie.</p>
+  <span style="color:#99f">@Bean</span>
+  <span style="color:#069;font-weight:bold">public</span> HeaderHttpSessionStrategy <span style="color:#c0f">sessionStrategy</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">new</span> HeaderHttpSessionStrategy<span style="color:#555">();</span>
+  <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
+<p>This forces clients to authenticate for access to resources under <code>/hello</code> and configures an in memory user <code>user</code> with password <code>password</code>. In this example, we will also be using <code>HeaderHttpSessionStrategy</code> <sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup> to pass the session value between client and server using the <code>x-auth-token</code> header instead of a Cookie.</p>
 
 <h3 id="the-issue">The issue</h3>
 
-<p>This is an issue only when using Spring Boot 1.3 or greater. If we are to follow the instructions provided at the <a href="http://docs.spring.io/spring-session/docs/1.2.1.RELEASE/reference/html5/guides/boot.html">official documentation</a> from Spring Session <sup class="footnote-ref" id="fnref:2"><a rel="footnote" href="#fn:2">2</a></sup>, we end up with the following configuration.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@EnableRedisHttpSession</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">RedisSessionConfig</span> <span style="color: #555555">{</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+<p>This is an issue only when using Spring Boot 1.3 or greater. If we are to follow the instructions provided at the <a href="http://docs.spring.io/spring-session/docs/1.2.1.RELEASE/reference/html5/guides/boot.html">official documentation</a> from Spring Session <sup class="footnote-ref" id="fnref:2"><a href="#fn:2">2</a></sup>, we end up with the following configuration.</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@EnableRedisHttpSession</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">RedisSessionConfig</span> <span style="color:#555">{</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>With this in place, authentication works as we expect. The application allows the user to obtain a session and authenticates correctly when presented with the session token.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>$ curl -i -s -X GET <span style="color: #CC3300">&quot;http://localhost:8080/hello&quot;</span> -uuser:password  | grep <span style="color: #CC3300">&quot;x-auth-token&quot;</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ curl -i -s -X GET <span style="color:#c30">&#34;http://localhost:8080/hello&#34;</span> -uuser:password  | grep <span style="color:#c30">&#34;x-auth-token&#34;</span>
 x-auth-token: c0fbb47d-d19f-44b1-a8d7-44e4837f403d
-$ curl -s -X GET <span style="color: #CC3300">&quot;http://localhost:8080/hello&quot;</span> --header <span style="color: #CC3300">&quot;x-auth-token: c0fbb47d-d19f-44b1-a8d7-44e4837f403d&quot;</span> | jq .
-<span style="color: #555555">{</span>
-  <span style="color: #CC3300">&quot;message&quot;</span>: <span style="color: #CC3300">&quot;hello&quot;</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+$ curl -s -X GET <span style="color:#c30">&#34;http://localhost:8080/hello&#34;</span> --header <span style="color:#c30">&#34;x-auth-token: c0fbb47d-d19f-44b1-a8d7-44e4837f403d&#34;</span> | jq .
+<span style="color:#555">{</span>
+  <span style="color:#c30">&#34;message&#34;</span>: <span style="color:#c30">&#34;hello&#34;</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>We can monitor the interactions the application performs with Redis by running Redis monitor:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>$ redis-cli monitor
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ redis-cli monitor</code></pre></div>
 <p>This is great. Now, let&rsquo;s attempt to modify our configuration to use Redis only in some environments and use the in-memory session store in others. We start by making <code>RedisSessionConfig</code> conditional on the value of the property <code>use.redis.session.store</code> being <code>true</code>:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@ConditionalOnProperty</span><span style="color: #555555">(</span>name <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;use.redis.session.store&quot;</span><span style="color: #555555">,</span> havingValue <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;true&quot;</span><span style="color: #555555">)</span>
-<span style="color: #9999FF">@EnableRedisHttpSession</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">RedisSessionConfig</span> <span style="color: #555555">{</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@ConditionalOnProperty</span><span style="color:#555">(</span>name <span style="color:#555">=</span> <span style="color:#c30">&#34;use.redis.session.store&#34;</span><span style="color:#555">,</span> havingValue <span style="color:#555">=</span> <span style="color:#c30">&#34;true&#34;</span><span style="color:#555">)</span>
+<span style="color:#99f">@EnableRedisHttpSession</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">RedisSessionConfig</span> <span style="color:#555">{</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>We will create a new configuration that sets up the in-memory session store if <code>use.redis.session.store</code> is false or missing.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@Configuration</span>
-<span style="color: #9999FF">@EnableSpringHttpSession</span>
-<span style="color: #9999FF">@ConditionalOnProperty</span><span style="color: #555555">(</span>name <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;use.redis.session.store&quot;</span><span style="color: #555555">,</span> havingValue <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;false&quot;</span><span style="color: #555555">,</span> matchIfMissing <span style="color: #555555">=</span> <span style="color: #006699; font-weight: bold">true</span><span style="color: #555555">)</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">MapSessionConfig</span> <span style="color: #555555">{</span>
-  <span style="color: #9999FF">@Bean</span>
-  <span style="color: #006699; font-weight: bold">public</span> SessionRepository <span style="color: #CC00FF">sessionRepository</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">new</span> MapSessionRepository<span style="color: #555555">();</span>
-  <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Configuration</span>
+<span style="color:#99f">@EnableSpringHttpSession</span>
+<span style="color:#99f">@ConditionalOnProperty</span><span style="color:#555">(</span>name <span style="color:#555">=</span> <span style="color:#c30">&#34;use.redis.session.store&#34;</span><span style="color:#555">,</span> havingValue <span style="color:#555">=</span> <span style="color:#c30">&#34;false&#34;</span><span style="color:#555">,</span> matchIfMissing <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">true</span><span style="color:#555">)</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">MapSessionConfig</span> <span style="color:#555">{</span>
+  <span style="color:#99f">@Bean</span>
+  <span style="color:#069;font-weight:bold">public</span> SessionRepository <span style="color:#c0f">sessionRepository</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">new</span> MapSessionRepository<span style="color:#555">();</span>
+  <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>Let&rsquo;s set the property to <code>false</code> so that we do not have to depend on Redis in the local environment.</p>
 
 <pre><code>use.redis.session.store=false
@@ -218,128 +204,88 @@ Caused by: java.net.ConnectException: Connection refused
 ...
 </code></pre>
 
-<p>It appears that the application is trying to make connections to Redis, even though we configured it not to. What is going on? It looks like some where along the chain, some configuration with the annotation <code>@EnableSpringHttpSession</code> is being loaded. Why could that happen?
-<div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Finding this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and actionable explanations for specific programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
-</p>
+<p>It appears that the application is trying to make connections to Redis, even though we configured it not to. What is going on? It looks like some where along the chain, some configuration with the annotation <code>@EnableSpringHttpSession</code> is being loaded. Why could that happen?</p>
 
 <h3 id="spring-boot-autoconfig">Spring Boot Autoconfig</h3>
 
-<p>Like a lot of Spring Boot applications, we are using the <code>@SpringBootApplication</code> annotation in our application. This is a meta-annotation <sup class="footnote-ref" id="fnref:3"><a rel="footnote" href="#fn:3">3</a></sup> that takes the following form:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@Target</span><span style="color: #555555">(</span>ElementType<span style="color: #555555">.</span><span style="color: #330099">TYPE</span><span style="color: #555555">)</span>
-<span style="color: #9999FF">@Retention</span><span style="color: #555555">(</span>RetentionPolicy<span style="color: #555555">.</span><span style="color: #330099">RUNTIME</span><span style="color: #555555">)</span>
-<span style="color: #9999FF">@Documented</span>
-<span style="color: #9999FF">@Inherited</span>
-<span style="color: #9999FF">@Configuration</span>
-<span style="color: #9999FF">@EnableAutoConfiguration</span>
-<span style="color: #9999FF">@ComponentScan</span>
-</pre></div>
-
+<p>Like a lot of Spring Boot applications, we are using the <code>@SpringBootApplication</code> annotation in our application. This is a meta-annotation <sup class="footnote-ref" id="fnref:3"><a href="#fn:3">3</a></sup> that takes the following form:</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Target</span><span style="color:#555">(</span>ElementType<span style="color:#555">.</span><span style="color:#309">TYPE</span><span style="color:#555">)</span>
+<span style="color:#99f">@Retention</span><span style="color:#555">(</span>RetentionPolicy<span style="color:#555">.</span><span style="color:#309">RUNTIME</span><span style="color:#555">)</span>
+<span style="color:#99f">@Documented</span>
+<span style="color:#99f">@Inherited</span>
+<span style="color:#99f">@Configuration</span>
+<span style="color:#99f">@EnableAutoConfiguration</span>
+<span style="color:#99f">@ComponentScan</span></code></pre></div>
 <p>The <code>@EnableAutoConfiguration</code> annotation is interesting because it wires up most of the default configuration that makes Spring Boot great for development. The annotation itself and the supporting mechanism that automatically loads configurations are present in the <code>org.springframework.boot:spring-boot-autoconfigure</code> library. One of these configurations is <code>SessionAutoConfiguration</code> which was introduced in Spring Boot <code>1.3.0</code>. It has the following code in version <code>1.3.6</code>:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@Configuration</span>
-<span style="color: #9999FF">@ConditionalOnClass</span><span style="color: #555555">(</span>Session<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">)</span>
-<span style="color: #9999FF">@AutoConfigureAfter</span><span style="color: #555555">(</span>RedisAutoConfiguration<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">)</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">SessionAutoConfiguration</span> <span style="color: #555555">{</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Configuration</span>
+<span style="color:#99f">@ConditionalOnClass</span><span style="color:#555">(</span>Session<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">)</span>
+<span style="color:#99f">@AutoConfigureAfter</span><span style="color:#555">(</span>RedisAutoConfiguration<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">)</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">SessionAutoConfiguration</span> <span style="color:#555">{</span>
 
-    <span style="color: #9999FF">@EnableConfigurationProperties</span>
-    <span style="color: #9999FF">@ConditionalOnClass</span><span style="color: #555555">(</span>RedisConnectionFactory<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">)</span>
-    <span style="color: #9999FF">@ConditionalOnWebApplication</span>
-    <span style="color: #9999FF">@ConditionalOnMissingBean</span><span style="color: #555555">(</span>RedisHttpSessionConfiguration<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">)</span>
-    <span style="color: #9999FF">@EnableRedisHttpSession</span>
-    <span style="color: #9999FF">@Configuration</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">static</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">SessionRedisHttpConfiguration</span> <span style="color: #555555">{</span>
+    <span style="color:#99f">@EnableConfigurationProperties</span>
+    <span style="color:#99f">@ConditionalOnClass</span><span style="color:#555">(</span>RedisConnectionFactory<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">)</span>
+    <span style="color:#99f">@ConditionalOnWebApplication</span>
+    <span style="color:#99f">@ConditionalOnMissingBean</span><span style="color:#555">(</span>RedisHttpSessionConfiguration<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">)</span>
+    <span style="color:#99f">@EnableRedisHttpSession</span>
+    <span style="color:#99f">@Configuration</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">static</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">SessionRedisHttpConfiguration</span> <span style="color:#555">{</span>
 
-        <span style="color: #9999FF">@Autowired</span>
-        <span style="color: #006699; font-weight: bold">private</span> ServerProperties serverProperties<span style="color: #555555">;</span>
+        <span style="color:#99f">@Autowired</span>
+        <span style="color:#069;font-weight:bold">private</span> ServerProperties serverProperties<span style="color:#555">;</span>
 
-        <span style="color: #9999FF">@Autowired</span>
-        <span style="color: #006699; font-weight: bold">private</span> RedisOperationsSessionRepository sessionRepository<span style="color: #555555">;</span>
+        <span style="color:#99f">@Autowired</span>
+        <span style="color:#069;font-weight:bold">private</span> RedisOperationsSessionRepository sessionRepository<span style="color:#555">;</span>
 
-        <span style="color: #9999FF">@PostConstruct</span>
-        <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">applyConfigurationProperties</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-            Integer timeout <span style="color: #555555">=</span> <span style="color: #006699; font-weight: bold">this</span><span style="color: #555555">.</span><span style="color: #330099">serverProperties</span><span style="color: #555555">.</span><span style="color: #330099">getSession</span><span style="color: #555555">().</span><span style="color: #330099">getTimeout</span><span style="color: #555555">();</span>
-            <span style="color: #006699; font-weight: bold">if</span> <span style="color: #555555">(</span>timeout <span style="color: #555555">!=</span> <span style="color: #006699; font-weight: bold">null</span><span style="color: #555555">)</span> <span style="color: #555555">{</span>
-                <span style="color: #006699; font-weight: bold">this</span><span style="color: #555555">.</span><span style="color: #330099">sessionRepository</span><span style="color: #555555">.</span><span style="color: #330099">setDefaultMaxInactiveInterval</span><span style="color: #555555">(</span>timeout<span style="color: #555555">);</span>
-            <span style="color: #555555">}</span>
-        <span style="color: #555555">}</span>
+        <span style="color:#99f">@PostConstruct</span>
+        <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">applyConfigurationProperties</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+            Integer timeout <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">this</span><span style="color:#555">.</span><span style="color:#309">serverProperties</span><span style="color:#555">.</span><span style="color:#309">getSession</span><span style="color:#555">().</span><span style="color:#309">getTimeout</span><span style="color:#555">();</span>
+            <span style="color:#069;font-weight:bold">if</span> <span style="color:#555">(</span>timeout <span style="color:#555">!=</span> <span style="color:#069;font-weight:bold">null</span><span style="color:#555">)</span> <span style="color:#555">{</span>
+                <span style="color:#069;font-weight:bold">this</span><span style="color:#555">.</span><span style="color:#309">sessionRepository</span><span style="color:#555">.</span><span style="color:#309">setDefaultMaxInactiveInterval</span><span style="color:#555">(</span>timeout<span style="color:#555">);</span>
+            <span style="color:#555">}</span>
+        <span style="color:#555">}</span>
 
-        <span style="color: #9999FF">@Configuration</span>
-        <span style="color: #9999FF">@ConditionalOnMissingBean</span><span style="color: #555555">(</span>value <span style="color: #555555">=</span> ServerProperties<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">,</span> search <span style="color: #555555">=</span> SearchStrategy<span style="color: #555555">.</span><span style="color: #330099">CURRENT</span><span style="color: #555555">)</span>
-        <span style="color: #0099FF; font-style: italic">// Just in case user switches off ServerPropertiesAutoConfiguration</span>
-        <span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">static</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">ServerPropertiesConfiguration</span> <span style="color: #555555">{</span>
+        <span style="color:#99f">@Configuration</span>
+        <span style="color:#99f">@ConditionalOnMissingBean</span><span style="color:#555">(</span>value <span style="color:#555">=</span> ServerProperties<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">,</span> search <span style="color:#555">=</span> SearchStrategy<span style="color:#555">.</span><span style="color:#309">CURRENT</span><span style="color:#555">)</span>
+        <span style="color:#09f;font-style:italic">// Just in case user switches off ServerPropertiesAutoConfiguration
+</span><span style="color:#09f;font-style:italic"></span>        <span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">static</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">ServerPropertiesConfiguration</span> <span style="color:#555">{</span>
 
-            <span style="color: #9999FF">@Bean</span>
-            <span style="color: #0099FF; font-style: italic">// Use the same bean name as the default one for any old webapp</span>
-            <span style="color: #006699; font-weight: bold">public</span> ServerProperties <span style="color: #CC00FF">serverProperties</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-                <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">new</span> ServerProperties<span style="color: #555555">();</span>
-            <span style="color: #555555">}</span>
+            <span style="color:#99f">@Bean</span>
+            <span style="color:#09f;font-style:italic">// Use the same bean name as the default one for any old webapp
+</span><span style="color:#09f;font-style:italic"></span>            <span style="color:#069;font-weight:bold">public</span> ServerProperties <span style="color:#c0f">serverProperties</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+                <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">new</span> ServerProperties<span style="color:#555">();</span>
+            <span style="color:#555">}</span>
 
-        <span style="color: #555555">}</span>
+        <span style="color:#555">}</span>
 
-    <span style="color: #555555">}</span>
+    <span style="color:#555">}</span>
 
-<span style="color: #555555">}</span>
-</pre></div>
-
+<span style="color:#555">}</span></code></pre></div>
 <p>And this is where things get interesting. We can clearly see that <code>SessionRedisHttpConfiguration</code> is annotated with <code>@EnableRedisHttpSession</code>. This class will be applied by Spring the moment it&rsquo;s parent class <code>SessionAutoConfiguration</code> is applied. The third annotation on the parent class <code>@AutoConfigureAfter(RedisAutoConfiguration.class)</code> instructs Spring to apply this configuration after <code>RedisAutoConfiguration</code>. This configuration has the following:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@Configuration</span>
-<span style="color: #9999FF">@ConditionalOnClass</span><span style="color: #555555">({</span> JedisConnection<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">,</span> RedisOperations<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">,</span> Jedis<span style="color: #555555">.</span><span style="color: #330099">class</span> <span style="color: #555555">})</span>
-<span style="color: #9999FF">@EnableConfigurationProperties</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">RedisAutoConfiguration</span> <span style="color: #555555">{</span>
-<span style="color: #0099FF; font-style: italic">// ...</span>
-<span style="color: #0099FF; font-style: italic">// ...</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Configuration</span>
+<span style="color:#99f">@ConditionalOnClass</span><span style="color:#555">({</span> JedisConnection<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">,</span> RedisOperations<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">,</span> Jedis<span style="color:#555">.</span><span style="color:#309">class</span> <span style="color:#555">})</span>
+<span style="color:#99f">@EnableConfigurationProperties</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">RedisAutoConfiguration</span> <span style="color:#555">{</span>
+<span style="color:#09f;font-style:italic">// ...
+</span><span style="color:#09f;font-style:italic">// ...
+</span><span style="color:#09f;font-style:italic"></span><span style="color:#555">}</span></code></pre></div>
 <p>This configuration will be applied if and only if the classes <code>JedisConnection</code>, <code>RedisOperations</code> and <code>Jedis</code> are present in the class path and by adding <code>spring-session-data-redis</code> as a dependency, we are causing exactly that to happen.</p>
 
 <h3 id="a-solution">A solution</h3>
 
 <p>We can prevent this from occurring by configuring our application to not attempt to apply this auto configuration class. This can be done by specifying this class to be excluded from the application.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@SpringBootApplication</span><span style="color: #555555">(</span>exclude <span style="color: #555555">=</span> <span style="color: #555555">{</span>SessionAutoConfiguration<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">})</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">RedisSessionApplication</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">static</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">main</span><span style="color: #555555">(</span>String<span style="color: #555555">[]</span> args<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        SpringApplication<span style="color: #555555">.</span><span style="color: #330099">run</span><span style="color: #555555">(</span>RedisSessionApplication<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">,</span> args<span style="color: #555555">);</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@SpringBootApplication</span><span style="color:#555">(</span>exclude <span style="color:#555">=</span> <span style="color:#555">{</span>SessionAutoConfiguration<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">})</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">RedisSessionApplication</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">static</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">main</span><span style="color:#555">(</span>String<span style="color:#555">[]</span> args<span style="color:#555">)</span> <span style="color:#555">{</span>
+        SpringApplication<span style="color:#555">.</span><span style="color:#309">run</span><span style="color:#555">(</span>RedisSessionApplication<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">,</span> args<span style="color:#555">);</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>With this is place, if we run the application, it will no longer encounter the connection error previously saw. Authentication works as before, except that it now uses the in-memory session store.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>$ curl -i -s -X GET <span style="color: #CC3300">&quot;http://localhost:8080/hello&quot;</span> -uuser:password  | grep <span style="color: #CC3300">&quot;x-auth-token&quot;</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ curl -i -s -X GET <span style="color:#c30">&#34;http://localhost:8080/hello&#34;</span> -uuser:password  | grep <span style="color:#c30">&#34;x-auth-token&#34;</span>
 x-auth-token: d0962e39-6423-46b3-b815-8979950e063a
-$ curl -s -X GET <span style="color: #CC3300">&quot;http://localhost:8080/hello&quot;</span> --header <span style="color: #CC3300">&quot;x-auth-token: d0962e39-6423-46b3-b815-8979950e063a&quot;</span> | jq .
-<span style="color: #555555">{</span>
-  <span style="color: #CC3300">&quot;message&quot;</span>: <span style="color: #CC3300">&quot;hello&quot;</span>
-<span style="color: #555555">}</span>
-</pre></div>
-<div class="footnotes">
+$ curl -s -X GET <span style="color:#c30">&#34;http://localhost:8080/hello&#34;</span> --header <span style="color:#c30">&#34;x-auth-token: d0962e39-6423-46b3-b815-8979950e063a&#34;</span> | jq .
+<span style="color:#555">{</span>
+  <span style="color:#c30">&#34;message&#34;</span>: <span style="color:#c30">&#34;hello&#34;</span>
+<span style="color:#555">}</span></code></pre></div><div class="footnotes">
 
 <hr />
 
@@ -355,36 +301,6 @@ $ curl -s -X GET <span style="color: #CC3300">&quot;http://localhost:8080/hello&
             <p class="comments">
   If you have questions or comments about this blog post, you can get in touch with me on Twitter <a href="https://twitter.com/sdqali">@sdqali</a>.
 </p>
-
-            <div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Found this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and explanations for specific Java, Spring and other programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
 
           </div>
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">

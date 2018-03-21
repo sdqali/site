@@ -115,114 +115,72 @@
 </p>
 
 <p>Let&rsquo;s consider a simple command line application implemented using Spring Boot&rsquo;s <code>CommandLineRunner</code>. The main application class is fairly simple.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@Configuration</span>
-<span style="color: #9999FF">@EnableAutoConfiguration</span>
-<span style="color: #9999FF">@ComponentScan</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">Application</span> <span style="color: #006699; font-weight: bold">implements</span> CommandLineRunner <span style="color: #555555">{</span>
-    <span style="color: #9999FF">@Autowired</span>
-    DataService dataService<span style="color: #555555">;</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Configuration</span>
+<span style="color:#99f">@EnableAutoConfiguration</span>
+<span style="color:#99f">@ComponentScan</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">Application</span> <span style="color:#069;font-weight:bold">implements</span> CommandLineRunner <span style="color:#555">{</span>
+    <span style="color:#99f">@Autowired</span>
+    DataService dataService<span style="color:#555">;</span>
 
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">static</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">main</span><span style="color: #555555">(</span>String<span style="color: #555555">[]</span> args<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        SpringApplication<span style="color: #555555">.</span><span style="color: #330099">run</span><span style="color: #555555">(</span>Application<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">,</span> args<span style="color: #555555">);</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">static</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">main</span><span style="color:#555">(</span>String<span style="color:#555">[]</span> args<span style="color:#555">)</span> <span style="color:#555">{</span>
+        SpringApplication<span style="color:#555">.</span><span style="color:#309">run</span><span style="color:#555">(</span>Application<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">,</span> args<span style="color:#555">);</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">run</span><span style="color: #555555">(</span>String<span style="color: #555555">...</span> args<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        dataService<span style="color: #555555">.</span><span style="color: #330099">perform</span><span style="color: #555555">(</span>args<span style="color: #555555">[</span><span style="color: #FF6600">0</span><span style="color: #555555">]);</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">run</span><span style="color:#555">(</span>String<span style="color:#555">...</span> args<span style="color:#555">)</span> <span style="color:#555">{</span>
+        dataService<span style="color:#555">.</span><span style="color:#309">perform</span><span style="color:#555">(</span>args<span style="color:#555">[</span>0<span style="color:#555">]);</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>In addition to this, there is a configuration class <code>AppConfiguration</code>.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@Configuration</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">AppConfiguration</span> <span style="color: #555555">{</span>
-    <span style="color: #9999FF">@Bean</span>
-    <span style="color: #006699; font-weight: bold">public</span> DataService <span style="color: #CC00FF">dataService</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">new</span> DataService<span style="color: #555555">();</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Configuration</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">AppConfiguration</span> <span style="color:#555">{</span>
+    <span style="color:#99f">@Bean</span>
+    <span style="color:#069;font-weight:bold">public</span> DataService <span style="color:#c0f">dataService</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">new</span> DataService<span style="color:#555">();</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>The <code>DataService</code> simply prints the argument it receives.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">DataService</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">perform</span><span style="color: #555555">(</span>String arg<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        System<span style="color: #555555">.</span><span style="color: #330099">out</span><span style="color: #555555">.</span><span style="color: #330099">println</span><span style="color: #555555">(</span>arg<span style="color: #555555">);</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">DataService</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">perform</span><span style="color:#555">(</span>String arg<span style="color:#555">)</span> <span style="color:#555">{</span>
+        System<span style="color:#555">.</span><span style="color:#309">out</span><span style="color:#555">.</span><span style="color:#309">println</span><span style="color:#555">(</span>arg<span style="color:#555">);</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>If we were to attempt writing an integration test for this application, it would look like this:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@RunWith</span><span style="color: #555555">(</span>SpringJUnit4ClassRunner<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">)</span>
-<span style="color: #9999FF">@SpringApplicationConfiguration</span><span style="color: #555555">(</span>classes <span style="color: #555555">=</span> <span style="color: #555555">{</span>Application<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">})</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">ApplicationIntegrationTest</span> <span style="color: #555555">{</span>
-    <span style="color: #9999FF">@Autowired</span>
-    <span style="color: #006699; font-weight: bold">private</span> Application application<span style="color: #555555">;</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@RunWith</span><span style="color:#555">(</span>SpringJUnit4ClassRunner<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">)</span>
+<span style="color:#99f">@SpringApplicationConfiguration</span><span style="color:#555">(</span>classes <span style="color:#555">=</span> <span style="color:#555">{</span>Application<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">})</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">ApplicationIntegrationTest</span> <span style="color:#555">{</span>
+    <span style="color:#99f">@Autowired</span>
+    <span style="color:#069;font-weight:bold">private</span> Application application<span style="color:#555">;</span>
 
 
-    <span style="color: #9999FF">@Rule</span>
-    <span style="color: #006699; font-weight: bold">public</span> OutputCapture outputCapture <span style="color: #555555">=</span> <span style="color: #006699; font-weight: bold">new</span> OutputCapture<span style="color: #555555">();</span>
+    <span style="color:#99f">@Rule</span>
+    <span style="color:#069;font-weight:bold">public</span> OutputCapture outputCapture <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">new</span> OutputCapture<span style="color:#555">();</span>
 
-    <span style="color: #9999FF">@Test</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">shouldGenerateResultFiles</span><span style="color: #555555">()</span> <span style="color: #006699; font-weight: bold">throws</span> Exception <span style="color: #555555">{</span>
-        application<span style="color: #555555">.</span><span style="color: #330099">run</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;sampleOutPut&quot;</span><span style="color: #555555">);</span>
-        assertTrue<span style="color: #555555">(</span>outputCapture<span style="color: #555555">.</span><span style="color: #330099">toString</span><span style="color: #555555">().</span><span style="color: #330099">contains</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;sampleOutput&quot;</span><span style="color: #555555">));</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
-<p>That test is straightforward—it loads the Spring context with all the beans, runs the application with parameters and expects the parameter to be printed to the console.
-<div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Finding this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and actionable explanations for specific programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
-</p>
+    <span style="color:#99f">@Test</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">shouldGenerateResultFiles</span><span style="color:#555">()</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
+        application<span style="color:#555">.</span><span style="color:#309">run</span><span style="color:#555">(</span><span style="color:#c30">&#34;sampleOutPut&#34;</span><span style="color:#555">);</span>
+        assertTrue<span style="color:#555">(</span>outputCapture<span style="color:#555">.</span><span style="color:#309">toString</span><span style="color:#555">().</span><span style="color:#309">contains</span><span style="color:#555">(</span><span style="color:#c30">&#34;sampleOutput&#34;</span><span style="color:#555">));</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
+<p>That test is straightforward—it loads the Spring context with all the beans, runs the application with parameters and expects the parameter to be printed to the console.</p>
 
 <p>Except, it does not work. If we were to execute the above test, we will get the following error:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>...
-Caused by: java.lang.ArrayIndexOutOfBoundsException: <span style="color: #FF6600">0</span>
-at in.sdqali.springapps.Application.run<span style="color: #555555">(</span>Application.java:24<span style="color: #555555">)</span> ~<span style="color: #555555">[</span>main/:na<span style="color: #555555">]</span>
-...
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">...
+Caused by: java.lang.ArrayIndexOutOfBoundsException: <span style="color:#f60">0</span>
+at in.sdqali.springapps.Application.run<span style="color:#555">(</span>Application.java:24<span style="color:#555">)</span> ~<span style="color:#555">[</span>main/:na<span style="color:#555">]</span>
+...</code></pre></div>
 <p>What happened? It looks like the <code>run</code> method was called with out any arguments while the test configuration was loaded.</p>
 
 <p>Let‘s try and understand wh
-y this happens. Remember how we annotated the test with <code>@SpringApplicationConfiguration</code>? This annotation is a meta-annotation <sup class="footnote-ref" id="fnref:1"><a rel="footnote" href="#fn:1">1</a></sup> specified as:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@ContextConfiguration</span><span style="color: #555555">(</span>loader <span style="color: #555555">=</span> SpringApplicationContextLoader<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">)</span>
-<span style="color: #9999FF">@Documented</span>
-<span style="color: #9999FF">@Inherited</span>
-<span style="color: #9999FF">@Retention</span><span style="color: #555555">(</span>RetentionPolicy<span style="color: #555555">.</span><span style="color: #330099">RUNTIME</span><span style="color: #555555">)</span>
-<span style="color: #9999FF">@Target</span><span style="color: #555555">(</span>ElementType<span style="color: #555555">.</span><span style="color: #330099">TYPE</span><span style="color: #555555">)</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #9999FF">@interface</span> SpringApplicationConfiguration <span style="color: #555555">{</span>
-<span style="color: #555555">...</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+y this happens. Remember how we annotated the test with <code>@SpringApplicationConfiguration</code>? This annotation is a meta-annotation <sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup> specified as:</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@ContextConfiguration</span><span style="color:#555">(</span>loader <span style="color:#555">=</span> SpringApplicationContextLoader<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">)</span>
+<span style="color:#99f">@Documented</span>
+<span style="color:#99f">@Inherited</span>
+<span style="color:#99f">@Retention</span><span style="color:#555">(</span>RetentionPolicy<span style="color:#555">.</span><span style="color:#309">RUNTIME</span><span style="color:#555">)</span>
+<span style="color:#99f">@Target</span><span style="color:#555">(</span>ElementType<span style="color:#555">.</span><span style="color:#309">TYPE</span><span style="color:#555">)</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#99f">@interface</span> SpringApplicationConfiguration <span style="color:#555">{</span>
+<span style="color:#555">...</span>
+<span style="color:#555">}</span></code></pre></div>
 <p><code>ContextConfiguration</code> is an annotation that allows tests to specify the information used to load and configure the application context. From the Java doc for this annotation:</p>
 
 <pre><code> * {@code @ContextConfiguration} defines class-level metadata that is used to determine
@@ -231,11 +189,9 @@ y this happens. Remember how we annotated the test with <code>@SpringApplication
 </code></pre>
 
 <p>This brings us to <code>SpringApplicationContextLoader</code>‘s <code>loadContext</code> method and buried deep inside are these line:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>application<span style="color: #555555">.</span><span style="color: #330099">setInitializers</span><span style="color: #555555">(</span>initializers<span style="color: #555555">);</span>
-ConfigurableApplicationContext applicationContext <span style="color: #555555">=</span> application<span style="color: #555555">.</span><span style="color: #330099">run</span><span style="color: #555555">();</span>
-<span style="color: #006699; font-weight: bold">return</span> applicationContext<span style="color: #555555">;</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">application<span style="color:#555">.</span><span style="color:#309">setInitializers</span><span style="color:#555">(</span>initializers<span style="color:#555">);</span>
+ConfigurableApplicationContext applicationContext <span style="color:#555">=</span> application<span style="color:#555">.</span><span style="color:#309">run</span><span style="color:#555">();</span>
+<span style="color:#069;font-weight:bold">return</span> applicationContext<span style="color:#555">;</span></code></pre></div>
 <p>So, regardless of how many arguments our command line application was supposed to take, this loader always call the application without any arguments.</p>
 
 <p>There are two solutions I have been able to think of for this problem:</p>
@@ -258,36 +214,6 @@ ConfigurableApplicationContext applicationContext <span style="color: #555555">=
             <p class="comments">
   If you have questions or comments about this blog post, you can get in touch with me on Twitter <a href="https://twitter.com/sdqali">@sdqali</a>.
 </p>
-
-            <div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Found this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and explanations for specific Java, Spring and other programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
 
           </div>
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">

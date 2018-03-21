@@ -131,266 +131,218 @@ These are the blog posts in this series:</p>
 </ul>
 
 <p>We will start by configuring Spring security with a filter to capture the JWT passed by the client in the <code>Authorization</code> header. We will wire up this filter to go before the <code>UsernamePasswordAuthenticationFilter</code> provided by Spring security.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@Configuration</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">SecurityConfig</span> <span style="color: #006699; font-weight: bold">extends</span> WebSecurityConfigurerAdapter <span style="color: #555555">{</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Configuration</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">SecurityConfig</span> <span style="color:#069;font-weight:bold">extends</span> WebSecurityConfigurerAdapter <span style="color:#555">{</span>
 
-    <span style="color: #9999FF">@Autowired</span>
-    <span style="color: #006699; font-weight: bold">private</span> JwtAuthFilter jwtAuthFilter<span style="color: #555555">;</span>
-    <span style="color: #0099FF; font-style: italic">// ...</span>
+    <span style="color:#99f">@Autowired</span>
+    <span style="color:#069;font-weight:bold">private</span> JwtAuthFilter jwtAuthFilter<span style="color:#555">;</span>
+    <span style="color:#09f;font-style:italic">// ...
+</span><span style="color:#09f;font-style:italic"></span>
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">protected</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">configure</span><span style="color:#555">(</span>HttpSecurity http<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
+        http<span style="color:#555">.</span><span style="color:#309">csrf</span><span style="color:#555">().</span><span style="color:#309">disable</span><span style="color:#555">();</span>
 
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">protected</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">configure</span><span style="color: #555555">(</span>HttpSecurity http<span style="color: #555555">)</span> <span style="color: #006699; font-weight: bold">throws</span> Exception <span style="color: #555555">{</span>
-        http<span style="color: #555555">.</span><span style="color: #330099">csrf</span><span style="color: #555555">().</span><span style="color: #330099">disable</span><span style="color: #555555">();</span>
-
-        http<span style="color: #555555">.</span><span style="color: #330099">authorizeRequests</span><span style="color: #555555">()</span>
-                <span style="color: #555555">.</span><span style="color: #330099">antMatchers</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;/login&quot;</span><span style="color: #555555">)</span>
-                <span style="color: #555555">.</span><span style="color: #330099">permitAll</span><span style="color: #555555">()</span>
-                <span style="color: #555555">.</span><span style="color: #330099">antMatchers</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;/**/*&quot;</span><span style="color: #555555">)</span>
-                <span style="color: #555555">.</span><span style="color: #330099">hasAuthority</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;ROLE_USER&quot;</span><span style="color: #555555">)</span>
-                <span style="color: #555555">.</span><span style="color: #330099">and</span><span style="color: #555555">()</span>
-                <span style="color: #555555">.</span><span style="color: #330099">addFilterBefore</span><span style="color: #555555">(</span>jwtAuthFilter<span style="color: #555555">,</span> UsernamePasswordAuthenticationFilter<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">)</span>
-                <span style="color: #0099FF; font-style: italic">// ...</span>
-    <span style="color: #555555">}</span>
-</pre></div>
-
+        http<span style="color:#555">.</span><span style="color:#309">authorizeRequests</span><span style="color:#555">()</span>
+                <span style="color:#555">.</span><span style="color:#309">antMatchers</span><span style="color:#555">(</span><span style="color:#c30">&#34;/login&#34;</span><span style="color:#555">)</span>
+                <span style="color:#555">.</span><span style="color:#309">permitAll</span><span style="color:#555">()</span>
+                <span style="color:#555">.</span><span style="color:#309">antMatchers</span><span style="color:#555">(</span><span style="color:#c30">&#34;/**/*&#34;</span><span style="color:#555">)</span>
+                <span style="color:#555">.</span><span style="color:#309">hasAuthority</span><span style="color:#555">(</span><span style="color:#c30">&#34;ROLE_USER&#34;</span><span style="color:#555">)</span>
+                <span style="color:#555">.</span><span style="color:#309">and</span><span style="color:#555">()</span>
+                <span style="color:#555">.</span><span style="color:#309">addFilterBefore</span><span style="color:#555">(</span>jwtAuthFilter<span style="color:#555">,</span> UsernamePasswordAuthenticationFilter<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">)</span>
+                <span style="color:#09f;font-style:italic">// ...
+</span><span style="color:#09f;font-style:italic"></span>    <span style="color:#555">}</span></code></pre></div>
 <p>The filter captures the <code>Authorization</code> header and creates a <code>JwtAuthToken</code> and sets that as the current authentication for the request.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@Component</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">JwtAuthFilter</span> <span style="color: #006699; font-weight: bold">implements</span> Filter <span style="color: #555555">{</span>
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">init</span><span style="color: #555555">(</span>FilterConfig filterConfig<span style="color: #555555">)</span> <span style="color: #006699; font-weight: bold">throws</span> ServletException <span style="color: #555555">{</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Component</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">JwtAuthFilter</span> <span style="color:#069;font-weight:bold">implements</span> Filter <span style="color:#555">{</span>
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">init</span><span style="color:#555">(</span>FilterConfig filterConfig<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> ServletException <span style="color:#555">{</span>
 
-    <span style="color: #555555">}</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">doFilter</span><span style="color: #555555">(</span>ServletRequest request<span style="color: #555555">,</span> ServletResponse response<span style="color: #555555">,</span> FilterChain chain<span style="color: #555555">)</span> <span style="color: #006699; font-weight: bold">throws</span> IOException<span style="color: #555555">,</span> ServletException <span style="color: #555555">{</span>
-        HttpServletRequest servletRequest <span style="color: #555555">=</span> <span style="color: #555555">(</span>HttpServletRequest<span style="color: #555555">)</span> request<span style="color: #555555">;</span>
-        String authorization <span style="color: #555555">=</span> servletRequest<span style="color: #555555">.</span><span style="color: #330099">getHeader</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;Authorization&quot;</span><span style="color: #555555">);</span>
-        <span style="color: #006699; font-weight: bold">if</span> <span style="color: #555555">(</span>authorization <span style="color: #555555">!=</span> <span style="color: #006699; font-weight: bold">null</span><span style="color: #555555">)</span> <span style="color: #555555">{</span>
-            JwtAuthToken token <span style="color: #555555">=</span> <span style="color: #006699; font-weight: bold">new</span> JwtAuthToken<span style="color: #555555">(</span>authorization<span style="color: #555555">.</span><span style="color: #330099">replaceAll</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;Bearer &quot;</span><span style="color: #555555">,</span> <span style="color: #CC3300">&quot;&quot;</span><span style="color: #555555">));</span>
-            SecurityContextHolder<span style="color: #555555">.</span><span style="color: #330099">getContext</span><span style="color: #555555">().</span><span style="color: #330099">setAuthentication</span><span style="color: #555555">(</span>token<span style="color: #555555">);</span>
-        <span style="color: #555555">}</span>
-        chain<span style="color: #555555">.</span><span style="color: #330099">doFilter</span><span style="color: #555555">(</span>request<span style="color: #555555">,</span> response<span style="color: #555555">);</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">doFilter</span><span style="color:#555">(</span>ServletRequest request<span style="color:#555">,</span> ServletResponse response<span style="color:#555">,</span> FilterChain chain<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> IOException<span style="color:#555">,</span> ServletException <span style="color:#555">{</span>
+        HttpServletRequest servletRequest <span style="color:#555">=</span> <span style="color:#555">(</span>HttpServletRequest<span style="color:#555">)</span> request<span style="color:#555">;</span>
+        String authorization <span style="color:#555">=</span> servletRequest<span style="color:#555">.</span><span style="color:#309">getHeader</span><span style="color:#555">(</span><span style="color:#c30">&#34;Authorization&#34;</span><span style="color:#555">);</span>
+        <span style="color:#069;font-weight:bold">if</span> <span style="color:#555">(</span>authorization <span style="color:#555">!=</span> <span style="color:#069;font-weight:bold">null</span><span style="color:#555">)</span> <span style="color:#555">{</span>
+            JwtAuthToken token <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">new</span> JwtAuthToken<span style="color:#555">(</span>authorization<span style="color:#555">.</span><span style="color:#309">replaceAll</span><span style="color:#555">(</span><span style="color:#c30">&#34;Bearer &#34;</span><span style="color:#555">,</span> <span style="color:#c30">&#34;&#34;</span><span style="color:#555">));</span>
+            SecurityContextHolder<span style="color:#555">.</span><span style="color:#309">getContext</span><span style="color:#555">().</span><span style="color:#309">setAuthentication</span><span style="color:#555">(</span>token<span style="color:#555">);</span>
+        <span style="color:#555">}</span>
+        chain<span style="color:#555">.</span><span style="color:#309">doFilter</span><span style="color:#555">(</span>request<span style="color:#555">,</span> response<span style="color:#555">);</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">destroy</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">destroy</span><span style="color:#555">()</span> <span style="color:#555">{</span>
 
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>The <code>JwtAuthToken</code> is simply a conduit to carry the token and although it implements the <code>Authentication</code> interface, it does not do much.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">JwtAuthToken</span> <span style="color: #006699; font-weight: bold">implements</span> Authentication <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">private</span> <span style="color: #006699; font-weight: bold">final</span> String token<span style="color: #555555">;</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">JwtAuthToken</span> <span style="color:#069;font-weight:bold">implements</span> Authentication <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">final</span> String token<span style="color:#555">;</span>
 
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #CC00FF">JwtAuthToken</span><span style="color: #555555">(</span>String token<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">this</span><span style="color: #555555">.</span><span style="color: #330099">token</span> <span style="color: #555555">=</span> token<span style="color: #555555">;</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">JwtAuthToken</span><span style="color:#555">(</span>String token<span style="color:#555">)</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">this</span><span style="color:#555">.</span><span style="color:#309">token</span> <span style="color:#555">=</span> token<span style="color:#555">;</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> Collection<span style="color: #555555">&lt;?</span> <span style="color: #006699; font-weight: bold">extends</span> GrantedAuthority<span style="color: #555555">&gt;</span> <span style="color: #CC00FF">getAuthorities</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">null</span><span style="color: #555555">;</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> Collection<span style="color:#555">&lt;?</span> <span style="color:#069;font-weight:bold">extends</span> GrantedAuthority<span style="color:#555">&gt;</span> <span style="color:#c0f">getAuthorities</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">null</span><span style="color:#555">;</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> Object <span style="color: #CC00FF">getCredentials</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> token<span style="color: #555555">;</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> Object <span style="color:#c0f">getCredentials</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> token<span style="color:#555">;</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> Object <span style="color: #CC00FF">getDetails</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">null</span><span style="color: #555555">;</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> Object <span style="color:#c0f">getDetails</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">null</span><span style="color:#555">;</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> Object <span style="color: #CC00FF">getPrincipal</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">null</span><span style="color: #555555">;</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> Object <span style="color:#c0f">getPrincipal</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">null</span><span style="color:#555">;</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">boolean</span> <span style="color: #CC00FF">isAuthenticated</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">false</span><span style="color: #555555">;</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">boolean</span> <span style="color:#c0f">isAuthenticated</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">false</span><span style="color:#555">;</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">setAuthenticated</span><span style="color: #555555">(</span><span style="color: #007788; font-weight: bold">boolean</span> isAuthenticated<span style="color: #555555">)</span> <span style="color: #006699; font-weight: bold">throws</span> IllegalArgumentException <span style="color: #555555">{</span>
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">setAuthenticated</span><span style="color:#555">(</span><span style="color:#078;font-weight:bold">boolean</span> isAuthenticated<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> IllegalArgumentException <span style="color:#555">{</span>
 
-    <span style="color: #555555">}</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> String <span style="color: #CC00FF">getName</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">null</span><span style="color: #555555">;</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> String <span style="color:#c0f">getName</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">null</span><span style="color:#555">;</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
+<p>At this point, we need to tell Spring Security how to verify the tokens. This can be done by providing a custom <code>AuthenticationProvider</code>. This can be done by overriding the <code>configure</code> method.</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Configuration</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">SecurityConfig</span> <span style="color:#069;font-weight:bold">extends</span> WebSecurityConfigurerAdapter <span style="color:#555">{</span>
+    <span style="color:#99f">@Autowired</span>
+    <span style="color:#069;font-weight:bold">private</span> JwtAuthenticationProvider jwtAuthenticationProvider<span style="color:#555">;</span>
 
-<p><div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Finding this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and actionable explanations for specific programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
-
-At this point, we need to tell Spring Security how to verify the tokens. This can be done by providing a custom <code>AuthenticationProvider</code>. This can be done by overriding the <code>configure</code> method.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@Configuration</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">SecurityConfig</span> <span style="color: #006699; font-weight: bold">extends</span> WebSecurityConfigurerAdapter <span style="color: #555555">{</span>
-    <span style="color: #9999FF">@Autowired</span>
-    <span style="color: #006699; font-weight: bold">private</span> JwtAuthenticationProvider jwtAuthenticationProvider<span style="color: #555555">;</span>
-
-    <span style="color: #0099FF; font-style: italic">// ...</span>
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">configure</span><span style="color: #555555">(</span>AuthenticationManagerBuilder auth<span style="color: #555555">)</span>  <span style="color: #006699; font-weight: bold">throws</span> Exception <span style="color: #555555">{</span>
-        auth<span style="color: #555555">.</span><span style="color: #330099">authenticationProvider</span><span style="color: #555555">(</span>jwtAuthenticationProvider<span style="color: #555555">);</span>
-    <span style="color: #555555">}</span>
-    <span style="color: #0099FF; font-style: italic">// ...</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+    <span style="color:#09f;font-style:italic">// ...
+</span><span style="color:#09f;font-style:italic"></span>    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">configure</span><span style="color:#555">(</span>AuthenticationManagerBuilder auth<span style="color:#555">)</span>  <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
+        auth<span style="color:#555">.</span><span style="color:#309">authenticationProvider</span><span style="color:#555">(</span>jwtAuthenticationProvider<span style="color:#555">);</span>
+    <span style="color:#555">}</span>
+    <span style="color:#09f;font-style:italic">// ...
+</span><span style="color:#09f;font-style:italic"></span><span style="color:#555">}</span></code></pre></div>
 <p>The <code>JwtAuthenticationProvider</code> receives the <code>Authentication</code> instance set on the <code>SecurityContext</code>, which in our case is the <code>JwtAuthToken</code> we set using the <code>JwtAuthFilter</code>. This token is then verified using the <code>JwtService</code>. If the token is valid, we return a <code>JwtAuthenticatedProfile</code> or throw an exception if it is invalid.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@Component</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">JwtAuthenticationProvider</span> <span style="color: #006699; font-weight: bold">implements</span> AuthenticationProvider <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">private</span> <span style="color: #006699; font-weight: bold">final</span> JwtService jwtService<span style="color: #555555">;</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Component</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">JwtAuthenticationProvider</span> <span style="color:#069;font-weight:bold">implements</span> AuthenticationProvider <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">final</span> JwtService jwtService<span style="color:#555">;</span>
 
-    <span style="color: #9999FF">@SuppressWarnings</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;unused&quot;</span><span style="color: #555555">)</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #CC00FF">JwtAuthenticationProvider</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">this</span><span style="color: #555555">(</span><span style="color: #006699; font-weight: bold">null</span><span style="color: #555555">);</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#99f">@SuppressWarnings</span><span style="color:#555">(</span><span style="color:#c30">&#34;unused&#34;</span><span style="color:#555">)</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">JwtAuthenticationProvider</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">this</span><span style="color:#555">(</span><span style="color:#069;font-weight:bold">null</span><span style="color:#555">);</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Autowired</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #CC00FF">JwtAuthenticationProvider</span><span style="color: #555555">(</span>JwtService jwtService<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">this</span><span style="color: #555555">.</span><span style="color: #330099">jwtService</span> <span style="color: #555555">=</span> jwtService<span style="color: #555555">;</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#99f">@Autowired</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">JwtAuthenticationProvider</span><span style="color:#555">(</span>JwtService jwtService<span style="color:#555">)</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">this</span><span style="color:#555">.</span><span style="color:#309">jwtService</span> <span style="color:#555">=</span> jwtService<span style="color:#555">;</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> Authentication <span style="color: #CC00FF">authenticate</span><span style="color: #555555">(</span>Authentication authentication<span style="color: #555555">)</span> <span style="color: #006699; font-weight: bold">throws</span> AuthenticationException <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">try</span> <span style="color: #555555">{</span>
-            Optional<span style="color: #555555">&lt;</span>MinimalProfile<span style="color: #555555">&gt;</span> possibleProfile <span style="color: #555555">=</span> jwtService<span style="color: #555555">.</span><span style="color: #330099">verify</span><span style="color: #555555">((</span>String<span style="color: #555555">)</span> authentication<span style="color: #555555">.</span><span style="color: #330099">getCredentials</span><span style="color: #555555">());</span>
-            <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">new</span> JwtAuthenticatedProfile<span style="color: #555555">(</span>possibleProfile<span style="color: #555555">.</span><span style="color: #330099">get</span><span style="color: #555555">());</span>
-        <span style="color: #555555">}</span> <span style="color: #006699; font-weight: bold">catch</span> <span style="color: #555555">(</span>Exception e<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-            <span style="color: #006699; font-weight: bold">throw</span> <span style="color: #006699; font-weight: bold">new</span> JwtAuthenticationException<span style="color: #555555">(</span><span style="color: #CC3300">&quot;Failed to verify token&quot;</span><span style="color: #555555">,</span> e<span style="color: #555555">);</span>
-        <span style="color: #555555">}</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> Authentication <span style="color:#c0f">authenticate</span><span style="color:#555">(</span>Authentication authentication<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> AuthenticationException <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">try</span> <span style="color:#555">{</span>
+            Optional<span style="color:#555">&lt;</span>MinimalProfile<span style="color:#555">&gt;</span> possibleProfile <span style="color:#555">=</span> jwtService<span style="color:#555">.</span><span style="color:#309">verify</span><span style="color:#555">((</span>String<span style="color:#555">)</span> authentication<span style="color:#555">.</span><span style="color:#309">getCredentials</span><span style="color:#555">());</span>
+            <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">new</span> JwtAuthenticatedProfile<span style="color:#555">(</span>possibleProfile<span style="color:#555">.</span><span style="color:#309">get</span><span style="color:#555">());</span>
+        <span style="color:#555">}</span> <span style="color:#069;font-weight:bold">catch</span> <span style="color:#555">(</span>Exception e<span style="color:#555">)</span> <span style="color:#555">{</span>
+            <span style="color:#069;font-weight:bold">throw</span> <span style="color:#069;font-weight:bold">new</span> JwtAuthenticationException<span style="color:#555">(</span><span style="color:#c30">&#34;Failed to verify token&#34;</span><span style="color:#555">,</span> e<span style="color:#555">);</span>
+        <span style="color:#555">}</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">boolean</span> <span style="color: #CC00FF">supports</span><span style="color: #555555">(</span>Class<span style="color: #555555">&lt;?&gt;</span> authentication<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> JwtAuthToken<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">.</span><span style="color: #330099">equals</span><span style="color: #555555">(</span>authentication<span style="color: #555555">);</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">boolean</span> <span style="color:#c0f">supports</span><span style="color:#555">(</span>Class<span style="color:#555">&lt;?&gt;</span> authentication<span style="color:#555">)</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> JwtAuthToken<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">.</span><span style="color:#309">equals</span><span style="color:#555">(</span>authentication<span style="color:#555">);</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p><code>JwtAuthenticatedProfile</code> is another implementation of <code>Authentication</code> that wraps the user&rsquo;s profile information:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">JwtAuthenticatedProfile</span> <span style="color: #006699; font-weight: bold">implements</span> Authentication <span style="color: #555555">{</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">JwtAuthenticatedProfile</span> <span style="color:#069;font-weight:bold">implements</span> Authentication <span style="color:#555">{</span>
 
-    <span style="color: #006699; font-weight: bold">private</span> <span style="color: #006699; font-weight: bold">final</span> MinimalProfile minimalProfile<span style="color: #555555">;</span>
+    <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">final</span> MinimalProfile minimalProfile<span style="color:#555">;</span>
 
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #CC00FF">JwtAuthenticatedProfile</span><span style="color: #555555">(</span>MinimalProfile minimalProfile<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">this</span><span style="color: #555555">.</span><span style="color: #330099">minimalProfile</span> <span style="color: #555555">=</span> minimalProfile<span style="color: #555555">;</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">JwtAuthenticatedProfile</span><span style="color:#555">(</span>MinimalProfile minimalProfile<span style="color:#555">)</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">this</span><span style="color:#555">.</span><span style="color:#309">minimalProfile</span> <span style="color:#555">=</span> minimalProfile<span style="color:#555">;</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> Collection<span style="color: #555555">&lt;?</span> <span style="color: #006699; font-weight: bold">extends</span> GrantedAuthority<span style="color: #555555">&gt;</span> <span style="color: #CC00FF">getAuthorities</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> Collections<span style="color: #555555">.</span><span style="color: #330099">singletonList</span><span style="color: #555555">(</span><span style="color: #006699; font-weight: bold">new</span> SimpleGrantedAuthority<span style="color: #555555">(</span><span style="color: #CC3300">&quot;ROLE_USER&quot;</span><span style="color: #555555">));</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> Collection<span style="color:#555">&lt;?</span> <span style="color:#069;font-weight:bold">extends</span> GrantedAuthority<span style="color:#555">&gt;</span> <span style="color:#c0f">getAuthorities</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> Collections<span style="color:#555">.</span><span style="color:#309">singletonList</span><span style="color:#555">(</span><span style="color:#069;font-weight:bold">new</span> SimpleGrantedAuthority<span style="color:#555">(</span><span style="color:#c30">&#34;ROLE_USER&#34;</span><span style="color:#555">));</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> Object <span style="color: #CC00FF">getCredentials</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">null</span><span style="color: #555555">;</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> Object <span style="color:#c0f">getCredentials</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">null</span><span style="color:#555">;</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> Object <span style="color: #CC00FF">getDetails</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">null</span><span style="color: #555555">;</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> Object <span style="color:#c0f">getDetails</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">null</span><span style="color:#555">;</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> Object <span style="color: #CC00FF">getPrincipal</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">null</span><span style="color: #555555">;</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> Object <span style="color:#c0f">getPrincipal</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">null</span><span style="color:#555">;</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">boolean</span> <span style="color: #CC00FF">isAuthenticated</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">true</span><span style="color: #555555">;</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">boolean</span> <span style="color:#c0f">isAuthenticated</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">true</span><span style="color:#555">;</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">setAuthenticated</span><span style="color: #555555">(</span><span style="color: #007788; font-weight: bold">boolean</span> isAuthenticated<span style="color: #555555">)</span> <span style="color: #006699; font-weight: bold">throws</span> IllegalArgumentException <span style="color: #555555">{</span>
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">setAuthenticated</span><span style="color:#555">(</span><span style="color:#078;font-weight:bold">boolean</span> isAuthenticated<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> IllegalArgumentException <span style="color:#555">{</span>
 
-    <span style="color: #555555">}</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> String <span style="color: #CC00FF">getName</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> minimalProfile<span style="color: #555555">.</span><span style="color: #330099">getUsername</span><span style="color: #555555">();</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> String <span style="color:#c0f">getName</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> minimalProfile<span style="color:#555">.</span><span style="color:#309">getUsername</span><span style="color:#555">();</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>Next, we implement the verify functionality in <code>JwtService</code>.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>    <span style="color: #006699; font-weight: bold">public</span> Optional<span style="color: #555555">&lt;</span>MinimalProfile<span style="color: #555555">&gt;</span> <span style="color: #CC00FF">verify</span><span style="color: #555555">(</span>String token<span style="color: #555555">)</span> <span style="color: #006699; font-weight: bold">throws</span> IOException<span style="color: #555555">,</span> URISyntaxException <span style="color: #555555">{</span>
-        <span style="color: #007788; font-weight: bold">byte</span><span style="color: #555555">[]</span> secretKey <span style="color: #555555">=</span> secretKeyProvider<span style="color: #555555">.</span><span style="color: #330099">getKey</span><span style="color: #555555">();</span>
-        Jws<span style="color: #555555">&lt;</span>Claims<span style="color: #555555">&gt;</span> claims <span style="color: #555555">=</span> Jwts<span style="color: #555555">.</span><span style="color: #330099">parser</span><span style="color: #555555">().</span><span style="color: #330099">setSigningKey</span><span style="color: #555555">(</span>secretKey<span style="color: #555555">).</span><span style="color: #330099">parseClaimsJws</span><span style="color: #555555">(</span>token<span style="color: #555555">);</span>
-        <span style="color: #006699; font-weight: bold">return</span> profileService<span style="color: #555555">.</span><span style="color: #330099">minimal</span><span style="color: #555555">(</span>claims<span style="color: #555555">.</span><span style="color: #330099">getBody</span><span style="color: #555555">().</span><span style="color: #330099">getSubject</span><span style="color: #555555">().</span><span style="color: #330099">toString</span><span style="color: #555555">());</span>
-    <span style="color: #555555">}</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#069;font-weight:bold">public</span> Optional<span style="color:#555">&lt;</span>MinimalProfile<span style="color:#555">&gt;</span> <span style="color:#c0f">verify</span><span style="color:#555">(</span>String token<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> IOException<span style="color:#555">,</span> URISyntaxException <span style="color:#555">{</span>
+        <span style="color:#078;font-weight:bold">byte</span><span style="color:#555">[]</span> secretKey <span style="color:#555">=</span> secretKeyProvider<span style="color:#555">.</span><span style="color:#309">getKey</span><span style="color:#555">();</span>
+        Jws<span style="color:#555">&lt;</span>Claims<span style="color:#555">&gt;</span> claims <span style="color:#555">=</span> Jwts<span style="color:#555">.</span><span style="color:#309">parser</span><span style="color:#555">().</span><span style="color:#309">setSigningKey</span><span style="color:#555">(</span>secretKey<span style="color:#555">).</span><span style="color:#309">parseClaimsJws</span><span style="color:#555">(</span>token<span style="color:#555">);</span>
+        <span style="color:#069;font-weight:bold">return</span> profileService<span style="color:#555">.</span><span style="color:#309">minimal</span><span style="color:#555">(</span>claims<span style="color:#555">.</span><span style="color:#309">getBody</span><span style="color:#555">().</span><span style="color:#309">getSubject</span><span style="color:#555">().</span><span style="color:#309">toString</span><span style="color:#555">());</span>
+    <span style="color:#555">}</span></code></pre></div>
 <p>When we generated the JWT, we had set the username as the JWT subject.</p>
 
 <p>The last thing to do is to ensure that we handle exceptions that occur during token verification gracefully. Since the token verification is happening outside controllers, we won&rsquo;t be able to leverage <code>ControllerAdvice</code> to handle exceptions. This is where Spring Security&rsquo;s <code>AuthenticationEntryPoint</code> comes in to play. We will configure a custom <code>AuthenticationEntryPoint</code> as follows:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>        http<span style="color: #555555">.</span><span style="color: #330099">authorizeRequests</span><span style="color: #555555">()</span>
-                <span style="color: #555555">.</span><span style="color: #330099">antMatchers</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;/login&quot;</span><span style="color: #555555">,</span> <span style="color: #CC3300">&quot;/bower_components/**/*&quot;</span><span style="color: #555555">,</span> <span style="color: #CC3300">&quot;/app/**/*&quot;</span><span style="color: #555555">,</span> <span style="color: #CC3300">&quot;/index.html&quot;</span><span style="color: #555555">)</span>
-                <span style="color: #555555">.</span><span style="color: #330099">permitAll</span><span style="color: #555555">()</span>
-                <span style="color: #555555">.</span><span style="color: #330099">antMatchers</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;/**/*&quot;</span><span style="color: #555555">)</span>
-                <span style="color: #555555">.</span><span style="color: #330099">hasAuthority</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;ROLE_USER&quot;</span><span style="color: #555555">)</span>
-                <span style="color: #555555">.</span><span style="color: #330099">and</span><span style="color: #555555">()</span>
-                <span style="color: #555555">.</span><span style="color: #330099">addFilterBefore</span><span style="color: #555555">(</span>jwtAuthFilter<span style="color: #555555">,</span> UsernamePasswordAuthenticationFilter<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">)</span>
-                <span style="color: #555555">.</span><span style="color: #330099">exceptionHandling</span><span style="color: #555555">()</span>
-                <span style="color: #555555">.</span><span style="color: #330099">authenticationEntryPoint</span><span style="color: #555555">(</span>jwtAuthEndPoint<span style="color: #555555">);</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">        http<span style="color:#555">.</span><span style="color:#309">authorizeRequests</span><span style="color:#555">()</span>
+                <span style="color:#555">.</span><span style="color:#309">antMatchers</span><span style="color:#555">(</span><span style="color:#c30">&#34;/login&#34;</span><span style="color:#555">,</span> <span style="color:#c30">&#34;/bower_components/**/*&#34;</span><span style="color:#555">,</span> <span style="color:#c30">&#34;/app/**/*&#34;</span><span style="color:#555">,</span> <span style="color:#c30">&#34;/index.html&#34;</span><span style="color:#555">)</span>
+                <span style="color:#555">.</span><span style="color:#309">permitAll</span><span style="color:#555">()</span>
+                <span style="color:#555">.</span><span style="color:#309">antMatchers</span><span style="color:#555">(</span><span style="color:#c30">&#34;/**/*&#34;</span><span style="color:#555">)</span>
+                <span style="color:#555">.</span><span style="color:#309">hasAuthority</span><span style="color:#555">(</span><span style="color:#c30">&#34;ROLE_USER&#34;</span><span style="color:#555">)</span>
+                <span style="color:#555">.</span><span style="color:#309">and</span><span style="color:#555">()</span>
+                <span style="color:#555">.</span><span style="color:#309">addFilterBefore</span><span style="color:#555">(</span>jwtAuthFilter<span style="color:#555">,</span> UsernamePasswordAuthenticationFilter<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">)</span>
+                <span style="color:#555">.</span><span style="color:#309">exceptionHandling</span><span style="color:#555">()</span>
+                <span style="color:#555">.</span><span style="color:#309">authenticationEntryPoint</span><span style="color:#555">(</span>jwtAuthEndPoint<span style="color:#555">);</span></code></pre></div>
 <p>Our entry point, sets the HTTP status to <code>403</code>, and sets the response body to a JSON showing the error.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@Component</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">JwtAuthenticationEntryPoint</span> <span style="color: #006699; font-weight: bold">implements</span> AuthenticationEntryPoint <span style="color: #555555">{</span>
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">commence</span><span style="color: #555555">(</span>HttpServletRequest httpServletRequest<span style="color: #555555">,</span> HttpServletResponse httpServletResponse<span style="color: #555555">,</span> AuthenticationException e<span style="color: #555555">)</span>
-            <span style="color: #006699; font-weight: bold">throws</span> IOException<span style="color: #555555">,</span> ServletException <span style="color: #555555">{</span>
-        httpServletResponse<span style="color: #555555">.</span><span style="color: #330099">setStatus</span><span style="color: #555555">(</span>SC_FORBIDDEN<span style="color: #555555">);</span>
-        httpServletResponse<span style="color: #555555">.</span><span style="color: #330099">setContentType</span><span style="color: #555555">(</span>MediaType<span style="color: #555555">.</span><span style="color: #330099">APPLICATION_JSON_VALUE</span><span style="color: #555555">);</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Component</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">JwtAuthenticationEntryPoint</span> <span style="color:#069;font-weight:bold">implements</span> AuthenticationEntryPoint <span style="color:#555">{</span>
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">commence</span><span style="color:#555">(</span>HttpServletRequest httpServletRequest<span style="color:#555">,</span> HttpServletResponse httpServletResponse<span style="color:#555">,</span> AuthenticationException e<span style="color:#555">)</span>
+            <span style="color:#069;font-weight:bold">throws</span> IOException<span style="color:#555">,</span> ServletException <span style="color:#555">{</span>
+        httpServletResponse<span style="color:#555">.</span><span style="color:#309">setStatus</span><span style="color:#555">(</span>SC_FORBIDDEN<span style="color:#555">);</span>
+        httpServletResponse<span style="color:#555">.</span><span style="color:#309">setContentType</span><span style="color:#555">(</span>MediaType<span style="color:#555">.</span><span style="color:#309">APPLICATION_JSON_VALUE</span><span style="color:#555">);</span>
 
-        String message<span style="color: #555555">;</span>
-        <span style="color: #006699; font-weight: bold">if</span><span style="color: #555555">(</span>e<span style="color: #555555">.</span><span style="color: #330099">getCause</span><span style="color: #555555">()</span> <span style="color: #555555">!=</span> <span style="color: #006699; font-weight: bold">null</span><span style="color: #555555">)</span> <span style="color: #555555">{</span>
-            message <span style="color: #555555">=</span> e<span style="color: #555555">.</span><span style="color: #330099">getCause</span><span style="color: #555555">().</span><span style="color: #330099">getMessage</span><span style="color: #555555">();</span>
-        <span style="color: #555555">}</span> <span style="color: #006699; font-weight: bold">else</span> <span style="color: #555555">{</span>
-            message <span style="color: #555555">=</span> e<span style="color: #555555">.</span><span style="color: #330099">getMessage</span><span style="color: #555555">();</span>
-        <span style="color: #555555">}</span>
-        <span style="color: #007788; font-weight: bold">byte</span><span style="color: #555555">[]</span> body <span style="color: #555555">=</span> <span style="color: #006699; font-weight: bold">new</span> ObjectMapper<span style="color: #555555">()</span>
-                <span style="color: #555555">.</span><span style="color: #330099">writeValueAsBytes</span><span style="color: #555555">(</span>Collections<span style="color: #555555">.</span><span style="color: #330099">singletonMap</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;error&quot;</span><span style="color: #555555">,</span> message<span style="color: #555555">));</span>
-        httpServletResponse<span style="color: #555555">.</span><span style="color: #330099">getOutputStream</span><span style="color: #555555">().</span><span style="color: #330099">write</span><span style="color: #555555">(</span>body<span style="color: #555555">);</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+        String message<span style="color:#555">;</span>
+        <span style="color:#069;font-weight:bold">if</span><span style="color:#555">(</span>e<span style="color:#555">.</span><span style="color:#309">getCause</span><span style="color:#555">()</span> <span style="color:#555">!=</span> <span style="color:#069;font-weight:bold">null</span><span style="color:#555">)</span> <span style="color:#555">{</span>
+            message <span style="color:#555">=</span> e<span style="color:#555">.</span><span style="color:#309">getCause</span><span style="color:#555">().</span><span style="color:#309">getMessage</span><span style="color:#555">();</span>
+        <span style="color:#555">}</span> <span style="color:#069;font-weight:bold">else</span> <span style="color:#555">{</span>
+            message <span style="color:#555">=</span> e<span style="color:#555">.</span><span style="color:#309">getMessage</span><span style="color:#555">();</span>
+        <span style="color:#555">}</span>
+        <span style="color:#078;font-weight:bold">byte</span><span style="color:#555">[]</span> body <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">new</span> ObjectMapper<span style="color:#555">()</span>
+                <span style="color:#555">.</span><span style="color:#309">writeValueAsBytes</span><span style="color:#555">(</span>Collections<span style="color:#555">.</span><span style="color:#309">singletonMap</span><span style="color:#555">(</span><span style="color:#c30">&#34;error&#34;</span><span style="color:#555">,</span> message<span style="color:#555">));</span>
+        httpServletResponse<span style="color:#555">.</span><span style="color:#309">getOutputStream</span><span style="color:#555">().</span><span style="color:#309">write</span><span style="color:#555">(</span>body<span style="color:#555">);</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>With this configuration in place, we can request a token and make a subsequent request with the received JWT.</p>
 
 <pre><code>$ curl -i -X POST &quot;http://localhost:8080/login&quot; -d '{&quot;username&quot;:&quot;greenrabbit948&quot;, &quot;password&quot;:&quot;celeste&quot;}' --header &quot;Content-Type: application/json&quot;
@@ -439,36 +391,6 @@ $ curl -s &quot;http://localhost:8080/profile/details/yellowfrog347&quot; --head
             <p class="comments">
   If you have questions or comments about this blog post, you can get in touch with me on Twitter <a href="https://twitter.com/sdqali">@sdqali</a>.
 </p>
-
-            <div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Found this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and explanations for specific Java, Spring and other programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
 
           </div>
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">

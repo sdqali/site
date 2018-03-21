@@ -2,99 +2,31 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Elisp on {code that works}</title>
-    <link>https://sdqali.in/categories/elisp/?utm_source=site&amp;utm_medium=feed</link>
+    <link>https://sdqali.in/categories/elisp/</link>
     <description>Recent content in Elisp on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
     <lastBuildDate>Mon, 29 Apr 2013 00:00:00 +0000</lastBuildDate>
-    <atom:link href="/categories/elisp/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    
+	<atom:link href="https://sdqali.in/categories/elisp/index.xml" rel="self" type="application/rss+xml" />
+    
     
     <item>
       <title>Emacs hack: Viewing Git logs while composing commit messages</title>
-      <link>https://sdqali.in/blog/2013/04/29/emacs-hack-viewing-git-logs-while-composing-commit-messages/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sdqali.in/blog/2013/04/29/emacs-hack-viewing-git-logs-while-composing-commit-messages/</link>
       <pubDate>Mon, 29 Apr 2013 00:00:00 +0000</pubDate>
       
-      <guid>https://sdqali.in/blog/2013/04/29/emacs-hack-viewing-git-logs-while-composing-commit-messages/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>&lt;p&gt;I use Emacs as my editor to compose Git commit messages. I almost never commit from the terminal with &lt;code&gt;git commit -m&lt;/code&gt;. This approach has two advantages: I get a chance to verify what is being committed and get to compose the message using a proper editor complete with spell checking provided by &lt;em&gt;flyspell mode&lt;/em&gt;. One thing I wish I had access to while composing commit messages is the git log. This is useful to refer to work items and encourages one to use a consistent style in the messages. This was easier in the terminal as one could do something like &lt;code&gt;git log -n 3&lt;/code&gt; and then commit with the &lt;code&gt;-m&lt;/code&gt; flag.&lt;/p&gt;
-
-&lt;p&gt;I decided to fix this today and some tinkering later came up with a hack tp do this.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Git commit messages are stored in the &lt;code&gt;COMMIT_EDITMSG&lt;/code&gt; file under &lt;code&gt;.git/&lt;/code&gt;. So the first thing to do is to ensure that this file always gets loaded with a custom minor mode. This can be done as follows:&lt;/li&gt;
-&lt;/ul&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #003333&#34;&gt;add-to-list&lt;/span&gt; &lt;span style=&#34;color: #FFCC33&#34;&gt;&amp;#39;auto-mode-alist&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;&amp;#39;&lt;/span&gt;(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;\\COMMIT_EDITMSG\\&amp;#39;&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;load-magit-log-when-committing-mode&lt;/span&gt;))
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;The minor mode does not need to do anything. The definition would be like this:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #003333&#34;&gt;define-minor-mode&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;load-magit-log-when-committing-mode&lt;/span&gt;
-  &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;dummy&amp;quot;&lt;/span&gt;)
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Next step is to add a custom hook that gets run after loading the minor mode. This hook calls the function to load git logs. The code for this is:&lt;/li&gt;
-&lt;/ul&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #003333&#34;&gt;add-hook&lt;/span&gt; &lt;span style=&#34;color: #FFCC33&#34;&gt;&amp;#39;load-magit-log-when-committing-mode-hook&lt;/span&gt; &lt;span style=&#34;color: #FFCC33&#34;&gt;&amp;#39;show-magit-log-hook&lt;/span&gt;)
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;ul&gt;
-&lt;li&gt;The actual function to load git logs. It calls &lt;code&gt;magit-log&lt;/code&gt; to load the logs and then opens the original &lt;code&gt;COMMIT_EDITMSG&lt;/code&gt; in the other frame.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #336666&#34;&gt;defun&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;show-magit-log-hook&lt;/span&gt; ()
-  (&lt;span style=&#34;color: #003333&#34;&gt;cd&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;..&amp;quot;&lt;/span&gt;)
-  (&lt;span style=&#34;color: #003333&#34;&gt;magit-log&lt;/span&gt;)
-  (&lt;span style=&#34;color: #003333&#34;&gt;switch-to-buffer-other-window&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;COMMIT_EDITMSG&amp;quot;&lt;/span&gt;))
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;This is how Emacs looks while committing with this hack in place:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://sdqali.in/images/screenshot_git_commit_log.png&#34; alt=&#34;&amp;quot;Screenshot showing git commit log&amp;quot;&#34; title=&#34;Screenshot showing git commit log&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;If you want to use this, copy the following snippet to your &lt;code&gt;init.el&lt;/code&gt;.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;;; load-magit-log-when-committing-mode&lt;/span&gt;
-(&lt;span style=&#34;color: #003333&#34;&gt;define-minor-mode&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;load-magit-log-when-committing-mode&lt;/span&gt;
-  &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;dummy&amp;quot;&lt;/span&gt;)
-
-&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;;; the hook&lt;/span&gt;
-(&lt;span style=&#34;color: #336666&#34;&gt;defun&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;show-magit-log-hook&lt;/span&gt; ()
-  (&lt;span style=&#34;color: #003333&#34;&gt;cd&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;..&amp;quot;&lt;/span&gt;)
-  (&lt;span style=&#34;color: #003333&#34;&gt;magit-log&lt;/span&gt;)
-  (&lt;span style=&#34;color: #003333&#34;&gt;switch-to-buffer-other-window&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;COMMIT_EDITMSG&amp;quot;&lt;/span&gt;))
-
-&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;;; add the hook&lt;/span&gt;
-(&lt;span style=&#34;color: #003333&#34;&gt;add-hook&lt;/span&gt; &lt;span style=&#34;color: #FFCC33&#34;&gt;&amp;#39;load-magit-log-when-committing-mode-hook&lt;/span&gt; &lt;span style=&#34;color: #FFCC33&#34;&gt;&amp;#39;show-magit-log-hook&lt;/span&gt;)
-
-&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;;; load the mode for commit message&lt;/span&gt;
-(&lt;span style=&#34;color: #003333&#34;&gt;add-to-list&lt;/span&gt; &lt;span style=&#34;color: #FFCC33&#34;&gt;&amp;#39;auto-mode-alist&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;&amp;#39;&lt;/span&gt;(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;\\COMMIT_EDITMSG\\&amp;#39;&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;load-magit-log-when-committing-mode&lt;/span&gt;))
-&lt;/pre&gt;&lt;/div&gt;
-</description>
+      <guid>https://sdqali.in/blog/2013/04/29/emacs-hack-viewing-git-logs-while-composing-commit-messages/</guid>
+      <description>I use Emacs as my editor to compose Git commit messages. I almost never commit from the terminal with git commit -m. This approach has two advantages: I get a chance to verify what is being committed and get to compose the message using a proper editor complete with spell checking provided by flyspell mode. One thing I wish I had access to while composing commit messages is the git log.</description>
     </item>
     
     <item>
       <title>Fixing Flyspell for Emacs in Mac OS X</title>
-      <link>https://sdqali.in/blog/2012/05/04/fixing-flyspell-for-emacs-in-mac-os-x/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sdqali.in/blog/2012/05/04/fixing-flyspell-for-emacs-in-mac-os-x/</link>
       <pubDate>Fri, 04 May 2012 00:00:00 +0000</pubDate>
       
-      <guid>https://sdqali.in/blog/2012/05/04/fixing-flyspell-for-emacs-in-mac-os-x/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>
-
-&lt;p&gt;I use the &lt;a href=&#34;http://www.emacswiki.org/emacs/FlySpell&#34;&gt;flyspell-mode&lt;/a&gt; as a spell checking mechanism in emacs. Recently, I moved to Mac OS X, and I began to get this error whenever I started emacs:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;Error enabling Flyspell mode:
-&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;Searching &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;for&lt;/span&gt; program No such file or directory aspell&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;I had installed aspell with Homebrew. The issue seemed to be that Emacs was unable to find the aspell binary. Homebrew installs binaries in &lt;strong&gt;/usr/local/bin&lt;/strong&gt; and it was in my $PATH. It turns out Emacs uses it&amp;rsquo;s own exec path to look for binaries to execute in sub-processes. So the fix is to add the &lt;strong&gt;/usr/local/bin&lt;/strong&gt; path to the exec-path. This is the change needed to the &lt;strong&gt;~/.emacs&lt;/strong&gt; file:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;&amp;#39;&lt;/span&gt;(&lt;span style=&#34;color: #003333&#34;&gt;exec-path&lt;/span&gt; (&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;quote&lt;/span&gt; (&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;/usr/bin&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;/bin&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;/usr/sbin&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;/sbin&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;/usr/local/bin&amp;quot;&lt;/span&gt;))))
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;Notice the &lt;strong&gt;/usr/local/bin&lt;/strong&gt; in there.&lt;/p&gt;
-
-&lt;h2 id=&#34;update&#34;&gt;Update&lt;/h2&gt;
-
-&lt;p&gt;This does not seem to work. A better way to do this is to add the
-following:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #003333&#34;&gt;setenv&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;PATH&amp;quot;&lt;/span&gt; (&lt;span style=&#34;color: #003333&#34;&gt;concat&lt;/span&gt; (&lt;span style=&#34;color: #003333&#34;&gt;getenv&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;PATH&amp;quot;&lt;/span&gt;) &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;:/usr/local/bin&amp;quot;&lt;/span&gt;))
-(&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;setq&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;exec-path&lt;/span&gt; (&lt;span style=&#34;color: #336666&#34;&gt;append&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;exec-path&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;&amp;#39;&lt;/span&gt;(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;/usr/local/bin&amp;quot;&lt;/span&gt;)))
-&lt;/pre&gt;&lt;/div&gt;
-</description>
+      <guid>https://sdqali.in/blog/2012/05/04/fixing-flyspell-for-emacs-in-mac-os-x/</guid>
+      <description>I use the flyspell-mode as a spell checking mechanism in emacs. Recently, I moved to Mac OS X, and I began to get this error whenever I started emacs:
+Error enabling Flyspell mode: (Searching for program No such file or directory aspell) I had installed aspell with Homebrew. The issue seemed to be that Emacs was unable to find the aspell binary. Homebrew installs binaries in /usr/local/bin and it was in my $PATH.</description>
     </item>
     
   </channel>

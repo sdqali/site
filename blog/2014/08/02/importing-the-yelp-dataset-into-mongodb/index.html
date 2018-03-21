@@ -118,7 +118,7 @@ The data is available as files with each line representing a JSON object." itemp
          itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div class="row">
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-            <p>Today Yelp announced their dataset challenge <sup class="footnote-ref" id="fnref:1"><a rel="footnote" href="#fn:1">1</a></sup>. The dataset they released includes data from 5 cities (Phoenix, Las Vegas, Madison, Waterloo and Edinburgh) and consists of</p>
+            <p>Today Yelp announced their dataset challenge <sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup>. The dataset they released includes data from 5 cities (Phoenix, Las Vegas, Madison, Waterloo and Edinburgh) and consists of</p>
 
 <ul>
 <li>42,153 businesses</li>
@@ -130,50 +130,44 @@ The data is available as files with each line representing a JSON object." itemp
 <li>1,125,458 reviews</li>
 </ul>
 
-<p>The data is available for public consumption, although Yelp owns any derivative dataset you create from the original <sup class="footnote-ref" id="fnref:2"><a rel="footnote" href="#fn:2">2</a></sup>.</p>
+<p>The data is available for public consumption, although Yelp owns any derivative dataset you create from the original <sup class="footnote-ref" id="fnref:2"><a href="#fn:2">2</a></sup>.</p>
 
 <p>The data is available as files with each line representing a JSON object. Since I am using MongoDB these days to analyze geospatial data, I wanted to convert this into an easy format that I could import into Mongo. Mongo puts a strict constraint on how a location needs to be specified - It expects a location field in a document to be an array in the format <code>[longitude, latitude]</code>.</p>
 
 <p>With this in mind, the first step is to convert and transform the objects into objects that Mongo can make sense of. The following Ruby script does the job:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #0099FF; font-style: italic">#!/usr/bin/env ruby</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ruby" data-lang="ruby"><span style="color:#09f;font-style:italic">#!/usr/bin/env ruby</span>
 
-<span style="color: #336666">require</span> <span style="color: #CC3300">&quot;json&quot;</span>
+<span style="color:#366">require</span> <span style="color:#c30">&#34;json&#34;</span>
 
-businesses <span style="color: #555555">=</span> <span style="color: #336600">IO</span><span style="color: #555555">.</span>readlines(<span style="color: #CC3300">&quot;yelp.business.json&quot;</span>)<span style="color: #555555">.</span>map <span style="color: #006699; font-weight: bold">do</span> <span style="color: #555555">|</span>line<span style="color: #555555">|</span>
-  b <span style="color: #555555">=</span> <span style="color: #336600">JSON</span><span style="color: #555555">.</span>parse(line)
-  b<span style="color: #555555">[</span><span style="color: #CC3300">&quot;location&quot;</span><span style="color: #555555">]</span> <span style="color: #555555">=</span> {
-    <span style="color: #CC3300">&quot;type&quot;</span> <span style="color: #555555">=&gt;</span> <span style="color: #CC3300">&quot;Point&quot;</span>,
-    <span style="color: #CC3300">&quot;coordinates&quot;</span> <span style="color: #555555">=&gt;</span> <span style="color: #555555">[</span>b<span style="color: #555555">[</span><span style="color: #CC3300">&quot;longitude&quot;</span><span style="color: #555555">]</span>, b<span style="color: #555555">[</span><span style="color: #CC3300">&quot;latitude&quot;</span><span style="color: #555555">]]</span>
+businesses <span style="color:#555">=</span> <span style="color:#360">IO</span><span style="color:#555">.</span>readlines(<span style="color:#c30">&#34;yelp.business.json&#34;</span>)<span style="color:#555">.</span>map <span style="color:#069;font-weight:bold">do</span> <span style="color:#555">|</span>line<span style="color:#555">|</span>
+  b <span style="color:#555">=</span> <span style="color:#360">JSON</span><span style="color:#555">.</span>parse(line)
+  b<span style="color:#555">[</span><span style="color:#c30">&#34;location&#34;</span><span style="color:#555">]</span> <span style="color:#555">=</span> {
+    <span style="color:#c30">&#34;type&#34;</span> <span style="color:#555">=&gt;</span> <span style="color:#c30">&#34;Point&#34;</span>,
+    <span style="color:#c30">&#34;coordinates&#34;</span> <span style="color:#555">=&gt;</span> <span style="color:#555">[</span>b<span style="color:#555">[</span><span style="color:#c30">&#34;longitude&#34;</span><span style="color:#555">]</span>, b<span style="color:#555">[</span><span style="color:#c30">&#34;latitude&#34;</span><span style="color:#555">]]</span>
   }
   b
-<span style="color: #006699; font-weight: bold">end</span>
-<span style="color: #336600">IO</span><span style="color: #555555">.</span>write <span style="color: #CC3300">&quot;businesses.mongo.json&quot;</span>, businesses<span style="color: #555555">.</span>to_json
-</pre></div>
-
+<span style="color:#069;font-weight:bold">end</span>
+<span style="color:#360">IO</span><span style="color:#555">.</span>write <span style="color:#c30">&#34;businesses.mongo.json&#34;</span>, businesses<span style="color:#555">.</span>to_json</code></pre></div>
 <p>The next step is to import this data into Mongo using the <code>mongoimport</code> tool.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>mongoimport --collection businesses --file businesses.mongo.json --jsonArray
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">mongoimport --collection businesses --file businesses.mongo.json --jsonArray</code></pre></div>
 <p>We need the <code>--jsonArray</code> parameter because our data is an array.</p>
 
 <p>Since there are 42153 businesses, it will take some time. On my Macbook Pro, it took around 2 minutes, 10 seconds. Once the import is done, make sure that we have a Geospatial index on the <code>location</code> field.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>db.businesses.ensureIndex({location<span style="color: #555555">:</span> <span style="color: #CC3300">&quot;2dsphere&quot;</span>})
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript">db.businesses.ensureIndex({location<span style="color:#555">:</span> <span style="color:#c30">&#34;2dsphere&#34;</span>})
+</code></pre></div>
 <p>Once the indexing is done, we can use Mongo&rsquo;s Geospatial queries to find interesting things. As an example, here we look up all the restaurants within 1 kilometer distance from downtown Phoenix.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>db.businesses.find({
-  location<span style="color: #555555">:</span> {
-    $near<span style="color: #555555">:</span> {
-      $geometry<span style="color: #555555">:</span> {
-	type<span style="color: #555555">:</span> <span style="color: #CC3300">&quot;Point&quot;</span>,
-	coordinates<span style="color: #555555">:</span> [<span style="color: #555555">-</span><span style="color: #FF6600">112.0667</span>, <span style="color: #FF6600">33.4500</span>]
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript">db.businesses.find({
+  location<span style="color:#555">:</span> {
+    $near<span style="color:#555">:</span> {
+      $geometry<span style="color:#555">:</span> {
+	type<span style="color:#555">:</span> <span style="color:#c30">&#34;Point&#34;</span>,
+	coordinates<span style="color:#555">:</span> [<span style="color:#555">-</span><span style="color:#f60">112.0667</span>, <span style="color:#f60">33.4500</span>]
       },
-      $maxDistance<span style="color: #555555">:</span> <span style="color: #FF6600">1000</span>
+      $maxDistance<span style="color:#555">:</span> <span style="color:#f60">1000</span>
     }
   }
 })
-</pre></div>
-
+</code></pre></div>
 <p>Happy hacking.</p>
 <div class="footnotes">
 
@@ -190,36 +184,6 @@ businesses <span style="color: #555555">=</span> <span style="color: #336600">IO
             <p class="comments">
   If you have questions or comments about this blog post, you can get in touch with me on Twitter <a href="https://twitter.com/sdqali">@sdqali</a>.
 </p>
-
-            <div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Found this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and explanations for specific Java, Spring and other programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
 
           </div>
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">

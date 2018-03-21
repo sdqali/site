@@ -139,222 +139,172 @@ These are the blog posts in this series:</p>
 <h2 id="structure-of-the-user-profile">Structure of the User Profile</h2>
 
 <p>For this example, I specifically generated 500 random profiles with only a subset of fields - <code>name</code>, <code>email</code>, <code>login</code> and <code>picture</code>. With these fields, a profile has the following structure:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>{
-  <span style="color: #330099; font-weight: bold">&quot;name&quot;</span>: {
-    <span style="color: #330099; font-weight: bold">&quot;title&quot;</span>: <span style="color: #CC3300">&quot;mr&quot;</span>,
-    <span style="color: #330099; font-weight: bold">&quot;first&quot;</span>: <span style="color: #CC3300">&quot;matt&quot;</span>,
-    <span style="color: #330099; font-weight: bold">&quot;last&quot;</span>: <span style="color: #CC3300">&quot;hahn&quot;</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+  <span style="color:#309;font-weight:bold">&#34;name&#34;</span>: {
+    <span style="color:#309;font-weight:bold">&#34;title&#34;</span>: <span style="color:#c30">&#34;mr&#34;</span>,
+    <span style="color:#309;font-weight:bold">&#34;first&#34;</span>: <span style="color:#c30">&#34;matt&#34;</span>,
+    <span style="color:#309;font-weight:bold">&#34;last&#34;</span>: <span style="color:#c30">&#34;hahn&#34;</span>
   },
-  <span style="color: #330099; font-weight: bold">&quot;email&quot;</span>: <span style="color: #CC3300">&quot;matt.hahn@example.com&quot;</span>,
-  <span style="color: #330099; font-weight: bold">&quot;login&quot;</span>: {
-    <span style="color: #330099; font-weight: bold">&quot;username&quot;</span>: <span style="color: #CC3300">&quot;greenostrich307&quot;</span>,
-    <span style="color: #330099; font-weight: bold">&quot;password&quot;</span>: <span style="color: #CC3300">&quot;darkange&quot;</span>,
-    <span style="color: #330099; font-weight: bold">&quot;salt&quot;</span>: <span style="color: #CC3300">&quot;V5xi38lN&quot;</span>,
-    <span style="color: #330099; font-weight: bold">&quot;md5&quot;</span>: <span style="color: #CC3300">&quot;cba0d5fb77ae3e0dbe177b9624df5ceb&quot;</span>,
-    <span style="color: #330099; font-weight: bold">&quot;sha1&quot;</span>: <span style="color: #CC3300">&quot;5f22fdcc79affdef604d89b64b7db599ed454c5e&quot;</span>,
-    <span style="color: #330099; font-weight: bold">&quot;sha256&quot;</span>: <span style="color: #CC3300">&quot;23afb0983e874169669f96cd72b69234aef4cf54a86f89a25e14e91941ac95a2&quot;</span>
+  <span style="color:#309;font-weight:bold">&#34;email&#34;</span>: <span style="color:#c30">&#34;matt.hahn@example.com&#34;</span>,
+  <span style="color:#309;font-weight:bold">&#34;login&#34;</span>: {
+    <span style="color:#309;font-weight:bold">&#34;username&#34;</span>: <span style="color:#c30">&#34;greenostrich307&#34;</span>,
+    <span style="color:#309;font-weight:bold">&#34;password&#34;</span>: <span style="color:#c30">&#34;darkange&#34;</span>,
+    <span style="color:#309;font-weight:bold">&#34;salt&#34;</span>: <span style="color:#c30">&#34;V5xi38lN&#34;</span>,
+    <span style="color:#309;font-weight:bold">&#34;md5&#34;</span>: <span style="color:#c30">&#34;cba0d5fb77ae3e0dbe177b9624df5ceb&#34;</span>,
+    <span style="color:#309;font-weight:bold">&#34;sha1&#34;</span>: <span style="color:#c30">&#34;5f22fdcc79affdef604d89b64b7db599ed454c5e&#34;</span>,
+    <span style="color:#309;font-weight:bold">&#34;sha256&#34;</span>: <span style="color:#c30">&#34;23afb0983e874169669f96cd72b69234aef4cf54a86f89a25e14e91941ac95a2&#34;</span>
   },
-  <span style="color: #330099; font-weight: bold">&quot;picture&quot;</span>: {
-    <span style="color: #330099; font-weight: bold">&quot;large&quot;</span>: <span style="color: #CC3300">&quot;https://randomuser.me/api/portraits/men/20.jpg&quot;</span>,
-    <span style="color: #330099; font-weight: bold">&quot;medium&quot;</span>: <span style="color: #CC3300">&quot;https://randomuser.me/api/portraits/med/men/20.jpg&quot;</span>,
-    <span style="color: #330099; font-weight: bold">&quot;thumbnail&quot;</span>: <span style="color: #CC3300">&quot;https://randomuser.me/api/portraits/thumb/men/20.jpg&quot;</span>
+  <span style="color:#309;font-weight:bold">&#34;picture&#34;</span>: {
+    <span style="color:#309;font-weight:bold">&#34;large&#34;</span>: <span style="color:#c30">&#34;https://randomuser.me/api/portraits/men/20.jpg&#34;</span>,
+    <span style="color:#309;font-weight:bold">&#34;medium&#34;</span>: <span style="color:#c30">&#34;https://randomuser.me/api/portraits/med/men/20.jpg&#34;</span>,
+    <span style="color:#309;font-weight:bold">&#34;thumbnail&#34;</span>: <span style="color:#c30">&#34;https://randomuser.me/api/portraits/thumb/men/20.jpg&#34;</span>
   }
-}
-</pre></div>
-
+}</code></pre></div>
 <p>At this point, you can see the password and hash in there. As I explained above, you <em>do not</em> want to do this in a real application. As such, this example focuses on JWT and we are doing this purely for convenience.</p>
 
 <h2 id="the-data-models">The data models</h2>
 
-<p>The models for representing the data provided from the random user generator are as follows. We will be using the Lombok <sup class="footnote-ref" id="fnref:1"><a rel="footnote" href="#fn:1">1</a></sup> <code>@Data</code> annotation to stay away from having to write explicit setters and getters.</p>
+<p>The models for representing the data provided from the random user generator are as follows. We will be using the Lombok <sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup> <code>@Data</code> annotation to stay away from having to write explicit setters and getters.</p>
 
 <h3 id="profile">Profile</h3>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">import</span> <span style="color: #00CCFF; font-weight: bold">lombok.Data</span><span style="color: #555555">;</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">import</span> <span style="color:#0cf;font-weight:bold">lombok.Data</span><span style="color:#555">;</span>
 
-<span style="color: #9999FF">@Data</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">Profile</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">private</span> Name name<span style="color: #555555">;</span>
-    <span style="color: #006699; font-weight: bold">private</span> String email<span style="color: #555555">;</span>
-    <span style="color: #006699; font-weight: bold">private</span> Login login<span style="color: #555555">;</span>
-    <span style="color: #006699; font-weight: bold">private</span> Picture picture<span style="color: #555555">;</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+<span style="color:#99f">@Data</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">Profile</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">private</span> Name name<span style="color:#555">;</span>
+    <span style="color:#069;font-weight:bold">private</span> String email<span style="color:#555">;</span>
+    <span style="color:#069;font-weight:bold">private</span> Login login<span style="color:#555">;</span>
+    <span style="color:#069;font-weight:bold">private</span> Picture picture<span style="color:#555">;</span>
+<span style="color:#555">}</span></code></pre></div>
 <h3 id="name">Name</h3>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@Data</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">Name</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">private</span> String title<span style="color: #555555">;</span>
-    <span style="color: #006699; font-weight: bold">private</span> String first<span style="color: #555555">;</span>
-    <span style="color: #006699; font-weight: bold">private</span> String last<span style="color: #555555">;</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Data</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">Name</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">private</span> String title<span style="color:#555">;</span>
+    <span style="color:#069;font-weight:bold">private</span> String first<span style="color:#555">;</span>
+    <span style="color:#069;font-weight:bold">private</span> String last<span style="color:#555">;</span>
+<span style="color:#555">}</span></code></pre></div>
 <h3 id="login">Login</h3>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@Data</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">Login</span> <span style="color: #555555">{</span>
-    String username<span style="color: #555555">;</span>
-    String password<span style="color: #555555">;</span>
-    String salt<span style="color: #555555">;</span>
-    String md5<span style="color: #555555">;</span>
-    String sha1<span style="color: #555555">;</span>
-    String sha256<span style="color: #555555">;</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Data</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">Login</span> <span style="color:#555">{</span>
+    String username<span style="color:#555">;</span>
+    String password<span style="color:#555">;</span>
+    String salt<span style="color:#555">;</span>
+    String md5<span style="color:#555">;</span>
+    String sha1<span style="color:#555">;</span>
+    String sha256<span style="color:#555">;</span>
+<span style="color:#555">}</span></code></pre></div>
 <h3 id="picture">Picture</h3>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@Data</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">Picture</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">private</span> URL large<span style="color: #555555">;</span>
-    <span style="color: #006699; font-weight: bold">private</span> URL medium<span style="color: #555555">;</span>
-    <span style="color: #006699; font-weight: bold">private</span> URL thumbnail<span style="color: #555555">;</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Data</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">Picture</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">private</span> URL large<span style="color:#555">;</span>
+    <span style="color:#069;font-weight:bold">private</span> URL medium<span style="color:#555">;</span>
+    <span style="color:#069;font-weight:bold">private</span> URL thumbnail<span style="color:#555">;</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>We will also create two other data models that expose a minimal set of profile information without the credentials.</p>
 
 <h3 id="minimalprofile">MinimalProfile</h3>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@Data</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">MinimalProfile</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">private</span> <span style="color: #006699; font-weight: bold">final</span> String username<span style="color: #555555">;</span>
-    <span style="color: #006699; font-weight: bold">private</span> <span style="color: #006699; font-weight: bold">final</span> Name name<span style="color: #555555">;</span>
-    <span style="color: #006699; font-weight: bold">private</span> <span style="color: #006699; font-weight: bold">final</span> URL thumbnail<span style="color: #555555">;</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Data</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">MinimalProfile</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">final</span> String username<span style="color:#555">;</span>
+    <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">final</span> Name name<span style="color:#555">;</span>
+    <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">final</span> URL thumbnail<span style="color:#555">;</span>
 
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #CC00FF">MinimalProfile</span><span style="color: #555555">(</span>Profile profile<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        name <span style="color: #555555">=</span> profile<span style="color: #555555">.</span><span style="color: #330099">getName</span><span style="color: #555555">();</span>
-        username <span style="color: #555555">=</span> profile<span style="color: #555555">.</span><span style="color: #330099">getLogin</span><span style="color: #555555">().</span><span style="color: #330099">getUsername</span><span style="color: #555555">();</span>
-        thumbnail <span style="color: #555555">=</span> profile<span style="color: #555555">.</span><span style="color: #330099">getPicture</span><span style="color: #555555">().</span><span style="color: #330099">getThumbnail</span><span style="color: #555555">();</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">MinimalProfile</span><span style="color:#555">(</span>Profile profile<span style="color:#555">)</span> <span style="color:#555">{</span>
+        name <span style="color:#555">=</span> profile<span style="color:#555">.</span><span style="color:#309">getName</span><span style="color:#555">();</span>
+        username <span style="color:#555">=</span> profile<span style="color:#555">.</span><span style="color:#309">getLogin</span><span style="color:#555">().</span><span style="color:#309">getUsername</span><span style="color:#555">();</span>
+        thumbnail <span style="color:#555">=</span> profile<span style="color:#555">.</span><span style="color:#309">getPicture</span><span style="color:#555">().</span><span style="color:#309">getThumbnail</span><span style="color:#555">();</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <h3 id="detailedprofile">DetailedProfile</h3>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@Data</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">DetailedProfile</span> <span style="color: #555555">{</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Data</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">DetailedProfile</span> <span style="color:#555">{</span>
 
-    <span style="color: #006699; font-weight: bold">private</span> <span style="color: #006699; font-weight: bold">final</span> Picture picture<span style="color: #555555">;</span>
-    <span style="color: #006699; font-weight: bold">private</span> <span style="color: #006699; font-weight: bold">final</span> Name name<span style="color: #555555">;</span>
-    <span style="color: #006699; font-weight: bold">private</span> <span style="color: #006699; font-weight: bold">final</span> String email<span style="color: #555555">;</span>
-    <span style="color: #006699; font-weight: bold">private</span> <span style="color: #006699; font-weight: bold">final</span> String username<span style="color: #555555">;</span>
+    <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">final</span> Picture picture<span style="color:#555">;</span>
+    <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">final</span> Name name<span style="color:#555">;</span>
+    <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">final</span> String email<span style="color:#555">;</span>
+    <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">final</span> String username<span style="color:#555">;</span>
 
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #CC00FF">DetailedProfile</span><span style="color: #555555">(</span>Profile profile<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        name <span style="color: #555555">=</span> profile<span style="color: #555555">.</span><span style="color: #330099">getName</span><span style="color: #555555">();</span>
-        email <span style="color: #555555">=</span> profile<span style="color: #555555">.</span><span style="color: #330099">getEmail</span><span style="color: #555555">();</span>
-        picture <span style="color: #555555">=</span> profile<span style="color: #555555">.</span><span style="color: #330099">getPicture</span><span style="color: #555555">();</span>
-        username <span style="color: #555555">=</span> profile<span style="color: #555555">.</span><span style="color: #330099">getLogin</span><span style="color: #555555">().</span><span style="color: #330099">getUsername</span><span style="color: #555555">();</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">DetailedProfile</span><span style="color:#555">(</span>Profile profile<span style="color:#555">)</span> <span style="color:#555">{</span>
+        name <span style="color:#555">=</span> profile<span style="color:#555">.</span><span style="color:#309">getName</span><span style="color:#555">();</span>
+        email <span style="color:#555">=</span> profile<span style="color:#555">.</span><span style="color:#309">getEmail</span><span style="color:#555">();</span>
+        picture <span style="color:#555">=</span> profile<span style="color:#555">.</span><span style="color:#309">getPicture</span><span style="color:#555">();</span>
+        username <span style="color:#555">=</span> profile<span style="color:#555">.</span><span style="color:#309">getLogin</span><span style="color:#555">().</span><span style="color:#309">getUsername</span><span style="color:#555">();</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <h2 id="the-controllers">The Controllers</h2>
 
 <p>The code for the API&rsquo;s controller is as follows:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@RestController</span>
-<span style="color: #9999FF">@RequestMapping</span><span style="color: #555555">(</span>path <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;/profile&quot;</span><span style="color: #555555">)</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">ProfileController</span> <span style="color: #555555">{</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@RestController</span>
+<span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span>path <span style="color:#555">=</span> <span style="color:#c30">&#34;/profile&#34;</span><span style="color:#555">)</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">ProfileController</span> <span style="color:#555">{</span>
 
-    <span style="color: #006699; font-weight: bold">private</span> <span style="color: #006699; font-weight: bold">final</span> ProfileService profileService<span style="color: #555555">;</span>
+    <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">final</span> ProfileService profileService<span style="color:#555">;</span>
 
-    <span style="color: #9999FF">@SuppressWarnings</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;unused&quot;</span><span style="color: #555555">)</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #CC00FF">ProfileController</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">this</span><span style="color: #555555">(</span><span style="color: #006699; font-weight: bold">null</span><span style="color: #555555">);</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#99f">@SuppressWarnings</span><span style="color:#555">(</span><span style="color:#c30">&#34;unused&#34;</span><span style="color:#555">)</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">ProfileController</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">this</span><span style="color:#555">(</span><span style="color:#069;font-weight:bold">null</span><span style="color:#555">);</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Autowired</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #CC00FF">ProfileController</span><span style="color: #555555">(</span>ProfileService profileService<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">this</span><span style="color: #555555">.</span><span style="color: #330099">profileService</span> <span style="color: #555555">=</span> profileService<span style="color: #555555">;</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#99f">@Autowired</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">ProfileController</span><span style="color:#555">(</span>ProfileService profileService<span style="color:#555">)</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">this</span><span style="color:#555">.</span><span style="color:#309">profileService</span> <span style="color:#555">=</span> profileService<span style="color:#555">;</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@RequestMapping</span><span style="color: #555555">(</span>path <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;/{username}&quot;</span><span style="color: #555555">,</span>
-            method <span style="color: #555555">=</span> GET<span style="color: #555555">,</span>
-            produces <span style="color: #555555">=</span> APPLICATION_JSON_VALUE<span style="color: #555555">)</span>
-    <span style="color: #006699; font-weight: bold">public</span> MinimalProfile <span style="color: #CC00FF">minimal</span><span style="color: #555555">(</span><span style="color: #9999FF">@PathVariable</span> String username<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> profileService<span style="color: #555555">.</span><span style="color: #330099">minimal</span><span style="color: #555555">(</span>username<span style="color: #555555">)</span>
-                <span style="color: #555555">.</span><span style="color: #330099">orElseThrow</span><span style="color: #555555">(()</span> <span style="color: #555555">-&gt;</span> <span style="color: #006699; font-weight: bold">new</span> ProfileNotFoundException<span style="color: #555555">(</span>username<span style="color: #555555">));</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span>path <span style="color:#555">=</span> <span style="color:#c30">&#34;/{username}&#34;</span><span style="color:#555">,</span>
+            method <span style="color:#555">=</span> GET<span style="color:#555">,</span>
+            produces <span style="color:#555">=</span> APPLICATION_JSON_VALUE<span style="color:#555">)</span>
+    <span style="color:#069;font-weight:bold">public</span> MinimalProfile <span style="color:#c0f">minimal</span><span style="color:#555">(</span><span style="color:#99f">@PathVariable</span> String username<span style="color:#555">)</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> profileService<span style="color:#555">.</span><span style="color:#309">minimal</span><span style="color:#555">(</span>username<span style="color:#555">)</span>
+                <span style="color:#555">.</span><span style="color:#309">orElseThrow</span><span style="color:#555">(()</span> <span style="color:#555">-&gt;</span> <span style="color:#069;font-weight:bold">new</span> ProfileNotFoundException<span style="color:#555">(</span>username<span style="color:#555">));</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@RequestMapping</span><span style="color: #555555">(</span>path <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;/details/{username}&quot;</span><span style="color: #555555">,</span>
-            method <span style="color: #555555">=</span> GET<span style="color: #555555">,</span>
-            produces <span style="color: #555555">=</span> APPLICATION_JSON_VALUE<span style="color: #555555">)</span>
-    <span style="color: #006699; font-weight: bold">public</span> DetailedProfile <span style="color: #CC00FF">details</span><span style="color: #555555">(</span><span style="color: #9999FF">@PathVariable</span> String username<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> profileService<span style="color: #555555">.</span><span style="color: #330099">detailed</span><span style="color: #555555">(</span>username<span style="color: #555555">)</span>
-                <span style="color: #555555">.</span><span style="color: #330099">orElseThrow</span><span style="color: #555555">(()</span> <span style="color: #555555">-&gt;</span> <span style="color: #006699; font-weight: bold">new</span> ProfileNotFoundException<span style="color: #555555">(</span>username<span style="color: #555555">));</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
-<p>It delegates querying for profiles to the <code>ProfileService</code> and throws exceptions if a Profile is not present. Notice the use of Java&rsquo;s <code>Optional</code> to throw exceptions.
-<div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Finding this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and actionable explanations for specific programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
-</p>
+    <span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span>path <span style="color:#555">=</span> <span style="color:#c30">&#34;/details/{username}&#34;</span><span style="color:#555">,</span>
+            method <span style="color:#555">=</span> GET<span style="color:#555">,</span>
+            produces <span style="color:#555">=</span> APPLICATION_JSON_VALUE<span style="color:#555">)</span>
+    <span style="color:#069;font-weight:bold">public</span> DetailedProfile <span style="color:#c0f">details</span><span style="color:#555">(</span><span style="color:#99f">@PathVariable</span> String username<span style="color:#555">)</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> profileService<span style="color:#555">.</span><span style="color:#309">detailed</span><span style="color:#555">(</span>username<span style="color:#555">)</span>
+                <span style="color:#555">.</span><span style="color:#309">orElseThrow</span><span style="color:#555">(()</span> <span style="color:#555">-&gt;</span> <span style="color:#069;font-weight:bold">new</span> ProfileNotFoundException<span style="color:#555">(</span>username<span style="color:#555">));</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
+<p>It delegates querying for profiles to the <code>ProfileService</code> and throws exceptions if a Profile is not present. Notice the use of Java&rsquo;s <code>Optional</code> to throw exceptions.</p>
 
 <h3 id="the-profileservice">The ProfileService</h3>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@Component</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">ProfileService</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">private</span> <span style="color: #006699; font-weight: bold">final</span> List<span style="color: #555555">&lt;</span>Profile<span style="color: #555555">&gt;</span> profiles<span style="color: #555555">;</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Component</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">ProfileService</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">final</span> List<span style="color:#555">&lt;</span>Profile<span style="color:#555">&gt;</span> profiles<span style="color:#555">;</span>
 
-    <span style="color: #006699; font-weight: bold">private</span> <span style="color: #006699; font-weight: bold">final</span> Path PROFILES_FILE <span style="color: #555555">=</span> Paths<span style="color: #555555">.</span><span style="color: #330099">get</span><span style="color: #555555">(</span><span style="color: #006699; font-weight: bold">this</span><span style="color: #555555">.</span><span style="color: #330099">getClass</span><span style="color: #555555">().</span><span style="color: #330099">getResource</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;/profiles.json&quot;</span><span style="color: #555555">).</span><span style="color: #330099">toURI</span><span style="color: #555555">());</span>
+    <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">final</span> Path PROFILES_FILE <span style="color:#555">=</span> Paths<span style="color:#555">.</span><span style="color:#309">get</span><span style="color:#555">(</span><span style="color:#069;font-weight:bold">this</span><span style="color:#555">.</span><span style="color:#309">getClass</span><span style="color:#555">().</span><span style="color:#309">getResource</span><span style="color:#555">(</span><span style="color:#c30">&#34;/profiles.json&#34;</span><span style="color:#555">).</span><span style="color:#309">toURI</span><span style="color:#555">());</span>
 
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #CC00FF">ProfileService</span><span style="color: #555555">()</span> <span style="color: #006699; font-weight: bold">throws</span> IOException<span style="color: #555555">,</span> URISyntaxException <span style="color: #555555">{</span>
-        ObjectMapper objectMapper <span style="color: #555555">=</span> <span style="color: #006699; font-weight: bold">new</span> ObjectMapper<span style="color: #555555">();</span>
-        profiles <span style="color: #555555">=</span> objectMapper<span style="color: #555555">.</span><span style="color: #330099">readValue</span><span style="color: #555555">(</span>PROFILES_FILE<span style="color: #555555">.</span><span style="color: #330099">toFile</span><span style="color: #555555">(),</span> <span style="color: #006699; font-weight: bold">new</span> TypeReference<span style="color: #555555">&lt;</span>List<span style="color: #555555">&lt;</span>Profile<span style="color: #555555">&gt;&gt;()</span> <span style="color: #555555">{</span>
-        <span style="color: #555555">});</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">ProfileService</span><span style="color:#555">()</span> <span style="color:#069;font-weight:bold">throws</span> IOException<span style="color:#555">,</span> URISyntaxException <span style="color:#555">{</span>
+        ObjectMapper objectMapper <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">new</span> ObjectMapper<span style="color:#555">();</span>
+        profiles <span style="color:#555">=</span> objectMapper<span style="color:#555">.</span><span style="color:#309">readValue</span><span style="color:#555">(</span>PROFILES_FILE<span style="color:#555">.</span><span style="color:#309">toFile</span><span style="color:#555">(),</span> <span style="color:#069;font-weight:bold">new</span> TypeReference<span style="color:#555">&lt;</span>List<span style="color:#555">&lt;</span>Profile<span style="color:#555">&gt;&gt;()</span> <span style="color:#555">{</span>
+        <span style="color:#555">});</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #006699; font-weight: bold">protected</span> Optional<span style="color: #555555">&lt;</span>Profile<span style="color: #555555">&gt;</span> <span style="color: #CC00FF">get</span><span style="color: #555555">(</span>String username<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> profiles<span style="color: #555555">.</span><span style="color: #330099">stream</span><span style="color: #555555">()</span>
-                <span style="color: #555555">.</span><span style="color: #330099">filter</span><span style="color: #555555">(</span>profile <span style="color: #555555">-&gt;</span> profile<span style="color: #555555">.</span><span style="color: #330099">getLogin</span><span style="color: #555555">().</span><span style="color: #330099">getUsername</span><span style="color: #555555">().</span><span style="color: #330099">equals</span><span style="color: #555555">(</span>username<span style="color: #555555">))</span>
-                <span style="color: #555555">.</span><span style="color: #330099">findFirst</span><span style="color: #555555">();</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#069;font-weight:bold">protected</span> Optional<span style="color:#555">&lt;</span>Profile<span style="color:#555">&gt;</span> <span style="color:#c0f">get</span><span style="color:#555">(</span>String username<span style="color:#555">)</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> profiles<span style="color:#555">.</span><span style="color:#309">stream</span><span style="color:#555">()</span>
+                <span style="color:#555">.</span><span style="color:#309">filter</span><span style="color:#555">(</span>profile <span style="color:#555">-&gt;</span> profile<span style="color:#555">.</span><span style="color:#309">getLogin</span><span style="color:#555">().</span><span style="color:#309">getUsername</span><span style="color:#555">().</span><span style="color:#309">equals</span><span style="color:#555">(</span>username<span style="color:#555">))</span>
+                <span style="color:#555">.</span><span style="color:#309">findFirst</span><span style="color:#555">();</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #006699; font-weight: bold">public</span> Optional<span style="color: #555555">&lt;</span>MinimalProfile<span style="color: #555555">&gt;</span> <span style="color: #CC00FF">minimal</span><span style="color: #555555">(</span>String username<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> get<span style="color: #555555">(</span>username<span style="color: #555555">).</span><span style="color: #330099">map</span><span style="color: #555555">(</span>profile <span style="color: #555555">-&gt;</span> <span style="color: #006699; font-weight: bold">new</span> MinimalProfile<span style="color: #555555">(</span>profile<span style="color: #555555">));</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#069;font-weight:bold">public</span> Optional<span style="color:#555">&lt;</span>MinimalProfile<span style="color:#555">&gt;</span> <span style="color:#c0f">minimal</span><span style="color:#555">(</span>String username<span style="color:#555">)</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> get<span style="color:#555">(</span>username<span style="color:#555">).</span><span style="color:#309">map</span><span style="color:#555">(</span>profile <span style="color:#555">-&gt;</span> <span style="color:#069;font-weight:bold">new</span> MinimalProfile<span style="color:#555">(</span>profile<span style="color:#555">));</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #006699; font-weight: bold">public</span> Optional<span style="color: #555555">&lt;</span>DetailedProfile<span style="color: #555555">&gt;</span> <span style="color: #CC00FF">detailed</span><span style="color: #555555">(</span>String username<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> get<span style="color: #555555">(</span>username<span style="color: #555555">).</span><span style="color: #330099">map</span><span style="color: #555555">(</span>profile <span style="color: #555555">-&gt;</span> <span style="color: #006699; font-weight: bold">new</span> DetailedProfile<span style="color: #555555">(</span>profile<span style="color: #555555">));</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+    <span style="color:#069;font-weight:bold">public</span> Optional<span style="color:#555">&lt;</span>DetailedProfile<span style="color:#555">&gt;</span> <span style="color:#c0f">detailed</span><span style="color:#555">(</span>String username<span style="color:#555">)</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> get<span style="color:#555">(</span>username<span style="color:#555">).</span><span style="color:#309">map</span><span style="color:#555">(</span>profile <span style="color:#555">-&gt;</span> <span style="color:#069;font-weight:bold">new</span> DetailedProfile<span style="color:#555">(</span>profile<span style="color:#555">));</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <h3 id="exception-handling">Exception Handling</h3>
 
 <p>We will also need to wire up a <code>ControllerAdvice</code> to handle exceptions appropriately:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@ControllerAdvice</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">GlobalExceptionHandler</span> <span style="color: #555555">{</span>
-    <span style="color: #9999FF">@ResponseStatus</span><span style="color: #555555">(</span>NOT_FOUND<span style="color: #555555">)</span>
-    <span style="color: #9999FF">@ExceptionHandler</span><span style="color: #555555">(</span>ProfileNotFoundException<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">)</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">profileNotFound</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@ControllerAdvice</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">GlobalExceptionHandler</span> <span style="color:#555">{</span>
+    <span style="color:#99f">@ResponseStatus</span><span style="color:#555">(</span>NOT_FOUND<span style="color:#555">)</span>
+    <span style="color:#99f">@ExceptionHandler</span><span style="color:#555">(</span>ProfileNotFoundException<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">)</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">profileNotFound</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>With this, you should have a profile service up and running.</p>
 
 <h3 id="minimal-profile">Minimal profile</h3>
@@ -403,36 +353,6 @@ These are the blog posts in this series:</p>
             <p class="comments">
   If you have questions or comments about this blog post, you can get in touch with me on Twitter <a href="https://twitter.com/sdqali">@sdqali</a>.
 </p>
-
-            <div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Found this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and explanations for specific Java, Spring and other programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
 
           </div>
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">

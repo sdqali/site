@@ -114,135 +114,95 @@ Apache Camel 1 makes a natural choice as the base for implementing such a data t
         <div class="row">
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
             <p>My team at work has been lately working on a data transformer that pushes information from an external system in to platform. For historical reasons the information is passed to us in the form of flat files. We have been working on a data transformer that reads information from the file and posts it into an HTTP end point.
-Apache Camel <sup class="footnote-ref" id="fnref:1"><a rel="footnote" href="#fn:1">1</a></sup> makes a natural choice as the base for implementing such a data transformer. The presence of ready to use components that can read files and post information to HTTP end points and the availability of a nice D.S.L. <sup class="footnote-ref" id="fnref:2"><a rel="footnote" href="#fn:2">2</a></sup> makes implementation easy and straightforward. One of the things we had to spend time figuring out was how to ensure that we authenticate correctly against our target HTTP end point. This blog post takes a look at various methods we explored.</p>
+Apache Camel <sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup> makes a natural choice as the base for implementing such a data transformer. The presence of ready to use components that can read files and post information to HTTP end points and the availability of a nice D.S.L. <sup class="footnote-ref" id="fnref:2"><a href="#fn:2">2</a></sup> makes implementation easy and straightforward. One of the things we had to spend time figuring out was how to ensure that we authenticate correctly against our target HTTP end point. This blog post takes a look at various methods we explored.</p>
 
 <p>
 Camel&rsquo;s HTTP component allows http resources to be added as Camel end points. These end points can be consuming information from routes or producing information which are then passed on to routes. For example, the following route takes information from the <code>direct:start</code> end point, tokenizes it into lines and sends each line into an HTTP url.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">FileToApiRoute</span> <span style="color: #006699; font-weight: bold">extends</span> RouteBuilder <span style="color: #555555">{</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">FileToApiRoute</span> <span style="color:#069;font-weight:bold">extends</span> RouteBuilder <span style="color:#555">{</span>
 
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">static</span> <span style="color: #006699; font-weight: bold">final</span> String UTF_8 <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;UTF-8&quot;</span><span style="color: #555555">;</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">static</span> <span style="color: #006699; font-weight: bold">final</span> String CONTENT_TYPE <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;Content-Type&quot;</span><span style="color: #555555">;</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">static</span> <span style="color: #006699; font-weight: bold">final</span> String APPLICATION_JSON <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;application/json&quot;</span><span style="color: #555555">;</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">static</span> <span style="color: #006699; font-weight: bold">final</span> String TARGET <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;http://localhost:8080/ingest&quot;</span><span style="color: #555555">;</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">static</span> <span style="color:#069;font-weight:bold">final</span> String UTF_8 <span style="color:#555">=</span> <span style="color:#c30">&#34;UTF-8&#34;</span><span style="color:#555">;</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">static</span> <span style="color:#069;font-weight:bold">final</span> String CONTENT_TYPE <span style="color:#555">=</span> <span style="color:#c30">&#34;Content-Type&#34;</span><span style="color:#555">;</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">static</span> <span style="color:#069;font-weight:bold">final</span> String APPLICATION_JSON <span style="color:#555">=</span> <span style="color:#c30">&#34;application/json&#34;</span><span style="color:#555">;</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">static</span> <span style="color:#069;font-weight:bold">final</span> String TARGET <span style="color:#555">=</span> <span style="color:#c30">&#34;http://localhost:8080/ingest&#34;</span><span style="color:#555">;</span>
 
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">configure</span><span style="color: #555555">()</span> <span style="color: #006699; font-weight: bold">throws</span> Exception <span style="color: #555555">{</span>
-        from<span style="color: #555555">(</span><span style="color: #CC3300">&quot;direct:start&quot;</span><span style="color: #555555">)</span>
-                <span style="color: #555555">.</span><span style="color: #330099">marshal</span><span style="color: #555555">()</span>
-                <span style="color: #555555">.</span><span style="color: #330099">string</span><span style="color: #555555">(</span>UTF_8<span style="color: #555555">)</span>
-                <span style="color: #555555">.</span><span style="color: #330099">split</span><span style="color: #555555">(</span>body<span style="color: #555555">().</span><span style="color: #330099">tokenize</span><span style="color: #555555">())</span>
-                <span style="color: #555555">.</span><span style="color: #330099">streaming</span><span style="color: #555555">()</span>
-                <span style="color: #555555">.</span><span style="color: #330099">setHeader</span><span style="color: #555555">(</span>CONTENT_TYPE<span style="color: #555555">,</span> simple<span style="color: #555555">(</span>APPLICATION_JSON<span style="color: #555555">))</span>
-                <span style="color: #555555">.</span><span style="color: #330099">to</span><span style="color: #555555">(</span>TARGET<span style="color: #555555">);</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">configure</span><span style="color:#555">()</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
+        from<span style="color:#555">(</span><span style="color:#c30">&#34;direct:start&#34;</span><span style="color:#555">)</span>
+                <span style="color:#555">.</span><span style="color:#309">marshal</span><span style="color:#555">()</span>
+                <span style="color:#555">.</span><span style="color:#309">string</span><span style="color:#555">(</span>UTF_8<span style="color:#555">)</span>
+                <span style="color:#555">.</span><span style="color:#309">split</span><span style="color:#555">(</span>body<span style="color:#555">().</span><span style="color:#309">tokenize</span><span style="color:#555">())</span>
+                <span style="color:#555">.</span><span style="color:#309">streaming</span><span style="color:#555">()</span>
+                <span style="color:#555">.</span><span style="color:#309">setHeader</span><span style="color:#555">(</span>CONTENT_TYPE<span style="color:#555">,</span> simple<span style="color:#555">(</span>APPLICATION_JSON<span style="color:#555">))</span>
+                <span style="color:#555">.</span><span style="color:#309">to</span><span style="color:#555">(</span>TARGET<span style="color:#555">);</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>Once this route has been registered, it can be used to send data by placing information on the <code>direct:start</code> end point. The following service does it by passing the contents of a file to a <code>ProducerTemplate</code>:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">DataStreamService</span> <span style="color: #555555">{</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">DataStreamService</span> <span style="color:#555">{</span>
 
-    <span style="color: #006699; font-weight: bold">private</span> <span style="color: #006699; font-weight: bold">final</span> ProducerTemplate producerTemplate<span style="color: #555555">;</span>
+    <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">final</span> ProducerTemplate producerTemplate<span style="color:#555">;</span>
 
-    <span style="color: #9999FF">@Autowired</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #CC00FF">DataStreamService</span><span style="color: #555555">(</span>ProducerTemplate producerTemplate<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">this</span><span style="color: #555555">.</span><span style="color: #330099">producerTemplate</span> <span style="color: #555555">=</span> producerTemplate<span style="color: #555555">;</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#99f">@Autowired</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">DataStreamService</span><span style="color:#555">(</span>ProducerTemplate producerTemplate<span style="color:#555">)</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">this</span><span style="color:#555">.</span><span style="color:#309">producerTemplate</span> <span style="color:#555">=</span> producerTemplate<span style="color:#555">;</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">stream</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-        producerTemplate<span style="color: #555555">.</span><span style="color: #330099">sendBody</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;direct:start&quot;</span><span style="color: #555555">,</span>
-                ExchangePattern<span style="color: #555555">.</span><span style="color: #330099">InOnly</span><span style="color: #555555">,</span>
-                <span style="color: #006699; font-weight: bold">new</span> File<span style="color: #555555">(</span><span style="color: #CC3300">&quot;src/main/resources/yelp.business.json&quot;</span><span style="color: #555555">));</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
-<p>Our challenge is to ensure that this continue to work when the HTTP end point in question requires authentication. For the purposes of this blog post, we will be restricting our discussion to Basic Authentication. There are three ways to do this authentication–through Camel authentication query parameters, through the use of the <code>Authorization</code> header and by overriding the <code>HttpConfiguration</code> in the current Camel context.
-<div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Finding this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and actionable explanations for specific programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
-</p>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">stream</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+        producerTemplate<span style="color:#555">.</span><span style="color:#309">sendBody</span><span style="color:#555">(</span><span style="color:#c30">&#34;direct:start&#34;</span><span style="color:#555">,</span>
+                ExchangePattern<span style="color:#555">.</span><span style="color:#309">InOnly</span><span style="color:#555">,</span>
+                <span style="color:#069;font-weight:bold">new</span> File<span style="color:#555">(</span><span style="color:#c30">&#34;src/main/resources/yelp.business.json&#34;</span><span style="color:#555">));</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
+<p>Our challenge is to ensure that this continue to work when the HTTP end point in question requires authentication. For the purposes of this blog post, we will be restricting our discussion to Basic Authentication. There are three ways to do this authentication–through Camel authentication query parameters, through the use of the <code>Authorization</code> header and by overriding the <code>HttpConfiguration</code> in the current Camel context.</p>
 
 <h3 id="camel-authentication-query-parameters">Camel authentication query parameters</h3>
 
 <p>Camel allows consumers to specify authentication parameters in the http end point. For example, three parameters required for Basic Authentication are <code>authMethod</code>, <code>authUsername</code> and <code>authPassword</code>. The route rewritten with these parameters will be as follows:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">static</span> <span style="color: #006699; font-weight: bold">final</span> String TARGET_WITH_AUTH <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;http://localhost:8080/ingest&quot;</span> <span style="color: #555555">+</span>
-            <span style="color: #CC3300">&quot;?authMethod=Basic&amp;authUsername=test&amp;authPassword=test&quot;</span><span style="color: #555555">;</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">static</span> <span style="color:#069;font-weight:bold">final</span> String TARGET_WITH_AUTH <span style="color:#555">=</span> <span style="color:#c30">&#34;http://localhost:8080/ingest&#34;</span> <span style="color:#555">+</span>
+            <span style="color:#c30">&#34;?authMethod=Basic&amp;authUsername=test&amp;authPassword=test&#34;</span><span style="color:#555">;</span>
 
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">configure</span><span style="color: #555555">()</span> <span style="color: #006699; font-weight: bold">throws</span> Exception <span style="color: #555555">{</span>
-        from<span style="color: #555555">(</span><span style="color: #CC3300">&quot;direct:start&quot;</span><span style="color: #555555">)</span>
-                <span style="color: #555555">.</span><span style="color: #330099">marshal</span><span style="color: #555555">()</span>
-                <span style="color: #555555">.</span><span style="color: #330099">string</span><span style="color: #555555">(</span>UTF_8<span style="color: #555555">)</span>
-                <span style="color: #555555">.</span><span style="color: #330099">split</span><span style="color: #555555">(</span>body<span style="color: #555555">().</span><span style="color: #330099">tokenize</span><span style="color: #555555">())</span>
-                <span style="color: #555555">.</span><span style="color: #330099">streaming</span><span style="color: #555555">()</span>
-                <span style="color: #555555">.</span><span style="color: #330099">setHeader</span><span style="color: #555555">(</span>CONTENT_TYPE<span style="color: #555555">,</span> simple<span style="color: #555555">(</span>APPLICATION_JSON<span style="color: #555555">))</span>
-                <span style="color: #555555">.</span><span style="color: #330099">to</span><span style="color: #555555">(</span>TARGET_WITH_AUTH<span style="color: #555555">);</span>
-    <span style="color: #555555">}</span>
-</pre></div>
-
-<p>It is odd to be adding authentication parameters to a URL, but here the URL has multiple purposes–this is a URL to which information is going to be sent to, it also represents a logical end point. These three parameters (and other authentication parameters) get stripped from the HTTP URL before Camel makes the HTTP request. <sup class="footnote-ref" id="fnref:3"><a rel="footnote" href="#fn:3">3</a></sup> This still will cause issues in odd cases where the HTTP A.P.I. you are integrating with expects these parameters to be sent.</p>
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">configure</span><span style="color:#555">()</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
+        from<span style="color:#555">(</span><span style="color:#c30">&#34;direct:start&#34;</span><span style="color:#555">)</span>
+                <span style="color:#555">.</span><span style="color:#309">marshal</span><span style="color:#555">()</span>
+                <span style="color:#555">.</span><span style="color:#309">string</span><span style="color:#555">(</span>UTF_8<span style="color:#555">)</span>
+                <span style="color:#555">.</span><span style="color:#309">split</span><span style="color:#555">(</span>body<span style="color:#555">().</span><span style="color:#309">tokenize</span><span style="color:#555">())</span>
+                <span style="color:#555">.</span><span style="color:#309">streaming</span><span style="color:#555">()</span>
+                <span style="color:#555">.</span><span style="color:#309">setHeader</span><span style="color:#555">(</span>CONTENT_TYPE<span style="color:#555">,</span> simple<span style="color:#555">(</span>APPLICATION_JSON<span style="color:#555">))</span>
+                <span style="color:#555">.</span><span style="color:#309">to</span><span style="color:#555">(</span>TARGET_WITH_AUTH<span style="color:#555">);</span>
+    <span style="color:#555">}</span></code></pre></div>
+<p>It is odd to be adding authentication parameters to a URL, but here the URL has multiple purposes–this is a URL to which information is going to be sent to, it also represents a logical end point. These three parameters (and other authentication parameters) get stripped from the HTTP URL before Camel makes the HTTP request. <sup class="footnote-ref" id="fnref:3"><a href="#fn:3">3</a></sup> This still will cause issues in odd cases where the HTTP A.P.I. you are integrating with expects these parameters to be sent.</p>
 
 <h3 id="setting-authorization-headers">Setting Authorization headers</h3>
 
 <p>Camel allows the addition of headers to messages that it processes and if the message ultimately gets routed to a Camel HTTP end point, these headers get converted to HTTP headers. This allows us to use authentication by setting the <code>Authorization</code> header. This example demonstrates this:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">configure</span><span style="color: #555555">()</span> <span style="color: #006699; font-weight: bold">throws</span> Exception <span style="color: #555555">{</span>
-        from<span style="color: #555555">(</span><span style="color: #CC3300">&quot;direct:start&quot;</span><span style="color: #555555">)</span>
-                <span style="color: #555555">.</span><span style="color: #330099">marshal</span><span style="color: #555555">()</span>
-                <span style="color: #555555">.</span><span style="color: #330099">string</span><span style="color: #555555">(</span>UTF_8<span style="color: #555555">)</span>
-                <span style="color: #555555">.</span><span style="color: #330099">split</span><span style="color: #555555">(</span>body<span style="color: #555555">().</span><span style="color: #330099">tokenize</span><span style="color: #555555">())</span>
-                <span style="color: #555555">.</span><span style="color: #330099">streaming</span><span style="color: #555555">()</span>
-                <span style="color: #555555">.</span><span style="color: #330099">setHeader</span><span style="color: #555555">(</span>CONTENT_TYPE<span style="color: #555555">,</span> simple<span style="color: #555555">(</span>APPLICATION_JSON<span style="color: #555555">))</span>
-                <span style="color: #555555">.</span><span style="color: #330099">setHeader</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;Authorization&quot;</span><span style="color: #555555">,</span> simple<span style="color: #555555">(</span><span style="color: #CC3300">&quot;Basic dGVzdDp0ZXN0&quot;</span><span style="color: #555555">))</span>
-                <span style="color: #555555">.</span><span style="color: #330099">to</span><span style="color: #555555">(</span>TARGET<span style="color: #555555">);</span>
-    <span style="color: #555555">}</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">configure</span><span style="color:#555">()</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
+        from<span style="color:#555">(</span><span style="color:#c30">&#34;direct:start&#34;</span><span style="color:#555">)</span>
+                <span style="color:#555">.</span><span style="color:#309">marshal</span><span style="color:#555">()</span>
+                <span style="color:#555">.</span><span style="color:#309">string</span><span style="color:#555">(</span>UTF_8<span style="color:#555">)</span>
+                <span style="color:#555">.</span><span style="color:#309">split</span><span style="color:#555">(</span>body<span style="color:#555">().</span><span style="color:#309">tokenize</span><span style="color:#555">())</span>
+                <span style="color:#555">.</span><span style="color:#309">streaming</span><span style="color:#555">()</span>
+                <span style="color:#555">.</span><span style="color:#309">setHeader</span><span style="color:#555">(</span>CONTENT_TYPE<span style="color:#555">,</span> simple<span style="color:#555">(</span>APPLICATION_JSON<span style="color:#555">))</span>
+                <span style="color:#555">.</span><span style="color:#309">setHeader</span><span style="color:#555">(</span><span style="color:#c30">&#34;Authorization&#34;</span><span style="color:#555">,</span> simple<span style="color:#555">(</span><span style="color:#c30">&#34;Basic dGVzdDp0ZXN0&#34;</span><span style="color:#555">))</span>
+                <span style="color:#555">.</span><span style="color:#309">to</span><span style="color:#555">(</span>TARGET<span style="color:#555">);</span>
+    <span style="color:#555">}</span></code></pre></div>
 <h3 id="overriding-httpconfiguration">Overriding HttpConfiguration</h3>
 
 <p>Camel provides a mechanism to override it‘s Context‘s configuration before the context gets created. In the following example, we get a reference to the <code>HttpComponent</code> and set a new <code>HttpConfiguration</code> with the right authentication. This allows us to separate the authentication configurations from the route definitions. However, if your Camel context is responsible for talking to different HTTP end points with different authentication mechanisms or parameters, this will not solve the issue.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>    <span style="color: #9999FF">@Bean</span>
-    CamelContextConfiguration <span style="color: #CC00FF">contextConfiguration</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> camelContext <span style="color: #555555">-&gt;</span> <span style="color: #555555">{</span>
-            HttpComponent http <span style="color: #555555">=</span> <span style="color: #555555">(</span>HttpComponent<span style="color: #555555">)</span> camelContext<span style="color: #555555">.</span><span style="color: #330099">getComponent</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;http&quot;</span><span style="color: #555555">);</span>
-            http<span style="color: #555555">.</span><span style="color: #330099">setHttpConfiguration</span><span style="color: #555555">(</span>httpConfiguration<span style="color: #555555">());</span>
-        <span style="color: #555555">};</span>
-    <span style="color: #555555">}</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#99f">@Bean</span>
+    CamelContextConfiguration <span style="color:#c0f">contextConfiguration</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> camelContext <span style="color:#555">-&gt;</span> <span style="color:#555">{</span>
+            HttpComponent http <span style="color:#555">=</span> <span style="color:#555">(</span>HttpComponent<span style="color:#555">)</span> camelContext<span style="color:#555">.</span><span style="color:#309">getComponent</span><span style="color:#555">(</span><span style="color:#c30">&#34;http&#34;</span><span style="color:#555">);</span>
+            http<span style="color:#555">.</span><span style="color:#309">setHttpConfiguration</span><span style="color:#555">(</span>httpConfiguration<span style="color:#555">());</span>
+        <span style="color:#555">};</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #006699; font-weight: bold">private</span> HttpConfiguration <span style="color: #CC00FF">httpConfiguration</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-        HttpConfiguration httpConfiguration <span style="color: #555555">=</span> <span style="color: #006699; font-weight: bold">new</span> HttpConfiguration<span style="color: #555555">();</span>
-        httpConfiguration<span style="color: #555555">.</span><span style="color: #330099">setAuthMethod</span><span style="color: #555555">(</span>authScheme<span style="color: #555555">);</span>
-        httpConfiguration<span style="color: #555555">.</span><span style="color: #330099">setAuthUsername</span><span style="color: #555555">(</span>authUsername<span style="color: #555555">);</span>
-        httpConfiguration<span style="color: #555555">.</span><span style="color: #330099">setAuthPassword</span><span style="color: #555555">(</span>authPassword<span style="color: #555555">);</span>
-        <span style="color: #006699; font-weight: bold">return</span> httpConfiguration<span style="color: #555555">;</span>
-    <span style="color: #555555">}</span>
-</pre></div>
-
+    <span style="color:#069;font-weight:bold">private</span> HttpConfiguration <span style="color:#c0f">httpConfiguration</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+        HttpConfiguration httpConfiguration <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">new</span> HttpConfiguration<span style="color:#555">();</span>
+        httpConfiguration<span style="color:#555">.</span><span style="color:#309">setAuthMethod</span><span style="color:#555">(</span>authScheme<span style="color:#555">);</span>
+        httpConfiguration<span style="color:#555">.</span><span style="color:#309">setAuthUsername</span><span style="color:#555">(</span>authUsername<span style="color:#555">);</span>
+        httpConfiguration<span style="color:#555">.</span><span style="color:#309">setAuthPassword</span><span style="color:#555">(</span>authPassword<span style="color:#555">);</span>
+        <span style="color:#069;font-weight:bold">return</span> httpConfiguration<span style="color:#555">;</span>
+    <span style="color:#555">}</span></code></pre></div>
 <p>In the end, the method you choose will depend on the unique constraints of the systems you are integrating with.</p>
 <div class="footnotes">
 
@@ -260,36 +220,6 @@ Camel&rsquo;s HTTP component allows http resources to be added as Camel end poin
             <p class="comments">
   If you have questions or comments about this blog post, you can get in touch with me on Twitter <a href="https://twitter.com/sdqali">@sdqali</a>.
 </p>
-
-            <div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Found this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and explanations for specific Java, Spring and other programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
 
           </div>
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">

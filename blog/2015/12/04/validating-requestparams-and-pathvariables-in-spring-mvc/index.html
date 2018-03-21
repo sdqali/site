@@ -129,155 +129,85 @@ Spring MVC provides a convenient way to validate inputs to API end points throug
 <p></p>
 
 <p>Let&rsquo;s take a look at how to validate RequestBody inputs using JSR-303.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>    <span style="color: #9999FF">@RequestMapping</span><span style="color: #555555">(</span>method <span style="color: #555555">=</span> RequestMethod<span style="color: #555555">.</span><span style="color: #330099">POST</span><span style="color: #555555">,</span>
-            consumes <span style="color: #555555">=</span> MediaType<span style="color: #555555">.</span><span style="color: #330099">APPLICATION_JSON_VALUE</span><span style="color: #555555">,</span>
-            produces <span style="color: #555555">=</span> MediaType<span style="color: #555555">.</span><span style="color: #330099">APPLICATION_JSON_VALUE</span>
-    <span style="color: #555555">)</span>
-    <span style="color: #9999FF">@ResponseStatus</span><span style="color: #555555">(</span>HttpStatus<span style="color: #555555">.</span><span style="color: #330099">OK</span><span style="color: #555555">)</span>
-    <span style="color: #006699; font-weight: bold">public</span> Map <span style="color: #CC00FF">register</span><span style="color: #555555">(</span><span style="color: #9999FF">@RequestBody</span> <span style="color: #9999FF">@Valid</span> EmailRequest emailRequest<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> registrationService<span style="color: #555555">.</span><span style="color: #330099">register</span><span style="color: #555555">(</span>emailRequest<span style="color: #555555">);</span>
-    <span style="color: #555555">}</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span>method <span style="color:#555">=</span> RequestMethod<span style="color:#555">.</span><span style="color:#309">POST</span><span style="color:#555">,</span>
+            consumes <span style="color:#555">=</span> MediaType<span style="color:#555">.</span><span style="color:#309">APPLICATION_JSON_VALUE</span><span style="color:#555">,</span>
+            produces <span style="color:#555">=</span> MediaType<span style="color:#555">.</span><span style="color:#309">APPLICATION_JSON_VALUE</span>
+    <span style="color:#555">)</span>
+    <span style="color:#99f">@ResponseStatus</span><span style="color:#555">(</span>HttpStatus<span style="color:#555">.</span><span style="color:#309">OK</span><span style="color:#555">)</span>
+    <span style="color:#069;font-weight:bold">public</span> Map <span style="color:#c0f">register</span><span style="color:#555">(</span><span style="color:#99f">@RequestBody</span> <span style="color:#99f">@Valid</span> EmailRequest emailRequest<span style="color:#555">)</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> registrationService<span style="color:#555">.</span><span style="color:#309">register</span><span style="color:#555">(</span>emailRequest<span style="color:#555">);</span>
+    <span style="color:#555">}</span></code></pre></div>
 <p>The value object <code>EmailRequest</code> is annotated with the appropriate constraint annotations.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">EmailRequest</span> <span style="color: #555555">{</span>
-    <span style="color: #9999FF">@Email</span>
-    <span style="color: #006699; font-weight: bold">public</span> String email<span style="color: #555555">;</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">EmailRequest</span> <span style="color:#555">{</span>
+    <span style="color:#99f">@Email</span>
+    <span style="color:#069;font-weight:bold">public</span> String email<span style="color:#555">;</span>
 
-    <span style="color: #006699; font-weight: bold">private</span> <span style="color: #CC00FF">EmailRequest</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#069;font-weight:bold">private</span> <span style="color:#c0f">EmailRequest</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #006699; font-weight: bold">public</span> String <span style="color: #CC00FF">getEmail</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> email<span style="color: #555555">;</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+    <span style="color:#069;font-weight:bold">public</span> String <span style="color:#c0f">getEmail</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> email<span style="color:#555">;</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>If we were to attempt a similar approach for a <code>GET</code> end point that accepts a <code>RequestParam</code>, the validation would simply not happen.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>    <span style="color: #9999FF">@RequestMapping</span><span style="color: #555555">(</span>method <span style="color: #555555">=</span> RequestMethod<span style="color: #555555">.</span><span style="color: #330099">GET</span><span style="color: #555555">,</span>
-            consumes <span style="color: #555555">=</span> MediaType<span style="color: #555555">.</span><span style="color: #330099">APPLICATION_JSON_VALUE</span><span style="color: #555555">,</span>
-            produces <span style="color: #555555">=</span> MediaType<span style="color: #555555">.</span><span style="color: #330099">APPLICATION_JSON_VALUE</span>
-    <span style="color: #555555">)</span>
-    <span style="color: #9999FF">@ResponseStatus</span><span style="color: #555555">(</span>HttpStatus<span style="color: #555555">.</span><span style="color: #330099">OK</span><span style="color: #555555">)</span>
-    <span style="color: #006699; font-weight: bold">public</span> Map <span style="color: #CC00FF">search</span><span style="color: #555555">(</span><span style="color: #9999FF">@Email</span>
-                   <span style="color: #9999FF">@Valid</span>
-                   <span style="color: #9999FF">@RequestParam</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;email&quot;</span><span style="color: #555555">)</span>
-                   String email<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> emailMessage<span style="color: #555555">(</span>email<span style="color: #555555">);</span>
-    <span style="color: #555555">}</span>
-</pre></div>
-
-<div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Finding this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and actionable explanations for specific programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
-
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span>method <span style="color:#555">=</span> RequestMethod<span style="color:#555">.</span><span style="color:#309">GET</span><span style="color:#555">,</span>
+            consumes <span style="color:#555">=</span> MediaType<span style="color:#555">.</span><span style="color:#309">APPLICATION_JSON_VALUE</span><span style="color:#555">,</span>
+            produces <span style="color:#555">=</span> MediaType<span style="color:#555">.</span><span style="color:#309">APPLICATION_JSON_VALUE</span>
+    <span style="color:#555">)</span>
+    <span style="color:#99f">@ResponseStatus</span><span style="color:#555">(</span>HttpStatus<span style="color:#555">.</span><span style="color:#309">OK</span><span style="color:#555">)</span>
+    <span style="color:#069;font-weight:bold">public</span> Map <span style="color:#c0f">search</span><span style="color:#555">(</span><span style="color:#99f">@Email</span>
+                   <span style="color:#99f">@Valid</span>
+                   <span style="color:#99f">@RequestParam</span><span style="color:#555">(</span><span style="color:#c30">&#34;email&#34;</span><span style="color:#555">)</span>
+                   String email<span style="color:#555">)</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> emailMessage<span style="color:#555">(</span>email<span style="color:#555">);</span>
+    <span style="color:#555">}</span></code></pre></div>
 <p>This is where Spring&rsquo;s <code>@Validated</code> annotation is useful. With <code>@Validated</code>, we can validate request parameters and path variables.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@RestController</span>
-<span style="color: #9999FF">@Validated</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">RegistrationController</span> <span style="color: #555555">{</span>
-    <span style="color: #9999FF">@RequestMapping</span><span style="color: #555555">(</span>method <span style="color: #555555">=</span> RequestMethod<span style="color: #555555">.</span><span style="color: #330099">GET</span><span style="color: #555555">,</span>
-            consumes <span style="color: #555555">=</span> MediaType<span style="color: #555555">.</span><span style="color: #330099">APPLICATION_JSON_VALUE</span><span style="color: #555555">,</span>
-            produces <span style="color: #555555">=</span> MediaType<span style="color: #555555">.</span><span style="color: #330099">APPLICATION_JSON_VALUE</span>
-    <span style="color: #555555">)</span>
-    <span style="color: #9999FF">@ResponseStatus</span><span style="color: #555555">(</span>HttpStatus<span style="color: #555555">.</span><span style="color: #330099">OK</span><span style="color: #555555">)</span>
-    <span style="color: #006699; font-weight: bold">public</span> Map <span style="color: #CC00FF">search</span><span style="color: #555555">(</span><span style="color: #9999FF">@Email</span>
-                   <span style="color: #9999FF">@RequestParam</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;email&quot;</span><span style="color: #555555">)</span>
-                   String email<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> emailMessage<span style="color: #555555">(</span>email<span style="color: #555555">);</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@RestController</span>
+<span style="color:#99f">@Validated</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">RegistrationController</span> <span style="color:#555">{</span>
+    <span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span>method <span style="color:#555">=</span> RequestMethod<span style="color:#555">.</span><span style="color:#309">GET</span><span style="color:#555">,</span>
+            consumes <span style="color:#555">=</span> MediaType<span style="color:#555">.</span><span style="color:#309">APPLICATION_JSON_VALUE</span><span style="color:#555">,</span>
+            produces <span style="color:#555">=</span> MediaType<span style="color:#555">.</span><span style="color:#309">APPLICATION_JSON_VALUE</span>
+    <span style="color:#555">)</span>
+    <span style="color:#99f">@ResponseStatus</span><span style="color:#555">(</span>HttpStatus<span style="color:#555">.</span><span style="color:#309">OK</span><span style="color:#555">)</span>
+    <span style="color:#069;font-weight:bold">public</span> Map <span style="color:#c0f">search</span><span style="color:#555">(</span><span style="color:#99f">@Email</span>
+                   <span style="color:#99f">@RequestParam</span><span style="color:#555">(</span><span style="color:#c30">&#34;email&#34;</span><span style="color:#555">)</span>
+                   String email<span style="color:#555">)</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> emailMessage<span style="color:#555">(</span>email<span style="color:#555">);</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>An important thing to note here is that using <code>@Valid</code> annotation results in <code>MethodArgumentNotValidException</code> being thrown when validation fails, but <code>@Validated</code> results in <code>ConstraintViolationException</code> being thrown. Since these exceptions have different ways of abstracting the error messages associated with validation, it is important to have different error handlers for both of these. An example pattern using <code>ExceptionHandler</code> will be as follows:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@ControllerAdvice</span>
-<span style="color: #9999FF">@Component</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">GlobalExceptionHandler</span> <span style="color: #555555">{</span>
-    <span style="color: #9999FF">@ExceptionHandler</span>
-    <span style="color: #9999FF">@ResponseBody</span>
-    <span style="color: #9999FF">@ResponseStatus</span><span style="color: #555555">(</span>HttpStatus<span style="color: #555555">.</span><span style="color: #330099">BAD_REQUEST</span><span style="color: #555555">)</span>
-    <span style="color: #006699; font-weight: bold">public</span> Map <span style="color: #CC00FF">handle</span><span style="color: #555555">(</span>MethodArgumentNotValidException exception<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> error<span style="color: #555555">(</span>exception<span style="color: #555555">.</span><span style="color: #330099">getBindingResult</span><span style="color: #555555">().</span><span style="color: #330099">getFieldErrors</span><span style="color: #555555">()</span>
-                <span style="color: #555555">.</span><span style="color: #330099">stream</span><span style="color: #555555">()</span>
-                <span style="color: #555555">.</span><span style="color: #330099">map</span><span style="color: #555555">(</span>FieldError<span style="color: #555555">::</span>getDefaultMessage<span style="color: #555555">)</span>
-                <span style="color: #555555">.</span><span style="color: #330099">collect</span><span style="color: #555555">(</span>Collectors<span style="color: #555555">.</span><span style="color: #330099">toList</span><span style="color: #555555">()));</span>
-    <span style="color: #555555">}</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@ControllerAdvice</span>
+<span style="color:#99f">@Component</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">GlobalExceptionHandler</span> <span style="color:#555">{</span>
+    <span style="color:#99f">@ExceptionHandler</span>
+    <span style="color:#99f">@ResponseBody</span>
+    <span style="color:#99f">@ResponseStatus</span><span style="color:#555">(</span>HttpStatus<span style="color:#555">.</span><span style="color:#309">BAD_REQUEST</span><span style="color:#555">)</span>
+    <span style="color:#069;font-weight:bold">public</span> Map <span style="color:#c0f">handle</span><span style="color:#555">(</span>MethodArgumentNotValidException exception<span style="color:#555">)</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> error<span style="color:#555">(</span>exception<span style="color:#555">.</span><span style="color:#309">getBindingResult</span><span style="color:#555">().</span><span style="color:#309">getFieldErrors</span><span style="color:#555">()</span>
+                <span style="color:#555">.</span><span style="color:#309">stream</span><span style="color:#555">()</span>
+                <span style="color:#555">.</span><span style="color:#309">map</span><span style="color:#555">(</span><span style="color:#99f">FieldError:</span><span style="color:#555">:</span>getDefaultMessage<span style="color:#555">)</span>
+                <span style="color:#555">.</span><span style="color:#309">collect</span><span style="color:#555">(</span>Collectors<span style="color:#555">.</span><span style="color:#309">toList</span><span style="color:#555">()));</span>
+    <span style="color:#555">}</span>
 
 
-    <span style="color: #9999FF">@ExceptionHandler</span>
-    <span style="color: #9999FF">@ResponseBody</span>
-    <span style="color: #9999FF">@ResponseStatus</span><span style="color: #555555">(</span>HttpStatus<span style="color: #555555">.</span><span style="color: #330099">BAD_REQUEST</span><span style="color: #555555">)</span>
-    <span style="color: #006699; font-weight: bold">public</span> Map <span style="color: #CC00FF">handle</span><span style="color: #555555">(</span>ConstraintViolationException exception<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> error<span style="color: #555555">(</span>exception<span style="color: #555555">.</span><span style="color: #330099">getConstraintViolations</span><span style="color: #555555">()</span>
-                <span style="color: #555555">.</span><span style="color: #330099">stream</span><span style="color: #555555">()</span>
-                <span style="color: #555555">.</span><span style="color: #330099">map</span><span style="color: #555555">(</span>ConstraintViolation<span style="color: #555555">::</span>getMessage<span style="color: #555555">)</span>
-                <span style="color: #555555">.</span><span style="color: #330099">collect</span><span style="color: #555555">(</span>Collectors<span style="color: #555555">.</span><span style="color: #330099">toList</span><span style="color: #555555">()));</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#99f">@ExceptionHandler</span>
+    <span style="color:#99f">@ResponseBody</span>
+    <span style="color:#99f">@ResponseStatus</span><span style="color:#555">(</span>HttpStatus<span style="color:#555">.</span><span style="color:#309">BAD_REQUEST</span><span style="color:#555">)</span>
+    <span style="color:#069;font-weight:bold">public</span> Map <span style="color:#c0f">handle</span><span style="color:#555">(</span>ConstraintViolationException exception<span style="color:#555">)</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> error<span style="color:#555">(</span>exception<span style="color:#555">.</span><span style="color:#309">getConstraintViolations</span><span style="color:#555">()</span>
+                <span style="color:#555">.</span><span style="color:#309">stream</span><span style="color:#555">()</span>
+                <span style="color:#555">.</span><span style="color:#309">map</span><span style="color:#555">(</span><span style="color:#99f">ConstraintViolation:</span><span style="color:#555">:</span>getMessage<span style="color:#555">)</span>
+                <span style="color:#555">.</span><span style="color:#309">collect</span><span style="color:#555">(</span>Collectors<span style="color:#555">.</span><span style="color:#309">toList</span><span style="color:#555">()));</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #006699; font-weight: bold">private</span> Map <span style="color: #CC00FF">error</span><span style="color: #555555">(</span>Object message<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> Collections<span style="color: #555555">.</span><span style="color: #330099">singletonMap</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;error&quot;</span><span style="color: #555555">,</span> message<span style="color: #555555">);</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
+    <span style="color:#069;font-weight:bold">private</span> Map <span style="color:#c0f">error</span><span style="color:#555">(</span>Object message<span style="color:#555">)</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> Collections<span style="color:#555">.</span><span style="color:#309">singletonMap</span><span style="color:#555">(</span><span style="color:#c30">&#34;error&#34;</span><span style="color:#555">,</span> message<span style="color:#555">);</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
             <p class="comments">
   If you have questions or comments about this blog post, you can get in touch with me on Twitter <a href="https://twitter.com/sdqali">@sdqali</a>.
 </p>
-
-            <div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Found this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and explanations for specific Java, Spring and other programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
 
           </div>
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">

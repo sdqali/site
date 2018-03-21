@@ -2,49 +2,22 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Bash on {code that works}</title>
-    <link>https://sdqali.in/tags/bash/?utm_source=site&amp;utm_medium=feed</link>
+    <link>https://sdqali.in/tags/bash/</link>
     <description>Recent content in Bash on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
     <lastBuildDate>Sun, 15 Sep 2013 00:00:00 +0000</lastBuildDate>
-    <atom:link href="/tags/bash/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    
+	<atom:link href="https://sdqali.in/tags/bash/index.xml" rel="self" type="application/rss+xml" />
+    
     
     <item>
       <title>Shared history in Bash</title>
-      <link>https://sdqali.in/blog/2013/09/15/shared-history-in-bash/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sdqali.in/blog/2013/09/15/shared-history-in-bash/</link>
       <pubDate>Sun, 15 Sep 2013 00:00:00 +0000</pubDate>
       
-      <guid>https://sdqali.in/blog/2013/09/15/shared-history-in-bash/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>&lt;p&gt;One of the features that I miss most in Bash is the shared history between terminals that Zsh supports. I was hunting down a solution for this and came across this Stack Overflow answer &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:1&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; by user &lt;em&gt;lesmana&lt;/em&gt;. This code snippet does the trick:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #003333&#34;&gt;HISTSIZE&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;9000&lt;/span&gt;
-&lt;span style=&#34;color: #003333&#34;&gt;HISTFILESIZE&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #003333&#34;&gt;$HISTSIZE&lt;/span&gt;
-&lt;span style=&#34;color: #003333&#34;&gt;HISTCONTROL&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;ignorespace:ignoredups
-
-history&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-  _bash_history_sync
-  &lt;span style=&#34;color: #336666&#34;&gt;builtin&lt;/span&gt; &lt;span style=&#34;color: #336666&#34;&gt;history&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #003333&#34;&gt;$@&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;&lt;/span&gt;
-&lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-
-_bash_history_sync&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-  &lt;span style=&#34;color: #336666&#34;&gt;builtin&lt;/span&gt; &lt;span style=&#34;color: #336666&#34;&gt;history&lt;/span&gt; -a         &lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;#1&lt;/span&gt;
-  &lt;span style=&#34;color: #003333&#34;&gt;HISTFILESIZE&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #003333&#34;&gt;$HISTSIZE&lt;/span&gt;     &lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;#2&lt;/span&gt;
-  &lt;span style=&#34;color: #336666&#34;&gt;builtin&lt;/span&gt; &lt;span style=&#34;color: #336666&#34;&gt;history&lt;/span&gt; -c         &lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;#3&lt;/span&gt;
-  &lt;span style=&#34;color: #336666&#34;&gt;builtin&lt;/span&gt; &lt;span style=&#34;color: #336666&#34;&gt;history&lt;/span&gt; -r         &lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;#4&lt;/span&gt;
-&lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-
-&lt;span style=&#34;color: #003333&#34;&gt;PROMPT_COMMAND&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;_bash_history_sync;&lt;/span&gt;&lt;span style=&#34;color: #003333&#34;&gt;$PROMPT_COMMAND&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;This is very hacky—This setting overrides the shell prompt to sync history every time the prompt is loaded. But like all great hacks, it works.&lt;/p&gt;
-&lt;div class=&#34;footnotes&#34;&gt;
-
-&lt;hr /&gt;
-
-&lt;ol&gt;
-&lt;li id=&#34;fn:1&#34;&gt;&lt;a href=&#34;http://stackoverflow.com/questions/103944/real-time-history-export-amongst-bash-terminal-windows/3055135#3055135&#34;&gt;Preserve bash history in multiple terminal windows&lt;/a&gt;
- &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:1&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/div&gt;
-</description>
+      <guid>https://sdqali.in/blog/2013/09/15/shared-history-in-bash/</guid>
+      <description>One of the features that I miss most in Bash is the shared history between terminals that Zsh supports. I was hunting down a solution for this and came across this Stack Overflow answer 1 by user lesmana. This code snippet does the trick:
+HISTSIZE=9000 HISTFILESIZE=$HISTSIZE HISTCONTROL=ignorespace:ignoredups history() { _bash_history_sync builtin history &amp;#34;$@&amp;#34; } _bash_history_sync() { builtin history -a #1  HISTFILESIZE=$HISTSIZE #2  builtin history -c #3  builtin history -r #4 } PROMPT_COMMAND=&amp;#34;_bash_history_sync;$PROMPT_COMMAND&amp;#34; This is very hacky—This setting overrides the shell prompt to sync history every time the prompt is loaded.</description>
     </item>
     
   </channel>

@@ -119,97 +119,59 @@
 <p>Spring&rsquo;s <code>@Configuration</code> annotation allows us to create a class that provides a set of beans. Because we wanted to wire up interceptors when the application started, it felt reasonable to annotate the extended <code>WebMvcConfigurerAdapter</code> adaptor as a <code>@Configuration</code>.</p>
 
 <p>So we ended up with code that looked as follows:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@Configuration</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">Config</span> <span style="color: #006699; font-weight: bold">extends</span> WebMvcConfigurerAdapter <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">private</span> HandlerInterceptor handlerInterceptor<span style="color: #555555">;</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Configuration</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">Config</span> <span style="color:#069;font-weight:bold">extends</span> WebMvcConfigurerAdapter <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">private</span> HandlerInterceptor handlerInterceptor<span style="color:#555">;</span>
 
-    <span style="color: #9999FF">@SuppressWarnings</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;unused&quot;</span><span style="color: #555555">)</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #CC00FF">Config</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#99f">@SuppressWarnings</span><span style="color:#555">(</span><span style="color:#c30">&#34;unused&#34;</span><span style="color:#555">)</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">Config</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Autowired</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #CC00FF">Config</span><span style="color: #555555">(</span>HandlerInterceptor handlerInterceptor<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">this</span><span style="color: #555555">.</span><span style="color: #330099">handlerInterceptor</span> <span style="color: #555555">=</span> handlerInterceptor<span style="color: #555555">;</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#99f">@Autowired</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">Config</span><span style="color:#555">(</span>HandlerInterceptor handlerInterceptor<span style="color:#555">)</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">this</span><span style="color:#555">.</span><span style="color:#309">handlerInterceptor</span> <span style="color:#555">=</span> handlerInterceptor<span style="color:#555">;</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">addInterceptors</span><span style="color: #555555">(</span>InterceptorRegistry registry<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        registry<span style="color: #555555">.</span><span style="color: #330099">addInterceptor</span><span style="color: #555555">(</span>handlerInterceptor<span style="color: #555555">);</span>
-        <span style="color: #006699; font-weight: bold">super</span><span style="color: #555555">.</span><span style="color: #330099">addInterceptors</span><span style="color: #555555">(</span>registry<span style="color: #555555">);</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">addInterceptors</span><span style="color:#555">(</span>InterceptorRegistry registry<span style="color:#555">)</span> <span style="color:#555">{</span>
+        registry<span style="color:#555">.</span><span style="color:#309">addInterceptor</span><span style="color:#555">(</span>handlerInterceptor<span style="color:#555">);</span>
+        <span style="color:#069;font-weight:bold">super</span><span style="color:#555">.</span><span style="color:#309">addInterceptors</span><span style="color:#555">(</span>registry<span style="color:#555">);</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>The interceptor itself is declared a <code>@Component</code> of the following form:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@Component</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">SessionCheckInterceptor</span> <span style="color: #006699; font-weight: bold">implements</span> HandlerInterceptor <span style="color: #555555">{</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Component</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">SessionCheckInterceptor</span> <span style="color:#069;font-weight:bold">implements</span> HandlerInterceptor <span style="color:#555">{</span>
 
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">boolean</span> <span style="color: #CC00FF">preHandle</span><span style="color: #555555">(</span>HttpServletRequest request<span style="color: #555555">,</span> HttpServletResponse response<span style="color: #555555">,</span> Object handler<span style="color: #555555">)</span> <span style="color: #006699; font-weight: bold">throws</span> Exception <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">if</span><span style="color: #555555">(</span>request<span style="color: #555555">.</span><span style="color: #330099">getHeader</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;session&quot;</span><span style="color: #555555">)</span> <span style="color: #555555">==</span> <span style="color: #006699; font-weight: bold">null</span><span style="color: #555555">)</span> <span style="color: #555555">{</span>
-            response<span style="color: #555555">.</span><span style="color: #330099">setStatus</span><span style="color: #555555">(</span>HttpServletResponse<span style="color: #555555">.</span><span style="color: #330099">SC_BAD_REQUEST</span><span style="color: #555555">);</span>
-            <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">false</span><span style="color: #555555">;</span>
-        <span style="color: #555555">}</span> <span style="color: #006699; font-weight: bold">else</span> <span style="color: #555555">{</span>
-            <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">true</span><span style="color: #555555">;</span>
-        <span style="color: #555555">}</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">boolean</span> <span style="color:#c0f">preHandle</span><span style="color:#555">(</span>HttpServletRequest request<span style="color:#555">,</span> HttpServletResponse response<span style="color:#555">,</span> Object handler<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">if</span><span style="color:#555">(</span>request<span style="color:#555">.</span><span style="color:#309">getHeader</span><span style="color:#555">(</span><span style="color:#c30">&#34;session&#34;</span><span style="color:#555">)</span> <span style="color:#555">==</span> <span style="color:#069;font-weight:bold">null</span><span style="color:#555">)</span> <span style="color:#555">{</span>
+            response<span style="color:#555">.</span><span style="color:#309">setStatus</span><span style="color:#555">(</span>HttpServletResponse<span style="color:#555">.</span><span style="color:#309">SC_BAD_REQUEST</span><span style="color:#555">);</span>
+            <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">false</span><span style="color:#555">;</span>
+        <span style="color:#555">}</span> <span style="color:#069;font-weight:bold">else</span> <span style="color:#555">{</span>
+            <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">true</span><span style="color:#555">;</span>
+        <span style="color:#555">}</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">postHandle</span><span style="color: #555555">(</span>HttpServletRequest request<span style="color: #555555">,</span> HttpServletResponse response<span style="color: #555555">,</span> Object handler<span style="color: #555555">,</span> ModelAndView modelAndView<span style="color: #555555">)</span> <span style="color: #006699; font-weight: bold">throws</span> Exception <span style="color: #555555">{</span>
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">postHandle</span><span style="color:#555">(</span>HttpServletRequest request<span style="color:#555">,</span> HttpServletResponse response<span style="color:#555">,</span> Object handler<span style="color:#555">,</span> ModelAndView modelAndView<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
 
-    <span style="color: #555555">}</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">afterCompletion</span><span style="color: #555555">(</span>HttpServletRequest request<span style="color: #555555">,</span> HttpServletResponse response<span style="color: #555555">,</span> Object handler<span style="color: #555555">,</span> Exception ex<span style="color: #555555">)</span> <span style="color: #006699; font-weight: bold">throws</span> Exception <span style="color: #555555">{</span>
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">afterCompletion</span><span style="color:#555">(</span>HttpServletRequest request<span style="color:#555">,</span> HttpServletResponse response<span style="color:#555">,</span> Object handler<span style="color:#555">,</span> Exception ex<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
 
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
-<p>As you can see, the interceptor checks every request for a <code>session</code> header and responds with a <code>BAD_REQUEST (400)</code> in the absence of it.
-<div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Finding this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and actionable explanations for specific programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
-</p>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
+<p>As you can see, the interceptor checks every request for a <code>session</code> header and responds with a <code>BAD_REQUEST (400)</code> in the absence of it.</p>
 
 <p>This code compiles fine, but when you run it, you will be confronted with the following stack trace:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>Factory method <span style="color: #CC3300">&#39;requestMappingHandlerMapping&#39;</span> threw exception; nested exception is java.lang.IllegalArgumentException: Interceptor is required
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">Factory method <span style="color:#c30">&#39;requestMappingHandlerMapping&#39;</span> threw exception; nested exception is java.lang.IllegalArgumentException: Interceptor is required</code></pre></div>
 <p>So, what happened? Looking at the stack trace reveals the following:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>Caused by: java.lang.IllegalArgumentException: Interceptor is required
-    at org.springframework.util.Assert.notNull<span style="color: #555555">(</span>Assert.java:115<span style="color: #555555">)</span>
-    at org.springframework.web.servlet.config.annotation.InterceptorRegistration.&lt;init&gt;<span style="color: #555555">(</span>InterceptorRegistration.java:51<span style="color: #555555">)</span>
-    at org.springframework.web.servlet.config.annotation.InterceptorRegistry.addInterceptor<span style="color: #555555">(</span>InterceptorRegistry.java:45<span style="color: #555555">)</span>
-    at in.sdqali.spring.config.Config.addInterceptors<span style="color: #555555">(</span>Config.java:30<span style="color: #555555">)</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">Caused by: java.lang.IllegalArgumentException: Interceptor is required
+    at org.springframework.util.Assert.notNull<span style="color:#555">(</span>Assert.java:115<span style="color:#555">)</span>
+    at org.springframework.web.servlet.config.annotation.InterceptorRegistration.&lt;init&gt;<span style="color:#555">(</span>InterceptorRegistration.java:51<span style="color:#555">)</span>
+    at org.springframework.web.servlet.config.annotation.InterceptorRegistry.addInterceptor<span style="color:#555">(</span>InterceptorRegistry.java:45<span style="color:#555">)</span>
+    at in.sdqali.spring.config.Config.addInterceptors<span style="color:#555">(</span>Config.java:30<span style="color:#555">)</span></code></pre></div>
 <p>Evidently, the interceptor we wired up is <code>null</code>. After a spending a lot of time on this, we discovered this line on the java doc for <code>@Configuration</code>:</p>
 
 <pre><code>@Configuration is meta-annotated with @Component, therefore
@@ -220,63 +182,31 @@ at the field and method level (but not at the constructor level).
 </code></pre>
 
 <p>A simple fix is to inject the interceptor through a setter as follows:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@Configuration</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">Config</span> <span style="color: #006699; font-weight: bold">extends</span> WebMvcConfigurerAdapter <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">private</span> HandlerInterceptor handlerInterceptor<span style="color: #555555">;</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Configuration</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">Config</span> <span style="color:#069;font-weight:bold">extends</span> WebMvcConfigurerAdapter <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">private</span> HandlerInterceptor handlerInterceptor<span style="color:#555">;</span>
 
-    <span style="color: #9999FF">@SuppressWarnings</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;unused&quot;</span><span style="color: #555555">)</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #CC00FF">Config</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#99f">@SuppressWarnings</span><span style="color:#555">(</span><span style="color:#c30">&#34;unused&#34;</span><span style="color:#555">)</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">Config</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Autowired</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">setHandlerInterceptor</span><span style="color: #555555">(</span>HandlerInterceptor handlerInterceptor<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">this</span><span style="color: #555555">.</span><span style="color: #330099">handlerInterceptor</span> <span style="color: #555555">=</span> handlerInterceptor<span style="color: #555555">;</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#99f">@Autowired</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">setHandlerInterceptor</span><span style="color:#555">(</span>HandlerInterceptor handlerInterceptor<span style="color:#555">)</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">this</span><span style="color:#555">.</span><span style="color:#309">handlerInterceptor</span> <span style="color:#555">=</span> handlerInterceptor<span style="color:#555">;</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">addInterceptors</span><span style="color: #555555">(</span>InterceptorRegistry registry<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        registry<span style="color: #555555">.</span><span style="color: #330099">addInterceptor</span><span style="color: #555555">(</span>handlerInterceptor<span style="color: #555555">);</span>
-        <span style="color: #006699; font-weight: bold">super</span><span style="color: #555555">.</span><span style="color: #330099">addInterceptors</span><span style="color: #555555">(</span>registry<span style="color: #555555">);</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">addInterceptors</span><span style="color:#555">(</span>InterceptorRegistry registry<span style="color:#555">)</span> <span style="color:#555">{</span>
+        registry<span style="color:#555">.</span><span style="color:#309">addInterceptor</span><span style="color:#555">(</span>handlerInterceptor<span style="color:#555">);</span>
+        <span style="color:#069;font-weight:bold">super</span><span style="color:#555">.</span><span style="color:#309">addInterceptors</span><span style="color:#555">(</span>registry<span style="color:#555">);</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>It took us a lot of time debugging and stepping through Spring code before we finally figured out what the issue was, but we could have discovered it in seconds from the java doc. There is a lesson in there for us.</p>
 
 <p>The example code to demonstrate this is available on <a href="https://github.com/sdqali/config-constructor-poc">GitHub</a>.</p>
             <p class="comments">
   If you have questions or comments about this blog post, you can get in touch with me on Twitter <a href="https://twitter.com/sdqali">@sdqali</a>.
 </p>
-
-            <div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Found this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and explanations for specific Java, Spring and other programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
 
           </div>
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">

@@ -2,18 +2,20 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Content Type on {code that works}</title>
-    <link>https://sdqali.in/tags/content-type/?utm_source=site&amp;utm_medium=feed</link>
+    <link>https://sdqali.in/tags/content-type/</link>
     <description>Recent content in Content Type on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
     <lastBuildDate>Tue, 27 Nov 2012 00:00:00 +0000</lastBuildDate>
-    <atom:link href="/tags/content-type/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    
+	<atom:link href="https://sdqali.in/tags/content-type/index.xml" rel="self" type="application/rss+xml" />
+    
     
     <item>
       <title>On REST, Content-Type, Google Chrome and Caching</title>
-      <link>https://sdqali.in/blog/2012/11/27/on-rest-content-type-google-chrome-and-caching/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sdqali.in/blog/2012/11/27/on-rest-content-type-google-chrome-and-caching/</link>
       <pubDate>Tue, 27 Nov 2012 00:00:00 +0000</pubDate>
       
-      <guid>https://sdqali.in/blog/2012/11/27/on-rest-content-type-google-chrome-and-caching/?utm_source=site&amp;utm_medium=feed</guid>
+      <guid>https://sdqali.in/blog/2012/11/27/on-rest-content-type-google-chrome-and-caching/</guid>
       <description>&lt;p&gt;Representational State Transfer (REST) is a style of software
 architecture for distributed systems that has replaced technologies like
 &lt;a href=&#34;http://en.wikipedia.org/wiki/SOAP&#34;&gt;SOAP&lt;/a&gt; as the predominant Web service
@@ -37,59 +39,7 @@ good example of this weird behaviour can be seen &lt;a href=&#34;http://chrome-j
 I ran in to this issue while playing around with &lt;a href=&#34;http://expressjs.com/&#34;&gt;Express JS&lt;/a&gt;.
 Now, the interesting thing here is that the Chrome developers seem to
 have closed the issue without providing any convincing answers or
-indicating whether they would fix this.&lt;/p&gt;
-
-&lt;h2 id=&#34;vary-accept-to-the-rescue&#34;&gt;Vary: Accept to the rescue?&lt;/h2&gt;
-
-&lt;p&gt;One of the
-&lt;a href=&#34;https://code.google.com/p/chromium/issues/detail?id=108766#c6&#34;&gt;solutions&lt;/a&gt;
-suggested in the bug discussion is to use the &lt;code&gt;Vary: Accept&lt;/code&gt;
-header. According to the
-&lt;a href=&#34;http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.44&#34;&gt;specs&lt;/a&gt;,
-&amp;ldquo;while the response is fresh, whether a cache is permitted to use the
-response to reply to a subsequent request without revalidation&amp;rdquo;. In
-other words, specifying &lt;code&gt;Vary: Accept&lt;/code&gt; tells the client that if there is
-a change in the &lt;code&gt;Accept&lt;/code&gt; field, the resource in the cache must
-be-revalidated. After trying that out and still having to stare at naked
-JSON, I was convinced that telling Chrome to
-re-validate the resource was the only way to get around this issue. This
-leads us to another interesting bug in Chrome.&lt;/p&gt;
-
-&lt;h2 id=&#34;chrome-ignores-the-no-cache-directive&#34;&gt;Chrome ignores the no-cache directive&lt;/h2&gt;
-
-&lt;p&gt;Reading the specs lead me to the
-&lt;a href=&#34;http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.9.4&#34;&gt;Cache-Control&lt;/a&gt;
-header. According to the specs, &amp;ldquo;If the no-cache directive does not
-specify a field-name, then a cache MUST NOT use the response to satisfy
-a subsequent request without successful revalidation with the origin
-server.&amp;ldquo;. That is exactly what I wanted.
-But setting that header did not change anything, I still had naked JSON
-when hitting the back button. This led me to
-&lt;a href=&#34;https://code.google.com/p/chromium/issues/detail?id=28035&#34;&gt;yet another bug&lt;/a&gt;
-on Chrome. Chrome seems to completely ignore the &lt;code&gt;no-cache&lt;/code&gt;
-directive. One of the &lt;a href=&#34;https://code.google.com/p/chromium/issues/detail?id=28035#c3&#34;&gt;suggestions&lt;/a&gt; in the discussion was to use the
-&lt;code&gt;no-store&lt;/code&gt; directive. That seemed to fix the issue.&lt;/p&gt;
-
-&lt;p&gt;But the
-&lt;a href=&#34;http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.9.2&#34;&gt;spec&lt;/a&gt;
-says &lt;code&gt;no-store&lt;/code&gt; directive should be used to prevent the client from
-caching any sensitive information. What that means is that the client
-will never cache the resource.&lt;/p&gt;
-
-&lt;p&gt;The end result is that you would end up with a system with lot of end
-points that are not cache-able because if you make them cache-able, Google
-Chrome will leave your users staring at naked JSON.&lt;/p&gt;
-
-&lt;h2 id=&#34;possible-solutions&#34;&gt;Possible solutions&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;Use different URLs for different representations. In my case, that
-would mean I have &lt;code&gt;/users/sdqali.html&lt;/code&gt; and &lt;code&gt;/users/sdqali.json&lt;/code&gt; as
-URLs for the same resource. This somewhat violates the REST principle.&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;Do not cache JSON end points at all. While this would work well for my
-small app, this is not an effective solution in the general case.&lt;/p&gt;&lt;/li&gt;
-&lt;/ul&gt;</description>
+indicating whether they would fix this.&lt;/p&gt;</description>
     </item>
     
   </channel>

@@ -187,118 +187,86 @@ http://en.wikipedia.org/wiki/The_Heart_of_Midlothian
 <p>I am still trying to make more sense of the links that I clicked away and the articles I read when I was page hopping.</p>
 
 <p>The Ruby script that parses Chromium history and figures out the Wikipedia links is below:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #0099FF; font-style: italic">#!/usr/bin/env ruby</span>
-<span style="color: #0099FF; font-style: italic"># Ruby script to parse Chromium (or Google Chrome) history to identify Wikipedia pages read per day.</span>
-<span style="color: #0099FF; font-style: italic"># usage: ./wikipedia_history.rb &lt;location of Chromium history db&gt;</span>
-<span style="color: #0099FF; font-style: italic"># The Chromium history db can be usually found under ~/.config/chromium/Default</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ruby" data-lang="ruby"><span style="color:#09f;font-style:italic">#!/usr/bin/env ruby</span>
+<span style="color:#09f;font-style:italic"># Ruby script to parse Chromium (or Google Chrome) history to identify Wikipedia pages read per day.</span>
+<span style="color:#09f;font-style:italic"># usage: ./wikipedia_history.rb &lt;location of Chromium history db&gt;</span>
+<span style="color:#09f;font-style:italic"># The Chromium history db can be usually found under ~/.config/chromium/Default</span>
 
-<span style="color: #336666">require</span> <span style="color: #CC3300">&#39;rubygems&#39;</span>
-<span style="color: #336666">require</span> <span style="color: #CC3300">&#39;sqlite3&#39;</span>
+<span style="color:#366">require</span> <span style="color:#c30">&#39;rubygems&#39;</span>
+<span style="color:#366">require</span> <span style="color:#c30">&#39;sqlite3&#39;</span>
 
-<span style="color: #336600">US_IN_A_DAY</span> <span style="color: #555555">=</span> <span style="color: #FF6600">24</span> <span style="color: #555555">*</span> <span style="color: #FF6600">60</span> <span style="color: #555555">*</span> <span style="color: #FF6600">60</span> <span style="color: #555555">*</span> <span style="color: #FF6600">1000000</span>
-<span style="color: #336600">SITE</span> <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;wikipedia&quot;</span>
+<span style="color:#360">US_IN_A_DAY</span> <span style="color:#555">=</span> <span style="color:#f60">24</span> <span style="color:#555">*</span> <span style="color:#f60">60</span> <span style="color:#555">*</span> <span style="color:#f60">60</span> <span style="color:#555">*</span> <span style="color:#f60">1000000</span>
+<span style="color:#555"></span><span style="color:#360">SITE</span> <span style="color:#555">=</span> <span style="color:#c30">&#34;wikipedia&#34;</span>
 
-<span style="color: #006699; font-weight: bold">module</span> <span style="color: #00CCFF; font-weight: bold">ChromiumHP</span>
-  <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">DbConnection</span>
-    <span style="color: #006699; font-weight: bold">def</span> <span style="color: #CC00FF">initialize</span> db_name
-      <span style="color: #003333">@db_name</span> <span style="color: #555555">=</span> db_name
-    <span style="color: #006699; font-weight: bold">end</span>
+<span style="color:#069;font-weight:bold">module</span> <span style="color:#0cf;font-weight:bold">ChromiumHP</span>
+  <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">DbConnection</span>
+    <span style="color:#069;font-weight:bold">def</span> <span style="color:#0a8;font-weight:bold"></span><span style="color:#555"></span><span style="color:#c0f">initialize</span> db_name
+      @db_name <span style="color:#555">=</span> db_name
+    <span style="color:#069;font-weight:bold">end</span>
 
-    <span style="color: #006699; font-weight: bold">def</span> <span style="color: #CC00FF">urls_history</span>
-      db <span style="color: #555555">=</span> <span style="color: #336600">SQLite3</span><span style="color: #555555">::</span><span style="color: #336600">Database</span><span style="color: #555555">.</span>new <span style="color: #003333">@db_name</span>
-      urls <span style="color: #555555">=</span> db<span style="color: #555555">.</span>execute(<span style="color: #CC3300">&quot;SELECT last_visit_time, url from urls ORDER BY last_visit_time;&quot;</span>)<span style="color: #555555">.</span>map <span style="color: #006699; font-weight: bold">do</span> <span style="color: #555555">|</span>t, u<span style="color: #555555">|</span>
-        {<span style="color: #FFCC33">:last_visit_time</span> <span style="color: #555555">=&gt;</span> t, <span style="color: #FFCC33">:url</span> <span style="color: #555555">=&gt;</span> u}
-      <span style="color: #006699; font-weight: bold">end</span>
-      db<span style="color: #555555">.</span>close
+    <span style="color:#069;font-weight:bold">def</span> <span style="color:#0a8;font-weight:bold"></span><span style="color:#555"></span><span style="color:#c0f">urls_history</span>
+      db <span style="color:#555">=</span> <span style="color:#360">SQLite3</span><span style="color:#555">::</span><span style="color:#360">Database</span><span style="color:#555">.</span>new @db_name
+      urls <span style="color:#555">=</span> db<span style="color:#555">.</span>execute(<span style="color:#c30">&#34;SELECT last_visit_time, url from urls ORDER BY last_visit_time;&#34;</span>)<span style="color:#555">.</span>map <span style="color:#069;font-weight:bold">do</span> <span style="color:#555">|</span>t, u<span style="color:#555">|</span>
+        {<span style="color:#fc3">:last_visit_time</span> <span style="color:#555">=&gt;</span> t, <span style="color:#fc3">:url</span> <span style="color:#555">=&gt;</span> u}
+      <span style="color:#069;font-weight:bold">end</span>
+      db<span style="color:#555">.</span>close
       urls
-    <span style="color: #006699; font-weight: bold">end</span>
-  <span style="color: #006699; font-weight: bold">end</span>
+    <span style="color:#069;font-weight:bold">end</span>
+  <span style="color:#069;font-weight:bold">end</span>
 
-  <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">Parser</span>
-    <span style="color: #006699; font-weight: bold">def</span> <span style="color: #CC00FF">initialize</span> db_name
-      <span style="color: #003333">@db_name</span> <span style="color: #555555">=</span> db_name
-    <span style="color: #006699; font-weight: bold">end</span>
+  <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">Parser</span>
+    <span style="color:#069;font-weight:bold">def</span> <span style="color:#0a8;font-weight:bold"></span><span style="color:#555"></span><span style="color:#c0f">initialize</span> db_name
+      @db_name <span style="color:#555">=</span> db_name
+    <span style="color:#069;font-weight:bold">end</span>
 
-    <span style="color: #006699; font-weight: bold">def</span> <span style="color: #CC00FF">chunks</span> days
-      <span style="color: #003333">@history</span> <span style="color: #555555">||=</span> get_history
-      parts <span style="color: #555555">=</span> <span style="color: #003333">@history</span><span style="color: #555555">.</span>group_by <span style="color: #006699; font-weight: bold">do</span> <span style="color: #555555">|</span>h<span style="color: #555555">|</span>
-         h<span style="color: #555555">[</span><span style="color: #FFCC33">:last_visit_time</span><span style="color: #555555">]</span> <span style="color: #555555">/</span> (days <span style="color: #555555">*</span> <span style="color: #336600">US_IN_A_DAY</span>)
-      <span style="color: #006699; font-weight: bold">end</span>
-      parts<span style="color: #555555">.</span>map { <span style="color: #555555">|</span>k, group<span style="color: #555555">|</span> group }
-    <span style="color: #006699; font-weight: bold">end</span>
-
-    <span style="color: #006699">private</span>
-    <span style="color: #006699; font-weight: bold">def</span> <span style="color: #CC00FF">get_history</span>
-      <span style="color: #336600">DbConnection</span><span style="color: #555555">.</span>new(<span style="color: #003333">@db_name</span>)<span style="color: #555555">.</span>urls_history
-    <span style="color: #006699; font-weight: bold">end</span>
-  <span style="color: #006699; font-weight: bold">end</span>
-
-  <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">Analyzer</span>
-    <span style="color: #006699; font-weight: bold">def</span> <span style="color: #00AA88; font-weight: bold">self</span><span style="color: #555555">.</span><span style="color: #CC00FF">graph</span> chunks
-      chunks<span style="color: #555555">.</span>map <span style="color: #006699; font-weight: bold">do</span> <span style="color: #555555">|</span>c<span style="color: #555555">|</span>
-        c<span style="color: #555555">.</span>find_all <span style="color: #006699; font-weight: bold">do</span> <span style="color: #555555">|</span>entry<span style="color: #555555">|</span>
-          url <span style="color: #555555">=</span> entry<span style="color: #555555">[</span><span style="color: #FFCC33">:url</span><span style="color: #555555">]</span>
-          url<span style="color: #555555">.</span>include?(<span style="color: #336600">SITE</span>) <span style="color: #555555">&amp;&amp;</span>
-            <span style="color: #555555">!</span>url<span style="color: #555555">.</span>include?(<span style="color: #CC3300">&quot;facebook&quot;</span>) <span style="color: #555555">&amp;&amp;</span>
-            <span style="color: #555555">!</span>url<span style="color: #555555">.</span>include?(<span style="color: #CC3300">&quot;google&quot;</span>)
-        <span style="color: #006699; font-weight: bold">end</span>
-      <span style="color: #006699; font-weight: bold">end</span><span style="color: #555555">.</span>find_all <span style="color: #006699; font-weight: bold">do</span> <span style="color: #555555">|</span>c<span style="color: #555555">|</span>
-        <span style="color: #555555">!</span>c<span style="color: #555555">.</span>empty?
-      <span style="color: #006699; font-weight: bold">end</span><span style="color: #555555">.</span>sort_by <span style="color: #006699; font-weight: bold">do</span> <span style="color: #555555">|</span>c<span style="color: #555555">|</span>
-        c<span style="color: #555555">.</span>length
-      <span style="color: #006699; font-weight: bold">end</span><span style="color: #555555">.</span>map <span style="color: #006699; font-weight: bold">do</span> <span style="color: #555555">|</span>c<span style="color: #555555">|</span>
-        c<span style="color: #555555">.</span>map <span style="color: #006699; font-weight: bold">do</span> <span style="color: #555555">|</span>entry<span style="color: #555555">|</span>
-          entry<span style="color: #555555">[</span><span style="color: #FFCC33">:url</span><span style="color: #555555">]</span>
-        <span style="color: #006699; font-weight: bold">end</span>
-      <span style="color: #006699; font-weight: bold">end</span>
-    <span style="color: #006699; font-weight: bold">end</span>
-  <span style="color: #006699; font-weight: bold">end</span>
-<span style="color: #006699; font-weight: bold">end</span>
-
-
-history_loc <span style="color: #555555">=</span> <span style="color: #336600">ARGV</span><span style="color: #555555">.</span>first
-<span style="color: #336666">abort</span> <span style="color: #CC3300">&quot;Error: Pass the chromium history location as parameter&quot;</span> <span style="color: #006699; font-weight: bold">if</span> history_loc<span style="color: #555555">.</span>nil?
-
-daily_chunks <span style="color: #555555">=</span> <span style="color: #336600">ChromiumHP</span><span style="color: #555555">::</span><span style="color: #336600">Parser</span><span style="color: #555555">.</span>new(history_loc <span style="color: #555555">+</span> <span style="color: #CC3300">&quot;/History&quot;</span>)<span style="color: #555555">.</span>chunks(<span style="color: #FF6600">1</span>)
-<span style="color: #336600">ChromiumHP</span><span style="color: #555555">::</span><span style="color: #336600">Analyzer</span><span style="color: #555555">.</span>graph(daily_chunks)<span style="color: #555555">.</span>each <span style="color: #006699; font-weight: bold">do</span> <span style="color: #555555">|</span>entries<span style="color: #555555">|</span>
-  <span style="color: #336666">puts</span> entries
-  <span style="color: #336666">puts</span> <span style="color: #CC3300">&quot;&quot;</span>
-<span style="color: #006699; font-weight: bold">end</span>
-</pre></div>
-
+    <span style="color:#069;font-weight:bold">def</span> <span style="color:#0a8;font-weight:bold"></span><span style="color:#555"></span><span style="color:#c0f">chunks</span> days
+      @history <span style="color:#555">||=</span> get_history
+      parts <span style="color:#555">=</span> @history<span style="color:#555">.</span>group_by <span style="color:#069;font-weight:bold">do</span> <span style="color:#555">|</span>h<span style="color:#555">|</span>
+         h<span style="color:#555">[</span><span style="color:#fc3">:last_visit_time</span><span style="color:#555">]</span> <span style="color:#3aa">/ (days * US_IN_A_DAY)
+</span><span style="color:#3aa">      end
+</span><span style="color:#3aa">      parts.map { |k, group| group }
+</span><span style="color:#3aa">    end
+</span><span style="color:#3aa">
+</span><span style="color:#3aa">    private
+</span><span style="color:#3aa">    def get_history
+</span><span style="color:#3aa">      DbConnection.new(@db_name).urls_history
+</span><span style="color:#3aa">    end
+</span><span style="color:#3aa">  end
+</span><span style="color:#3aa">
+</span><span style="color:#3aa">  class Analyzer
+</span><span style="color:#3aa">    def self.graph chunks
+</span><span style="color:#3aa">      chunks.map do |c|
+</span><span style="color:#3aa">        c.find_all do |entry|
+</span><span style="color:#3aa">          url = entry[:url]
+</span><span style="color:#3aa">          url.include?(SITE) &amp;&amp;
+</span><span style="color:#3aa">            !url.include?(&#34;facebook&#34;) &amp;&amp;
+</span><span style="color:#3aa">            !url.include?(&#34;google&#34;)
+</span><span style="color:#3aa">        end
+</span><span style="color:#3aa">      end.find_all do |c|
+</span><span style="color:#3aa">        !c.empty?
+</span><span style="color:#3aa">      end.sort_by do |c|
+</span><span style="color:#3aa">        c.length
+</span><span style="color:#3aa">      end.map do |c|
+</span><span style="color:#3aa">        c.map do |entry|
+</span><span style="color:#3aa">          entry[:url]
+</span><span style="color:#3aa">        end
+</span><span style="color:#3aa">      end
+</span><span style="color:#3aa">    end
+</span><span style="color:#3aa">  end
+</span><span style="color:#3aa">end
+</span><span style="color:#3aa">
+</span><span style="color:#3aa">
+</span><span style="color:#3aa">history_loc = ARGV.first
+</span><span style="color:#3aa">abort &#34;Error: Pass the chromium history location as parameter&#34; if history_loc.nil?
+</span><span style="color:#3aa">
+</span><span style="color:#3aa">daily_chunks = ChromiumHP::Parser.new(history_loc + &#34;/</span><span style="color:#360">History</span><span style="color:#c30">&#34;).chunks(1)
+</span><span style="color:#c30">ChromiumHP::Analyzer.graph(daily_chunks).each do |entries|
+</span><span style="color:#c30">  puts entries
+</span><span style="color:#c30">  puts &#34;&#34;
+</span><span style="color:#c30">end</span></code></pre></div>
             <p class="comments">
   If you have questions or comments about this blog post, you can get in touch with me on Twitter <a href="https://twitter.com/sdqali">@sdqali</a>.
 </p>
-
-            <div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Found this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and explanations for specific Java, Spring and other programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
 
           </div>
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">

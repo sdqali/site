@@ -110,482 +110,418 @@
             <p>Both Spring Security and Angular JS provide support for CSRF protection. However, getting these to work together to provide protection from CSRF requires some non-obvious configuration. This blog post explains how to add CSRF protection to an application that uses Spring Security with an Angular JS front end.
 </p>
 
-<p>Cross-Site Request Forgery (CSRF) <sup class="footnote-ref" id="fnref:1"><a rel="footnote" href="#fn:1">1</a></sup> is an attack that forces an end user to execute unwanted actions on a web application in which they&rsquo;re currently authenticated. This blog post implements the CSRF token part of the protection described by OWASP. The application still needs to have protection to enforce the right Origin for requests.</p>
+<p>Cross-Site Request Forgery (CSRF) <sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup> is an attack that forces an end user to execute unwanted actions on a web application in which they&rsquo;re currently authenticated. This blog post implements the CSRF token part of the protection described by OWASP. The application still needs to have protection to enforce the right Origin for requests.</p>
 
 <h3 id="front-end">Front end</h3>
 
 <p>For this example, we will build a simple Spring Boot application with an Angular front end. The front end is based on the application we built for the <a href="/blog/2016/07/02/jwt-authentication-with-spring-web---part-1/">series</a> on authentication with JWT. The changes are in how the initial authentication is done - we will be using Basic Auth in this example to perform the initial authentication.</p>
 
 <p>This involves changing the <code>LoginService</code> to this:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>(<span style="color: #006699; font-weight: bold">function</span>(angular) {
-  <span style="color: #006699; font-weight: bold">var</span> LoginFactory <span style="color: #555555">=</span> <span style="color: #006699; font-weight: bold">function</span>($http) {
-    <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">function</span>(credentials, success, error) {
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript">(<span style="color:#069;font-weight:bold">function</span>(angular) {
+  <span style="color:#069;font-weight:bold">var</span> LoginFactory <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">function</span>($http) {
+    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">function</span>(credentials, success, error) {
       $http({
-        method<span style="color: #555555">:</span> <span style="color: #CC3300">&#39;POST&#39;</span>,
-        url<span style="color: #555555">:</span> <span style="color: #CC3300">&#39;/login&#39;</span>,
-        headers<span style="color: #555555">:</span> {
-          Authorization<span style="color: #555555">:</span> <span style="color: #CC3300">&quot;Basic &quot;</span> <span style="color: #555555">+</span> btoa(credentials.username <span style="color: #555555">+</span> <span style="color: #CC3300">&quot;:&quot;</span> <span style="color: #555555">+</span> credentials.password)
+        method<span style="color:#555">:</span> <span style="color:#c30">&#39;POST&#39;</span>,
+        url<span style="color:#555">:</span> <span style="color:#c30">&#39;/login&#39;</span>,
+        headers<span style="color:#555">:</span> {
+          Authorization<span style="color:#555">:</span> <span style="color:#c30">&#34;Basic &#34;</span> <span style="color:#555">+</span> btoa(credentials.username <span style="color:#555">+</span> <span style="color:#c30">&#34;:&#34;</span> <span style="color:#555">+</span> credentials.password)
         }
-      }).then(<span style="color: #006699; font-weight: bold">function</span> (resp) {
+      }).then(<span style="color:#069;font-weight:bold">function</span> (resp) {
         success(resp.data, resp.headers())
       }, error);
     };
   };
 
-  LoginFactory.$inject <span style="color: #555555">=</span> [<span style="color: #CC3300">&#39;$http&#39;</span>];
-  angular.module(<span style="color: #CC3300">&#39;jwtDemo.services&#39;</span>).factory(<span style="color: #CC3300">&#39;Login&#39;</span>, LoginFactory);
+  LoginFactory.$inject <span style="color:#555">=</span> [<span style="color:#c30">&#39;$http&#39;</span>];
+  angular.module(<span style="color:#c30">&#39;jwtDemo.services&#39;</span>).factory(<span style="color:#c30">&#39;Login&#39;</span>, LoginFactory);
 
-  <span style="color: #006699; font-weight: bold">var</span> HelloFactory <span style="color: #555555">=</span> <span style="color: #006699; font-weight: bold">function</span>($resource) {
-    <span style="color: #006699; font-weight: bold">return</span> $resource(<span style="color: #CC3300">&#39;/hello&#39;</span>, {}, {
-      hello<span style="color: #555555">:</span> {
-        method<span style="color: #555555">:</span> <span style="color: #CC3300">&#39;GET&#39;</span>
+  <span style="color:#069;font-weight:bold">var</span> HelloFactory <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">function</span>($resource) {
+    <span style="color:#069;font-weight:bold">return</span> $resource(<span style="color:#c30">&#39;/hello&#39;</span>, {}, {
+      hello<span style="color:#555">:</span> {
+        method<span style="color:#555">:</span> <span style="color:#c30">&#39;GET&#39;</span>
       }
     });
   };
 
-  HelloFactory.$inject <span style="color: #555555">=</span> [<span style="color: #CC3300">&#39;$resource&#39;</span>];
-  angular.module(<span style="color: #CC3300">&#39;jwtDemo.services&#39;</span>).factory(<span style="color: #CC3300">&#39;Hello&#39;</span>, HelloFactory);}(angular));
-</pre></div>
-
+  HelloFactory.$inject <span style="color:#555">=</span> [<span style="color:#c30">&#39;$resource&#39;</span>];
+  angular.module(<span style="color:#c30">&#39;jwtDemo.services&#39;</span>).factory(<span style="color:#c30">&#39;Hello&#39;</span>, HelloFactory);}(angular));
+</code></pre></div>
 <p>And the controllers are changed to use these services.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>(<span style="color: #006699; font-weight: bold">function</span>(angular) {
-  <span style="color: #006699; font-weight: bold">var</span> LoginController <span style="color: #555555">=</span> <span style="color: #006699; font-weight: bold">function</span>($scope, $localStorage, $http, $location, Login) {
-    $scope.login <span style="color: #555555">=</span> <span style="color: #006699; font-weight: bold">function</span>(username, password) {
-      <span style="color: #006699; font-weight: bold">new</span> Login({username<span style="color: #555555">:</span> username, password<span style="color: #555555">:</span> password},
-          <span style="color: #006699; font-weight: bold">function</span> (data, headers) {
-            $localStorage.user <span style="color: #555555">=</span> data.user;
-            $localStorage.authToken <span style="color: #555555">=</span> headers[<span style="color: #CC3300">&#39;x-auth-token&#39;</span>];
-            $http.defaults.headers.common[<span style="color: #CC3300">&#39;x-auth-token&#39;</span>] <span style="color: #555555">=</span> headers[<span style="color: #CC3300">&#39;x-auth-token&#39;</span>];
-            $location.path(<span style="color: #CC3300">&quot;/&quot;</span>);
-          }, <span style="color: #006699; font-weight: bold">function</span> (error) {
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript">(<span style="color:#069;font-weight:bold">function</span>(angular) {
+  <span style="color:#069;font-weight:bold">var</span> LoginController <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">function</span>($scope, $localStorage, $http, $location, Login) {
+    $scope.login <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">function</span>(username, password) {
+      <span style="color:#069;font-weight:bold">new</span> Login({username<span style="color:#555">:</span> username, password<span style="color:#555">:</span> password},
+          <span style="color:#069;font-weight:bold">function</span> (data, headers) {
+            $localStorage.user <span style="color:#555">=</span> data.user;
+            $localStorage.authToken <span style="color:#555">=</span> headers[<span style="color:#c30">&#39;x-auth-token&#39;</span>];
+            $http.defaults.headers.common[<span style="color:#c30">&#39;x-auth-token&#39;</span>] <span style="color:#555">=</span> headers[<span style="color:#c30">&#39;x-auth-token&#39;</span>];
+            $location.path(<span style="color:#c30">&#34;/&#34;</span>);
+          }, <span style="color:#069;font-weight:bold">function</span> (error) {
             console.log(error);
           });
     };
 
-    $scope.logout <span style="color: #555555">=</span> <span style="color: #006699; font-weight: bold">function</span> () {
-      <span style="color: #006699; font-weight: bold">delete</span> $localStorage.user;
-      <span style="color: #006699; font-weight: bold">delete</span> $localStorage.authToken;
-      $http.defaults.headers.common <span style="color: #555555">=</span> {};
+    $scope.logout <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">function</span> () {
+      <span style="color:#069;font-weight:bold">delete</span> $localStorage.user;
+      <span style="color:#069;font-weight:bold">delete</span> $localStorage.authToken;
+      $http.defaults.headers.common <span style="color:#555">=</span> {};
     }
 
     $scope.logout();
   };
 
-  LoginController.$inject <span style="color: #555555">=</span> [<span style="color: #CC3300">&#39;$scope&#39;</span>, <span style="color: #CC3300">&#39;$localStorage&#39;</span>, <span style="color: #CC3300">&#39;$http&#39;</span>, <span style="color: #CC3300">&#39;$location&#39;</span>,<span style="color: #CC3300">&#39;Login&#39;</span>];
-  angular.module(<span style="color: #CC3300">&quot;jwtDemo.controllers&quot;</span>).controller(<span style="color: #CC3300">&quot;LoginController&quot;</span>, LoginController);
+  LoginController.$inject <span style="color:#555">=</span> [<span style="color:#c30">&#39;$scope&#39;</span>, <span style="color:#c30">&#39;$localStorage&#39;</span>, <span style="color:#c30">&#39;$http&#39;</span>, <span style="color:#c30">&#39;$location&#39;</span>,<span style="color:#c30">&#39;Login&#39;</span>];
+  angular.module(<span style="color:#c30">&#34;jwtDemo.controllers&#34;</span>).controller(<span style="color:#c30">&#34;LoginController&#34;</span>, LoginController);
 
 
-  <span style="color: #006699; font-weight: bold">var</span> ProfileController <span style="color: #555555">=</span> <span style="color: #006699; font-weight: bold">function</span> ($scope, $localStorage, Hello) {
-    $scope.profile <span style="color: #555555">=</span> $localStorage.user;
-    <span style="color: #006699; font-weight: bold">new</span> Hello().$hello(<span style="color: #006699; font-weight: bold">function</span> (resp, headers) {
-      $scope.greeting <span style="color: #555555">=</span> resp.message;
-    }, <span style="color: #006699; font-weight: bold">function</span> (error) {
+  <span style="color:#069;font-weight:bold">var</span> ProfileController <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">function</span> ($scope, $localStorage, Hello) {
+    $scope.profile <span style="color:#555">=</span> $localStorage.user;
+    <span style="color:#069;font-weight:bold">new</span> Hello().$hello(<span style="color:#069;font-weight:bold">function</span> (resp, headers) {
+      $scope.greeting <span style="color:#555">=</span> resp.message;
+    }, <span style="color:#069;font-weight:bold">function</span> (error) {
       console.log(error);
     })
   };
-  ProfileController.inject <span style="color: #555555">=</span> [<span style="color: #CC3300">&#39;$scope&#39;</span>, <span style="color: #CC3300">&#39;$localStorage&#39;</span>, <span style="color: #CC3300">&#39;Hello&#39;</span>];
-  angular.module(<span style="color: #CC3300">&quot;jwtDemo.controllers&quot;</span>).controller(<span style="color: #CC3300">&quot;ProfileController&quot;</span>, ProfileController);
+  ProfileController.inject <span style="color:#555">=</span> [<span style="color:#c30">&#39;$scope&#39;</span>, <span style="color:#c30">&#39;$localStorage&#39;</span>, <span style="color:#c30">&#39;Hello&#39;</span>];
+  angular.module(<span style="color:#c30">&#34;jwtDemo.controllers&#34;</span>).controller(<span style="color:#c30">&#34;ProfileController&#34;</span>, ProfileController);
   }(angular));
-</pre></div>
-
-<p>It can be noted that there are no CSRF specific code in there. We will be relying on Angular&rsquo;s CSRF (or XSRF as Angular refers to it) protection.
-<div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Finding this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and actionable explanations for specific programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
-</p>
+</code></pre></div>
+<p>It can be noted that there are no CSRF specific code in there. We will be relying on Angular&rsquo;s CSRF (or XSRF as Angular refers to it) protection.</p>
 
 <h3 id="the-back-end">The back end</h3>
 
 <p>The main API returns a greeting:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@RestController</span>
-<span style="color: #9999FF">@RequestMapping</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;/hello&quot;</span><span style="color: #555555">)</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">HelloController</span> <span style="color: #555555">{</span>
-  <span style="color: #9999FF">@RequestMapping</span><span style="color: #555555">(</span>method <span style="color: #555555">=</span> GET<span style="color: #555555">,</span>
-      path <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;&quot;</span><span style="color: #555555">,</span>
-      produces <span style="color: #555555">=</span> APPLICATION_JSON_VALUE<span style="color: #555555">)</span>
-  <span style="color: #006699; font-weight: bold">public</span> Map<span style="color: #555555">&lt;</span>String<span style="color: #555555">,</span> String<span style="color: #555555">&gt;</span> <span style="color: #CC00FF">hello</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">return</span> Collections<span style="color: #555555">.</span><span style="color: #330099">singletonMap</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;message&quot;</span><span style="color: #555555">,</span> <span style="color: #CC3300">&quot;hello&quot;</span><span style="color: #555555">);</span>
-  <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@RestController</span>
+<span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span><span style="color:#c30">&#34;/hello&#34;</span><span style="color:#555">)</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">HelloController</span> <span style="color:#555">{</span>
+  <span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span>method <span style="color:#555">=</span> GET<span style="color:#555">,</span>
+      path <span style="color:#555">=</span> <span style="color:#c30">&#34;&#34;</span><span style="color:#555">,</span>
+      produces <span style="color:#555">=</span> APPLICATION_JSON_VALUE<span style="color:#555">)</span>
+  <span style="color:#069;font-weight:bold">public</span> Map<span style="color:#555">&lt;</span>String<span style="color:#555">,</span> String<span style="color:#555">&gt;</span> <span style="color:#c0f">hello</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">return</span> Collections<span style="color:#555">.</span><span style="color:#309">singletonMap</span><span style="color:#555">(</span><span style="color:#c30">&#34;message&#34;</span><span style="color:#555">,</span> <span style="color:#c30">&#34;hello&#34;</span><span style="color:#555">);</span>
+  <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>We also have an end point that clients can authenticate against and it returns the currently authenticated user:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@RestController</span>
-<span style="color: #9999FF">@RequestMapping</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;/login&quot;</span><span style="color: #555555">)</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">LoginController</span> <span style="color: #555555">{</span>
-  <span style="color: #9999FF">@RequestMapping</span><span style="color: #555555">(</span>method <span style="color: #555555">=</span> POST<span style="color: #555555">,</span>
-      path <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;&quot;</span><span style="color: #555555">,</span>
-      produces <span style="color: #555555">=</span> APPLICATION_JSON_VALUE<span style="color: #555555">)</span>
-  <span style="color: #006699; font-weight: bold">public</span> Map<span style="color: #555555">&lt;</span>String<span style="color: #555555">,</span> Object<span style="color: #555555">&gt;</span> <span style="color: #CC00FF">login</span><span style="color: #555555">(</span>Authentication auth<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">return</span> Collections<span style="color: #555555">.</span><span style="color: #330099">singletonMap</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;user&quot;</span><span style="color: #555555">,</span> auth<span style="color: #555555">.</span><span style="color: #330099">getName</span><span style="color: #555555">());</span>
-  <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@RestController</span>
+<span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span><span style="color:#c30">&#34;/login&#34;</span><span style="color:#555">)</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">LoginController</span> <span style="color:#555">{</span>
+  <span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span>method <span style="color:#555">=</span> POST<span style="color:#555">,</span>
+      path <span style="color:#555">=</span> <span style="color:#c30">&#34;&#34;</span><span style="color:#555">,</span>
+      produces <span style="color:#555">=</span> APPLICATION_JSON_VALUE<span style="color:#555">)</span>
+  <span style="color:#069;font-weight:bold">public</span> Map<span style="color:#555">&lt;</span>String<span style="color:#555">,</span> Object<span style="color:#555">&gt;</span> <span style="color:#c0f">login</span><span style="color:#555">(</span>Authentication auth<span style="color:#555">)</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">return</span> Collections<span style="color:#555">.</span><span style="color:#309">singletonMap</span><span style="color:#555">(</span><span style="color:#c30">&#34;user&#34;</span><span style="color:#555">,</span> auth<span style="color:#555">.</span><span style="color:#309">getName</span><span style="color:#555">());</span>
+  <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <h3 id="security">Security</h3>
 
 <p>In this example, we will be using an in-memory authentication. We will also be using a header based session instead of a Cookie based session by wiring up <code>HeaderHttpSessionStrategy</code>. Sessions are stored in-memory using <code>MapSessionRepository</code>. We also secure all end points except the front end components and the <code>/login</code> end point.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@EnableWebSecurity</span>
-<span style="color: #9999FF">@Configuration</span>
-<span style="color: #9999FF">@EnableSpringHttpSession</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">SecurityConfig</span> <span style="color: #006699; font-weight: bold">extends</span> WebSecurityConfigurerAdapter <span style="color: #555555">{</span>
-  <span style="color: #9999FF">@Override</span>
-  <span style="color: #006699; font-weight: bold">protected</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">configure</span><span style="color: #555555">(</span>HttpSecurity http<span style="color: #555555">)</span> <span style="color: #006699; font-weight: bold">throws</span> Exception <span style="color: #555555">{</span>
-    String<span style="color: #555555">[]</span> patterns <span style="color: #555555">=</span> <span style="color: #006699; font-weight: bold">new</span> String<span style="color: #555555">[]</span> <span style="color: #555555">{</span>
-        <span style="color: #CC3300">&quot;/&quot;</span><span style="color: #555555">,</span>
-        <span style="color: #CC3300">&quot;/login&quot;</span><span style="color: #555555">,</span>
-        <span style="color: #CC3300">&quot;/bower_components/**/*&quot;</span><span style="color: #555555">,</span>
-        <span style="color: #CC3300">&quot;/app/**/*&quot;</span><span style="color: #555555">,</span>
-        <span style="color: #CC3300">&quot;/index.html&quot;</span><span style="color: #555555">,</span>
-        <span style="color: #CC3300">&quot;/home.html&quot;</span><span style="color: #555555">,</span>
-        <span style="color: #CC3300">&quot;/signin.html&quot;</span><span style="color: #555555">,</span>
-        <span style="color: #CC3300">&quot;/favicon.ico&quot;</span>
-    <span style="color: #555555">};</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@EnableWebSecurity</span>
+<span style="color:#99f">@Configuration</span>
+<span style="color:#99f">@EnableSpringHttpSession</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">SecurityConfig</span> <span style="color:#069;font-weight:bold">extends</span> WebSecurityConfigurerAdapter <span style="color:#555">{</span>
+  <span style="color:#99f">@Override</span>
+  <span style="color:#069;font-weight:bold">protected</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">configure</span><span style="color:#555">(</span>HttpSecurity http<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
+    String<span style="color:#555">[]</span> patterns <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">new</span> String<span style="color:#555">[]</span> <span style="color:#555">{</span>
+        <span style="color:#c30">&#34;/&#34;</span><span style="color:#555">,</span>
+        <span style="color:#c30">&#34;/login&#34;</span><span style="color:#555">,</span>
+        <span style="color:#c30">&#34;/bower_components/**/*&#34;</span><span style="color:#555">,</span>
+        <span style="color:#c30">&#34;/app/**/*&#34;</span><span style="color:#555">,</span>
+        <span style="color:#c30">&#34;/index.html&#34;</span><span style="color:#555">,</span>
+        <span style="color:#c30">&#34;/home.html&#34;</span><span style="color:#555">,</span>
+        <span style="color:#c30">&#34;/signin.html&#34;</span><span style="color:#555">,</span>
+        <span style="color:#c30">&#34;/favicon.ico&#34;</span>
+    <span style="color:#555">};</span>
 
     http
-        <span style="color: #555555">.</span><span style="color: #330099">authorizeRequests</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">antMatchers</span><span style="color: #555555">(</span>patterns<span style="color: #555555">)</span>
-        <span style="color: #555555">.</span><span style="color: #330099">permitAll</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">antMatchers</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;/hello/**&quot;</span><span style="color: #555555">)</span>
-        <span style="color: #555555">.</span><span style="color: #330099">hasRole</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;USER&quot;</span><span style="color: #555555">)</span>
-        <span style="color: #555555">.</span><span style="color: #330099">and</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">csrf</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">disable</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">httpBasic</span><span style="color: #555555">();</span>
-  <span style="color: #555555">}</span>
+        <span style="color:#555">.</span><span style="color:#309">authorizeRequests</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">antMatchers</span><span style="color:#555">(</span>patterns<span style="color:#555">)</span>
+        <span style="color:#555">.</span><span style="color:#309">permitAll</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">antMatchers</span><span style="color:#555">(</span><span style="color:#c30">&#34;/hello/**&#34;</span><span style="color:#555">)</span>
+        <span style="color:#555">.</span><span style="color:#309">hasRole</span><span style="color:#555">(</span><span style="color:#c30">&#34;USER&#34;</span><span style="color:#555">)</span>
+        <span style="color:#555">.</span><span style="color:#309">and</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">csrf</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">disable</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">httpBasic</span><span style="color:#555">();</span>
+  <span style="color:#555">}</span>
 
-  <span style="color: #9999FF">@Autowired</span>
-  <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">configureGlobal</span><span style="color: #555555">(</span>AuthenticationManagerBuilder auth<span style="color: #555555">)</span> <span style="color: #006699; font-weight: bold">throws</span> Exception <span style="color: #555555">{</span>
+  <span style="color:#99f">@Autowired</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">configureGlobal</span><span style="color:#555">(</span>AuthenticationManagerBuilder auth<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
     auth
-        <span style="color: #555555">.</span><span style="color: #330099">inMemoryAuthentication</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">withUser</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;user&quot;</span><span style="color: #555555">).</span><span style="color: #330099">password</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;password&quot;</span><span style="color: #555555">).</span><span style="color: #330099">roles</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;USER&quot;</span><span style="color: #555555">);</span>
-  <span style="color: #555555">}</span>
+        <span style="color:#555">.</span><span style="color:#309">inMemoryAuthentication</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">withUser</span><span style="color:#555">(</span><span style="color:#c30">&#34;user&#34;</span><span style="color:#555">).</span><span style="color:#309">password</span><span style="color:#555">(</span><span style="color:#c30">&#34;password&#34;</span><span style="color:#555">).</span><span style="color:#309">roles</span><span style="color:#555">(</span><span style="color:#c30">&#34;USER&#34;</span><span style="color:#555">);</span>
+  <span style="color:#555">}</span>
 
-  <span style="color: #9999FF">@Bean</span>
-  <span style="color: #006699; font-weight: bold">public</span> SessionRepository <span style="color: #CC00FF">sessionRepository</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">new</span> MapSessionRepository<span style="color: #555555">();</span>
-  <span style="color: #555555">}</span>
+  <span style="color:#99f">@Bean</span>
+  <span style="color:#069;font-weight:bold">public</span> SessionRepository <span style="color:#c0f">sessionRepository</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">new</span> MapSessionRepository<span style="color:#555">();</span>
+  <span style="color:#555">}</span>
 
-  <span style="color: #9999FF">@Bean</span>
-  <span style="color: #006699; font-weight: bold">public</span> HeaderHttpSessionStrategy <span style="color: #CC00FF">sessionStrategy</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">new</span> HeaderHttpSessionStrategy<span style="color: #555555">();</span>
-  <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+  <span style="color:#99f">@Bean</span>
+  <span style="color:#069;font-weight:bold">public</span> HeaderHttpSessionStrategy <span style="color:#c0f">sessionStrategy</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">new</span> HeaderHttpSessionStrategy<span style="color:#555">();</span>
+  <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>With this in place, access to the end point <code>/hello</code> is not permitted unless authenticated.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>$ curl -s -X GET <span style="color: #CC3300">&quot;http://localhost:8080/hello&quot;</span> | jq .
-<span style="color: #555555">{</span>
-  <span style="color: #CC3300">&quot;timestamp&quot;</span>: <span style="color: #FF6600">1469068247812</span>,
-  <span style="color: #CC3300">&quot;status&quot;</span>: <span style="color: #FF6600">401</span>,
-  <span style="color: #CC3300">&quot;error&quot;</span>: <span style="color: #CC3300">&quot;Unauthorized&quot;</span>,
-  <span style="color: #CC3300">&quot;message&quot;</span>: <span style="color: #CC3300">&quot;Full authentication is required to access this resource&quot;</span>,
-  <span style="color: #CC3300">&quot;path&quot;</span>: <span style="color: #CC3300">&quot;/hello&quot;</span>
-<span style="color: #555555">}</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ curl -s -X GET <span style="color:#c30">&#34;http://localhost:8080/hello&#34;</span> | jq .
+<span style="color:#555">{</span>
+  <span style="color:#c30">&#34;timestamp&#34;</span>: <span style="color:#f60">1469068247812</span>,
+  <span style="color:#c30">&#34;status&#34;</span>: <span style="color:#f60">401</span>,
+  <span style="color:#c30">&#34;error&#34;</span>: <span style="color:#c30">&#34;Unauthorized&#34;</span>,
+  <span style="color:#c30">&#34;message&#34;</span>: <span style="color:#c30">&#34;Full authentication is required to access this resource&#34;</span>,
+  <span style="color:#c30">&#34;path&#34;</span>: <span style="color:#c30">&#34;/hello&#34;</span>
+<span style="color:#555">}</span>
 
-$ curl -s -v -X POST <span style="color: #CC3300">&quot;http://localhost:8080/login&quot;</span> -uuser:password | jq .
+$ curl -s -v -X POST <span style="color:#c30">&#34;http://localhost:8080/login&#34;</span> -uuser:password | jq .
 *   Trying ::1...
-* Connected to localhost <span style="color: #555555">(</span>::1<span style="color: #555555">)</span> port <span style="color: #FF6600">8080</span> <span style="color: #555555">(</span><span style="color: #0099FF; font-style: italic">#0)</span>
-* Server auth using Basic with user <span style="color: #CC3300">&#39;user&#39;</span>
+* Connected to localhost <span style="color:#555">(</span>::1<span style="color:#555">)</span> port <span style="color:#f60">8080</span> <span style="color:#555">(</span><span style="color:#09f;font-style:italic">#0)
+</span><span style="color:#09f;font-style:italic"></span>* Server auth using Basic with user <span style="color:#c30">&#39;user&#39;</span>
 &gt; POST /login HTTP/1.1
 &gt; Host: localhost:8080
-&gt; Authorization: Basic <span style="color: #003333">dXNlcjpwYXNzd29yZA</span><span style="color: #555555">==</span>
+&gt; Authorization: Basic <span style="color:#033">dXNlcjpwYXNzd29yZA</span><span style="color:#555">==</span>
 &gt; User-Agent: curl/7.43.0
 &gt; Accept: */*
 &gt;
-&lt; HTTP/1.1 <span style="color: #FF6600">200</span> OK
+&lt; HTTP/1.1 <span style="color:#f60">200</span> OK
 &lt; Server: Apache-Coyote/1.1
 &lt; X-Content-Type-Options: nosniff
-&lt; X-XSS-Protection: <span style="color: #FF6600">1</span>; <span style="color: #003333">mode</span><span style="color: #555555">=</span>block
-&lt; Cache-Control: no-cache, no-store, max-age<span style="color: #555555">=</span><span style="color: #FF6600">0</span>, must-revalidate
+&lt; X-XSS-Protection: <span style="color:#f60">1</span>; <span style="color:#033">mode</span><span style="color:#555">=</span>block
+&lt; Cache-Control: no-cache, no-store, max-age<span style="color:#555">=</span><span style="color:#f60">0</span>, must-revalidate
 &lt; Pragma: no-cache
-&lt; Expires: <span style="color: #FF6600">0</span>
+&lt; Expires: <span style="color:#f60">0</span>
 &lt; X-Frame-Options: DENY
 &lt; x-auth-token: 4ec4c614-0dc8-4e64-afa6-bd0ac03517b5
-&lt; Content-Type: application/json;<span style="color: #003333">charset</span><span style="color: #555555">=</span>UTF-8
+&lt; Content-Type: application/json;<span style="color:#033">charset</span><span style="color:#555">=</span>UTF-8
 &lt; Transfer-Encoding: chunked
-&lt; Date: Thu, <span style="color: #FF6600">21</span> Jul <span style="color: #FF6600">2016</span> <span style="color: #FF6600">02</span>:31:10 GMT
+&lt; Date: Thu, <span style="color:#f60">21</span> Jul <span style="color:#f60">2016</span> <span style="color:#f60">02</span>:31:10 GMT
 &lt;
-<span style="color: #555555">{</span> <span style="color: #555555">[</span><span style="color: #FF6600">18</span> bytes data<span style="color: #555555">]</span>
-* Connection <span style="color: #0099FF; font-style: italic">#0 to host localhost left intact</span>
-<span style="color: #555555">{</span>
-  <span style="color: #CC3300">&quot;user&quot;</span>: <span style="color: #CC3300">&quot;user&quot;</span>
-<span style="color: #555555">}</span>
+<span style="color:#555">{</span> <span style="color:#555">[</span><span style="color:#f60">18</span> bytes data<span style="color:#555">]</span>
+* Connection <span style="color:#09f;font-style:italic">#0 to host localhost left intact
+</span><span style="color:#09f;font-style:italic"></span><span style="color:#555">{</span>
+  <span style="color:#c30">&#34;user&#34;</span>: <span style="color:#c30">&#34;user&#34;</span>
+<span style="color:#555">}</span>
 
-$ curl -s -X GET <span style="color: #CC3300">&quot;http://localhost:8080/hello&quot;</span> -H <span style="color: #CC3300">&quot;x-auth-token: 4ec4c614-0dc8-4e64-afa6-bd0ac03517b5&quot;</span> | jq .
-<span style="color: #555555">{</span>
-  <span style="color: #CC3300">&quot;message&quot;</span>: <span style="color: #CC3300">&quot;hello&quot;</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+$ curl -s -X GET <span style="color:#c30">&#34;http://localhost:8080/hello&#34;</span> -H <span style="color:#c30">&#34;x-auth-token: 4ec4c614-0dc8-4e64-afa6-bd0ac03517b5&#34;</span> | jq .
+<span style="color:#555">{</span>
+  <span style="color:#c30">&#34;message&#34;</span>: <span style="color:#c30">&#34;hello&#34;</span>
+<span style="color:#555">}</span></code></pre></div>
 <h3 id="enabling-csrf-protection">Enabling CSRF protection</h3>
 
 <p>In Spring Security, CSRF protection can be enabled by replacing <code>csrf().disable()</code> with <code>.csrf()</code>.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>    http
-        <span style="color: #555555">.</span><span style="color: #330099">authorizeRequests</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">antMatchers</span><span style="color: #555555">(</span>patterns<span style="color: #555555">)</span>
-        <span style="color: #555555">.</span><span style="color: #330099">permitAll</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">antMatchers</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;/hello/**&quot;</span><span style="color: #555555">)</span>
-        <span style="color: #555555">.</span><span style="color: #330099">hasRole</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;USER&quot;</span><span style="color: #555555">)</span>
-        <span style="color: #555555">.</span><span style="color: #330099">and</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">csrf</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">and</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">httpBasic</span><span style="color: #555555">();</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    http
+        <span style="color:#555">.</span><span style="color:#309">authorizeRequests</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">antMatchers</span><span style="color:#555">(</span>patterns<span style="color:#555">)</span>
+        <span style="color:#555">.</span><span style="color:#309">permitAll</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">antMatchers</span><span style="color:#555">(</span><span style="color:#c30">&#34;/hello/**&#34;</span><span style="color:#555">)</span>
+        <span style="color:#555">.</span><span style="color:#309">hasRole</span><span style="color:#555">(</span><span style="color:#c30">&#34;USER&#34;</span><span style="color:#555">)</span>
+        <span style="color:#555">.</span><span style="color:#309">and</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">csrf</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">and</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">httpBasic</span><span style="color:#555">();</span></code></pre></div>
 <p>With this in place however, we notice that all end points, including static assets and the login end point need CSRF protection tokens to access.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>$ curl -s -X POST <span style="color: #CC3300">&quot;http://localhost:8080/login&quot;</span> -uuser:password | jq .
-<span style="color: #555555">{</span>
-  <span style="color: #CC3300">&quot;timestamp&quot;</span>: <span style="color: #FF6600">1469068611814</span>,
-  <span style="color: #CC3300">&quot;status&quot;</span>: <span style="color: #FF6600">403</span>,
-  <span style="color: #CC3300">&quot;error&quot;</span>: <span style="color: #CC3300">&quot;Forbidden&quot;</span>,
-  <span style="color: #CC3300">&quot;message&quot;</span>: <span style="color: #CC3300">&quot;Expected CSRF token not found. Has your session expired?&quot;</span>,
-  <span style="color: #CC3300">&quot;path&quot;</span>: <span style="color: #CC3300">&quot;/login&quot;</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ curl -s -X POST <span style="color:#c30">&#34;http://localhost:8080/login&#34;</span> -uuser:password | jq .
+<span style="color:#555">{</span>
+  <span style="color:#c30">&#34;timestamp&#34;</span>: <span style="color:#f60">1469068611814</span>,
+  <span style="color:#c30">&#34;status&#34;</span>: <span style="color:#f60">403</span>,
+  <span style="color:#c30">&#34;error&#34;</span>: <span style="color:#c30">&#34;Forbidden&#34;</span>,
+  <span style="color:#c30">&#34;message&#34;</span>: <span style="color:#c30">&#34;Expected CSRF token not found. Has your session expired?&#34;</span>,
+  <span style="color:#c30">&#34;path&#34;</span>: <span style="color:#c30">&#34;/login&#34;</span>
+<span style="color:#555">}</span></code></pre></div>
 <h3 id="protecting-urls-selectively">Protecting URLs selectively</h3>
 
 <p>We want a mechanism to specify a list of URL patterns for which CSRF protection need to be turned OFF. Spring Security provides a <code>requireCsrfProtectionMatcher</code> method. With this, we will add a matcher that returns false when any of the URL patters we have matches the current request&rsquo;s path.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>http
-        <span style="color: #555555">.</span><span style="color: #330099">authorizeRequests</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">antMatchers</span><span style="color: #555555">(</span>patterns<span style="color: #555555">)</span>
-        <span style="color: #555555">.</span><span style="color: #330099">permitAll</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">antMatchers</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;/hello/**&quot;</span><span style="color: #555555">)</span>
-        <span style="color: #555555">.</span><span style="color: #330099">hasRole</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;USER&quot;</span><span style="color: #555555">)</span>
-        <span style="color: #555555">.</span><span style="color: #330099">and</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">csrf</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">requireCsrfProtectionMatcher</span><span style="color: #555555">(</span><span style="color: #006699; font-weight: bold">new</span> NoAntPathRequestMatcher<span style="color: #555555">(</span>patterns<span style="color: #555555">))</span>
-        <span style="color: #555555">.</span><span style="color: #330099">and</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">httpBasic</span><span style="color: #555555">();</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">http
+        <span style="color:#555">.</span><span style="color:#309">authorizeRequests</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">antMatchers</span><span style="color:#555">(</span>patterns<span style="color:#555">)</span>
+        <span style="color:#555">.</span><span style="color:#309">permitAll</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">antMatchers</span><span style="color:#555">(</span><span style="color:#c30">&#34;/hello/**&#34;</span><span style="color:#555">)</span>
+        <span style="color:#555">.</span><span style="color:#309">hasRole</span><span style="color:#555">(</span><span style="color:#c30">&#34;USER&#34;</span><span style="color:#555">)</span>
+        <span style="color:#555">.</span><span style="color:#309">and</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">csrf</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">requireCsrfProtectionMatcher</span><span style="color:#555">(</span><span style="color:#069;font-weight:bold">new</span> NoAntPathRequestMatcher<span style="color:#555">(</span>patterns<span style="color:#555">))</span>
+        <span style="color:#555">.</span><span style="color:#309">and</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">httpBasic</span><span style="color:#555">();</span></code></pre></div>
 <p>The <code>NoAntPathRequestMatcher</code> can be implemented as a combination of two request matchers provided by Spring - <code>NegatedRequestMatcher</code> and <code>AndRequestMatcher</code>:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">NoAntPathRequestMatcher</span> <span style="color: #006699; font-weight: bold">implements</span> RequestMatcher <span style="color: #555555">{</span>
-  <span style="color: #006699; font-weight: bold">private</span> <span style="color: #006699; font-weight: bold">final</span> AndRequestMatcher andRequestMatcher<span style="color: #555555">;</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">NoAntPathRequestMatcher</span> <span style="color:#069;font-weight:bold">implements</span> RequestMatcher <span style="color:#555">{</span>
+  <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">final</span> AndRequestMatcher andRequestMatcher<span style="color:#555">;</span>
 
-  <span style="color: #006699; font-weight: bold">public</span> <span style="color: #CC00FF">NoAntPathRequestMatcher</span><span style="color: #555555">(</span>String<span style="color: #555555">[]</span> patterns<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-    List<span style="color: #555555">&lt;</span>RequestMatcher<span style="color: #555555">&gt;</span> requestMatchers <span style="color: #555555">=</span> Arrays<span style="color: #555555">.</span><span style="color: #330099">asList</span><span style="color: #555555">(</span>patterns<span style="color: #555555">)</span>
-        <span style="color: #555555">.</span><span style="color: #330099">stream</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">map</span><span style="color: #555555">(</span>p <span style="color: #555555">-&gt;</span> <span style="color: #006699; font-weight: bold">new</span> NegatedRequestMatcher<span style="color: #555555">(</span><span style="color: #006699; font-weight: bold">new</span> AntPathRequestMatcher<span style="color: #555555">(</span>p<span style="color: #555555">)))</span>
-        <span style="color: #555555">.</span><span style="color: #330099">collect</span><span style="color: #555555">(</span>Collectors<span style="color: #555555">.</span><span style="color: #330099">toList</span><span style="color: #555555">());</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">NoAntPathRequestMatcher</span><span style="color:#555">(</span>String<span style="color:#555">[]</span> patterns<span style="color:#555">)</span> <span style="color:#555">{</span>
+    List<span style="color:#555">&lt;</span>RequestMatcher<span style="color:#555">&gt;</span> requestMatchers <span style="color:#555">=</span> Arrays<span style="color:#555">.</span><span style="color:#309">asList</span><span style="color:#555">(</span>patterns<span style="color:#555">)</span>
+        <span style="color:#555">.</span><span style="color:#309">stream</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">map</span><span style="color:#555">(</span>p <span style="color:#555">-&gt;</span> <span style="color:#069;font-weight:bold">new</span> NegatedRequestMatcher<span style="color:#555">(</span><span style="color:#069;font-weight:bold">new</span> AntPathRequestMatcher<span style="color:#555">(</span>p<span style="color:#555">)))</span>
+        <span style="color:#555">.</span><span style="color:#309">collect</span><span style="color:#555">(</span>Collectors<span style="color:#555">.</span><span style="color:#309">toList</span><span style="color:#555">());</span>
 
-    andRequestMatcher <span style="color: #555555">=</span> <span style="color: #006699; font-weight: bold">new</span> AndRequestMatcher<span style="color: #555555">(</span>requestMatchers<span style="color: #555555">);</span>
-  <span style="color: #555555">}</span>
+    andRequestMatcher <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">new</span> AndRequestMatcher<span style="color:#555">(</span>requestMatchers<span style="color:#555">);</span>
+  <span style="color:#555">}</span>
 
-  <span style="color: #9999FF">@Override</span>
-  <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">boolean</span> <span style="color: #CC00FF">matches</span><span style="color: #555555">(</span>HttpServletRequest request<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">return</span> andRequestMatcher<span style="color: #555555">.</span><span style="color: #330099">matches</span><span style="color: #555555">(</span>request<span style="color: #555555">);</span>
-  <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+  <span style="color:#99f">@Override</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">boolean</span> <span style="color:#c0f">matches</span><span style="color:#555">(</span>HttpServletRequest request<span style="color:#555">)</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">return</span> andRequestMatcher<span style="color:#555">.</span><span style="color:#309">matches</span><span style="color:#555">(</span>request<span style="color:#555">);</span>
+  <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>With this in place, we should be able to authenticate.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>$ curl -s -v -X POST <span style="color: #CC3300">&quot;http://localhost:8080/login&quot;</span> -uuser:password | jq .
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ curl -s -v -X POST <span style="color:#c30">&#34;http://localhost:8080/login&#34;</span> -uuser:password | jq .
 *   Trying ::1...
-* Connected to localhost <span style="color: #555555">(</span>::1<span style="color: #555555">)</span> port <span style="color: #FF6600">8080</span> <span style="color: #555555">(</span><span style="color: #0099FF; font-style: italic">#0)</span>
-* Server auth using Basic with user <span style="color: #CC3300">&#39;user&#39;</span>
+* Connected to localhost <span style="color:#555">(</span>::1<span style="color:#555">)</span> port <span style="color:#f60">8080</span> <span style="color:#555">(</span><span style="color:#09f;font-style:italic">#0)
+</span><span style="color:#09f;font-style:italic"></span>* Server auth using Basic with user <span style="color:#c30">&#39;user&#39;</span>
 &gt; POST /login HTTP/1.1
 &gt; Host: localhost:8080
-&gt; Authorization: Basic <span style="color: #003333">dXNlcjpwYXNzd29yZA</span><span style="color: #555555">==</span>
+&gt; Authorization: Basic <span style="color:#033">dXNlcjpwYXNzd29yZA</span><span style="color:#555">==</span>
 &gt; User-Agent: curl/7.43.0
 &gt; Accept: */*
 &gt;
-&lt; HTTP/1.1 <span style="color: #FF6600">200</span> OK
+&lt; HTTP/1.1 <span style="color:#f60">200</span> OK
 &lt; Server: Apache-Coyote/1.1
 &lt; X-Content-Type-Options: nosniff
-&lt; X-XSS-Protection: <span style="color: #FF6600">1</span>; <span style="color: #003333">mode</span><span style="color: #555555">=</span>block
-&lt; Cache-Control: no-cache, no-store, max-age<span style="color: #555555">=</span><span style="color: #FF6600">0</span>, must-revalidate
+&lt; X-XSS-Protection: <span style="color:#f60">1</span>; <span style="color:#033">mode</span><span style="color:#555">=</span>block
+&lt; Cache-Control: no-cache, no-store, max-age<span style="color:#555">=</span><span style="color:#f60">0</span>, must-revalidate
 &lt; Pragma: no-cache
-&lt; Expires: <span style="color: #FF6600">0</span>
+&lt; Expires: <span style="color:#f60">0</span>
 &lt; X-Frame-Options: DENY
 &lt; x-auth-token: c5af3ea9-e3f8-4425-a6e8-de35588af0ca
-&lt; Content-Type: application/json;<span style="color: #003333">charset</span><span style="color: #555555">=</span>UTF-8
+&lt; Content-Type: application/json;<span style="color:#033">charset</span><span style="color:#555">=</span>UTF-8
 &lt; Transfer-Encoding: chunked
-&lt; Date: Thu, <span style="color: #FF6600">21</span> Jul <span style="color: #FF6600">2016</span> <span style="color: #FF6600">02</span>:44:28 GMT
+&lt; Date: Thu, <span style="color:#f60">21</span> Jul <span style="color:#f60">2016</span> <span style="color:#f60">02</span>:44:28 GMT
 &lt;
-<span style="color: #555555">{</span> <span style="color: #555555">[</span><span style="color: #FF6600">18</span> bytes data<span style="color: #555555">]</span>
-* Connection <span style="color: #0099FF; font-style: italic">#0 to host localhost left intact</span>
-<span style="color: #555555">{</span>
-  <span style="color: #CC3300">&quot;user&quot;</span>: <span style="color: #CC3300">&quot;user&quot;</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+<span style="color:#555">{</span> <span style="color:#555">[</span><span style="color:#f60">18</span> bytes data<span style="color:#555">]</span>
+* Connection <span style="color:#09f;font-style:italic">#0 to host localhost left intact
+</span><span style="color:#09f;font-style:italic"></span><span style="color:#555">{</span>
+  <span style="color:#c30">&#34;user&#34;</span>: <span style="color:#c30">&#34;user&#34;</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>But we do not see anything in the response that tells the client what the token allocated to it for the current session is. This is because Spring Security&rsquo;s CSRF protection by default provides enforcement and allocation of tokens, but it does not expose the token granted to the client out of the box.</p>
 
 <h3 id="granting-csrf-token-to-the-client">Granting CSRF Token to the client</h3>
 
 <p>One way to grant the client the CSRF token allocated to the current session will be to add a filter that sets the token as a Cookie once it is available. For this, we will add a filter immediately after the session is assigned by Spring Security&rsquo;s <code>SessionManagementFilter</code>.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>    http
-        <span style="color: #555555">.</span><span style="color: #330099">authorizeRequests</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">antMatchers</span><span style="color: #555555">(</span>patterns<span style="color: #555555">)</span>
-        <span style="color: #555555">.</span><span style="color: #330099">permitAll</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">antMatchers</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;/hello/**&quot;</span><span style="color: #555555">)</span>
-        <span style="color: #555555">.</span><span style="color: #330099">hasRole</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;USER&quot;</span><span style="color: #555555">)</span>
-        <span style="color: #555555">.</span><span style="color: #330099">and</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">csrf</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">requireCsrfProtectionMatcher</span><span style="color: #555555">(</span>csrfProtectionMatcher<span style="color: #555555">(</span>patterns<span style="color: #555555">))</span>
-        <span style="color: #555555">.</span><span style="color: #330099">and</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">httpBasic</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">and</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">addFilterAfter</span><span style="color: #555555">(</span><span style="color: #006699; font-weight: bold">new</span> CsrfGrantingFilter<span style="color: #555555">(),</span> SessionManagementFilter<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">);</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    http
+        <span style="color:#555">.</span><span style="color:#309">authorizeRequests</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">antMatchers</span><span style="color:#555">(</span>patterns<span style="color:#555">)</span>
+        <span style="color:#555">.</span><span style="color:#309">permitAll</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">antMatchers</span><span style="color:#555">(</span><span style="color:#c30">&#34;/hello/**&#34;</span><span style="color:#555">)</span>
+        <span style="color:#555">.</span><span style="color:#309">hasRole</span><span style="color:#555">(</span><span style="color:#c30">&#34;USER&#34;</span><span style="color:#555">)</span>
+        <span style="color:#555">.</span><span style="color:#309">and</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">csrf</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">requireCsrfProtectionMatcher</span><span style="color:#555">(</span>csrfProtectionMatcher<span style="color:#555">(</span>patterns<span style="color:#555">))</span>
+        <span style="color:#555">.</span><span style="color:#309">and</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">httpBasic</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">and</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">addFilterAfter</span><span style="color:#555">(</span><span style="color:#069;font-weight:bold">new</span> CsrfGrantingFilter<span style="color:#555">(),</span> SessionManagementFilter<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">);</span></code></pre></div>
 <p>The filter is implemented as follows:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">CsrfGrantingFilter</span> <span style="color: #006699; font-weight: bold">implements</span> Filter <span style="color: #555555">{</span>
-  <span style="color: #9999FF">@Override</span>
-  <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">init</span><span style="color: #555555">(</span>FilterConfig filterConfig<span style="color: #555555">)</span> <span style="color: #006699; font-weight: bold">throws</span> ServletException <span style="color: #555555">{}</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">CsrfGrantingFilter</span> <span style="color:#069;font-weight:bold">implements</span> Filter <span style="color:#555">{</span>
+  <span style="color:#99f">@Override</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">init</span><span style="color:#555">(</span>FilterConfig filterConfig<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> ServletException <span style="color:#555">{}</span>
 
-  <span style="color: #9999FF">@Override</span>
-  <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">doFilter</span><span style="color: #555555">(</span>ServletRequest servletRequest<span style="color: #555555">,</span> ServletResponse servletResponse<span style="color: #555555">,</span> FilterChain filterChain<span style="color: #555555">)</span>
-      <span style="color: #006699; font-weight: bold">throws</span> IOException<span style="color: #555555">,</span> ServletException <span style="color: #555555">{</span>
-    CsrfToken csrf <span style="color: #555555">=</span> <span style="color: #555555">(</span>CsrfToken<span style="color: #555555">)</span> servletRequest<span style="color: #555555">.</span><span style="color: #330099">getAttribute</span><span style="color: #555555">(</span>CsrfToken<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">.</span><span style="color: #330099">getName</span><span style="color: #555555">());</span>
-    String token <span style="color: #555555">=</span> csrf<span style="color: #555555">.</span><span style="color: #330099">getToken</span><span style="color: #555555">();</span>
-    <span style="color: #006699; font-weight: bold">if</span> <span style="color: #555555">(</span>token <span style="color: #555555">!=</span> <span style="color: #006699; font-weight: bold">null</span> <span style="color: #555555">&amp;&amp;</span> isAuthenticating<span style="color: #555555">(</span>servletRequest<span style="color: #555555">))</span> <span style="color: #555555">{</span>
-      HttpServletResponse response <span style="color: #555555">=</span> <span style="color: #555555">(</span>HttpServletResponse<span style="color: #555555">)</span> servletResponse<span style="color: #555555">;</span>
-      Cookie cookie <span style="color: #555555">=</span> <span style="color: #006699; font-weight: bold">new</span> Cookie<span style="color: #555555">(</span><span style="color: #CC3300">&quot;CSRF-TOKEN&quot;</span><span style="color: #555555">,</span> token<span style="color: #555555">);</span>
-      cookie<span style="color: #555555">.</span><span style="color: #330099">setPath</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;/&quot;</span><span style="color: #555555">);</span>
-      response<span style="color: #555555">.</span><span style="color: #330099">addCookie</span><span style="color: #555555">(</span>cookie<span style="color: #555555">);</span>
-    <span style="color: #555555">}</span>
-    filterChain<span style="color: #555555">.</span><span style="color: #330099">doFilter</span><span style="color: #555555">(</span>servletRequest<span style="color: #555555">,</span> servletResponse<span style="color: #555555">);</span>
-  <span style="color: #555555">}</span>
+  <span style="color:#99f">@Override</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">doFilter</span><span style="color:#555">(</span>ServletRequest servletRequest<span style="color:#555">,</span> ServletResponse servletResponse<span style="color:#555">,</span> FilterChain filterChain<span style="color:#555">)</span>
+      <span style="color:#069;font-weight:bold">throws</span> IOException<span style="color:#555">,</span> ServletException <span style="color:#555">{</span>
+    CsrfToken csrf <span style="color:#555">=</span> <span style="color:#555">(</span>CsrfToken<span style="color:#555">)</span> servletRequest<span style="color:#555">.</span><span style="color:#309">getAttribute</span><span style="color:#555">(</span>CsrfToken<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">.</span><span style="color:#309">getName</span><span style="color:#555">());</span>
+    String token <span style="color:#555">=</span> csrf<span style="color:#555">.</span><span style="color:#309">getToken</span><span style="color:#555">();</span>
+    <span style="color:#069;font-weight:bold">if</span> <span style="color:#555">(</span>token <span style="color:#555">!=</span> <span style="color:#069;font-weight:bold">null</span> <span style="color:#555">&amp;&amp;</span> isAuthenticating<span style="color:#555">(</span>servletRequest<span style="color:#555">))</span> <span style="color:#555">{</span>
+      HttpServletResponse response <span style="color:#555">=</span> <span style="color:#555">(</span>HttpServletResponse<span style="color:#555">)</span> servletResponse<span style="color:#555">;</span>
+      Cookie cookie <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">new</span> Cookie<span style="color:#555">(</span><span style="color:#c30">&#34;CSRF-TOKEN&#34;</span><span style="color:#555">,</span> token<span style="color:#555">);</span>
+      cookie<span style="color:#555">.</span><span style="color:#309">setPath</span><span style="color:#555">(</span><span style="color:#c30">&#34;/&#34;</span><span style="color:#555">);</span>
+      response<span style="color:#555">.</span><span style="color:#309">addCookie</span><span style="color:#555">(</span>cookie<span style="color:#555">);</span>
+    <span style="color:#555">}</span>
+    filterChain<span style="color:#555">.</span><span style="color:#309">doFilter</span><span style="color:#555">(</span>servletRequest<span style="color:#555">,</span> servletResponse<span style="color:#555">);</span>
+  <span style="color:#555">}</span>
 
-  <span style="color: #006699; font-weight: bold">private</span> <span style="color: #007788; font-weight: bold">boolean</span> <span style="color: #CC00FF">isAuthenticating</span><span style="color: #555555">(</span>ServletRequest servletRequest<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-    HttpServletRequest request <span style="color: #555555">=</span> <span style="color: #555555">(</span>HttpServletRequest<span style="color: #555555">)</span> servletRequest<span style="color: #555555">;</span>
-    <span style="color: #006699; font-weight: bold">return</span> request<span style="color: #555555">.</span><span style="color: #330099">getRequestURI</span><span style="color: #555555">().</span><span style="color: #330099">equals</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;/login&quot;</span><span style="color: #555555">);</span>
-  <span style="color: #555555">}</span>
+  <span style="color:#069;font-weight:bold">private</span> <span style="color:#078;font-weight:bold">boolean</span> <span style="color:#c0f">isAuthenticating</span><span style="color:#555">(</span>ServletRequest servletRequest<span style="color:#555">)</span> <span style="color:#555">{</span>
+    HttpServletRequest request <span style="color:#555">=</span> <span style="color:#555">(</span>HttpServletRequest<span style="color:#555">)</span> servletRequest<span style="color:#555">;</span>
+    <span style="color:#069;font-weight:bold">return</span> request<span style="color:#555">.</span><span style="color:#309">getRequestURI</span><span style="color:#555">().</span><span style="color:#309">equals</span><span style="color:#555">(</span><span style="color:#c30">&#34;/login&#34;</span><span style="color:#555">);</span>
+  <span style="color:#555">}</span>
 
-  <span style="color: #9999FF">@Override</span>
-  <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">destroy</span><span style="color: #555555">()</span> <span style="color: #555555">{}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+  <span style="color:#99f">@Override</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">destroy</span><span style="color:#555">()</span> <span style="color:#555">{}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>The filter checks to see if the current request has a CSRF token set on it by Spring Security&rsquo;s <code>CsrfFilter</code> and then sets it as a Cookie on the response, if the current request was made by a client to authenticate.</p>
 
 <p>With this filter in place, when we authenticate, we will see the following behavior:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>$ curl -I -X POST <span style="color: #CC3300">&quot;http://localhost:8080/login&quot;</span> -uuser:password
-HTTP/1.1 <span style="color: #FF6600">200</span> OK
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ curl -I -X POST <span style="color:#c30">&#34;http://localhost:8080/login&#34;</span> -uuser:password
+HTTP/1.1 <span style="color:#f60">200</span> OK
 Server: Apache-Coyote/1.1
 X-Content-Type-Options: nosniff
-X-XSS-Protection: <span style="color: #FF6600">1</span>; <span style="color: #003333">mode</span><span style="color: #555555">=</span>block
-Cache-Control: no-cache, no-store, max-age<span style="color: #555555">=</span><span style="color: #FF6600">0</span>, must-revalidate
+X-XSS-Protection: <span style="color:#f60">1</span>; <span style="color:#033">mode</span><span style="color:#555">=</span>block
+Cache-Control: no-cache, no-store, max-age<span style="color:#555">=</span><span style="color:#f60">0</span>, must-revalidate
 Pragma: no-cache
-Expires: <span style="color: #FF6600">0</span>
+Expires: <span style="color:#f60">0</span>
 X-Frame-Options: DENY
-Set-Cookie: CSRF-TOKEN<span style="color: #555555">=</span>628ae2c8-f35b-49a4-acc7-04fe87bdb98e; <span style="color: #003333">Path</span><span style="color: #555555">=</span>/
+Set-Cookie: CSRF-TOKEN<span style="color:#555">=</span>628ae2c8-f35b-49a4-acc7-04fe87bdb98e; <span style="color:#033">Path</span><span style="color:#555">=</span>/
 x-auth-token: 9444d058-eccb-471d-bc0d-460fd4c968e8
-Content-Type: application/json;<span style="color: #003333">charset</span><span style="color: #555555">=</span>UTF-8
+Content-Type: application/json;<span style="color:#033">charset</span><span style="color:#555">=</span>UTF-8
 Transfer-Encoding: chunked
-Date: Thu, <span style="color: #FF6600">21</span> Jul <span style="color: #FF6600">2016</span> <span style="color: #FF6600">02</span>:51:19 GMT
-</pre></div>
-
+Date: Thu, <span style="color:#f60">21</span> Jul <span style="color:#f60">2016</span> <span style="color:#f60">02</span>:51:19 GMT</code></pre></div>
 <p>We can clearly see that the CSRF token is sent to the client as a Cookie. At this point, we can make changes to our front end to send this token with every subsequent request. However, it is easier to use Angular&rsquo;s support for CSRF tokens.</p>
 
 <h3 id="customizing-csrf-protection-for-angular">Customizing CSRF protection for Angular</h3>
 
-<p>Angular&rsquo;s CSRF protection <sup class="footnote-ref" id="fnref:2"><a rel="footnote" href="#fn:2">2</a></sup> uses the cookie <code>XSRF-TOKEN</code> it expects from server responses and the header <code>X-XSRF-TOKEN</code> which it will send for every subsequent request, once the Cookie is found in a response. We will have to configure Spring Security to use this header and token instead of it&rsquo;s default header <code>X-CSRF-TOKEN</code> and Cookie name <code>CSRF-TOKEN</code>.</p>
+<p>Angular&rsquo;s CSRF protection <sup class="footnote-ref" id="fnref:2"><a href="#fn:2">2</a></sup> uses the cookie <code>XSRF-TOKEN</code> it expects from server responses and the header <code>X-XSRF-TOKEN</code> which it will send for every subsequent request, once the Cookie is found in a response. We will have to configure Spring Security to use this header and token instead of it&rsquo;s default header <code>X-CSRF-TOKEN</code> and Cookie name <code>CSRF-TOKEN</code>.</p>
 
 <p>The first step is to pass Spring Security a custom <code>CsrfTokenRepository</code>:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>    http
-        <span style="color: #555555">.</span><span style="color: #330099">authorizeRequests</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">antMatchers</span><span style="color: #555555">(</span>patterns<span style="color: #555555">)</span>
-        <span style="color: #555555">.</span><span style="color: #330099">permitAll</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">antMatchers</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;/hello/**&quot;</span><span style="color: #555555">)</span>
-        <span style="color: #555555">.</span><span style="color: #330099">hasRole</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;USER&quot;</span><span style="color: #555555">)</span>
-        <span style="color: #555555">.</span><span style="color: #330099">and</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">csrf</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">csrfTokenRepository</span><span style="color: #555555">(</span>csrfTokenRepository<span style="color: #555555">())</span>
-        <span style="color: #555555">.</span><span style="color: #330099">requireCsrfProtectionMatcher</span><span style="color: #555555">(</span>csrfProtectionMatcher<span style="color: #555555">(</span>patterns<span style="color: #555555">))</span>
-        <span style="color: #555555">.</span><span style="color: #330099">and</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">httpBasic</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">and</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">addFilterAfter</span><span style="color: #555555">(</span><span style="color: #006699; font-weight: bold">new</span> CsrfGrantingFilter<span style="color: #555555">(),</span> SessionManagementFilter<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">);</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    http
+        <span style="color:#555">.</span><span style="color:#309">authorizeRequests</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">antMatchers</span><span style="color:#555">(</span>patterns<span style="color:#555">)</span>
+        <span style="color:#555">.</span><span style="color:#309">permitAll</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">antMatchers</span><span style="color:#555">(</span><span style="color:#c30">&#34;/hello/**&#34;</span><span style="color:#555">)</span>
+        <span style="color:#555">.</span><span style="color:#309">hasRole</span><span style="color:#555">(</span><span style="color:#c30">&#34;USER&#34;</span><span style="color:#555">)</span>
+        <span style="color:#555">.</span><span style="color:#309">and</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">csrf</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">csrfTokenRepository</span><span style="color:#555">(</span>csrfTokenRepository<span style="color:#555">())</span>
+        <span style="color:#555">.</span><span style="color:#309">requireCsrfProtectionMatcher</span><span style="color:#555">(</span>csrfProtectionMatcher<span style="color:#555">(</span>patterns<span style="color:#555">))</span>
+        <span style="color:#555">.</span><span style="color:#309">and</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">httpBasic</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">and</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">addFilterAfter</span><span style="color:#555">(</span><span style="color:#069;font-weight:bold">new</span> CsrfGrantingFilter<span style="color:#555">(),</span> SessionManagementFilter<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">);</span></code></pre></div>
 <p>The <code>CsrfTokenRepository</code> is configured with the right header:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>  <span style="color: #006699; font-weight: bold">private</span> CsrfTokenRepository <span style="color: #CC00FF">csrfTokenRepository</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-    HttpSessionCsrfTokenRepository repository <span style="color: #555555">=</span> <span style="color: #006699; font-weight: bold">new</span> HttpSessionCsrfTokenRepository<span style="color: #555555">();</span>
-    repository<span style="color: #555555">.</span><span style="color: #330099">setHeaderName</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;X-XSRF-TOKEN&quot;</span><span style="color: #555555">);</span>
-    <span style="color: #006699; font-weight: bold">return</span> repository<span style="color: #555555">;</span>
-  <span style="color: #555555">}</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">  <span style="color:#069;font-weight:bold">private</span> CsrfTokenRepository <span style="color:#c0f">csrfTokenRepository</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+    HttpSessionCsrfTokenRepository repository <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">new</span> HttpSessionCsrfTokenRepository<span style="color:#555">();</span>
+    repository<span style="color:#555">.</span><span style="color:#309">setHeaderName</span><span style="color:#555">(</span><span style="color:#c30">&#34;X-XSRF-TOKEN&#34;</span><span style="color:#555">);</span>
+    <span style="color:#069;font-weight:bold">return</span> repository<span style="color:#555">;</span>
+  <span style="color:#555">}</span></code></pre></div>
 <p>The next step is to set the Cookie with the right name in the <code>CsrfGrantingFilter</code>:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">CsrfGrantingFilter</span> <span style="color: #006699; font-weight: bold">implements</span> Filter <span style="color: #555555">{</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">CsrfGrantingFilter</span> <span style="color:#069;font-weight:bold">implements</span> Filter <span style="color:#555">{</span>
 
-  <span style="color: #9999FF">@Override</span>
-  <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">init</span><span style="color: #555555">(</span>FilterConfig filterConfig<span style="color: #555555">)</span> <span style="color: #006699; font-weight: bold">throws</span> ServletException <span style="color: #555555">{}</span>
+  <span style="color:#99f">@Override</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">init</span><span style="color:#555">(</span>FilterConfig filterConfig<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> ServletException <span style="color:#555">{}</span>
 
-  <span style="color: #9999FF">@Override</span>
-  <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">doFilter</span><span style="color: #555555">(</span>ServletRequest servletRequest<span style="color: #555555">,</span> ServletResponse servletResponse<span style="color: #555555">,</span> FilterChain filterChain<span style="color: #555555">)</span>
-      <span style="color: #006699; font-weight: bold">throws</span> IOException<span style="color: #555555">,</span> ServletException <span style="color: #555555">{</span>
-    CsrfToken csrf <span style="color: #555555">=</span> <span style="color: #555555">(</span>CsrfToken<span style="color: #555555">)</span> servletRequest<span style="color: #555555">.</span><span style="color: #330099">getAttribute</span><span style="color: #555555">(</span>CsrfToken<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">.</span><span style="color: #330099">getName</span><span style="color: #555555">());</span>
-    String token <span style="color: #555555">=</span> csrf<span style="color: #555555">.</span><span style="color: #330099">getToken</span><span style="color: #555555">();</span>
-    <span style="color: #006699; font-weight: bold">if</span> <span style="color: #555555">(</span>token <span style="color: #555555">!=</span> <span style="color: #006699; font-weight: bold">null</span> <span style="color: #555555">&amp;&amp;</span> isAuthenticating<span style="color: #555555">(</span>servletRequest<span style="color: #555555">))</span> <span style="color: #555555">{</span>
-      HttpServletResponse response <span style="color: #555555">=</span> <span style="color: #555555">(</span>HttpServletResponse<span style="color: #555555">)</span> servletResponse<span style="color: #555555">;</span>
-      Cookie cookie <span style="color: #555555">=</span> <span style="color: #006699; font-weight: bold">new</span> Cookie<span style="color: #555555">(</span><span style="color: #CC3300">&quot;XSRF-TOKEN&quot;</span><span style="color: #555555">,</span> token<span style="color: #555555">);</span>
-      cookie<span style="color: #555555">.</span><span style="color: #330099">setPath</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;/&quot;</span><span style="color: #555555">);</span>
-      response<span style="color: #555555">.</span><span style="color: #330099">addCookie</span><span style="color: #555555">(</span>cookie<span style="color: #555555">);</span>
-    <span style="color: #555555">}</span>
-    filterChain<span style="color: #555555">.</span><span style="color: #330099">doFilter</span><span style="color: #555555">(</span>servletRequest<span style="color: #555555">,</span> servletResponse<span style="color: #555555">);</span>
-  <span style="color: #555555">}</span>
+  <span style="color:#99f">@Override</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">doFilter</span><span style="color:#555">(</span>ServletRequest servletRequest<span style="color:#555">,</span> ServletResponse servletResponse<span style="color:#555">,</span> FilterChain filterChain<span style="color:#555">)</span>
+      <span style="color:#069;font-weight:bold">throws</span> IOException<span style="color:#555">,</span> ServletException <span style="color:#555">{</span>
+    CsrfToken csrf <span style="color:#555">=</span> <span style="color:#555">(</span>CsrfToken<span style="color:#555">)</span> servletRequest<span style="color:#555">.</span><span style="color:#309">getAttribute</span><span style="color:#555">(</span>CsrfToken<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">.</span><span style="color:#309">getName</span><span style="color:#555">());</span>
+    String token <span style="color:#555">=</span> csrf<span style="color:#555">.</span><span style="color:#309">getToken</span><span style="color:#555">();</span>
+    <span style="color:#069;font-weight:bold">if</span> <span style="color:#555">(</span>token <span style="color:#555">!=</span> <span style="color:#069;font-weight:bold">null</span> <span style="color:#555">&amp;&amp;</span> isAuthenticating<span style="color:#555">(</span>servletRequest<span style="color:#555">))</span> <span style="color:#555">{</span>
+      HttpServletResponse response <span style="color:#555">=</span> <span style="color:#555">(</span>HttpServletResponse<span style="color:#555">)</span> servletResponse<span style="color:#555">;</span>
+      Cookie cookie <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">new</span> Cookie<span style="color:#555">(</span><span style="color:#c30">&#34;XSRF-TOKEN&#34;</span><span style="color:#555">,</span> token<span style="color:#555">);</span>
+      cookie<span style="color:#555">.</span><span style="color:#309">setPath</span><span style="color:#555">(</span><span style="color:#c30">&#34;/&#34;</span><span style="color:#555">);</span>
+      response<span style="color:#555">.</span><span style="color:#309">addCookie</span><span style="color:#555">(</span>cookie<span style="color:#555">);</span>
+    <span style="color:#555">}</span>
+    filterChain<span style="color:#555">.</span><span style="color:#309">doFilter</span><span style="color:#555">(</span>servletRequest<span style="color:#555">,</span> servletResponse<span style="color:#555">);</span>
+  <span style="color:#555">}</span>
 
-  <span style="color: #006699; font-weight: bold">private</span> <span style="color: #007788; font-weight: bold">boolean</span> <span style="color: #CC00FF">isAuthenticating</span><span style="color: #555555">(</span>ServletRequest servletRequest<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-    HttpServletRequest request <span style="color: #555555">=</span> <span style="color: #555555">(</span>HttpServletRequest<span style="color: #555555">)</span> servletRequest<span style="color: #555555">;</span>
-    <span style="color: #006699; font-weight: bold">return</span> request<span style="color: #555555">.</span><span style="color: #330099">getRequestURI</span><span style="color: #555555">().</span><span style="color: #330099">equals</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;/login&quot;</span><span style="color: #555555">);</span>
-  <span style="color: #555555">}</span>
+  <span style="color:#069;font-weight:bold">private</span> <span style="color:#078;font-weight:bold">boolean</span> <span style="color:#c0f">isAuthenticating</span><span style="color:#555">(</span>ServletRequest servletRequest<span style="color:#555">)</span> <span style="color:#555">{</span>
+    HttpServletRequest request <span style="color:#555">=</span> <span style="color:#555">(</span>HttpServletRequest<span style="color:#555">)</span> servletRequest<span style="color:#555">;</span>
+    <span style="color:#069;font-weight:bold">return</span> request<span style="color:#555">.</span><span style="color:#309">getRequestURI</span><span style="color:#555">().</span><span style="color:#309">equals</span><span style="color:#555">(</span><span style="color:#c30">&#34;/login&#34;</span><span style="color:#555">);</span>
+  <span style="color:#555">}</span>
 
-  <span style="color: #9999FF">@Override</span>
-  <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">destroy</span><span style="color: #555555">()</span> <span style="color: #555555">{}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+  <span style="color:#99f">@Override</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">destroy</span><span style="color:#555">()</span> <span style="color:#555">{}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>With these configurations in place, the front end is able to authenticate and obtain a token Cookie which Angular will pass for every subsequent request.</p>
 
 <h3 id="configuring-order-of-enforcement">Configuring order of enforcement</h3>
 
 <p>The only drawback to the configurations we have developed so far is that when a client makes a request to a protected end point with out Authentication and CSRF token, it will receive a <code>403 Forbidden</code> instead of a <code>401 Unauthorized</code>.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>$ curl -I -X GET <span style="color: #CC3300">&quot;http://localhost:8080/hello&quot;</span>
-HTTP/1.1 <span style="color: #FF6600">403</span> Forbidden
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ curl -I -X GET <span style="color:#c30">&#34;http://localhost:8080/hello&#34;</span>
+HTTP/1.1 <span style="color:#f60">403</span> Forbidden
 Server: Apache-Coyote/1.1
 X-Content-Type-Options: nosniff
-X-XSS-Protection: <span style="color: #FF6600">1</span>; <span style="color: #003333">mode</span><span style="color: #555555">=</span>block
-Cache-Control: no-cache, no-store, max-age<span style="color: #555555">=</span><span style="color: #FF6600">0</span>, must-revalidate
+X-XSS-Protection: <span style="color:#f60">1</span>; <span style="color:#033">mode</span><span style="color:#555">=</span>block
+Cache-Control: no-cache, no-store, max-age<span style="color:#555">=</span><span style="color:#f60">0</span>, must-revalidate
 Pragma: no-cache
-Expires: <span style="color: #FF6600">0</span>
+Expires: <span style="color:#f60">0</span>
 X-Frame-Options: DENY
 x-auth-token: a0abe09c-94cb-4966-9ee6-a5327f3bd939
-Content-Type: application/json;<span style="color: #003333">charset</span><span style="color: #555555">=</span>UTF-8
+Content-Type: application/json;<span style="color:#033">charset</span><span style="color:#555">=</span>UTF-8
 Transfer-Encoding: chunked
-Date: Thu, <span style="color: #FF6600">21</span> Jul <span style="color: #FF6600">2016</span> <span style="color: #FF6600">03</span>:16:01 GMT
-</pre></div>
-
+Date: Thu, <span style="color:#f60">21</span> Jul <span style="color:#f60">2016</span> <span style="color:#f60">03</span>:16:01 GMT</code></pre></div>
 <p>This happens because by default, when CSRF protection is enabled, <code>CsrfFilter</code> appears in the filter chain before <code>FilterSecurityInterceptor</code>. For this example, this is the order:</p>
 
 <pre><code>0 = {WebAsyncManagerIntegrationFilter@7344}
@@ -604,56 +540,50 @@ Date: Thu, <span style="color: #FF6600">21</span> Jul <span style="color: #FF660
 </code></pre>
 
 <p>If this is not the behavior desirable for your application, we can disable the default CSRF protection and enable the required filters, enforcing the right order. This is achieved with the following configuration:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>    http
-        <span style="color: #555555">.</span><span style="color: #330099">authorizeRequests</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">antMatchers</span><span style="color: #555555">(</span>patterns<span style="color: #555555">)</span>
-        <span style="color: #555555">.</span><span style="color: #330099">permitAll</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">antMatchers</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;/hello/**&quot;</span><span style="color: #555555">)</span>
-        <span style="color: #555555">.</span><span style="color: #330099">hasRole</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;USER&quot;</span><span style="color: #555555">)</span>
-        <span style="color: #555555">.</span><span style="color: #330099">and</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">csrf</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">disable</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">httpBasic</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">and</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">addFilterAfter</span><span style="color: #555555">(</span>csrfFilter<span style="color: #555555">(</span>patterns<span style="color: #555555">),</span> FilterSecurityInterceptor<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">)</span>
-        <span style="color: #555555">.</span><span style="color: #330099">addFilterAfter</span><span style="color: #555555">(</span><span style="color: #006699; font-weight: bold">new</span> CsrfGrantingFilter<span style="color: #555555">(),</span> CsrfFilter<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">);</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    http
+        <span style="color:#555">.</span><span style="color:#309">authorizeRequests</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">antMatchers</span><span style="color:#555">(</span>patterns<span style="color:#555">)</span>
+        <span style="color:#555">.</span><span style="color:#309">permitAll</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">antMatchers</span><span style="color:#555">(</span><span style="color:#c30">&#34;/hello/**&#34;</span><span style="color:#555">)</span>
+        <span style="color:#555">.</span><span style="color:#309">hasRole</span><span style="color:#555">(</span><span style="color:#c30">&#34;USER&#34;</span><span style="color:#555">)</span>
+        <span style="color:#555">.</span><span style="color:#309">and</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">csrf</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">disable</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">httpBasic</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">and</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">addFilterAfter</span><span style="color:#555">(</span>csrfFilter<span style="color:#555">(</span>patterns<span style="color:#555">),</span> FilterSecurityInterceptor<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">)</span>
+        <span style="color:#555">.</span><span style="color:#309">addFilterAfter</span><span style="color:#555">(</span><span style="color:#069;font-weight:bold">new</span> CsrfGrantingFilter<span style="color:#555">(),</span> CsrfFilter<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">);</span></code></pre></div>
 <p>The CSRF filter is built with the right repository and URL matchers:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>  <span style="color: #006699; font-weight: bold">private</span> Filter <span style="color: #CC00FF">csrfFilter</span><span style="color: #555555">(</span>String<span style="color: #555555">[]</span> patterns<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-    CsrfFilter csrfFilter <span style="color: #555555">=</span> <span style="color: #006699; font-weight: bold">new</span> CsrfFilter<span style="color: #555555">(</span>csrfTokenRepository<span style="color: #555555">());</span>
-    csrfFilter<span style="color: #555555">.</span><span style="color: #330099">setRequireCsrfProtectionMatcher</span><span style="color: #555555">(</span>csrfProtectionMatcher<span style="color: #555555">(</span>patterns<span style="color: #555555">));</span>
-    <span style="color: #006699; font-weight: bold">return</span> csrfFilter<span style="color: #555555">;</span>
-  <span style="color: #555555">}</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">  <span style="color:#069;font-weight:bold">private</span> Filter <span style="color:#c0f">csrfFilter</span><span style="color:#555">(</span>String<span style="color:#555">[]</span> patterns<span style="color:#555">)</span> <span style="color:#555">{</span>
+    CsrfFilter csrfFilter <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">new</span> CsrfFilter<span style="color:#555">(</span>csrfTokenRepository<span style="color:#555">());</span>
+    csrfFilter<span style="color:#555">.</span><span style="color:#309">setRequireCsrfProtectionMatcher</span><span style="color:#555">(</span>csrfProtectionMatcher<span style="color:#555">(</span>patterns<span style="color:#555">));</span>
+    <span style="color:#069;font-weight:bold">return</span> csrfFilter<span style="color:#555">;</span>
+  <span style="color:#555">}</span>
 
-  <span style="color: #006699; font-weight: bold">private</span> NoAntPathRequestMatcher <span style="color: #CC00FF">csrfProtectionMatcher</span><span style="color: #555555">(</span>String<span style="color: #555555">[]</span> patterns<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">new</span> NoAntPathRequestMatcher<span style="color: #555555">(</span>patterns<span style="color: #555555">);</span>
-  <span style="color: #555555">}</span>
+  <span style="color:#069;font-weight:bold">private</span> NoAntPathRequestMatcher <span style="color:#c0f">csrfProtectionMatcher</span><span style="color:#555">(</span>String<span style="color:#555">[]</span> patterns<span style="color:#555">)</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">new</span> NoAntPathRequestMatcher<span style="color:#555">(</span>patterns<span style="color:#555">);</span>
+  <span style="color:#555">}</span>
 
-  <span style="color: #006699; font-weight: bold">private</span> CsrfTokenRepository <span style="color: #CC00FF">csrfTokenRepository</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-    HttpSessionCsrfTokenRepository repository <span style="color: #555555">=</span> <span style="color: #006699; font-weight: bold">new</span> HttpSessionCsrfTokenRepository<span style="color: #555555">();</span>
-    repository<span style="color: #555555">.</span><span style="color: #330099">setHeaderName</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;X_XSRF_TOKEN&quot;</span><span style="color: #555555">);</span>
-    <span style="color: #006699; font-weight: bold">return</span> repository<span style="color: #555555">;</span>
-  <span style="color: #555555">}</span>
-</pre></div>
-
+  <span style="color:#069;font-weight:bold">private</span> CsrfTokenRepository <span style="color:#c0f">csrfTokenRepository</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+    HttpSessionCsrfTokenRepository repository <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">new</span> HttpSessionCsrfTokenRepository<span style="color:#555">();</span>
+    repository<span style="color:#555">.</span><span style="color:#309">setHeaderName</span><span style="color:#555">(</span><span style="color:#c30">&#34;X_XSRF_TOKEN&#34;</span><span style="color:#555">);</span>
+    <span style="color:#069;font-weight:bold">return</span> repository<span style="color:#555">;</span>
+  <span style="color:#555">}</span></code></pre></div>
 <p>This will result in the right order of errors:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>$ curl -I -X GET <span style="color: #CC3300">&quot;http://localhost:8080/hello&quot;</span>
-HTTP/1.1 <span style="color: #FF6600">401</span> Unauthorized
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ curl -I -X GET <span style="color:#c30">&#34;http://localhost:8080/hello&#34;</span>
+HTTP/1.1 <span style="color:#f60">401</span> Unauthorized
 Server: Apache-Coyote/1.1
 X-Content-Type-Options: nosniff
-X-XSS-Protection: <span style="color: #FF6600">1</span>; <span style="color: #003333">mode</span><span style="color: #555555">=</span>block
-Cache-Control: no-cache, no-store, max-age<span style="color: #555555">=</span><span style="color: #FF6600">0</span>, must-revalidate
+X-XSS-Protection: <span style="color:#f60">1</span>; <span style="color:#033">mode</span><span style="color:#555">=</span>block
+Cache-Control: no-cache, no-store, max-age<span style="color:#555">=</span><span style="color:#f60">0</span>, must-revalidate
 Pragma: no-cache
-Expires: <span style="color: #FF6600">0</span>
+Expires: <span style="color:#f60">0</span>
 X-Frame-Options: DENY
-WWW-Authenticate: Basic <span style="color: #003333">realm</span><span style="color: #555555">=</span><span style="color: #CC3300">&quot;Realm&quot;</span>
+WWW-Authenticate: Basic <span style="color:#033">realm</span><span style="color:#555">=</span><span style="color:#c30">&#34;Realm&#34;</span>
 x-auth-token: 08a06acd-3398-4fc4-af25-23d3f4155a2b
-Content-Type: application/json;<span style="color: #003333">charset</span><span style="color: #555555">=</span>UTF-8
+Content-Type: application/json;<span style="color:#033">charset</span><span style="color:#555">=</span>UTF-8
 Transfer-Encoding: chunked
-Date: Thu, <span style="color: #FF6600">21</span> Jul <span style="color: #FF6600">2016</span> <span style="color: #FF6600">03</span>:27:58 GMT
-</pre></div>
-
+Date: Thu, <span style="color:#f60">21</span> Jul <span style="color:#f60">2016</span> <span style="color:#f60">03</span>:27:58 GMT</code></pre></div>
 <p>This is the end of this blog post. In this example, we built an application with CSRF protection that works well with Angular JS. The code for this blog post is available <a href="https://github.com/sdqali/csrf-demo">on GitHub</a>.</p>
 <div class="footnotes">
 
@@ -669,36 +599,6 @@ Date: Thu, <span style="color: #FF6600">21</span> Jul <span style="color: #FF660
             <p class="comments">
   If you have questions or comments about this blog post, you can get in touch with me on Twitter <a href="https://twitter.com/sdqali">@sdqali</a>.
 </p>
-
-            <div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Found this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and explanations for specific Java, Spring and other programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
 
           </div>
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">

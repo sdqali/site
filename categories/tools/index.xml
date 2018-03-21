@@ -2,391 +2,95 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tools on {code that works}</title>
-    <link>https://sdqali.in/categories/tools/?utm_source=site&amp;utm_medium=feed</link>
+    <link>https://sdqali.in/categories/tools/</link>
     <description>Recent content in Tools on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
     <lastBuildDate>Fri, 08 Aug 2014 00:00:00 +0000</lastBuildDate>
-    <atom:link href="/categories/tools/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    
+	<atom:link href="https://sdqali.in/categories/tools/index.xml" rel="self" type="application/rss+xml" />
+    
     
     <item>
       <title>Disputed territories and merging shapes and features</title>
-      <link>https://sdqali.in/blog/2014/08/08/disputed-territories-and-merging-shapes-and-features/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sdqali.in/blog/2014/08/08/disputed-territories-and-merging-shapes-and-features/</link>
       <pubDate>Fri, 08 Aug 2014 00:00:00 +0000</pubDate>
       
-      <guid>https://sdqali.in/blog/2014/08/08/disputed-territories-and-merging-shapes-and-features/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>&lt;p&gt;Making a map that shows a disputed territory can be a tricky business. Nation states vigorously contest maps that appear to portray a boundary that challenges what a border looks like. From the Falkland Islands to Kuril Islands; from Western Sahara to Arunachal Pradesh, disputed territories result in omissions, additions and inaccuracies in maps.&lt;/p&gt;
-
-&lt;p&gt;I grew up looking at maps in books printed by the Oxford Press, that came with a disclaimer in blue rubber stamped across them that stated how the map was wrong. This was due to the fact that the maps showed only the parts of Kashmir being administered by India, thereby omitting areas under Chinese and Pakistani control. The Criminal Law Amendment Act, 1961 in India makes it punishable with imprisonment up to 6 months to publish a map that excludes all or parts of Kashmir&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:1&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
-
-&lt;p&gt;This creates a lot of trouble for people who make maps for fun or to visualize data. Survey of India does not make it easy to get hold of shape files that represent India&amp;rsquo;s boundaries, and all the shape files that are available from international sources exclude parts of Kashmir. So, how do we solve this problem?&lt;/p&gt;
-
-&lt;p&gt;The North American Cartographic Information Society&amp;rsquo;s Natural Earth &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:2&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:2&#34;&gt;2&lt;/a&gt;&lt;/sup&gt; maps has all the disputed territories available for download as shape files. One way to solve the issue on our hands will be to take the shapes relevant to Kashmir from this file and merge it with the rest of India.&lt;/p&gt;
-
-&lt;p&gt;We will explore how to perform and an operation like this through QGIS &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:3&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:3&#34;&gt;3&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;Open the disputed areas shape file in QGIS.&lt;/li&gt;
-&lt;li&gt;Select all the regions in Kashmir that are seen by India as it&amp;rsquo;s territories.&lt;/li&gt;
-&lt;li&gt;In order to make merging these shapes easier, we will introduce a new attribute on them. Go to &lt;code&gt;Layer → Open Attribute Table&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;Switch to editing mode in the Attribute Table by clicking the &lt;code&gt;Toggle editing mode&lt;/code&gt; button.&lt;/li&gt;
-&lt;li&gt;Click &lt;code&gt;New column&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;Choose a name for the column. In this example we are using &lt;code&gt;target&lt;/code&gt;. Select &lt;code&gt;Text (string)&lt;/code&gt; as the Type and choose a number like &lt;code&gt;10&lt;/code&gt; for width.&lt;/li&gt;
-&lt;li&gt;For all the selected shapes, set the value of &lt;code&gt;target&lt;/code&gt; to Kashmir.&lt;/li&gt;
-&lt;li&gt;Use the &lt;code&gt;Dissolve&lt;/code&gt; tool, found at &lt;code&gt;Vector → Geoprocessing tools → Dissolve&lt;/code&gt; to dissolve the shapes in to a single shape file. Choose &lt;code&gt;target&lt;/code&gt; as the value for &lt;code&gt;dissolve&lt;/code&gt; field. Save the output to a new shape file.&lt;/li&gt;
-&lt;li&gt;Install the QGIS plugin &lt;code&gt;MergeShapes&lt;/code&gt;. Plugins can be installed from &lt;code&gt;Plugins → Manage and Install Plugins&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;Copy the &lt;a href=&#34;http://biogeo.ucdavis.edu/data/diva/adm/IND_adm.zip&#34;&gt;India shape file&lt;/a&gt; from DIVA-GIS and the newly generated Kashmir shape file to a directory.&lt;/li&gt;
-&lt;li&gt;Merge these into a single shape using &lt;code&gt;Vector → MergeShapes → MergeShapes&lt;/code&gt;.&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;With that we have a shape File for India that closely resembles India&amp;rsquo;s official version.&lt;/p&gt;
-
-&lt;p&gt;Once we have the shape File for Kashmir from step &lt;code&gt;8&lt;/code&gt;, we could do the merging by converting both shape Files to their corresponding GeoJSON formats and doing simple JavaScript operations on the objects.&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;Start by converting both shape Files to their GeoJSON representation.
-&lt;code&gt;bash
-&amp;gt; ogr2ogr -f GeoJSON india.geo.json india.shp
-&amp;gt; ogr2ogr -f GeoJSON kashmir.geo.json kashmir.shp
-&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;Load the two feature collections in to a JavaScript console. I tend to use Chromium&amp;rsquo;s Developer Tools, but in this example I am using  Node.js&amp;rsquo; REPL.
-&lt;code&gt;javascript
-kashmir = JSON.parse(fs.readFileSync(&amp;quot;./kashmir.geo.json&amp;quot;).toString());
-india = JSON.parse(fs.readFileSync(&amp;quot;./india.geo.json&amp;quot;).toString());
-&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;Identify the Kashmir feature in the India feature collection.
-&lt;code&gt;javascript
-kin = india.features.filter(function(f) {return f.properties.NAME_1.match(&amp;quot;Kashmir&amp;quot;);})[0];
-&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;Replace it&amp;rsquo;s coordinates with the unified Kashmir we generated.
-&lt;code&gt;javascript
-kin.geometry.coordinates = kashmir.features[0].geometry.coordinates;
-&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;Save it back to a GeoJSON file.
-&lt;code&gt;javascript
-fs.writeFileSync(&amp;quot;full_india.geo.json&amp;quot;, JSON.stringify(india));
-&lt;/code&gt;&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;Now the GeoJSON file can be transformed back in to a shape file.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;ogr2ogr -f &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;ESRI Shapefile&amp;#39;&lt;/span&gt; full_india.shp full_india.geo.json
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;Back to Kashmir and laws. Will this map save one from trouble? I am not sure, but this is an improvement on the omission of territories.&lt;/p&gt;
-&lt;div class=&#34;footnotes&#34;&gt;
-
-&lt;hr /&gt;
-
-&lt;ol&gt;
-&lt;li id=&#34;fn:1&#34;&gt;The Criminal Law Amendment Act, 1961 - &lt;a href=&#34;http://www.vakilno1.com/bareacts/laws/the-criminal-law-amendment-act-1961.html#2_Questioning_the_territorial_integrity_or_frontiers_of_India_in_a_manner_prejudicial_to_the_interests_of_safety_and_security_of_India&#34;&gt;Questioning the territorial integrity or frontiers of India in a manner prejudicial to the interests of safety and security of India.&lt;/a&gt;
- &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:1&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;li id=&#34;fn:2&#34;&gt;Natural Earth is a public domain map dataset available at 1:10m, 1:50m, and 1:110 million scales. The data set is available for download &lt;a href=&#34;http://www.naturalearthdata.com/downloads/&#34;&gt;here&lt;/a&gt;.
- &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:2&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;li id=&#34;fn:3&#34;&gt;&lt;a href=&#34;http://qgis.org/en/site/&#34;&gt;QGIS&lt;/a&gt; is a cross-platform free and open source desktop geographic information systems application that provides data viewing, editing, and analysis capabilities.
- &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:3&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/div&gt;
-</description>
+      <guid>https://sdqali.in/blog/2014/08/08/disputed-territories-and-merging-shapes-and-features/</guid>
+      <description>Making a map that shows a disputed territory can be a tricky business. Nation states vigorously contest maps that appear to portray a boundary that challenges what a border looks like. From the Falkland Islands to Kuril Islands; from Western Sahara to Arunachal Pradesh, disputed territories result in omissions, additions and inaccuracies in maps.
+I grew up looking at maps in books printed by the Oxford Press, that came with a disclaimer in blue rubber stamped across them that stated how the map was wrong.</description>
     </item>
     
     <item>
       <title>A list of GIS tools</title>
-      <link>https://sdqali.in/blog/2014/08/03/a-list-of-gis-tools/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sdqali.in/blog/2014/08/03/a-list-of-gis-tools/</link>
       <pubDate>Sun, 03 Aug 2014 00:00:00 +0000</pubDate>
       
-      <guid>https://sdqali.in/blog/2014/08/03/a-list-of-gis-tools/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>
-
-&lt;p&gt;I have been playing around with maps a lot these days and have ended up using various tools in the process. This blog post is a way to make a note of these tools for later use.&lt;/p&gt;
-
-&lt;h1 id=&#34;geojson-io&#34;&gt;geojson.io&lt;/h1&gt;
-
-&lt;p&gt;Mapbox&amp;rsquo;s &lt;a href=&#34;http://geojson.io/&#34;&gt;geojson.io&lt;/a&gt; is a simple tool for creating, editing and sharing maps. It lets you import map data in various formats and has an editor to modify maps.&lt;/p&gt;
-
-&lt;h1 id=&#34;geojson-topojson&#34;&gt;GeoJSON-TopoJSON&lt;/h1&gt;
-
-&lt;p&gt;&lt;a href=&#34;https://github.com/JeffPaine&#34;&gt;Jeff Paine&lt;/a&gt;&amp;rsquo;s &lt;a href=&#34;https://github.com/JeffPaine/geojson-topojson&#34;&gt;GeoJSON-TopoJSON&lt;/a&gt; is a simple tool to convert between the more common GeoJSON format and the TopoJSON format used by libraries like D3.js. It is a simple tool, but it does exactly what it says on the tin.&lt;/p&gt;
-
-&lt;h1 id=&#34;the-distillery&#34;&gt;The Distillery&lt;/h1&gt;
-
-&lt;p&gt;The New York Times&amp;rsquo; &lt;a href=&#34;http://shancarter.com/&#34;&gt;Shan Carter&lt;/a&gt; built &lt;a href=&#34;http://shancarter.github.io/distillery/&#34;&gt;The Distillery&lt;/a&gt;, a GUI around TopoJSON. Apart from converting GeoJSON to TopoJSON, it allows you to alter the map&amp;rsquo;s projection.&lt;/p&gt;
-
-&lt;h1 id=&#34;ogr2ogr&#34;&gt;ogr2ogr&lt;/h1&gt;
-
-&lt;p&gt;&lt;a href=&#34;http://www.gdal.org/ogr2ogr.html&#34;&gt;ogr2ogr&lt;/a&gt; is a command line utility to convert features data between different file formats.&lt;/p&gt;
-
-&lt;h1 id=&#34;ogre-ogr2ogr-web-client&#34;&gt;Ogre - ogr2ogr web client&lt;/h1&gt;
-
-&lt;p&gt;&lt;a href=&#34;http://ogre.adc4gis.com/&#34;&gt;Ogre&lt;/a&gt; is a web UI around ogr2ogr. It lets you do transformations on your map files when you are lazy and don&amp;rsquo;t want to use the command line to run ogr2ogr.&lt;/p&gt;
-
-&lt;h1 id=&#34;merge-geojson-features&#34;&gt;merge-geojson-features&lt;/h1&gt;
-
-&lt;p&gt;&lt;a href=&#34;https://www.npmjs.org/package/&#34;&gt;merge-geojson-features&lt;/a&gt; is a Node.js module to combine Features defined in different files in to a single FeatureCollection. I use it when I am not in the mood to alter GeoJSON objects from a JavaScript console by hand.&lt;/p&gt;
-</description>
+      <guid>https://sdqali.in/blog/2014/08/03/a-list-of-gis-tools/</guid>
+      <description>I have been playing around with maps a lot these days and have ended up using various tools in the process. This blog post is a way to make a note of these tools for later use.
+geojson.io Mapbox&amp;rsquo;s geojson.io is a simple tool for creating, editing and sharing maps. It lets you import map data in various formats and has an editor to modify maps.
+GeoJSON-TopoJSON Jeff Paine&amp;rsquo;s GeoJSON-TopoJSON is a simple tool to convert between the more common GeoJSON format and the TopoJSON format used by libraries like D3.</description>
     </item>
     
     <item>
       <title>A simple JMeter test with login</title>
-      <link>https://sdqali.in/blog/2014/02/17/a-simple-jmeter-test-with-login/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sdqali.in/blog/2014/02/17/a-simple-jmeter-test-with-login/</link>
       <pubDate>Mon, 17 Feb 2014 00:00:00 +0000</pubDate>
       
-      <guid>https://sdqali.in/blog/2014/02/17/a-simple-jmeter-test-with-login/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>
-
-&lt;p&gt;&lt;meta content=&#34;jmeter, login&#34; name=&#34;keywords&#34;&gt;
-I had to set up a JMeter test last week - the test included logging in to a site, and then hitting a bunch of URLs, all of them being GET requests. I found it hard to find a simple documentation that described how to do this - the ones I found were either incomplete or were trying to teach me a large number of things at the same time. So when I figured it out, I decided to write this down, for anyone else finding themselves in the same place as me.&lt;/p&gt;
-
-&lt;p&gt;For this example, the application under test is a simple Rails application, with the login form at &lt;code&gt;/login&lt;/code&gt; and a &lt;code&gt;POST&lt;/code&gt; request to &lt;code&gt;/login&lt;/code&gt; does the authentication.&lt;/p&gt;
-
-&lt;h3 id=&#34;add-a-thread-group&#34;&gt;Add a Thread Group&lt;/h3&gt;
-
-&lt;p&gt;A Thread Group defines a pool of users that will execute a particular test case against the server. JMeter makes the number of users, and the ramp-rate configurable. For the purpose of this example, Number of Threads is 2 and the ramp up time period is 1 second. This thread group is also configured to run forever.
-&lt;img src=&#34;https://sdqali.in/images/jmeter/thread_group.png&#34; alt=&#34;&amp;quot;Screenshot of Thread Group window&amp;quot;&#34; title=&#34;Thread Groups&#34; /&gt;&lt;/p&gt;
-
-&lt;h3 id=&#34;http-request-defaults&#34;&gt;HTTP Request Defaults&lt;/h3&gt;
-
-&lt;p&gt;The net step is to add an HTTP Request Defaults configuration element to the Thread Group. This configuration element sets up the domain or I.P. address of the server, the port and the protocol (HTTP / HTTPS). In this example, Server Name is &lt;code&gt;127.0.0.1&lt;/code&gt; and Port is &lt;code&gt;3000&lt;/code&gt;.
-&lt;img src=&#34;https://sdqali.in/images/jmeter/request_defaults.png&#34; alt=&#34;&amp;quot;Screenshot of HTTP Request Defaults&amp;quot;&#34; title=&#34;HTTP Request Defaults&#34; /&gt;&lt;/p&gt;
-
-&lt;h3 id=&#34;http-cookie-manager&#34;&gt;HTTP Cookie Manager&lt;/h3&gt;
-
-&lt;p&gt;A cookie manager stores and sends cookies, as a web browser would do if an actual user was hitting the server. For the purposes of this example, the default configurations are enough.
-&lt;img src=&#34;https://sdqali.in/images/jmeter/cookie_manager.png&#34; alt=&#34;&amp;quot;Screenshot of Cookie Manager&amp;quot;&#34; title=&#34;Cookie Manager&#34; /&gt;&lt;/p&gt;
-
-&lt;h3 id=&#34;implement-normal-page-actions&#34;&gt;Implement normal page actions&lt;/h3&gt;
-
-&lt;p&gt;From this point, all that remains is to implement HTTP Requests to the end points that are relevant to this test. In this example, we navigate to the Login page at &lt;code&gt;/login&lt;/code&gt;, fire a &lt;code&gt;POST&lt;/code&gt; request to &lt;code&gt;/login&lt;/code&gt; with the appropriate form input values and proceed to the Admin page.&lt;/p&gt;
-</description>
+      <guid>https://sdqali.in/blog/2014/02/17/a-simple-jmeter-test-with-login/</guid>
+      <description>I had to set up a JMeter test last week - the test included logging in to a site, and then hitting a bunch of URLs, all of them being GET requests. I found it hard to find a simple documentation that described how to do this - the ones I found were either incomplete or were trying to teach me a large number of things at the same time.</description>
     </item>
     
     <item>
       <title>Shared history in Bash</title>
-      <link>https://sdqali.in/blog/2013/09/15/shared-history-in-bash/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sdqali.in/blog/2013/09/15/shared-history-in-bash/</link>
       <pubDate>Sun, 15 Sep 2013 00:00:00 +0000</pubDate>
       
-      <guid>https://sdqali.in/blog/2013/09/15/shared-history-in-bash/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>&lt;p&gt;One of the features that I miss most in Bash is the shared history between terminals that Zsh supports. I was hunting down a solution for this and came across this Stack Overflow answer &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:1&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; by user &lt;em&gt;lesmana&lt;/em&gt;. This code snippet does the trick:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #003333&#34;&gt;HISTSIZE&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;9000&lt;/span&gt;
-&lt;span style=&#34;color: #003333&#34;&gt;HISTFILESIZE&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #003333&#34;&gt;$HISTSIZE&lt;/span&gt;
-&lt;span style=&#34;color: #003333&#34;&gt;HISTCONTROL&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;ignorespace:ignoredups
-
-history&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-  _bash_history_sync
-  &lt;span style=&#34;color: #336666&#34;&gt;builtin&lt;/span&gt; &lt;span style=&#34;color: #336666&#34;&gt;history&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #003333&#34;&gt;$@&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;&lt;/span&gt;
-&lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-
-_bash_history_sync&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-  &lt;span style=&#34;color: #336666&#34;&gt;builtin&lt;/span&gt; &lt;span style=&#34;color: #336666&#34;&gt;history&lt;/span&gt; -a         &lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;#1&lt;/span&gt;
-  &lt;span style=&#34;color: #003333&#34;&gt;HISTFILESIZE&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #003333&#34;&gt;$HISTSIZE&lt;/span&gt;     &lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;#2&lt;/span&gt;
-  &lt;span style=&#34;color: #336666&#34;&gt;builtin&lt;/span&gt; &lt;span style=&#34;color: #336666&#34;&gt;history&lt;/span&gt; -c         &lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;#3&lt;/span&gt;
-  &lt;span style=&#34;color: #336666&#34;&gt;builtin&lt;/span&gt; &lt;span style=&#34;color: #336666&#34;&gt;history&lt;/span&gt; -r         &lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;#4&lt;/span&gt;
-&lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-
-&lt;span style=&#34;color: #003333&#34;&gt;PROMPT_COMMAND&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;_bash_history_sync;&lt;/span&gt;&lt;span style=&#34;color: #003333&#34;&gt;$PROMPT_COMMAND&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;This is very hacky—This setting overrides the shell prompt to sync history every time the prompt is loaded. But like all great hacks, it works.&lt;/p&gt;
-&lt;div class=&#34;footnotes&#34;&gt;
-
-&lt;hr /&gt;
-
-&lt;ol&gt;
-&lt;li id=&#34;fn:1&#34;&gt;&lt;a href=&#34;http://stackoverflow.com/questions/103944/real-time-history-export-amongst-bash-terminal-windows/3055135#3055135&#34;&gt;Preserve bash history in multiple terminal windows&lt;/a&gt;
- &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:1&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/div&gt;
-</description>
+      <guid>https://sdqali.in/blog/2013/09/15/shared-history-in-bash/</guid>
+      <description>One of the features that I miss most in Bash is the shared history between terminals that Zsh supports. I was hunting down a solution for this and came across this Stack Overflow answer 1 by user lesmana. This code snippet does the trick:
+HISTSIZE=9000 HISTFILESIZE=$HISTSIZE HISTCONTROL=ignorespace:ignoredups history() { _bash_history_sync builtin history &amp;#34;$@&amp;#34; } _bash_history_sync() { builtin history -a #1  HISTFILESIZE=$HISTSIZE #2  builtin history -c #3  builtin history -r #4 } PROMPT_COMMAND=&amp;#34;_bash_history_sync;$PROMPT_COMMAND&amp;#34; This is very hacky—This setting overrides the shell prompt to sync history every time the prompt is loaded.</description>
     </item>
     
     <item>
       <title>Navigating Stacktraces in Emacs</title>
-      <link>https://sdqali.in/blog/2013/08/22/navigating-stacktraces-in-emacs/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sdqali.in/blog/2013/08/22/navigating-stacktraces-in-emacs/</link>
       <pubDate>Thu, 22 Aug 2013 00:00:00 +0000</pubDate>
       
-      <guid>https://sdqali.in/blog/2013/08/22/navigating-stacktraces-in-emacs/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>&lt;p&gt;I had to debug an issue today and that meant dealing with Rails stack traces. I got tired of having to constantly switch between reading the trace in the terminal and the code in Emacs to figure out what was going wrong and get more context around it. I felt that there should be an easier way of doing this. A quick search &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:1&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; did not yield anything. But then I remembered Grep mode &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:2&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:2&#34;&gt;2&lt;/a&gt;&lt;/sup&gt; and it occurred to me that hijacking Grep mode&amp;rsquo;s navigation feature would let me navigate the stack trace better. This is the solution I came up with.&lt;/p&gt;
+      <guid>https://sdqali.in/blog/2013/08/22/navigating-stacktraces-in-emacs/</guid>
+      <description>&lt;p&gt;I had to debug an issue today and that meant dealing with Rails stack traces. I got tired of having to constantly switch between reading the trace in the terminal and the code in Emacs to figure out what was going wrong and get more context around it. I felt that there should be an easier way of doing this. A quick search &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; did not yield anything. But then I remembered Grep mode &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:2&#34;&gt;&lt;a href=&#34;#fn:2&#34;&gt;2&lt;/a&gt;&lt;/sup&gt; and it occurred to me that hijacking Grep mode&amp;rsquo;s navigation feature would let me navigate the stack trace better. This is the solution I came up with.&lt;/p&gt;
 
-&lt;p&gt;&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Open the log in a buffer.&lt;/li&gt;
-&lt;li&gt;Replace any leading file paths in the logs with the appropriate path for your local copy of the code. In the following case, I would replace all &lt;code&gt;/opt/thoughtworks/mingle&lt;/code&gt; with empty string &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:3&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:3&#34;&gt;3&lt;/a&gt;&lt;/sup&gt;.
-&lt;code&gt;bash
-/opt/thoughtworks/mingle/app/models/foo.rb:46:in &#39;compare_bar&#39;
-/opt/thoughtworks/mingle/app/controllers/foos_controller.rb:42:in &#39;validate_bar&#39;
-...
-&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;Load the Grep mode with &lt;code&gt;M-x grep-mode&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Now I can easily press &lt;code&gt;Enter&lt;/code&gt; on the lines of the stack trace and Emacs will navigate to the correct source file and line number.&lt;/p&gt;
-&lt;div class=&#34;footnotes&#34;&gt;
-
-&lt;hr /&gt;
-
-&lt;ol&gt;
-&lt;li id=&#34;fn:1&#34;&gt;I almost wrote &amp;ldquo;quick google&amp;rdquo;, but then remembered that I no longer use Google that much. &lt;a href=&#34;http://duckduckgo.com&#34;&gt;DuckDuckGo&lt;/a&gt; has been my preferred search engine for a while.
- &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:1&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;li id=&#34;fn:2&#34;&gt;Grep mode is an Emacs mode used by the &lt;a href=&#34;http://www.emacswiki.org/emacs/GrepMode&#34;&gt;Grep&lt;/a&gt; command to display the results of a search. It populates the buffer with file paths and line numbers that let the user navigate to lines in the code base.
- &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:2&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;li id=&#34;fn:3&#34;&gt;Typically logs are long and you may want to use &lt;code&gt;replace-string&lt;/code&gt; instead of the default &lt;code&gt;query-replace&lt;/code&gt; for searching and replacing text. The former replaces strings without asking for confirmation while the latter asks you to confirm each replace operation. The latter has it&amp;rsquo;s use, but this use case calls for the former.
- &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:3&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/div&gt;</description>
+&lt;p&gt;&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Validating JSON in Emacs</title>
-      <link>https://sdqali.in/blog/2013/07/31/validating-json-in-emacs/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sdqali.in/blog/2013/07/31/validating-json-in-emacs/</link>
       <pubDate>Wed, 31 Jul 2013 00:00:00 +0000</pubDate>
       
-      <guid>https://sdqali.in/blog/2013/07/31/validating-json-in-emacs/?utm_source=site&amp;utm_medium=feed</guid>
+      <guid>https://sdqali.in/blog/2013/07/31/validating-json-in-emacs/</guid>
       <description>&lt;p&gt;&lt;meta content=&#34;validate&#34; name=&#34;keywords&#34;&gt;
-At work, I have to deal with Amazon CloudFormation &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:1&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; templates a fair bit. These templates are JSON files. More and more members of our team are moving away from TextMate to Emacs which makes me really happy. We would like to validate these CloudFormation templates in Emacs. Today we set this up and I hope this turns out to be of help to some one else trying to do the same.&lt;/p&gt;
+At work, I have to deal with Amazon CloudFormation &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; templates a fair bit. These templates are JSON files. More and more members of our team are moving away from TextMate to Emacs which makes me really happy. We would like to validate these CloudFormation templates in Emacs. Today we set this up and I hope this turns out to be of help to some one else trying to do the same.&lt;/p&gt;
 
-&lt;p&gt;&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Grab jsonlint. It is a command line utility that validates JSON. There seems to be two flavors of jsonlint available. A pure JavaScript implementation &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:2&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:2&#34;&gt;2&lt;/a&gt;&lt;/sup&gt; that runs on the Node.js runtime and a native Mac OS X &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:3&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:3&#34;&gt;3&lt;/a&gt;&lt;/sup&gt; version. We use the Node.js version.&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;Ensure that your Emacs can find the jsonlint binary. This can be done by adding the following snippet in your Emacs configuration:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #003333&#34;&gt;setenv&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;PATH&amp;quot;&lt;/span&gt; (&lt;span style=&#34;color: #003333&#34;&gt;concat&lt;/span&gt; (&lt;span style=&#34;color: #003333&#34;&gt;getenv&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;PATH&amp;quot;&lt;/span&gt;) &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;:/usr/local/share/npm/bin&amp;quot;&lt;/span&gt;))
-(&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;setq&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;exec-path&lt;/span&gt; (&lt;span style=&#34;color: #336666&#34;&gt;append&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;exec-path&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;&amp;#39;&lt;/span&gt;(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;/usr/local/share/npm/bin&amp;quot;&lt;/span&gt;)))
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;Of course, the path you add will depend on where your installation process put the binary.&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;Install &lt;code&gt;flymake-json&lt;/code&gt; &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:4&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:4&#34;&gt;4&lt;/a&gt;&lt;/sup&gt;, using your Emacs package manager.&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;Bind a key to &lt;code&gt;flymake-json-load&lt;/code&gt; which is the command to perform jsonlint on the current file. This can be done with the following snippet:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #003333&#34;&gt;global-set-key&lt;/span&gt; (&lt;span style=&#34;color: #003333&#34;&gt;kbd&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;C-c j v&amp;quot;&lt;/span&gt;) &lt;span style=&#34;color: #FFCC33&#34;&gt;&amp;#39;flymake-json-load&lt;/span&gt;)
-&lt;/pre&gt;&lt;/div&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Enjoy!&lt;/p&gt;
-&lt;div class=&#34;footnotes&#34;&gt;
-
-&lt;hr /&gt;
-
-&lt;ol&gt;
-&lt;li id=&#34;fn:1&#34;&gt;&lt;a href=&#34;http://aws.amazon.com/cloudformation/&#34;&gt;CloudFormation&lt;/a&gt;
- &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:1&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;li id=&#34;fn:2&#34;&gt;&lt;a href=&#34;https://github.com/zaach/jsonlint&#34;&gt;zaach/jsonlint&lt;/a&gt;
- &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:2&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;li id=&#34;fn:3&#34;&gt;&lt;a href=&#34;https://github.com/atomicbird/jsonlint&#34;&gt;atomicbird/jsonlint&lt;/a&gt;
- &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:3&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;li id=&#34;fn:4&#34;&gt;&lt;a href=&#34;http://marmalade-repo.org/packages/flymake-json&#34;&gt;A flymake handler for json using jsonlint&lt;/a&gt;
- &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:4&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/div&gt;</description>
+&lt;p&gt;&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Emacs hack: Viewing Git logs while composing commit messages</title>
-      <link>https://sdqali.in/blog/2013/04/29/emacs-hack-viewing-git-logs-while-composing-commit-messages/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sdqali.in/blog/2013/04/29/emacs-hack-viewing-git-logs-while-composing-commit-messages/</link>
       <pubDate>Mon, 29 Apr 2013 00:00:00 +0000</pubDate>
       
-      <guid>https://sdqali.in/blog/2013/04/29/emacs-hack-viewing-git-logs-while-composing-commit-messages/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>&lt;p&gt;I use Emacs as my editor to compose Git commit messages. I almost never commit from the terminal with &lt;code&gt;git commit -m&lt;/code&gt;. This approach has two advantages: I get a chance to verify what is being committed and get to compose the message using a proper editor complete with spell checking provided by &lt;em&gt;flyspell mode&lt;/em&gt;. One thing I wish I had access to while composing commit messages is the git log. This is useful to refer to work items and encourages one to use a consistent style in the messages. This was easier in the terminal as one could do something like &lt;code&gt;git log -n 3&lt;/code&gt; and then commit with the &lt;code&gt;-m&lt;/code&gt; flag.&lt;/p&gt;
-
-&lt;p&gt;I decided to fix this today and some tinkering later came up with a hack tp do this.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Git commit messages are stored in the &lt;code&gt;COMMIT_EDITMSG&lt;/code&gt; file under &lt;code&gt;.git/&lt;/code&gt;. So the first thing to do is to ensure that this file always gets loaded with a custom minor mode. This can be done as follows:&lt;/li&gt;
-&lt;/ul&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #003333&#34;&gt;add-to-list&lt;/span&gt; &lt;span style=&#34;color: #FFCC33&#34;&gt;&amp;#39;auto-mode-alist&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;&amp;#39;&lt;/span&gt;(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;\\COMMIT_EDITMSG\\&amp;#39;&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;load-magit-log-when-committing-mode&lt;/span&gt;))
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;The minor mode does not need to do anything. The definition would be like this:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #003333&#34;&gt;define-minor-mode&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;load-magit-log-when-committing-mode&lt;/span&gt;
-  &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;dummy&amp;quot;&lt;/span&gt;)
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Next step is to add a custom hook that gets run after loading the minor mode. This hook calls the function to load git logs. The code for this is:&lt;/li&gt;
-&lt;/ul&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #003333&#34;&gt;add-hook&lt;/span&gt; &lt;span style=&#34;color: #FFCC33&#34;&gt;&amp;#39;load-magit-log-when-committing-mode-hook&lt;/span&gt; &lt;span style=&#34;color: #FFCC33&#34;&gt;&amp;#39;show-magit-log-hook&lt;/span&gt;)
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;ul&gt;
-&lt;li&gt;The actual function to load git logs. It calls &lt;code&gt;magit-log&lt;/code&gt; to load the logs and then opens the original &lt;code&gt;COMMIT_EDITMSG&lt;/code&gt; in the other frame.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #336666&#34;&gt;defun&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;show-magit-log-hook&lt;/span&gt; ()
-  (&lt;span style=&#34;color: #003333&#34;&gt;cd&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;..&amp;quot;&lt;/span&gt;)
-  (&lt;span style=&#34;color: #003333&#34;&gt;magit-log&lt;/span&gt;)
-  (&lt;span style=&#34;color: #003333&#34;&gt;switch-to-buffer-other-window&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;COMMIT_EDITMSG&amp;quot;&lt;/span&gt;))
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;This is how Emacs looks while committing with this hack in place:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://sdqali.in/images/screenshot_git_commit_log.png&#34; alt=&#34;&amp;quot;Screenshot showing git commit log&amp;quot;&#34; title=&#34;Screenshot showing git commit log&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;If you want to use this, copy the following snippet to your &lt;code&gt;init.el&lt;/code&gt;.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;;; load-magit-log-when-committing-mode&lt;/span&gt;
-(&lt;span style=&#34;color: #003333&#34;&gt;define-minor-mode&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;load-magit-log-when-committing-mode&lt;/span&gt;
-  &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;dummy&amp;quot;&lt;/span&gt;)
-
-&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;;; the hook&lt;/span&gt;
-(&lt;span style=&#34;color: #336666&#34;&gt;defun&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;show-magit-log-hook&lt;/span&gt; ()
-  (&lt;span style=&#34;color: #003333&#34;&gt;cd&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;..&amp;quot;&lt;/span&gt;)
-  (&lt;span style=&#34;color: #003333&#34;&gt;magit-log&lt;/span&gt;)
-  (&lt;span style=&#34;color: #003333&#34;&gt;switch-to-buffer-other-window&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;COMMIT_EDITMSG&amp;quot;&lt;/span&gt;))
-
-&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;;; add the hook&lt;/span&gt;
-(&lt;span style=&#34;color: #003333&#34;&gt;add-hook&lt;/span&gt; &lt;span style=&#34;color: #FFCC33&#34;&gt;&amp;#39;load-magit-log-when-committing-mode-hook&lt;/span&gt; &lt;span style=&#34;color: #FFCC33&#34;&gt;&amp;#39;show-magit-log-hook&lt;/span&gt;)
-
-&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;;; load the mode for commit message&lt;/span&gt;
-(&lt;span style=&#34;color: #003333&#34;&gt;add-to-list&lt;/span&gt; &lt;span style=&#34;color: #FFCC33&#34;&gt;&amp;#39;auto-mode-alist&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;&amp;#39;&lt;/span&gt;(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;\\COMMIT_EDITMSG\\&amp;#39;&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;load-magit-log-when-committing-mode&lt;/span&gt;))
-&lt;/pre&gt;&lt;/div&gt;
-</description>
+      <guid>https://sdqali.in/blog/2013/04/29/emacs-hack-viewing-git-logs-while-composing-commit-messages/</guid>
+      <description>I use Emacs as my editor to compose Git commit messages. I almost never commit from the terminal with git commit -m. This approach has two advantages: I get a chance to verify what is being committed and get to compose the message using a proper editor complete with spell checking provided by flyspell mode. One thing I wish I had access to while composing commit messages is the git log.</description>
     </item>
     
     <item>
       <title>Configure Git&#39;s comment character</title>
-      <link>https://sdqali.in/blog/2013/04/14/configure-gits-comment-character/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sdqali.in/blog/2013/04/14/configure-gits-comment-character/</link>
       <pubDate>Sun, 14 Apr 2013 00:00:00 +0000</pubDate>
       
-      <guid>https://sdqali.in/blog/2013/04/14/configure-gits-comment-character/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>&lt;p&gt;TL;DR -
-Use the &lt;code&gt;core.commentchar&lt;/code&gt; configuration to change the character Git uses to mark comment lines in commit messages.&lt;/p&gt;
-
-&lt;p&gt;My team has a convention of putting the number of the current Issue/Ticket/Story that we are working on at the beginning of every commit message. This is great because it lets us make sense of the history of our code by helping us answer&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;What were the changes made to the code base to build a feature or fix an issue?&lt;/li&gt;
-&lt;li&gt;Given a changeset, why was it put in place?&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;We use the format &lt;code&gt;#123 Foo bar&lt;/code&gt; for the message where &lt;code&gt;123&lt;/code&gt; is the issue number because it lets &lt;a href=&#34;http://www.thoughtworks-studios.com/mingle&#34;&gt;Mingle&lt;/a&gt;, our project management tool track the commits made against each card.&lt;/p&gt;
-
-&lt;p&gt;Things work fine, except for me. I almost never use &lt;code&gt;git ci -m&lt;/code&gt;. I like Git to open up an editor (almost always Emacs), and type my comment message out. But if I type the commit message according to the convention, because the line starts with a &lt;code&gt;#&lt;/code&gt;, Git would treat it as a comment and the commit will be aborted.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;#123 Foobar
-# Please enter the commit message for your changes. Lines starting
-# with &amp;#39;#&amp;#39; will be ignored, and an empty message aborts the commit.
-# On branch source
-#
-# Changes to be committed:
-#   (use &amp;quot;git reset HEAD &amp;lt;file&amp;gt;...&amp;quot; to unstage)
-...
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;I have been getting around this issue by pre-pending a space before the message. So I was really happy to see that Git &lt;code&gt;1.8.2&lt;/code&gt; ships with a new configuration &lt;code&gt;core.commentchar&lt;/code&gt;. This let&amp;rsquo;s you configure the characters that marks a comment in the commit message. From the &lt;a href=&#34;http://git-scm.com/docs/git-config&#34;&gt;doc&lt;/a&gt;:
-&amp;gt; core.commentchar
-&amp;gt;
-&amp;gt;    Commands such as commit and tag that lets you edit messages consider a line that begins with this character commented, and removes them after the editor returns (default #).&lt;/p&gt;
-
-&lt;p&gt;So with this set to &lt;code&gt;$&lt;/code&gt;, I can just type in my commit message.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;#123 Foobar
-$ Please enter the commit message for your changes. Lines starting
-$ with &amp;#39;$&amp;#39; will be ignored, and an empty message aborts the commit.
-$ On branch source
-$
-$ Changes to be committed:
-$   (use &amp;quot;git reset HEAD &amp;lt;file&amp;gt;...&amp;quot; to unstage)
-...
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;This configuration is available only in versions &lt;code&gt;1.8.2&lt;/code&gt; and later.&lt;/p&gt;
-</description>
+      <guid>https://sdqali.in/blog/2013/04/14/configure-gits-comment-character/</guid>
+      <description>TL;DR - Use the core.commentchar configuration to change the character Git uses to mark comment lines in commit messages.
+My team has a convention of putting the number of the current Issue/Ticket/Story that we are working on at the beginning of every commit message. This is great because it lets us make sense of the history of our code by helping us answer
+ What were the changes made to the code base to build a feature or fix an issue?</description>
     </item>
     
   </channel>

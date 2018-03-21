@@ -2,101 +2,40 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Android on {code that works}</title>
-    <link>https://sdqali.in/categories/android/?utm_source=site&amp;utm_medium=feed</link>
+    <link>https://sdqali.in/categories/android/</link>
     <description>Recent content in Android on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
     <lastBuildDate>Tue, 01 Oct 2013 00:00:00 +0000</lastBuildDate>
-    <atom:link href="/categories/android/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    
+	<atom:link href="https://sdqali.in/categories/android/index.xml" rel="self" type="application/rss+xml" />
+    
     
     <item>
       <title>Accessing Environment Variables in Gradle</title>
-      <link>https://sdqali.in/blog/2013/10/01/accessing-environment-variables-in-gradle/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sdqali.in/blog/2013/10/01/accessing-environment-variables-in-gradle/</link>
       <pubDate>Tue, 01 Oct 2013 00:00:00 +0000</pubDate>
       
-      <guid>https://sdqali.in/blog/2013/10/01/accessing-environment-variables-in-gradle/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>&lt;p&gt;I have been writing a fun Android App. &lt;a href=&#34;https://play.google.com/store/apps/details?id=in.sdqali.sharewithtitle&#34;&gt;Share With Title&lt;/a&gt; is a small application that allows you to share web pages you are reading to other applications without having to jump through the messy copy-paste hoop. (You should try it. If you share stuff from the web like I do, it will save you a lot of time and frustration). I have been coding on &lt;a href=&#34;https://developer.android.com/sdk/installing/studio.html&#34;&gt;Android Studio&lt;/a&gt;, Google&amp;rsquo;s IntelliJ based IDE for Android development. It uses Gradle for build scripts. Gradle is a Groovy based DSL &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:1&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; for declaratively specifying build tasks. From what I have seen so far, it looks like an improvement over Ant.&lt;/p&gt;
-
-&lt;p&gt;While attempting to build a signed version of my app, I found a &lt;a href=&#34;http://stackoverflow.com/questions/18328730/how-to-create-a-release-signed-apk-file-using-gradle&#34;&gt;Gradle recipe&lt;/a&gt; for signing Android applications. However, it used hard coded parameters including passwords. This lead me to figuring out how to use environment variables in Gradle scripts.&lt;/p&gt;
-
-&lt;p&gt;Since Gradle scripts are Groovy files, Groovy&amp;rsquo;s &lt;code&gt;System.getEnv&lt;/code&gt; method will do the trick. The recipe modified to use this and thereby eliminate hard coded parameters will look like this:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;signingConfigs {
-	release {
-		storeFile file(System.getenv(&amp;quot;KEYSTORE&amp;quot;))
-		storePassword System.getenv(&amp;quot;KEYSTORE_PASSWORD&amp;quot;)
-		keyAlias System.getenv(&amp;quot;KEY_ALIAS&amp;quot;)
-		keyPassword System.getenv(&amp;quot;KEY_PASSWORD&amp;quot;)
-	}
-}
-
-buildTypes {
-	release {
-		signingConfig signingConfigs.release
-	}
-}
-&lt;/code&gt;&lt;/pre&gt;
-&lt;div class=&#34;footnotes&#34;&gt;
-
-&lt;hr /&gt;
-
-&lt;ol&gt;
-&lt;li id=&#34;fn:1&#34;&gt;A Domain Specific Languages (DSL) is a languages targeted to a particular kind of problem. Martin Fowler has a very good description of them &lt;a href=&#34;http://martinfowler.com/bliki/DomainSpecificLanguage.html&#34;&gt;here&lt;/a&gt;. Build scripts like Make, Ant and Rake are all DSLs.
- &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:1&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/div&gt;
-</description>
+      <guid>https://sdqali.in/blog/2013/10/01/accessing-environment-variables-in-gradle/</guid>
+      <description>I have been writing a fun Android App. Share With Title is a small application that allows you to share web pages you are reading to other applications without having to jump through the messy copy-paste hoop. (You should try it. If you share stuff from the web like I do, it will save you a lot of time and frustration). I have been coding on Android Studio, Google&amp;rsquo;s IntelliJ based IDE for Android development.</description>
     </item>
     
     <item>
       <title>Reading user input in Gradle scripts</title>
-      <link>https://sdqali.in/blog/2013/10/01/reading-user-input-in-gradle-scripts/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sdqali.in/blog/2013/10/01/reading-user-input-in-gradle-scripts/</link>
       <pubDate>Tue, 01 Oct 2013 00:00:00 +0000</pubDate>
       
-      <guid>https://sdqali.in/blog/2013/10/01/reading-user-input-in-gradle-scripts/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>
-
-&lt;p&gt;Continuing from the last &lt;a href=&#34;https://sdqali.in/blog/2013/10/01/accessing-environment-variables-in-gradle/&#34;&gt;blog post&lt;/a&gt;, I have been looking at reading user input from a Gradle script. This was a result of Stack Overflow user &lt;em&gt;user672009&lt;/em&gt;&amp;rsquo;s &lt;a href=&#34;http://stackoverflow.com/questions/18328730/how-to-create-a-release-signed-apk-file-using-gradle/19130098#19130098&#34;&gt;question&lt;/a&gt; about prompting for input from a Gradle script so the one does not have to include passwords in the script while checking in.&lt;/p&gt;
-
-&lt;p&gt;Just like the last example, the fact that Gradle scripts are written in a Groovy DSL comes to our help. Groovy&amp;rsquo;s &lt;code&gt;System. console(). readLine&lt;/code&gt; can be called from inside Gradle tasks. The same recipe from the last post can be rewritten to prompt for various parameters.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;signingConfigs {
-	release {
-		storeFile file(System.console().readLine(&amp;quot;\n\$ Enter keystore path: &amp;quot;))
-		storePassword System.console().readLine(&amp;quot;\n\$ Enter keystore password: &amp;quot;)
-		keyAlias System.console().readLine(&amp;quot;\n\$ Enter key alias: &amp;quot;)
-		keyPassword System.console().readLine(&amp;quot;\n\$ Enter key password: &amp;quot;)
-	}
-}
-
-buildTypes {
-	release {
-		signingConfig signingConfigs.release
-	}
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&#34;this-is-a-bad-idea&#34;&gt;This is a bad idea&lt;/h3&gt;
-
-&lt;p&gt;While Gradle allows this kind of prompts, this is a bad pattern for a build script, especially when the script is run remotely, for example on a Continuous Integration &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:1&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; environment. The correct way to prevent hard coding of parameters like this is to access them from environment variables.&lt;/p&gt;
-&lt;div class=&#34;footnotes&#34;&gt;
-
-&lt;hr /&gt;
-
-&lt;ol&gt;
-&lt;li id=&#34;fn:1&#34;&gt;Continuous Integration (CI) is a software development practice where code from different developers, on different components are integrated frequently with the aid of an automated build. Martin Fowler has a &lt;a href=&#34;http://www.martinfowler.com/articles/continuousIntegration.html&#34;&gt;great article&lt;/a&gt; about it.
- &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:1&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/div&gt;
-</description>
+      <guid>https://sdqali.in/blog/2013/10/01/reading-user-input-in-gradle-scripts/</guid>
+      <description>Continuing from the last blog post, I have been looking at reading user input from a Gradle script. This was a result of Stack Overflow user user672009&amp;rsquo;s question about prompting for input from a Gradle script so the one does not have to include passwords in the script while checking in.
+Just like the last example, the fact that Gradle scripts are written in a Groovy DSL comes to our help.</description>
     </item>
     
     <item>
       <title>My thoughts on Android fragmentation -  It is not a bad thing</title>
-      <link>https://sdqali.in/blog/2013/07/30/my-thoughts-on-android-fragmentation----it-is-not-a-bad-thing/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sdqali.in/blog/2013/07/30/my-thoughts-on-android-fragmentation----it-is-not-a-bad-thing/</link>
       <pubDate>Tue, 30 Jul 2013 00:00:00 +0000</pubDate>
       
-      <guid>https://sdqali.in/blog/2013/07/30/my-thoughts-on-android-fragmentation----it-is-not-a-bad-thing/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>&lt;p&gt;OpenSignal released the July 2013 edition &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:1&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; of their State of Android report. Among many things like the dominance of Samsung, HTC&amp;rsquo;s faltering performance and Motorola&amp;rsquo;s struggle, it points out that the Android device landscape is more fragmented than ever. Out of &lt;em&gt;682000&lt;/em&gt; devices surveyed for the report, &lt;em&gt;11868&lt;/em&gt; distinct devices were seen. This has met with cries of anguish from Developers and the usual suspects &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:2&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:2&#34;&gt;2&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
+      <guid>https://sdqali.in/blog/2013/07/30/my-thoughts-on-android-fragmentation----it-is-not-a-bad-thing/</guid>
+      <description>&lt;p&gt;OpenSignal released the July 2013 edition &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; of their State of Android report. Among many things like the dominance of Samsung, HTC&amp;rsquo;s faltering performance and Motorola&amp;rsquo;s struggle, it points out that the Android device landscape is more fragmented than ever. Out of &lt;em&gt;682000&lt;/em&gt; devices surveyed for the report, &lt;em&gt;11868&lt;/em&gt; distinct devices were seen. This has met with cries of anguish from Developers and the usual suspects &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:2&#34;&gt;&lt;a href=&#34;#fn:2&#34;&gt;2&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
 
 &lt;p&gt;There is a very important point in the OpenSignal report that gets ignored or does not get as much focus as it deserves. To quote:&lt;/p&gt;
 
@@ -104,37 +43,7 @@ buildTypes {
 &lt;p&gt;For consumers, extreme fragmentation means that they can get exactly the phone they want – big or small, cheap or expensive, with any number of different feature combinations.&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;p&gt;&lt;/p&gt;
-
-&lt;p&gt;A lot of people, especially from the Valley and in love with Apple&amp;rsquo;s excellent devices point this out as evidence of Android&amp;rsquo;s cheapness. I think Android fragmentation is not a bad thing. I will try to make this point below.&lt;/p&gt;
-
-&lt;h1 id=&#34;fragmentation-means-android-provides-à-la-carte-smartness&#34;&gt;Fragmentation means Android provides &lt;em&gt;à la carte&lt;/em&gt; smartness.&lt;/h1&gt;
-
-&lt;p&gt;Apple provides well-engineered, extremely well-designed our-way-or-high-way devices. These are loved by a lot of people and evidently work very well for them. But fragmentation means  that Android is able to be a vehicle for devices with &lt;em&gt;à la carte&lt;/em&gt; smartness. Want a big screen? Or you feel you want a small screen to fit your hand? There is an Android device for you.
-Want a really good camera? Or you don&amp;rsquo;t care about taking photos? There is an Android device for both cases.
-Does not want WiFi support on your device because you live in a part of the of the world where you would pretty much never encounter a WiFi hot-spot? Or you always have a hot-spot near you? No problem. There are Android devices that fit either use cases.
-Are you a programmer in the valley and can afford pretty much any smart device you want? Or you are a daily wage laborer in rural India? No problem. There are Android devices for both of you.&lt;/p&gt;
-
-&lt;h1 id=&#34;fragmentation-allows-android-to-put-smart-devices-in-more-hands&#34;&gt;Fragmentation allows Android to put smart devices in more hands.&lt;/h1&gt;
-
-&lt;p&gt;Fragmentation caused by manufacturers from Asia who make devices tailored for the budgets of the emerging markets they serve has pushed smart device adoption forward. In a market like India, local manufacturers like Karbonn and Micromax provide competition for Samsung. According to a recent study &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:3&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:3&#34;&gt;3&lt;/a&gt;&lt;/sup&gt;,  Micromax and Karbonn occupy the 2nd and 3rd spot in the smart device market with 19.3% and 8.6%.&lt;/p&gt;
-
-&lt;h1 id=&#34;seriously-smart-devices-are-not-about-the-developers&#34;&gt;Seriously, smart devices are not about the developers.&lt;/h1&gt;
-
-&lt;p&gt;Developers seem to have a negative view towards the fragmentation on the Android platform. This is understandable because they have to spend money and effort to support a large number of devices and screen sizes. In my opinion Developers are wrong to think that smart devices are about them. It is about the users. The average smart device user in my village back home in India does not care about your cool new app that delivers commodity X to the doorsteps or lets you ask for a black taxi. He cares about being able to browse, update Facebook and make Skype calls. And that is okay because Facebook, Microsoft and Google have the Engineering strength and money to build apps that cater to the whole spectrum of Android devices. Of course, you will have trouble if you want to do with your app and will choose instead to not support those devices at the low end of the spectrum. That is okay. These smart device owners won&amp;rsquo;t miss you, because they don&amp;rsquo;t need your app.&lt;/p&gt;
-&lt;div class=&#34;footnotes&#34;&gt;
-
-&lt;hr /&gt;
-
-&lt;ol&gt;
-&lt;li id=&#34;fn:1&#34;&gt;&lt;a href=&#34;http://opensignal.com/reports/fragmentation-2013/&#34;&gt;Android Fragmentation Report July 2013 - OpenSignal&lt;/a&gt;
- &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:1&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;li id=&#34;fn:2&#34;&gt;&lt;a href=&#34;http://daringfireball.net/linked/2013/07/30/bbc-android&#34;&gt;Daring Fireball taking yet another dig at Android&lt;/a&gt;
- &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:2&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;li id=&#34;fn:3&#34;&gt;&lt;a href=&#34;http://cmrindia.com/more-than-73-5-million-mobile-handsets-shipped-in-india-during-january-april-2013-a-yoy-growth-of-11-1/&#34;&gt;CMR’s India Monthly Mobile Handsets Market Review, April 2013, June 2013&lt;/a&gt;
- &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:3&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/div&gt;</description>
+&lt;p&gt;&lt;/p&gt;</description>
     </item>
     
   </channel>

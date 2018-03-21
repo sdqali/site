@@ -2,18 +2,20 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Plugin on {code that works}</title>
-    <link>https://sdqali.in/tags/plugin/?utm_source=site&amp;utm_medium=feed</link>
+    <link>https://sdqali.in/tags/plugin/</link>
     <description>Recent content in Plugin on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
     <lastBuildDate>Thu, 29 Nov 2012 00:00:00 +0000</lastBuildDate>
-    <atom:link href="/tags/plugin/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    
+	<atom:link href="https://sdqali.in/tags/plugin/index.xml" rel="self" type="application/rss+xml" />
+    
     
     <item>
       <title>My first Firefox plugin: GetCache - View cached version of the current page</title>
-      <link>https://sdqali.in/blog/2012/11/29/my-first-firefox-plugin-getcache---view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sdqali.in/blog/2012/11/29/my-first-firefox-plugin-getcache---view-cached-version-of-the-current-page/</link>
       <pubDate>Thu, 29 Nov 2012 00:00:00 +0000</pubDate>
       
-      <guid>https://sdqali.in/blog/2012/11/29/my-first-firefox-plugin-getcache---view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=feed</guid>
+      <guid>https://sdqali.in/blog/2012/11/29/my-first-firefox-plugin-getcache---view-cached-version-of-the-current-page/</guid>
       <description>&lt;p&gt;I released my &lt;a href=&#34;https://addons.mozilla.org/en-US/firefox/addon/getcache-ff/&#34;&gt;first Firefox plugin&lt;/a&gt; today. It
 is awaiting review, but if you are adventurous, you can install it right
 now. Go on, try it.&lt;/p&gt;
@@ -24,70 +26,15 @@ that does exactly what GetCache does, but I decided to go ahead and write it
 for fun. And of course, the fact that I could publish it without having
 to sign up with my Credit Card information was enticing.&lt;/p&gt;
 
-&lt;p&gt;&lt;/p&gt;
-
-&lt;p&gt;There are three approaches to write a Firefox plugin:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://developer.mozilla.org/en-US/docs/XUL_School/Introduction&#34;&gt;Traditional extensions&lt;/a&gt; - Uses JAvaScript and XUL.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://addons.mozilla.org/en-US/developers/builder&#34;&gt;Jetpacks&lt;/a&gt; - Uses
-HTML, CSS and JavaScript.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://developer.mozilla.org/en-US/docs/Extensions/Bootstrapped_extensions&#34;&gt;Bootstrapped extensions&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;HUGOMORE42
-I decided to go the Jetpack because the development process and
-technologies were similar to Chrome plugins. And I had no prior
-experience with XUL. Once I had downloaded the SDK and set it up, things
-were pretty easy. The
-&lt;a href=&#34;https://addons.mozilla.org/en-US/developers/docs/sdk/latest/&#34;&gt;API&lt;/a&gt; is
-well documented.&lt;/p&gt;
-
-&lt;h2 id=&#34;the-api&#34;&gt;The API&lt;/h2&gt;
-
-&lt;p&gt;The bulk of the code is JavaScript. The API is easy to use. The
-following snippet adds a widget to the Addon toolbar at the bottom of
-the Firefox window:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;var&lt;/span&gt; createWidget &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;function&lt;/span&gt; () {
-      &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;new&lt;/span&gt; Widget({
-        id&lt;span style=&#34;color: #555555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;sdqali-getcache&amp;quot;&lt;/span&gt;,
-        label&lt;span style=&#34;color: #555555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Get Google&amp;#39;s cached version of the current page..&amp;quot;&lt;/span&gt;,
-        contentURL&lt;span style=&#34;color: #555555&#34;&gt;:&lt;/span&gt; self.data.url (&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;images/icon.png&amp;quot;&lt;/span&gt;),
-        onClick&lt;span style=&#34;color: #555555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;function&lt;/span&gt;(event) {
-          loadCachedPage ();
-        }
-      });
-    };
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;h2 id=&#34;adding-context-menu-entries&#34;&gt;Adding context menu entries&lt;/h2&gt;
-
-&lt;p&gt;While things were pretty smooth overall, I ran in to a weird edge
-case. I wanted a context menu entry that would load the Google cache
-page, and I wanted this entry to be available regardless of whether the
-user has selected some text in the page or not. The API uses the notion
-of
-&lt;a href=&#34;https://addons.mozilla.org/en-US/developers/docs/sdk/latest/packages/addon-kit/context-menu.html&#34;&gt;&lt;code&gt;Contexts&lt;/code&gt;&lt;/a&gt;
-o decide when the menu entry will be available. While the API says that
-I can use an arrays of &lt;code&gt;Contexts&lt;/code&gt;, I had no success with it. I ended up
-creating two context menu entries, one attached to the &lt;code&gt;PageContext&lt;/code&gt; and
-one attached to the &lt;code&gt;SelectionContext&lt;/code&gt;.&lt;/p&gt;
-
-&lt;h2 id=&#34;source&#34;&gt;Source&lt;/h2&gt;
-
-&lt;p&gt;I used this
-&lt;a href=&#34;http://www.iconfinder.com/icondetails/7065/128/cache_icon&#34;&gt;beautiful icon&lt;/a&gt;
-by Sergio Sanchez Lopez. Since it comes with a GPL license, the plugin
-is also licensed under GPL.
-I have put the source code on &lt;a href=&#34;https://github.com/sdqali/getcache-ff&#34;&gt;Github&lt;/a&gt;.&lt;/p&gt;</description>
+&lt;p&gt;&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>GetCache - A Chrome plugin to view cached version of the current page</title>
-      <link>https://sdqali.in/blog/2012/11/28/getcache---a-chrome-plugin-to-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sdqali.in/blog/2012/11/28/getcache---a-chrome-plugin-to-view-cached-version-of-the-current-page/</link>
       <pubDate>Wed, 28 Nov 2012 00:00:00 +0000</pubDate>
       
-      <guid>https://sdqali.in/blog/2012/11/28/getcache---a-chrome-plugin-to-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=feed</guid>
+      <guid>https://sdqali.in/blog/2012/11/28/getcache---a-chrome-plugin-to-view-cached-version-of-the-current-page/</guid>
       <description>&lt;blockquote&gt;
 &lt;p&gt;Download the plugin
 &lt;a href=&#34;https://sdqali.in/downloads/GetCache.crx&#34;&gt;here&lt;/a&gt;&lt;/p&gt;
@@ -111,60 +58,7 @@ the current page.&lt;/p&gt;
 Extensions page (&lt;code&gt;Window -&amp;gt; Extensions&lt;/code&gt;) and drag the downloaded &lt;code&gt;CRX&lt;/code&gt;
 file to the page.&lt;/p&gt;
 
-&lt;p&gt;&lt;/p&gt;
-
-&lt;h2 id=&#34;usage&#34;&gt;Usage&lt;/h2&gt;
-
-&lt;p&gt;On any page, click on the GetCache icon to load the cached page.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://sdqali.in/images/get_cache_icon.png&#34; alt=&#34;GetCache icon&#34; title=&#34;GetCache icon&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Or you could right click on the page and select &lt;code&gt;View Google&#39;s cache&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://sdqali.in/images/get_cache_context_menu.png&#34; alt=&#34;GetCache context menu&#34; title=&#34;GetCache context menu&#34; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&#34;source-code&#34;&gt;Source Code&lt;/h2&gt;
-
-&lt;p&gt;The source code for the plugin is dead simple. All it does is to append
-&lt;code&gt;http://webcache.googleusercontent.com/search?q=cache:&lt;/code&gt; to the beginning
-of the current URL and ask chrome to load the new URL in the same
-tab. The interesting bit of the code is below:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;function&lt;/span&gt; () {
-  &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;var&lt;/span&gt; navigateToCachedPage &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;function&lt;/span&gt; (tab) {
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;var&lt;/span&gt; gCacheUrlPrefix &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;http://webcache.googleusercontent.com/search?q=cache:&amp;quot;&lt;/span&gt;;
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;var&lt;/span&gt; currentUrl &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; tab.url;
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;var&lt;/span&gt; cacheUrl &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; gCacheUrlPrefix &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; currentUrl;
-    chrome.tabs.update(tab.id, {url&lt;span style=&#34;color: #555555&#34;&gt;:&lt;/span&gt; cacheUrl});
-  };
-
-  chrome.browserAction.onClicked.addListener(&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;function&lt;/span&gt;(tab) {
-    navigateToCachedPage (tab);
-  });
-
-  chrome.contextMenus.create({
-    title&lt;span style=&#34;color: #555555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;View Google&amp;#39;s cache&amp;quot;&lt;/span&gt;,
-    contexts&lt;span style=&#34;color: #555555&#34;&gt;:&lt;/span&gt;[&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;all&amp;quot;&lt;/span&gt;],
-    onclick&lt;span style=&#34;color: #555555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;function&lt;/span&gt; (clickData, tab) {
-      navigateToCachedPage (tab);
-    }
-  });
-}) ();
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;I used this
-&lt;a href=&#34;http://www.iconfinder.com/icondetails/7065/128/cache_icon&#34;&gt;beautiful icon&lt;/a&gt;
-by Sergio Sanchez Lopez. Since it comes with a GPL license, the plugin
-is also licensed under GPL.&lt;/p&gt;
-
-&lt;p&gt;The source code for the plugin is on &lt;a href=&#34;https://github.com/sdqali/GetCache&#34;&gt;Github&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h2 id=&#34;why-is-this-not-on-the-chrome-store&#34;&gt;Why is this not on the Chrome store?&lt;/h2&gt;
-
-&lt;p&gt;I wanted to push it to the Google Chrome web store. But it looks like I
-need to verify my developer account by paying a sum of USD 5.0. Even
-worse, I have to create a Google Wallet acount. At this
-point, I am not so keen to be on the Webstore. In the future, I might
-get a verified developer account.&lt;/p&gt;</description>
+&lt;p&gt;&lt;/p&gt;</description>
     </item>
     
   </channel>

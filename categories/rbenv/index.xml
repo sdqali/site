@@ -2,109 +2,25 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Rbenv on {code that works}</title>
-    <link>https://sdqali.in/categories/rbenv/?utm_source=site&amp;utm_medium=feed</link>
+    <link>https://sdqali.in/categories/rbenv/</link>
     <description>Recent content in Rbenv on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
     <lastBuildDate>Thu, 12 Sep 2013 00:00:00 +0000</lastBuildDate>
-    <atom:link href="/categories/rbenv/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    
+	<atom:link href="https://sdqali.in/categories/rbenv/index.xml" rel="self" type="application/rss+xml" />
+    
     
     <item>
       <title>Managing Gemsets in Rbenv</title>
-      <link>https://sdqali.in/blog/2013/09/12/managing-gemsets-in-rbenv/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sdqali.in/blog/2013/09/12/managing-gemsets-in-rbenv/</link>
       <pubDate>Thu, 12 Sep 2013 00:00:00 +0000</pubDate>
       
-      <guid>https://sdqali.in/blog/2013/09/12/managing-gemsets-in-rbenv/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>&lt;p&gt;When I was setting up my new laptop today, I decided to use Rbenv &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:1&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; to manage my Ruby versions. I have typically used RVM &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:2&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:2&#34;&gt;2&lt;/a&gt;&lt;/sup&gt; and had never used Rbenv. Rbenv is a Ruby version manager written by &lt;a href=&#34;https://github.com/sstephenson/&#34;&gt;Sam Stephenson&lt;/a&gt; and deliberately tries to do less and do it well. Instead of overriding Bash commands like RVM does, Rbenv chooses to use wrappers or &lt;strong&gt;shims&lt;/strong&gt; around Ruby binaries to choose the Ruby executable to run.&lt;/p&gt;
+      <guid>https://sdqali.in/blog/2013/09/12/managing-gemsets-in-rbenv/</guid>
+      <description>&lt;p&gt;When I was setting up my new laptop today, I decided to use Rbenv &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; to manage my Ruby versions. I have typically used RVM &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:2&#34;&gt;&lt;a href=&#34;#fn:2&#34;&gt;2&lt;/a&gt;&lt;/sup&gt; and had never used Rbenv. Rbenv is a Ruby version manager written by &lt;a href=&#34;https://github.com/sstephenson/&#34;&gt;Sam Stephenson&lt;/a&gt; and deliberately tries to do less and do it well. Instead of overriding Bash commands like RVM does, Rbenv chooses to use wrappers or &lt;strong&gt;shims&lt;/strong&gt; around Ruby binaries to choose the Ruby executable to run.&lt;/p&gt;
 
-&lt;p&gt;This works well, until you have to manage Gemsets &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:3&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:3&#34;&gt;3&lt;/a&gt;&lt;/sup&gt;. Often, one is working on two projects that use the same version of Ruby, but has entirely different chain of dependency on Gems. RVM&amp;rsquo;s gemsets work really well for this use case. I was looking around to see how one would manage gemsets with Rbenv. There are three ways to do it.&lt;/p&gt;
+&lt;p&gt;This works well, until you have to manage Gemsets &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:3&#34;&gt;&lt;a href=&#34;#fn:3&#34;&gt;3&lt;/a&gt;&lt;/sup&gt;. Often, one is working on two projects that use the same version of Ruby, but has entirely different chain of dependency on Gems. RVM&amp;rsquo;s gemsets work really well for this use case. I was looking around to see how one would manage gemsets with Rbenv. There are three ways to do it.&lt;/p&gt;
 
-&lt;p&gt;&lt;/p&gt;
-
-&lt;h2 id=&#34;use-the-rbenv-gemset-plugin&#34;&gt;Use the &lt;code&gt;rbenv-gemset&lt;/code&gt; plugin&lt;/h2&gt;
-
-&lt;p&gt;&lt;a href=&#34;https://github.com/jf&#34;&gt;Jeffrey Lim&lt;/a&gt;&amp;rsquo;s &lt;code&gt;rbenv-gemset&lt;/code&gt;&lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:4&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:4&#34;&gt;4&lt;/a&gt;&lt;/sup&gt; plugin forces Rbenv to look in a specific path for gems. A typical workflow of using the plugin will be as follows.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Specify the gemset by adding it&amp;rsquo;s name to a &lt;code&gt;rbenv-gemsets&lt;/code&gt; file in the root directory of the project.
-&lt;code&gt;bash
-cat rbenv-gemsets
-$ .gems
-&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;Install the gems, by using &lt;code&gt;gem install&lt;/code&gt; or with bundler.&lt;/li&gt;
-&lt;li&gt;The gems will be installed in &lt;code&gt;.gems&lt;/code&gt; directory under the project root.&lt;/li&gt;
-&lt;li&gt;Ruby will look for gems in the &lt;code&gt;.gems&lt;/code&gt; directory.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;div class=&#34;signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0&#34;&gt;
-  &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0&#34;&gt;
-    &lt;h3&gt;Finding this article useful?&lt;/h3&gt;
-    &lt;div&gt;
-      My posts with working code - tested and verified - and actionable explanations for specific programming problems. Delivered each week for free.
-    &lt;/div&gt;
-  &lt;/div&gt;
-  &lt;div class=&#34;col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0&#34; id=&#34;mc_embed_signup&#34;&gt;
-    &lt;form action=&#34;//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;amp;id=b7e69e463e&#34; method=&#34;post&#34; id=&#34;mc-embedded-subscribe-form&#34; name=&#34;mc-embedded-subscribe-form&#34; class=&#34;validate&#34; target=&#34;_blank&#34; novalidate&gt;
-      &lt;div id=&#34;mc_embed_signup_scroll&#34;&gt;
-        &lt;div class=&#34;mc-field-group form-group&#34;&gt;
-          &lt;label for=&#34;mce-FNAME&#34;&gt;First Name&lt;/label&gt;
-          &lt;input type=&#34;text&#34; value=&#34;&#34; name=&#34;FNAME&#34; class=&#34;form-control&#34; id=&#34;mce-FNAME&#34;&gt;
-        &lt;/div&gt;
-        &lt;div class=&#34;mc-field-group form-group&#34;&gt;
-          &lt;label for=&#34;mce-EMAIL&#34;&gt;Email Address&lt;/label&gt;
-          &lt;input type=&#34;email&#34; value=&#34;&#34; name=&#34;EMAIL&#34; class=&#34;email form-control&#34; id=&#34;mce-EMAIL&#34;&gt;
-        &lt;/div&gt;
-        &lt;div id=&#34;mce-responses&#34; class=&#34;form-group&#34;&gt;
-          &lt;div class=&#34;response&#34; id=&#34;mce-error-response&#34; style=&#34;display:none&#34; class=&#34;alert alert-success&#34; role=&#34;alert&#34;&gt;&lt;/div&gt;
-          &lt;div class=&#34;response&#34; id=&#34;mce-success-response&#34; style=&#34;display:none&#34; class=&#34;alert alert-success&#34; role=&#34;alert&#34;&gt;&lt;/div&gt;
-        &lt;/div&gt;
-        &lt;button type=&#34;submit&#34; class=&#34;btn btn-success&#34; id=&#34;mc-embedded-subscribe&#34; name=&#34;subscribe&#34;&gt;Join the Newsletter&lt;/button&gt;
-        &lt;div style=&#34;position: absolute; left: -5000px;&#34; aria-hidden=&#34;true&#34;&gt;&lt;input type=&#34;text&#34; name=&#34;b_52d266a23636b031a38de6d70_b7e69e463e&#34; tabindex=&#34;-1&#34; value=&#34;&#34;&gt;&lt;/div&gt;
-      &lt;/div&gt;
-    &lt;/form&gt;
-    &lt;p class=&#34;no-spam&#34;&gt;I won&#39;t send you spam. Unsubscribe at any time.&lt;/p&gt;
-  &lt;/div&gt;
-&lt;/div&gt;
-
-
-&lt;h2 id=&#34;use-bundler-to-manage-gemsets&#34;&gt;Use bundler to manage gemsets&lt;/h2&gt;
-
-&lt;p&gt;In this approach, we will be using bundler&amp;rsquo;s &lt;code&gt;--path&lt;/code&gt; flag to install the gemset to a local directory and then wrap all calls with &lt;code&gt;bundle exec&lt;/code&gt;. A typical workflow in this case will look like this.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Install gems to a &lt;code&gt;.gems&lt;/code&gt; directory using bundler
-&lt;code&gt;bash
-bundle install --path .gems
-&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;Wrap calls with &lt;code&gt;bundle exec&lt;/code&gt;
-&lt;code&gt;bash
-bundle exec rake --version
-&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;use-a-devenv-file&#34;&gt;Use a devenv file&lt;/h2&gt;
-
-&lt;p&gt;This is a hacky way doing things and it was the first that came to my mind when I was looking at this problem. This approach involves adding a project specific &lt;code&gt;devenv&lt;/code&gt; file that is sourced when one starts to work on that project. This file will set the &lt;code&gt;GEM_HOME&lt;/code&gt; and &lt;code&gt;GEM_PATH&lt;/code&gt; environment variables to the directory where the gemset is supposed to live as well as prepend the &lt;code&gt;gems/bin&lt;/code&gt; directory of the gemset to &lt;code&gt;PATH&lt;/code&gt;. An example &lt;code&gt;devenv&lt;/code&gt; file will be as follows&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #336666&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;GEM_PATH&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;./.gems
-&lt;span style=&#34;color: #336666&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;GEM_HOME&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;./.gems
-&lt;span style=&#34;color: #336666&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;PATH&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;./.gems/bin:&lt;span style=&#34;color: #003333&#34;&gt;$PATH&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;In the end, I ended up choosing the &lt;code&gt;bundler&lt;/code&gt; approach. I use bundler in most of my Ruby projects anyway. The downside to this is that every invocation will be spawning a &lt;code&gt;bundler&lt;/code&gt; process, in addition to whatever we intend to do.&lt;/p&gt;
-&lt;div class=&#34;footnotes&#34;&gt;
-
-&lt;hr /&gt;
-
-&lt;ol&gt;
-&lt;li id=&#34;fn:1&#34;&gt;Rbenv is used to pick a Ruby version for an application and guarantee that the development environment matches production. &lt;a href=&#34;https://github.com/sstephenson/rbenv&#34;&gt;Rbenv - Groom your app’s Ruby environment&lt;/a&gt;.
- &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:1&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;li id=&#34;fn:2&#34;&gt;RVM is a command-line tool which allows you to easily install, manage, and work with multiple ruby environments from interpreters to sets of gems. &lt;a href=&#34;https://rvm.io/&#34;&gt;RVM - Cut Rubies with ease!&lt;/a&gt;.
- &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:2&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;li id=&#34;fn:3&#34;&gt;Gemsets are collection of Ruby gems specific to a project. This &lt;a href=&#34;http://stackoverflow.com/questions/11086661/why-should-i-use-application-specific-rvm-gemsets-in-addition-to-bundler&#34;&gt;StackOverflow question&lt;/a&gt; answers why one should use gemsets.
- &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:3&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;li id=&#34;fn:4&#34;&gt;&lt;a href=&#34;https://github.com/jf/rbenv-gemset&#34;&gt;&lt;code&gt;rbenv-gemsets&lt;/code&gt; - Gem management for Rbenv&lt;/a&gt;.
- &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:4&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/div&gt;</description>
+&lt;p&gt;&lt;/p&gt;</description>
     </item>
     
   </channel>

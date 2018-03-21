@@ -126,7 +126,7 @@
 
 <h2 id="requirements">Requirements</h2>
 
-<p>Our application is a Spring Boot web application that gets deployed in a Tomcat instance. The application is deployed via Chef and chef sets up the appropriate configuration parameters for the application as Tomcat <a href="https://tomcat.apache.org/tomcat-8.0-doc/config/context.html#Environment_Entries">Environment</a> entries. Since feature toggles are ultimately application parameters <sup class="footnote-ref" id="fnref:1"><a rel="footnote" href="#fn:1">1</a></sup>, we started by setting them as Tomcat environment variables. Having considered this, we identified the following requirements:</p>
+<p>Our application is a Spring Boot web application that gets deployed in a Tomcat instance. The application is deployed via Chef and chef sets up the appropriate configuration parameters for the application as Tomcat <a href="https://tomcat.apache.org/tomcat-8.0-doc/config/context.html#Environment_Entries">Environment</a> entries. Since feature toggles are ultimately application parameters <sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup>, we started by setting them as Tomcat environment variables. Having considered this, we identified the following requirements:</p>
 
 <ul>
 <li>The ability to toggle dependency injection. For example, in some environments, we wanted to use Redis to store our sessions, while in some test environments, they were to be stored in memory.</li>
@@ -139,231 +139,182 @@
 <h3 id="toggling-dependency-injection">Toggling dependency injection.</h3>
 
 <p>We started by using configuration parameters with the <code>feature</code> prefix to toggle features. With this convention in place, we started using the <code>@ConditionalOnProperty</code> annotation in our configuration classes to toggle the beans that got wired up. For example, to toggle between Redis and in-memory store for sessions, we ended up with the following configuration:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@Configuration</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">AppConfig</span> <span style="color: #555555">{</span>
-  <span style="color: #9999FF">@Bean</span>
-  <span style="color: #9999FF">@ConditionalOnProperty</span><span style="color: #555555">(</span>value <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;feature.redis.session.store&quot;</span><span style="color: #555555">,</span> havingValue <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;false&quot;</span><span style="color: #555555">)</span>
-  <span style="color: #006699; font-weight: bold">public</span> SessionRepository <span style="color: #CC00FF">mapSessionRepository</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">new</span> MapSessionRepository<span style="color: #555555">();</span>
-  <span style="color: #555555">}</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Configuration</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">AppConfig</span> <span style="color:#555">{</span>
+  <span style="color:#99f">@Bean</span>
+  <span style="color:#99f">@ConditionalOnProperty</span><span style="color:#555">(</span>value <span style="color:#555">=</span> <span style="color:#c30">&#34;feature.redis.session.store&#34;</span><span style="color:#555">,</span> havingValue <span style="color:#555">=</span> <span style="color:#c30">&#34;false&#34;</span><span style="color:#555">)</span>
+  <span style="color:#069;font-weight:bold">public</span> SessionRepository <span style="color:#c0f">mapSessionRepository</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">new</span> MapSessionRepository<span style="color:#555">();</span>
+  <span style="color:#555">}</span>
 
-  <span style="color: #9999FF">@Bean</span>
-  <span style="color: #9999FF">@ConditionalOnProperty</span><span style="color: #555555">(</span>value <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;feature.redis.session.store&quot;</span><span style="color: #555555">,</span> havingValue <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;true&quot;</span><span style="color: #555555">)</span>
-  <span style="color: #006699; font-weight: bold">public</span> SessionRepository <span style="color: #CC00FF">redisSessionRepository</span><span style="color: #555555">(</span>RedisConnectionFactory factory<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">new</span> RedisOperationsSessionRepository<span style="color: #555555">(</span>factory<span style="color: #555555">);</span>
-  <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+  <span style="color:#99f">@Bean</span>
+  <span style="color:#99f">@ConditionalOnProperty</span><span style="color:#555">(</span>value <span style="color:#555">=</span> <span style="color:#c30">&#34;feature.redis.session.store&#34;</span><span style="color:#555">,</span> havingValue <span style="color:#555">=</span> <span style="color:#c30">&#34;true&#34;</span><span style="color:#555">)</span>
+  <span style="color:#069;font-weight:bold">public</span> SessionRepository <span style="color:#c0f">redisSessionRepository</span><span style="color:#555">(</span>RedisConnectionFactory factory<span style="color:#555">)</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">new</span> RedisOperationsSessionRepository<span style="color:#555">(</span>factory<span style="color:#555">);</span>
+  <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <h3 id="toggling-individual-controller-methods">Toggling individual controller methods</h3>
 
-<p>In order to prevent end points defined by controllers and controller methods that are toggled off from being accessed, we decided to configure a <code>HandlerInterceptor</code> <sup class="footnote-ref" id="fnref:2"><a rel="footnote" href="#fn:2">2</a></sup> to intercept requests to these end points.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">FeatureInterceptor</span> <span style="color: #006699; font-weight: bold">implements</span> HandlerInterceptor <span style="color: #555555">{</span>
-  <span style="color: #006699; font-weight: bold">private</span> <span style="color: #006699; font-weight: bold">final</span> FeatureRepository featureRepository<span style="color: #555555">;</span>
+<p>In order to prevent end points defined by controllers and controller methods that are toggled off from being accessed, we decided to configure a <code>HandlerInterceptor</code> <sup class="footnote-ref" id="fnref:2"><a href="#fn:2">2</a></sup> to intercept requests to these end points.</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">FeatureInterceptor</span> <span style="color:#069;font-weight:bold">implements</span> HandlerInterceptor <span style="color:#555">{</span>
+  <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">final</span> FeatureRepository featureRepository<span style="color:#555">;</span>
 
-  <span style="color: #006699; font-weight: bold">public</span> <span style="color: #CC00FF">FeatureInterceptor</span><span style="color: #555555">(</span>FeatureRepository featureRepository<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">this</span><span style="color: #555555">.</span><span style="color: #330099">featureRepository</span> <span style="color: #555555">=</span> featureRepository<span style="color: #555555">;</span>
-  <span style="color: #555555">}</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">FeatureInterceptor</span><span style="color:#555">(</span>FeatureRepository featureRepository<span style="color:#555">)</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">this</span><span style="color:#555">.</span><span style="color:#309">featureRepository</span> <span style="color:#555">=</span> featureRepository<span style="color:#555">;</span>
+  <span style="color:#555">}</span>
 
-  <span style="color: #9999FF">@Override</span>
-  <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">boolean</span> <span style="color: #CC00FF">preHandle</span><span style="color: #555555">(</span>HttpServletRequest httpServletRequest<span style="color: #555555">,</span> HttpServletResponse httpServletResponse<span style="color: #555555">,</span> Object handler<span style="color: #555555">)</span> <span style="color: #006699; font-weight: bold">throws</span> Exception <span style="color: #555555">{</span>
-    HandlerMethod handlerMethod <span style="color: #555555">=</span> <span style="color: #555555">(</span>HandlerMethod<span style="color: #555555">)</span> handler<span style="color: #555555">;</span>
-    FeatureToggle methodAnnotation <span style="color: #555555">=</span> handlerMethod<span style="color: #555555">.</span><span style="color: #330099">getMethodAnnotation</span><span style="color: #555555">(</span>FeatureToggle<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">);</span>
-    <span style="color: #006699; font-weight: bold">if</span> <span style="color: #555555">(</span>methodAnnotation <span style="color: #555555">==</span> <span style="color: #006699; font-weight: bold">null</span><span style="color: #555555">)</span> <span style="color: #555555">{</span>
-      <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">true</span><span style="color: #555555">;</span>
-    <span style="color: #555555">}</span>
+  <span style="color:#99f">@Override</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">boolean</span> <span style="color:#c0f">preHandle</span><span style="color:#555">(</span>HttpServletRequest httpServletRequest<span style="color:#555">,</span> HttpServletResponse httpServletResponse<span style="color:#555">,</span> Object handler<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
+    HandlerMethod handlerMethod <span style="color:#555">=</span> <span style="color:#555">(</span>HandlerMethod<span style="color:#555">)</span> handler<span style="color:#555">;</span>
+    FeatureToggle methodAnnotation <span style="color:#555">=</span> handlerMethod<span style="color:#555">.</span><span style="color:#309">getMethodAnnotation</span><span style="color:#555">(</span>FeatureToggle<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">);</span>
+    <span style="color:#069;font-weight:bold">if</span> <span style="color:#555">(</span>methodAnnotation <span style="color:#555">==</span> <span style="color:#069;font-weight:bold">null</span><span style="color:#555">)</span> <span style="color:#555">{</span>
+      <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">true</span><span style="color:#555">;</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #006699; font-weight: bold">if</span><span style="color: #555555">(</span>featureRepository<span style="color: #555555">.</span><span style="color: #330099">isOn</span><span style="color: #555555">(</span>methodAnnotation<span style="color: #555555">.</span><span style="color: #330099">feature</span><span style="color: #555555">())</span> <span style="color: #555555">==</span> <span style="color: #006699; font-weight: bold">null</span><span style="color: #555555">)</span> <span style="color: #555555">{</span>
-      <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">true</span><span style="color: #555555">;</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#069;font-weight:bold">if</span><span style="color:#555">(</span>featureRepository<span style="color:#555">.</span><span style="color:#309">isOn</span><span style="color:#555">(</span>methodAnnotation<span style="color:#555">.</span><span style="color:#309">feature</span><span style="color:#555">())</span> <span style="color:#555">==</span> <span style="color:#069;font-weight:bold">null</span><span style="color:#555">)</span> <span style="color:#555">{</span>
+      <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">true</span><span style="color:#555">;</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #006699; font-weight: bold">if</span><span style="color: #555555">(</span>methodAnnotation<span style="color: #555555">.</span><span style="color: #330099">expectedToBeOn</span><span style="color: #555555">()</span> <span style="color: #555555">==</span> featureRepository<span style="color: #555555">.</span><span style="color: #330099">isOn</span><span style="color: #555555">(</span>methodAnnotation<span style="color: #555555">.</span><span style="color: #330099">feature</span><span style="color: #555555">()))</span> <span style="color: #555555">{</span>
-      <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">true</span><span style="color: #555555">;</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#069;font-weight:bold">if</span><span style="color:#555">(</span>methodAnnotation<span style="color:#555">.</span><span style="color:#309">expectedToBeOn</span><span style="color:#555">()</span> <span style="color:#555">==</span> featureRepository<span style="color:#555">.</span><span style="color:#309">isOn</span><span style="color:#555">(</span>methodAnnotation<span style="color:#555">.</span><span style="color:#309">feature</span><span style="color:#555">()))</span> <span style="color:#555">{</span>
+      <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">true</span><span style="color:#555">;</span>
+    <span style="color:#555">}</span>
 
-    httpServletResponse<span style="color: #555555">.</span><span style="color: #330099">setStatus</span><span style="color: #555555">(</span>HttpServletResponse<span style="color: #555555">.</span><span style="color: #330099">SC_NOT_FOUND</span><span style="color: #555555">);</span>
-    <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">false</span><span style="color: #555555">;</span>
-  <span style="color: #555555">}</span>
+    httpServletResponse<span style="color:#555">.</span><span style="color:#309">setStatus</span><span style="color:#555">(</span>HttpServletResponse<span style="color:#555">.</span><span style="color:#309">SC_NOT_FOUND</span><span style="color:#555">);</span>
+    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">false</span><span style="color:#555">;</span>
+  <span style="color:#555">}</span>
 
-  <span style="color: #9999FF">@Override</span>
-  <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">postHandle</span><span style="color: #555555">(</span>HttpServletRequest httpServletRequest<span style="color: #555555">,</span> HttpServletResponse httpServletResponse<span style="color: #555555">,</span> Object o<span style="color: #555555">,</span> ModelAndView modelAndView<span style="color: #555555">)</span> <span style="color: #006699; font-weight: bold">throws</span> Exception <span style="color: #555555">{</span>
+  <span style="color:#99f">@Override</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">postHandle</span><span style="color:#555">(</span>HttpServletRequest httpServletRequest<span style="color:#555">,</span> HttpServletResponse httpServletResponse<span style="color:#555">,</span> Object o<span style="color:#555">,</span> ModelAndView modelAndView<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
 
-  <span style="color: #555555">}</span>
+  <span style="color:#555">}</span>
 
-  <span style="color: #9999FF">@Override</span>
-  <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">afterCompletion</span><span style="color: #555555">(</span>HttpServletRequest httpServletRequest<span style="color: #555555">,</span> HttpServletResponse httpServletResponse<span style="color: #555555">,</span> Object o<span style="color: #555555">,</span> Exception e<span style="color: #555555">)</span> <span style="color: #006699; font-weight: bold">throws</span> Exception <span style="color: #555555">{</span>
+  <span style="color:#99f">@Override</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">afterCompletion</span><span style="color:#555">(</span>HttpServletRequest httpServletRequest<span style="color:#555">,</span> HttpServletResponse httpServletResponse<span style="color:#555">,</span> Object o<span style="color:#555">,</span> Exception e<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
 
-  <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+  <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>This feature interceptor uses the <code>FeatureToggle</code> looks for the annotation, and the looks at a feature repository to see if the state of the feature flag is set to what the annotation expects and if it does not, returns a 404. The annotation has two attributes - <code>isOn</code> and <code>feature</code>.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@Target</span><span style="color: #555555">({</span>ElementType<span style="color: #555555">.</span><span style="color: #330099">TYPE</span><span style="color: #555555">,</span> ElementType<span style="color: #555555">.</span><span style="color: #330099">METHOD</span><span style="color: #555555">})</span>
-<span style="color: #9999FF">@Retention</span><span style="color: #555555">(</span>RetentionPolicy<span style="color: #555555">.</span><span style="color: #330099">RUNTIME</span><span style="color: #555555">)</span>
-<span style="color: #9999FF">@Documented</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #9999FF">@interface</span> FeatureToggle <span style="color: #555555">{</span>
-  String <span style="color: #CC00FF">feature</span><span style="color: #555555">();</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Target</span><span style="color:#555">({</span>ElementType<span style="color:#555">.</span><span style="color:#309">TYPE</span><span style="color:#555">,</span> ElementType<span style="color:#555">.</span><span style="color:#309">METHOD</span><span style="color:#555">})</span>
+<span style="color:#99f">@Retention</span><span style="color:#555">(</span>RetentionPolicy<span style="color:#555">.</span><span style="color:#309">RUNTIME</span><span style="color:#555">)</span>
+<span style="color:#99f">@Documented</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#99f">@interface</span> FeatureToggle <span style="color:#555">{</span>
+  String <span style="color:#c0f">feature</span><span style="color:#555">();</span>
 
-  <span style="color: #007788; font-weight: bold">boolean</span> <span style="color: #CC00FF">expectedToBeOn</span><span style="color: #555555">()</span> <span style="color: #006699; font-weight: bold">default</span> <span style="color: #006699; font-weight: bold">true</span><span style="color: #555555">;</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+  <span style="color:#078;font-weight:bold">boolean</span> <span style="color:#c0f">expectedToBeOn</span><span style="color:#555">()</span> <span style="color:#069;font-weight:bold">default</span> <span style="color:#069;font-weight:bold">true</span><span style="color:#555">;</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>This annotation can be used on a controller method as follows:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@RestController</span>
-<span style="color: #9999FF">@RequestMapping</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;/hello&quot;</span><span style="color: #555555">)</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">MessageController</span> <span style="color: #555555">{</span>
-  <span style="color: #9999FF">@RequestMapping</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;&quot;</span><span style="color: #555555">)</span>
-  <span style="color: #9999FF">@FeatureToggle</span><span style="color: #555555">(</span>feature <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;feature.hello&quot;</span><span style="color: #555555">)</span>
-  <span style="color: #006699; font-weight: bold">public</span> Map <span style="color: #CC00FF">hello</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">return</span> Collections<span style="color: #555555">.</span><span style="color: #330099">singletonMap</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;message&quot;</span><span style="color: #555555">,</span> <span style="color: #CC3300">&quot;hello world!&quot;</span><span style="color: #555555">);</span>
-  <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@RestController</span>
+<span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span><span style="color:#c30">&#34;/hello&#34;</span><span style="color:#555">)</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">MessageController</span> <span style="color:#555">{</span>
+  <span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span><span style="color:#c30">&#34;&#34;</span><span style="color:#555">)</span>
+  <span style="color:#99f">@FeatureToggle</span><span style="color:#555">(</span>feature <span style="color:#555">=</span> <span style="color:#c30">&#34;feature.hello&#34;</span><span style="color:#555">)</span>
+  <span style="color:#069;font-weight:bold">public</span> Map <span style="color:#c0f">hello</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">return</span> Collections<span style="color:#555">.</span><span style="color:#309">singletonMap</span><span style="color:#555">(</span><span style="color:#c30">&#34;message&#34;</span><span style="color:#555">,</span> <span style="color:#c30">&#34;hello world!&#34;</span><span style="color:#555">);</span>
+  <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
+<p>The <code>FeatureRepository</code> has to look at all the properties that are available in the applications environment and filter out the ones that start with <code>feature.</code>.</p>
 
-<p>The <code>FeatureRepository</code> has to look at all the properties that are available in the applications environment and filter out the ones that start with <code>feature.</code>.
-<div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Finding this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and actionable explanations for specific programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
+<p>Collecting all the properties available in an environment is <a href="https://stackoverflow.com/questions/23506471/spring-access-all-environment-properties-as-a-map-or-properties-object">surprisingly complex</a>, owing to the number of ways properties can be injected. Based on the approach discussed in that question, we can create a <code>FeatureRepository</code> as follows:</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">FeatureRepository</span> <span style="color:#555">{</span>
+  <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">static</span> <span style="color:#069;font-weight:bold">final</span> String FEATURE_PREFIX <span style="color:#555">=</span> <span style="color:#c30">&#34;feature.&#34;</span><span style="color:#555">;</span>
+  <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">final</span> Environment env<span style="color:#555">;</span>
 
-Collecting all the properties available in an environment is <a href="https://stackoverflow.com/questions/23506471/spring-access-all-environment-properties-as-a-map-or-properties-object">surprisingly complex</a>, owing to the number of ways properties can be injected. Based on the approach discussed in that question, we can create a <code>FeatureRepository</code> as follows:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">FeatureRepository</span> <span style="color: #555555">{</span>
-  <span style="color: #006699; font-weight: bold">private</span> <span style="color: #006699; font-weight: bold">static</span> <span style="color: #006699; font-weight: bold">final</span> String FEATURE_PREFIX <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;feature.&quot;</span><span style="color: #555555">;</span>
-  <span style="color: #006699; font-weight: bold">private</span> <span style="color: #006699; font-weight: bold">final</span> Environment env<span style="color: #555555">;</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">FeatureRepository</span><span style="color:#555">(</span>Environment env<span style="color:#555">)</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">this</span><span style="color:#555">.</span><span style="color:#309">env</span> <span style="color:#555">=</span> env<span style="color:#555">;</span>
+  <span style="color:#555">}</span>
 
-  <span style="color: #006699; font-weight: bold">public</span> <span style="color: #CC00FF">FeatureRepository</span><span style="color: #555555">(</span>Environment env<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">this</span><span style="color: #555555">.</span><span style="color: #330099">env</span> <span style="color: #555555">=</span> env<span style="color: #555555">;</span>
-  <span style="color: #555555">}</span>
+  <span style="color:#069;font-weight:bold">public</span> Set<span style="color:#555">&lt;</span>String<span style="color:#555">&gt;</span> <span style="color:#c0f">featureKeys</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+    Map<span style="color:#555">&lt;</span>String<span style="color:#555">,</span> Object<span style="color:#555">&gt;</span> map <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">new</span> HashMap<span style="color:#555">();</span>
+    <span style="color:#069;font-weight:bold">for</span><span style="color:#555">(</span>Iterator it <span style="color:#555">=</span> <span style="color:#555">((</span>AbstractEnvironment<span style="color:#555">)</span> env<span style="color:#555">).</span><span style="color:#309">getPropertySources</span><span style="color:#555">().</span><span style="color:#309">iterator</span><span style="color:#555">();</span> it<span style="color:#555">.</span><span style="color:#309">hasNext</span><span style="color:#555">();</span> <span style="color:#555">)</span> <span style="color:#555">{</span>
+      PropertySource propertySource <span style="color:#555">=</span> <span style="color:#555">(</span>PropertySource<span style="color:#555">)</span> it<span style="color:#555">.</span><span style="color:#309">next</span><span style="color:#555">();</span>
+      <span style="color:#069;font-weight:bold">if</span> <span style="color:#555">(</span>propertySource <span style="color:#069;font-weight:bold">instanceof</span> MapPropertySource<span style="color:#555">)</span> <span style="color:#555">{</span>
+        map<span style="color:#555">.</span><span style="color:#309">putAll</span><span style="color:#555">(((</span>MapPropertySource<span style="color:#555">)</span> propertySource<span style="color:#555">).</span><span style="color:#309">getSource</span><span style="color:#555">());</span>
+      <span style="color:#555">}</span>
+    <span style="color:#555">}</span>
+    <span style="color:#069;font-weight:bold">return</span> map<span style="color:#555">.</span><span style="color:#309">keySet</span><span style="color:#555">().</span><span style="color:#309">stream</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">filter</span><span style="color:#555">(</span>k <span style="color:#555">-&gt;</span> k<span style="color:#555">.</span><span style="color:#309">startsWith</span><span style="color:#555">(</span>FEATURE_PREFIX<span style="color:#555">))</span>
+        <span style="color:#555">.</span><span style="color:#309">collect</span><span style="color:#555">(</span>Collectors<span style="color:#555">.</span><span style="color:#309">toSet</span><span style="color:#555">());</span>
+  <span style="color:#555">}</span>
 
-  <span style="color: #006699; font-weight: bold">public</span> Set<span style="color: #555555">&lt;</span>String<span style="color: #555555">&gt;</span> <span style="color: #CC00FF">featureKeys</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-    Map<span style="color: #555555">&lt;</span>String<span style="color: #555555">,</span> Object<span style="color: #555555">&gt;</span> map <span style="color: #555555">=</span> <span style="color: #006699; font-weight: bold">new</span> HashMap<span style="color: #555555">();</span>
-    <span style="color: #006699; font-weight: bold">for</span><span style="color: #555555">(</span>Iterator it <span style="color: #555555">=</span> <span style="color: #555555">((</span>AbstractEnvironment<span style="color: #555555">)</span> env<span style="color: #555555">).</span><span style="color: #330099">getPropertySources</span><span style="color: #555555">().</span><span style="color: #330099">iterator</span><span style="color: #555555">();</span> it<span style="color: #555555">.</span><span style="color: #330099">hasNext</span><span style="color: #555555">();</span> <span style="color: #555555">)</span> <span style="color: #555555">{</span>
-      PropertySource propertySource <span style="color: #555555">=</span> <span style="color: #555555">(</span>PropertySource<span style="color: #555555">)</span> it<span style="color: #555555">.</span><span style="color: #330099">next</span><span style="color: #555555">();</span>
-      <span style="color: #006699; font-weight: bold">if</span> <span style="color: #555555">(</span>propertySource <span style="color: #006699; font-weight: bold">instanceof</span> MapPropertySource<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        map<span style="color: #555555">.</span><span style="color: #330099">putAll</span><span style="color: #555555">(((</span>MapPropertySource<span style="color: #555555">)</span> propertySource<span style="color: #555555">).</span><span style="color: #330099">getSource</span><span style="color: #555555">());</span>
-      <span style="color: #555555">}</span>
-    <span style="color: #555555">}</span>
-    <span style="color: #006699; font-weight: bold">return</span> map<span style="color: #555555">.</span><span style="color: #330099">keySet</span><span style="color: #555555">().</span><span style="color: #330099">stream</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">filter</span><span style="color: #555555">(</span>k <span style="color: #555555">-&gt;</span> k<span style="color: #555555">.</span><span style="color: #330099">startsWith</span><span style="color: #555555">(</span>FEATURE_PREFIX<span style="color: #555555">))</span>
-        <span style="color: #555555">.</span><span style="color: #330099">collect</span><span style="color: #555555">(</span>Collectors<span style="color: #555555">.</span><span style="color: #330099">toSet</span><span style="color: #555555">());</span>
-  <span style="color: #555555">}</span>
+  <span style="color:#069;font-weight:bold">public</span> Boolean <span style="color:#c0f">isOn</span><span style="color:#555">(</span>String key<span style="color:#555">)</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">return</span> allFeatures<span style="color:#555">().</span><span style="color:#309">get</span><span style="color:#555">(</span>key<span style="color:#555">);</span>
+  <span style="color:#555">}</span>
 
-  <span style="color: #006699; font-weight: bold">public</span> Boolean <span style="color: #CC00FF">isOn</span><span style="color: #555555">(</span>String key<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">return</span> allFeatures<span style="color: #555555">().</span><span style="color: #330099">get</span><span style="color: #555555">(</span>key<span style="color: #555555">);</span>
-  <span style="color: #555555">}</span>
-
-  <span style="color: #006699; font-weight: bold">public</span> Map<span style="color: #555555">&lt;</span>String<span style="color: #555555">,</span> Boolean<span style="color: #555555">&gt;</span> <span style="color: #CC00FF">allFeatures</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">return</span> featureKeys<span style="color: #555555">().</span><span style="color: #330099">stream</span><span style="color: #555555">().</span><span style="color: #330099">collect</span><span style="color: #555555">(</span>Collectors<span style="color: #555555">.</span><span style="color: #330099">toMap</span><span style="color: #555555">(</span>k <span style="color: #555555">-&gt;</span> k<span style="color: #555555">,</span> k <span style="color: #555555">-&gt;</span> Boolean<span style="color: #555555">.</span><span style="color: #330099">parseBoolean</span><span style="color: #555555">(</span>env<span style="color: #555555">.</span><span style="color: #330099">getProperty</span><span style="color: #555555">(</span>k<span style="color: #555555">))));</span>
-  <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+  <span style="color:#069;font-weight:bold">public</span> Map<span style="color:#555">&lt;</span>String<span style="color:#555">,</span> Boolean<span style="color:#555">&gt;</span> <span style="color:#c0f">allFeatures</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">return</span> featureKeys<span style="color:#555">().</span><span style="color:#309">stream</span><span style="color:#555">().</span><span style="color:#309">collect</span><span style="color:#555">(</span>Collectors<span style="color:#555">.</span><span style="color:#309">toMap</span><span style="color:#555">(</span>k <span style="color:#555">-&gt;</span> k<span style="color:#555">,</span> k <span style="color:#555">-&gt;</span> Boolean<span style="color:#555">.</span><span style="color:#309">parseBoolean</span><span style="color:#555">(</span>env<span style="color:#555">.</span><span style="color:#309">getProperty</span><span style="color:#555">(</span>k<span style="color:#555">))));</span>
+  <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <h3 id="toggling-entire-controllers">Toggling entire controllers</h3>
 
 <p>Since Spring controllers are wired up as beans, the <code>ConditionalOnProperty</code> annotation can be used to toggle on entire controllers.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@RestController</span>
-<span style="color: #9999FF">@RequestMapping</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;/foo&quot;</span><span style="color: #555555">)</span>
-<span style="color: #9999FF">@ConditionalOnProperty</span><span style="color: #555555">(</span>value <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;feature.foo&quot;</span><span style="color: #555555">,</span> havingValue <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;true&quot;</span><span style="color: #555555">)</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">FooController</span> <span style="color: #555555">{</span>
-  <span style="color: #9999FF">@RequestMapping</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;&quot;</span><span style="color: #555555">)</span>
-  <span style="color: #006699; font-weight: bold">public</span> Map <span style="color: #CC00FF">hello</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">return</span> Collections<span style="color: #555555">.</span><span style="color: #330099">singletonMap</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;message&quot;</span><span style="color: #555555">,</span> <span style="color: #CC3300">&quot;hello foo!&quot;</span><span style="color: #555555">);</span>
-  <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@RestController</span>
+<span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span><span style="color:#c30">&#34;/foo&#34;</span><span style="color:#555">)</span>
+<span style="color:#99f">@ConditionalOnProperty</span><span style="color:#555">(</span>value <span style="color:#555">=</span> <span style="color:#c30">&#34;feature.foo&#34;</span><span style="color:#555">,</span> havingValue <span style="color:#555">=</span> <span style="color:#c30">&#34;true&#34;</span><span style="color:#555">)</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">FooController</span> <span style="color:#555">{</span>
+  <span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span><span style="color:#c30">&#34;&#34;</span><span style="color:#555">)</span>
+  <span style="color:#069;font-weight:bold">public</span> Map <span style="color:#c0f">hello</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">return</span> Collections<span style="color:#555">.</span><span style="color:#309">singletonMap</span><span style="color:#555">(</span><span style="color:#c30">&#34;message&#34;</span><span style="color:#555">,</span> <span style="color:#c30">&#34;hello foo!&#34;</span><span style="color:#555">);</span>
+  <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>However, now we have two different mechanisms to toggle methods and controllers. It will be nice to consolidate them and doing so will allow us to use the same mechanism for toggling beans. This can be done by annotating <code>FeatureToggle</code> with the <a href="/blog/2015/12/06/implementing-custom-annotations-for-spring-mvc/">meta annotation</a> <code>Conditional</code> that looks up the state of feature toggles using the custom condition <code>FeatureCondition</code>. This will change <code>FeatureToggle</code> to:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@Target</span><span style="color: #555555">({</span>ElementType<span style="color: #555555">.</span><span style="color: #330099">TYPE</span><span style="color: #555555">,</span> ElementType<span style="color: #555555">.</span><span style="color: #330099">METHOD</span><span style="color: #555555">})</span>
-<span style="color: #9999FF">@Retention</span><span style="color: #555555">(</span>RetentionPolicy<span style="color: #555555">.</span><span style="color: #330099">RUNTIME</span><span style="color: #555555">)</span>
-<span style="color: #9999FF">@Documented</span>
-<span style="color: #9999FF">@Conditional</span><span style="color: #555555">(</span>FeatureCondition<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">)</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #9999FF">@interface</span> FeatureToggle <span style="color: #555555">{</span>
-  String <span style="color: #CC00FF">feature</span><span style="color: #555555">();</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Target</span><span style="color:#555">({</span>ElementType<span style="color:#555">.</span><span style="color:#309">TYPE</span><span style="color:#555">,</span> ElementType<span style="color:#555">.</span><span style="color:#309">METHOD</span><span style="color:#555">})</span>
+<span style="color:#99f">@Retention</span><span style="color:#555">(</span>RetentionPolicy<span style="color:#555">.</span><span style="color:#309">RUNTIME</span><span style="color:#555">)</span>
+<span style="color:#99f">@Documented</span>
+<span style="color:#99f">@Conditional</span><span style="color:#555">(</span>FeatureCondition<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">)</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#99f">@interface</span> FeatureToggle <span style="color:#555">{</span>
+  String <span style="color:#c0f">feature</span><span style="color:#555">();</span>
 
-  <span style="color: #007788; font-weight: bold">boolean</span> <span style="color: #CC00FF">expectedToBeOn</span><span style="color: #555555">()</span> <span style="color: #006699; font-weight: bold">default</span> <span style="color: #006699; font-weight: bold">true</span><span style="color: #555555">;</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+  <span style="color:#078;font-weight:bold">boolean</span> <span style="color:#c0f">expectedToBeOn</span><span style="color:#555">()</span> <span style="color:#069;font-weight:bold">default</span> <span style="color:#069;font-weight:bold">true</span><span style="color:#555">;</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>The <code>FearureCondition</code> uses the meta annotation attributes provided to it and the environment to decide the state to be returned:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">FeatureCondition</span> <span style="color: #006699; font-weight: bold">implements</span> Condition <span style="color: #555555">{</span>
-  <span style="color: #9999FF">@Override</span>
-  <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">boolean</span> <span style="color: #CC00FF">matches</span><span style="color: #555555">(</span>ConditionContext conditionContext<span style="color: #555555">,</span> AnnotatedTypeMetadata annotatedTypeMetadata<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">if</span><span style="color: #555555">(</span>annotatedTypeMetadata<span style="color: #555555">.</span><span style="color: #330099">isAnnotated</span><span style="color: #555555">(</span>FeatureToggle<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">.</span><span style="color: #330099">getCanonicalName</span><span style="color: #555555">()))</span> <span style="color: #555555">{</span>
-      Map<span style="color: #555555">&lt;</span>String<span style="color: #555555">,</span> Object<span style="color: #555555">&gt;</span> annotationAttributes <span style="color: #555555">=</span> annotatedTypeMetadata
-          <span style="color: #555555">.</span><span style="color: #330099">getAnnotationAttributes</span><span style="color: #555555">(</span>FeatureToggle<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">.</span><span style="color: #330099">getCanonicalName</span><span style="color: #555555">());</span>
-      String feature <span style="color: #555555">=</span> <span style="color: #555555">(</span>String<span style="color: #555555">)</span> annotationAttributes<span style="color: #555555">.</span><span style="color: #330099">get</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;feature&quot;</span><span style="color: #555555">);</span>
-      <span style="color: #007788; font-weight: bold">boolean</span> expectedToBeOn <span style="color: #555555">=</span> Boolean<span style="color: #555555">.</span><span style="color: #330099">parseBoolean</span><span style="color: #555555">(</span>String<span style="color: #555555">.</span><span style="color: #330099">valueOf</span><span style="color: #555555">(</span>annotationAttributes<span style="color: #555555">.</span><span style="color: #330099">get</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;expectedToBeOn&quot;</span><span style="color: #555555">)));</span>
-      <span style="color: #007788; font-weight: bold">boolean</span> isOn <span style="color: #555555">=</span> Boolean<span style="color: #555555">.</span><span style="color: #330099">parseBoolean</span><span style="color: #555555">(</span>conditionContext<span style="color: #555555">.</span><span style="color: #330099">getEnvironment</span><span style="color: #555555">().</span><span style="color: #330099">getProperty</span><span style="color: #555555">(</span>feature<span style="color: #555555">));</span>
-      <span style="color: #006699; font-weight: bold">return</span> expectedToBeOn <span style="color: #555555">==</span> isOn<span style="color: #555555">;</span>
-    <span style="color: #555555">}</span>
-    <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">true</span><span style="color: #555555">;</span>
-  <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">FeatureCondition</span> <span style="color:#069;font-weight:bold">implements</span> Condition <span style="color:#555">{</span>
+  <span style="color:#99f">@Override</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">boolean</span> <span style="color:#c0f">matches</span><span style="color:#555">(</span>ConditionContext conditionContext<span style="color:#555">,</span> AnnotatedTypeMetadata annotatedTypeMetadata<span style="color:#555">)</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">if</span><span style="color:#555">(</span>annotatedTypeMetadata<span style="color:#555">.</span><span style="color:#309">isAnnotated</span><span style="color:#555">(</span>FeatureToggle<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">.</span><span style="color:#309">getCanonicalName</span><span style="color:#555">()))</span> <span style="color:#555">{</span>
+      Map<span style="color:#555">&lt;</span>String<span style="color:#555">,</span> Object<span style="color:#555">&gt;</span> annotationAttributes <span style="color:#555">=</span> annotatedTypeMetadata
+          <span style="color:#555">.</span><span style="color:#309">getAnnotationAttributes</span><span style="color:#555">(</span>FeatureToggle<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">.</span><span style="color:#309">getCanonicalName</span><span style="color:#555">());</span>
+      String feature <span style="color:#555">=</span> <span style="color:#555">(</span>String<span style="color:#555">)</span> annotationAttributes<span style="color:#555">.</span><span style="color:#309">get</span><span style="color:#555">(</span><span style="color:#c30">&#34;feature&#34;</span><span style="color:#555">);</span>
+      <span style="color:#078;font-weight:bold">boolean</span> expectedToBeOn <span style="color:#555">=</span> Boolean<span style="color:#555">.</span><span style="color:#309">parseBoolean</span><span style="color:#555">(</span>String<span style="color:#555">.</span><span style="color:#309">valueOf</span><span style="color:#555">(</span>annotationAttributes<span style="color:#555">.</span><span style="color:#309">get</span><span style="color:#555">(</span><span style="color:#c30">&#34;expectedToBeOn&#34;</span><span style="color:#555">)));</span>
+      <span style="color:#078;font-weight:bold">boolean</span> isOn <span style="color:#555">=</span> Boolean<span style="color:#555">.</span><span style="color:#309">parseBoolean</span><span style="color:#555">(</span>conditionContext<span style="color:#555">.</span><span style="color:#309">getEnvironment</span><span style="color:#555">().</span><span style="color:#309">getProperty</span><span style="color:#555">(</span>feature<span style="color:#555">));</span>
+      <span style="color:#069;font-weight:bold">return</span> expectedToBeOn <span style="color:#555">==</span> isOn<span style="color:#555">;</span>
+    <span style="color:#555">}</span>
+    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">true</span><span style="color:#555">;</span>
+  <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>Now that we have a unified mechanism to toggle controllers, beans and controller methods, we can use this annotation. The <code>FooController</code> would now look like this:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@RestController</span>
-<span style="color: #9999FF">@RequestMapping</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;/foo&quot;</span><span style="color: #555555">)</span>
-<span style="color: #9999FF">@FeatureToggle</span><span style="color: #555555">(</span>feature <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;feature.foo&quot;</span><span style="color: #555555">)</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">FooController</span> <span style="color: #555555">{</span>
-  <span style="color: #9999FF">@RequestMapping</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;&quot;</span><span style="color: #555555">)</span>
-  <span style="color: #006699; font-weight: bold">public</span> Map <span style="color: #CC00FF">hello</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">return</span> Collections<span style="color: #555555">.</span><span style="color: #330099">singletonMap</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;message&quot;</span><span style="color: #555555">,</span> <span style="color: #CC3300">&quot;hello foo!&quot;</span><span style="color: #555555">);</span>
-  <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@RestController</span>
+<span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span><span style="color:#c30">&#34;/foo&#34;</span><span style="color:#555">)</span>
+<span style="color:#99f">@FeatureToggle</span><span style="color:#555">(</span>feature <span style="color:#555">=</span> <span style="color:#c30">&#34;feature.foo&#34;</span><span style="color:#555">)</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">FooController</span> <span style="color:#555">{</span>
+  <span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span><span style="color:#c30">&#34;&#34;</span><span style="color:#555">)</span>
+  <span style="color:#069;font-weight:bold">public</span> Map <span style="color:#c0f">hello</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">return</span> Collections<span style="color:#555">.</span><span style="color:#309">singletonMap</span><span style="color:#555">(</span><span style="color:#c30">&#34;message&#34;</span><span style="color:#555">,</span> <span style="color:#c30">&#34;hello foo!&#34;</span><span style="color:#555">);</span>
+  <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>And our <code>AppConfig</code> will be like this:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@Configuration</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">AppConfig</span> <span style="color: #006699; font-weight: bold">extends</span> WebMvcConfigurerAdapter <span style="color: #555555">{</span>
-  <span style="color: #9999FF">@Autowired</span>
-  Environment env<span style="color: #555555">;</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Configuration</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">AppConfig</span> <span style="color:#069;font-weight:bold">extends</span> WebMvcConfigurerAdapter <span style="color:#555">{</span>
+  <span style="color:#99f">@Autowired</span>
+  Environment env<span style="color:#555">;</span>
 
-  <span style="color: #9999FF">@Bean</span>
-  <span style="color: #9999FF">@FeatureToggle</span><span style="color: #555555">(</span>feature <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;feature.redis.session.store&quot;</span><span style="color: #555555">,</span> expectedToBeOn <span style="color: #555555">=</span> <span style="color: #006699; font-weight: bold">false</span><span style="color: #555555">)</span>
-  <span style="color: #006699; font-weight: bold">public</span> SessionRepository <span style="color: #CC00FF">mapSessionRepository</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">new</span> MapSessionRepository<span style="color: #555555">();</span>
-  <span style="color: #555555">}</span>
+  <span style="color:#99f">@Bean</span>
+  <span style="color:#99f">@FeatureToggle</span><span style="color:#555">(</span>feature <span style="color:#555">=</span> <span style="color:#c30">&#34;feature.redis.session.store&#34;</span><span style="color:#555">,</span> expectedToBeOn <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">false</span><span style="color:#555">)</span>
+  <span style="color:#069;font-weight:bold">public</span> SessionRepository <span style="color:#c0f">mapSessionRepository</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">new</span> MapSessionRepository<span style="color:#555">();</span>
+  <span style="color:#555">}</span>
 
-  <span style="color: #9999FF">@Bean</span>
-  <span style="color: #9999FF">@FeatureToggle</span><span style="color: #555555">(</span>feature <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;feature.redis.session.store&quot;</span><span style="color: #555555">)</span>
-  <span style="color: #006699; font-weight: bold">public</span> SessionRepository <span style="color: #CC00FF">redisSessionRepository</span><span style="color: #555555">(</span>RedisConnectionFactory factory<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">new</span> RedisOperationsSessionRepository<span style="color: #555555">(</span>factory<span style="color: #555555">);</span>
-  <span style="color: #555555">}</span>
+  <span style="color:#99f">@Bean</span>
+  <span style="color:#99f">@FeatureToggle</span><span style="color:#555">(</span>feature <span style="color:#555">=</span> <span style="color:#c30">&#34;feature.redis.session.store&#34;</span><span style="color:#555">)</span>
+  <span style="color:#069;font-weight:bold">public</span> SessionRepository <span style="color:#c0f">redisSessionRepository</span><span style="color:#555">(</span>RedisConnectionFactory factory<span style="color:#555">)</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">new</span> RedisOperationsSessionRepository<span style="color:#555">(</span>factory<span style="color:#555">);</span>
+  <span style="color:#555">}</span>
 
-  <span style="color: #9999FF">@Override</span>
-  <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">addInterceptors</span><span style="color: #555555">(</span>InterceptorRegistry registry<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-    registry<span style="color: #555555">.</span><span style="color: #330099">addInterceptor</span><span style="color: #555555">(</span><span style="color: #006699; font-weight: bold">new</span> FeatureInterceptor<span style="color: #555555">(</span><span style="color: #006699; font-weight: bold">new</span> FeatureRepository<span style="color: #555555">(</span>env<span style="color: #555555">)));</span>
-    <span style="color: #006699; font-weight: bold">super</span><span style="color: #555555">.</span><span style="color: #330099">addInterceptors</span><span style="color: #555555">(</span>registry<span style="color: #555555">);</span>
-  <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+  <span style="color:#99f">@Override</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">addInterceptors</span><span style="color:#555">(</span>InterceptorRegistry registry<span style="color:#555">)</span> <span style="color:#555">{</span>
+    registry<span style="color:#555">.</span><span style="color:#309">addInterceptor</span><span style="color:#555">(</span><span style="color:#069;font-weight:bold">new</span> FeatureInterceptor<span style="color:#555">(</span><span style="color:#069;font-weight:bold">new</span> FeatureRepository<span style="color:#555">(</span>env<span style="color:#555">)));</span>
+    <span style="color:#069;font-weight:bold">super</span><span style="color:#555">.</span><span style="color:#309">addInterceptors</span><span style="color:#555">(</span>registry<span style="color:#555">);</span>
+  <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>In the second part of <a href="/series/feature-toggles">this series</a>, we will explore how the feature toggle can be exposed to the front end and how to consume this and use it for toggling features in the Angular components.</p>
 <div class="footnotes">
 
@@ -379,36 +330,6 @@ Collecting all the properties available in an environment is <a href="https://st
             <p class="comments">
   If you have questions or comments about this blog post, you can get in touch with me on Twitter <a href="https://twitter.com/sdqali">@sdqali</a>.
 </p>
-
-            <div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Found this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and explanations for specific Java, Spring and other programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
 
           </div>
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">

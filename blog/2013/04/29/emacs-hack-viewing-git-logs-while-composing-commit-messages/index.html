@@ -121,84 +121,44 @@
 <ul>
 <li>Git commit messages are stored in the <code>COMMIT_EDITMSG</code> file under <code>.git/</code>. So the first thing to do is to ensure that this file always gets loaded with a custom minor mode. This can be done as follows:</li>
 </ul>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>(<span style="color: #003333">add-to-list</span> <span style="color: #FFCC33">&#39;auto-mode-alist</span> <span style="color: #555555">&#39;</span>(<span style="color: #CC3300">&quot;\\COMMIT_EDITMSG\\&#39;&quot;</span> <span style="color: #555555">.</span> <span style="color: #003333">load-magit-log-when-committing-mode</span>))
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cl" data-lang="cl">(<span style="color:#033">add-to-list</span> <span style="color:#fc3">&#39;auto-mode-alist</span> <span style="color:#555">&#39;</span>(<span style="color:#c30">&#34;\\COMMIT_EDITMSG\\&#39;&#34;</span> <span style="color:#555">.</span> <span style="color:#033">load-magit-log-when-committing-mode</span>))</code></pre></div>
 <p>The minor mode does not need to do anything. The definition would be like this:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>(<span style="color: #003333">define-minor-mode</span> <span style="color: #003333">load-magit-log-when-committing-mode</span>
-  <span style="color: #CC3300">&quot;dummy&quot;</span>)
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cl" data-lang="cl">(<span style="color:#033">define-minor-mode</span> <span style="color:#033">load-magit-log-when-committing-mode</span>
+  <span style="color:#c30">&#34;dummy&#34;</span>)</code></pre></div>
 <ul>
 <li>Next step is to add a custom hook that gets run after loading the minor mode. This hook calls the function to load git logs. The code for this is:</li>
 </ul>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>(<span style="color: #003333">add-hook</span> <span style="color: #FFCC33">&#39;load-magit-log-when-committing-mode-hook</span> <span style="color: #FFCC33">&#39;show-magit-log-hook</span>)
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cl" data-lang="cl">(<span style="color:#033">add-hook</span> <span style="color:#fc3">&#39;load-magit-log-when-committing-mode-hook</span> <span style="color:#fc3">&#39;show-magit-log-hook</span>)</code></pre></div>
 <ul>
 <li>The actual function to load git logs. It calls <code>magit-log</code> to load the logs and then opens the original <code>COMMIT_EDITMSG</code> in the other frame.</li>
 </ul>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>(<span style="color: #336666">defun</span> <span style="color: #003333">show-magit-log-hook</span> ()
-  (<span style="color: #003333">cd</span> <span style="color: #CC3300">&quot;..&quot;</span>)
-  (<span style="color: #003333">magit-log</span>)
-  (<span style="color: #003333">switch-to-buffer-other-window</span> <span style="color: #CC3300">&quot;COMMIT_EDITMSG&quot;</span>))
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cl" data-lang="cl">(<span style="color:#033">defun</span> <span style="color:#033">show-magit-log-hook</span> ()
+  (<span style="color:#033">cd</span> <span style="color:#c30">&#34;..&#34;</span>)
+  (<span style="color:#033">magit-log</span>)
+  (<span style="color:#033">switch-to-buffer-other-window</span> <span style="color:#c30">&#34;COMMIT_EDITMSG&#34;</span>))</code></pre></div>
 <p>This is how Emacs looks while committing with this hack in place:</p>
 
 <p><img src="/images/screenshot_git_commit_log.png" alt="&quot;Screenshot showing git commit log&quot;" title="Screenshot showing git commit log" /></p>
 
 <p>If you want to use this, copy the following snippet to your <code>init.el</code>.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #0099FF; font-style: italic">;; load-magit-log-when-committing-mode</span>
-(<span style="color: #003333">define-minor-mode</span> <span style="color: #003333">load-magit-log-when-committing-mode</span>
-  <span style="color: #CC3300">&quot;dummy&quot;</span>)
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cl" data-lang="cl"><span style="color:#09f;font-style:italic">;; load-magit-log-when-committing-mode</span>
+(<span style="color:#033">define-minor-mode</span> <span style="color:#033">load-magit-log-when-committing-mode</span>
+  <span style="color:#c30">&#34;dummy&#34;</span>)
 
-<span style="color: #0099FF; font-style: italic">;; the hook</span>
-(<span style="color: #336666">defun</span> <span style="color: #003333">show-magit-log-hook</span> ()
-  (<span style="color: #003333">cd</span> <span style="color: #CC3300">&quot;..&quot;</span>)
-  (<span style="color: #003333">magit-log</span>)
-  (<span style="color: #003333">switch-to-buffer-other-window</span> <span style="color: #CC3300">&quot;COMMIT_EDITMSG&quot;</span>))
+<span style="color:#09f;font-style:italic">;; the hook</span>
+(<span style="color:#033">defun</span> <span style="color:#033">show-magit-log-hook</span> ()
+  (<span style="color:#033">cd</span> <span style="color:#c30">&#34;..&#34;</span>)
+  (<span style="color:#033">magit-log</span>)
+  (<span style="color:#033">switch-to-buffer-other-window</span> <span style="color:#c30">&#34;COMMIT_EDITMSG&#34;</span>))
 
-<span style="color: #0099FF; font-style: italic">;; add the hook</span>
-(<span style="color: #003333">add-hook</span> <span style="color: #FFCC33">&#39;load-magit-log-when-committing-mode-hook</span> <span style="color: #FFCC33">&#39;show-magit-log-hook</span>)
+<span style="color:#09f;font-style:italic">;; add the hook</span>
+(<span style="color:#033">add-hook</span> <span style="color:#fc3">&#39;load-magit-log-when-committing-mode-hook</span> <span style="color:#fc3">&#39;show-magit-log-hook</span>)
 
-<span style="color: #0099FF; font-style: italic">;; load the mode for commit message</span>
-(<span style="color: #003333">add-to-list</span> <span style="color: #FFCC33">&#39;auto-mode-alist</span> <span style="color: #555555">&#39;</span>(<span style="color: #CC3300">&quot;\\COMMIT_EDITMSG\\&#39;&quot;</span> <span style="color: #555555">.</span> <span style="color: #003333">load-magit-log-when-committing-mode</span>))
-</pre></div>
-
+<span style="color:#09f;font-style:italic">;; load the mode for commit message</span>
+(<span style="color:#033">add-to-list</span> <span style="color:#fc3">&#39;auto-mode-alist</span> <span style="color:#555">&#39;</span>(<span style="color:#c30">&#34;\\COMMIT_EDITMSG\\&#39;&#34;</span> <span style="color:#555">.</span> <span style="color:#033">load-magit-log-when-committing-mode</span>))</code></pre></div>
             <p class="comments">
   If you have questions or comments about this blog post, you can get in touch with me on Twitter <a href="https://twitter.com/sdqali">@sdqali</a>.
 </p>
-
-            <div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Found this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and explanations for specific Java, Spring and other programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
 
           </div>
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">

@@ -120,51 +120,43 @@ Among the new things introduced in Spring 4 was the idea of meta-annotations. 1 
             <p><meta content="spring, annotation, custom annotation, spring mvc, spring boot" name="keywords">
 I often have to work with Spring MVC based code bases that have been living for a while. One of the common trait of these code bases I have observed is the repeated use of the same Spring annotations to achieve the same effect again and again. A really good example of this is annotating a controller method with a combination of <code>@RequestMapping</code> and <code>@ResponseStatus</code> to set the expected request and response <code>Content-Type</code>, the request Method, response status etc. This blog post describes how to create custom Spring annotationshow to create custom annotation in spring mvc that produce the same effect as multiple Spring annotations acting together.
 
-Among the new things introduced in Spring 4 was the idea of meta-annotations. <sup class="footnote-ref" id="fnref:1"><a rel="footnote" href="#fn:1">1</a></sup> Meta annotations are annotations that can act up on other annotations by modifying and overriding attributes of the target annotations.</p>
+Among the new things introduced in Spring 4 was the idea of meta-annotations. <sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup> Meta annotations are annotations that can act up on other annotations by modifying and overriding attributes of the target annotations.</p>
 
-<p>This allows us to build composed annotations <sup class="footnote-ref" id="fnref:2"><a rel="footnote" href="#fn:2">2</a></sup> that combine the behavior of multiple annotations. The <code>@AliasFor</code> annotation allows us to override attribute names, thereby adding great flexibility while composing.</p>
+<p>This allows us to build composed annotations <sup class="footnote-ref" id="fnref:2"><a href="#fn:2">2</a></sup> that combine the behavior of multiple annotations. The <code>@AliasFor</code> annotation allows us to override attribute names, thereby adding great flexibility while composing.</p>
 
 <p>This is a common pattern in code bases that use Spring MVC.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>    <span style="color: #9999FF">@RequestMapping</span><span style="color: #555555">(</span>path <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;/register&quot;</span><span style="color: #555555">,</span>
-            method <span style="color: #555555">=</span> RequestMethod<span style="color: #555555">.</span><span style="color: #330099">POST</span><span style="color: #555555">,</span>
-            consumes <span style="color: #555555">=</span> MediaType<span style="color: #555555">.</span><span style="color: #330099">APPLICATION_JSON_VALUE</span><span style="color: #555555">,</span>
-            produces <span style="color: #555555">=</span> MediaType<span style="color: #555555">.</span><span style="color: #330099">APPLICATION_JSON_VALUE</span>
-    <span style="color: #555555">)</span>
-    <span style="color: #9999FF">@ResponseStatus</span><span style="color: #555555">(</span>HttpStatus<span style="color: #555555">.</span><span style="color: #330099">CREATED</span><span style="color: #555555">)</span>
-    <span style="color: #006699; font-weight: bold">public</span> Map <span style="color: #CC00FF">register</span><span style="color: #555555">(</span><span style="color: #9999FF">@RequestBody</span> <span style="color: #9999FF">@Valid</span> EmailRequest emailRequest<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> registrationService<span style="color: #555555">.</span><span style="color: #330099">register</span><span style="color: #555555">(</span>emailRequest<span style="color: #555555">);</span>
-    <span style="color: #555555">}</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span>path <span style="color:#555">=</span> <span style="color:#c30">&#34;/register&#34;</span><span style="color:#555">,</span>
+            method <span style="color:#555">=</span> RequestMethod<span style="color:#555">.</span><span style="color:#309">POST</span><span style="color:#555">,</span>
+            consumes <span style="color:#555">=</span> MediaType<span style="color:#555">.</span><span style="color:#309">APPLICATION_JSON_VALUE</span><span style="color:#555">,</span>
+            produces <span style="color:#555">=</span> MediaType<span style="color:#555">.</span><span style="color:#309">APPLICATION_JSON_VALUE</span>
+    <span style="color:#555">)</span>
+    <span style="color:#99f">@ResponseStatus</span><span style="color:#555">(</span>HttpStatus<span style="color:#555">.</span><span style="color:#309">CREATED</span><span style="color:#555">)</span>
+    <span style="color:#069;font-weight:bold">public</span> Map <span style="color:#c0f">register</span><span style="color:#555">(</span><span style="color:#99f">@RequestBody</span> <span style="color:#99f">@Valid</span> EmailRequest emailRequest<span style="color:#555">)</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> registrationService<span style="color:#555">.</span><span style="color:#309">register</span><span style="color:#555">(</span>emailRequest<span style="color:#555">);</span>
+    <span style="color:#555">}</span></code></pre></div>
 <p>The two annotations as applied on this method represent the fact that this is an end point that a client can <code>POST</code> JSON to and produces JSON and a <code>201 Created</code> HTTP status when it succeeds. If we had 20 end points that did the similar operations, it would be really useful to have a <code>@PostJson</code> annotation that did the same thing.</p>
 
 <p>The following is one way of writing such an annotation.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@Target</span><span style="color: #555555">(</span>METHOD<span style="color: #555555">)</span>
-<span style="color: #9999FF">@Retention</span><span style="color: #555555">(</span>RUNTIME<span style="color: #555555">)</span>
-<span style="color: #9999FF">@Documented</span>
-<span style="color: #9999FF">@RequestMapping</span><span style="color: #555555">(</span>method <span style="color: #555555">=</span> RequestMethod<span style="color: #555555">.</span><span style="color: #330099">POST</span><span style="color: #555555">,</span>
-        consumes <span style="color: #555555">=</span> MediaType<span style="color: #555555">.</span><span style="color: #330099">APPLICATION_JSON_VALUE</span><span style="color: #555555">,</span>
-        produces <span style="color: #555555">=</span> MediaType<span style="color: #555555">.</span><span style="color: #330099">APPLICATION_JSON_VALUE</span>
-<span style="color: #555555">)</span>
-<span style="color: #9999FF">@ResponseStatus</span><span style="color: #555555">(</span>HttpStatus<span style="color: #555555">.</span><span style="color: #330099">CREATED</span><span style="color: #555555">)</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #9999FF">@interface</span> PostJson <span style="color: #555555">{</span>
-    <span style="color: #9999FF">@AliasFor</span><span style="color: #555555">(</span>annotation <span style="color: #555555">=</span> RequestMapping<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">,</span> attribute <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;path&quot;</span><span style="color: #555555">)</span>
-    String<span style="color: #555555">[]</span> <span style="color: #CC00FF">path</span><span style="color: #555555">()</span> <span style="color: #006699; font-weight: bold">default</span> <span style="color: #555555">{};</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Target</span><span style="color:#555">(</span>METHOD<span style="color:#555">)</span>
+<span style="color:#99f">@Retention</span><span style="color:#555">(</span>RUNTIME<span style="color:#555">)</span>
+<span style="color:#99f">@Documented</span>
+<span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span>method <span style="color:#555">=</span> RequestMethod<span style="color:#555">.</span><span style="color:#309">POST</span><span style="color:#555">,</span>
+        consumes <span style="color:#555">=</span> MediaType<span style="color:#555">.</span><span style="color:#309">APPLICATION_JSON_VALUE</span><span style="color:#555">,</span>
+        produces <span style="color:#555">=</span> MediaType<span style="color:#555">.</span><span style="color:#309">APPLICATION_JSON_VALUE</span>
+<span style="color:#555">)</span>
+<span style="color:#99f">@ResponseStatus</span><span style="color:#555">(</span>HttpStatus<span style="color:#555">.</span><span style="color:#309">CREATED</span><span style="color:#555">)</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#99f">@interface</span> PostJson <span style="color:#555">{</span>
+    <span style="color:#99f">@AliasFor</span><span style="color:#555">(</span>annotation <span style="color:#555">=</span> RequestMapping<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">,</span> attribute <span style="color:#555">=</span> <span style="color:#c30">&#34;path&#34;</span><span style="color:#555">)</span>
+    String<span style="color:#555">[]</span> <span style="color:#c0f">path</span><span style="color:#555">()</span> <span style="color:#069;font-weight:bold">default</span> <span style="color:#555">{};</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>This annotation takes a single parameter <code>path</code> that represents that URL path to which it will respond to. This can now be applied on the register end point.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>    <span style="color: #9999FF">@PostJson</span><span style="color: #555555">(</span>path <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;/register&quot;</span><span style="color: #555555">)</span>
-    <span style="color: #006699; font-weight: bold">public</span> Map <span style="color: #CC00FF">register</span><span style="color: #555555">(</span><span style="color: #9999FF">@RequestBody</span> <span style="color: #9999FF">@Valid</span> EmailRequest emailRequest<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> registrationService<span style="color: #555555">.</span><span style="color: #330099">register</span><span style="color: #555555">(</span>emailRequest<span style="color: #555555">);</span>
-    <span style="color: #555555">}</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#99f">@PostJson</span><span style="color:#555">(</span>path <span style="color:#555">=</span> <span style="color:#c30">&#34;/register&#34;</span><span style="color:#555">)</span>
+    <span style="color:#069;font-weight:bold">public</span> Map <span style="color:#c0f">register</span><span style="color:#555">(</span><span style="color:#99f">@RequestBody</span> <span style="color:#99f">@Valid</span> EmailRequest emailRequest<span style="color:#555">)</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> registrationService<span style="color:#555">.</span><span style="color:#309">register</span><span style="color:#555">(</span>emailRequest<span style="color:#555">);</span>
+    <span style="color:#555">}</span></code></pre></div>
 <p>If we wanted to allow the consumers of <code>@PostJson</code> to override other parameters of <code>@RequestMapping</code> or <code>@ResponseStatus</code>, it can be achieved by adding more aliases. For example, the following will allow users to specify a reason phrase.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>    <span style="color: #9999FF">@AliasFor</span><span style="color: #555555">(</span>annotation <span style="color: #555555">=</span> ResponseStatus<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">,</span> attribute <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;reason&quot;</span><span style="color: #555555">)</span>
-    String<span style="color: #555555">[]</span> <span style="color: #CC00FF">reason</span><span style="color: #555555">()</span> <span style="color: #006699; font-weight: bold">default</span> <span style="color: #555555">{};</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#99f">@AliasFor</span><span style="color:#555">(</span>annotation <span style="color:#555">=</span> ResponseStatus<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">,</span> attribute <span style="color:#555">=</span> <span style="color:#c30">&#34;reason&#34;</span><span style="color:#555">)</span>
+    String<span style="color:#555">[]</span> <span style="color:#c0f">reason</span><span style="color:#555">()</span> <span style="color:#069;font-weight:bold">default</span> <span style="color:#555">{};</span></code></pre></div>
 <p>This pattern can easily be extended to introduce annotations like <code>@GetJson</code>, <code>@PutJson</code>, <code>@PostXml</code> and so on and so forth.</p>
 <div class="footnotes">
 
@@ -180,36 +172,6 @@ Among the new things introduced in Spring 4 was the idea of meta-annotations. <s
             <p class="comments">
   If you have questions or comments about this blog post, you can get in touch with me on Twitter <a href="https://twitter.com/sdqali">@sdqali</a>.
 </p>
-
-            <div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Found this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and explanations for specific Java, Spring and other programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
 
           </div>
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">

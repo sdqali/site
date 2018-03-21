@@ -121,24 +121,22 @@
 <p></p>
 
 <p>Let&rsquo;s take a look at the following example. In this example, we have a simple end point that responds with a JSON object when invoked.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@RestController</span>
-<span style="color: #9999FF">@RequestMapping</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;/test&quot;</span><span style="color: #555555">)</span>
-<span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">ExampleController</span> <span style="color: #555555">{</span>
-    <span style="color: #9999FF">@RequestMapping</span><span style="color: #555555">(</span>value <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;/hello&quot;</span><span style="color: #555555">,</span>
-            method <span style="color: #555555">=</span> GET<span style="color: #555555">,</span>
-            consumes <span style="color: #555555">=</span> APPLICATION_JSON_VALUE<span style="color: #555555">,</span>
-            produces <span style="color: #555555">=</span> APPLICATION_JSON_VALUE<span style="color: #555555">)</span>
-    <span style="color: #9999FF">@ResponseStatus</span><span style="color: #555555">(</span>OK<span style="color: #555555">)</span>
-    <span style="color: #006699; font-weight: bold">public</span> Map<span style="color: #555555">&lt;</span>String<span style="color: #555555">,</span> Object<span style="color: #555555">&gt;</span> <span style="color: #CC00FF">hello</span><span style="color: #555555">(){</span>
-        <span style="color: #006699; font-weight: bold">return</span> helloMessage<span style="color: #555555">();</span>
-    <span style="color: #555555">}</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@RestController</span>
+<span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span><span style="color:#c30">&#34;/test&#34;</span><span style="color:#555">)</span>
+<span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">ExampleController</span> <span style="color:#555">{</span>
+    <span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span>value <span style="color:#555">=</span> <span style="color:#c30">&#34;/hello&#34;</span><span style="color:#555">,</span>
+            method <span style="color:#555">=</span> GET<span style="color:#555">,</span>
+            consumes <span style="color:#555">=</span> APPLICATION_JSON_VALUE<span style="color:#555">,</span>
+            produces <span style="color:#555">=</span> APPLICATION_JSON_VALUE<span style="color:#555">)</span>
+    <span style="color:#99f">@ResponseStatus</span><span style="color:#555">(</span>OK<span style="color:#555">)</span>
+    <span style="color:#069;font-weight:bold">public</span> Map<span style="color:#555">&lt;</span>String<span style="color:#555">,</span> Object<span style="color:#555">&gt;</span> <span style="color:#c0f">hello</span><span style="color:#555">(){</span>
+        <span style="color:#069;font-weight:bold">return</span> helloMessage<span style="color:#555">();</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #006699; font-weight: bold">private</span> Map<span style="color: #555555">&lt;</span>String<span style="color: #555555">,</span> Object<span style="color: #555555">&gt;</span> <span style="color: #CC00FF">helloMessage</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> Collections<span style="color: #555555">.</span><span style="color: #330099">singletonMap</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;message&quot;</span><span style="color: #555555">,</span> <span style="color: #CC3300">&quot;hello&quot;</span><span style="color: #555555">);</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+    <span style="color:#069;font-weight:bold">private</span> Map<span style="color:#555">&lt;</span>String<span style="color:#555">,</span> Object<span style="color:#555">&gt;</span> <span style="color:#c0f">helloMessage</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> Collections<span style="color:#555">.</span><span style="color:#309">singletonMap</span><span style="color:#555">(</span><span style="color:#c30">&#34;message&#34;</span><span style="color:#555">,</span> <span style="color:#c30">&#34;hello&#34;</span><span style="color:#555">);</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>Writing a MockMvc test for this controller is fairly simple. The following test invokes the end point and asserts that the end point returns:</p>
 
 <ul>
@@ -146,113 +144,73 @@
 <li>The right Content-Type <code>application/json</code></li>
 <li>The right JSON message</li>
 </ul>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@RunWith</span><span style="color: #555555">(</span>MockitoJUnitRunner<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">)</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">ExampleControllerTest</span> <span style="color: #555555">{</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@RunWith</span><span style="color:#555">(</span>MockitoJUnitRunner<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">)</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">ExampleControllerTest</span> <span style="color:#555">{</span>
 
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">static</span> <span style="color: #006699; font-weight: bold">final</span> String CONTENT_TYPE <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;Content-Type&quot;</span><span style="color: #555555">;</span>
-    <span style="color: #006699; font-weight: bold">private</span> ExampleController controller<span style="color: #555555">;</span>
-    <span style="color: #006699; font-weight: bold">private</span> MockMvc mockMvc<span style="color: #555555">;</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">static</span> <span style="color:#069;font-weight:bold">final</span> String CONTENT_TYPE <span style="color:#555">=</span> <span style="color:#c30">&#34;Content-Type&#34;</span><span style="color:#555">;</span>
+    <span style="color:#069;font-weight:bold">private</span> ExampleController controller<span style="color:#555">;</span>
+    <span style="color:#069;font-weight:bold">private</span> MockMvc mockMvc<span style="color:#555">;</span>
 
-    <span style="color: #9999FF">@Before</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">setUp</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-        controller <span style="color: #555555">=</span> <span style="color: #006699; font-weight: bold">new</span> ExampleController<span style="color: #555555">();</span>
-        mockMvc <span style="color: #555555">=</span> MockMvcBuilders
-                <span style="color: #555555">.</span><span style="color: #330099">standaloneSetup</span><span style="color: #555555">(</span>controller<span style="color: #555555">)</span>
-                <span style="color: #555555">.</span><span style="color: #330099">build</span><span style="color: #555555">();</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#99f">@Before</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">setUp</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+        controller <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">new</span> ExampleController<span style="color:#555">();</span>
+        mockMvc <span style="color:#555">=</span> MockMvcBuilders
+                <span style="color:#555">.</span><span style="color:#309">standaloneSetup</span><span style="color:#555">(</span>controller<span style="color:#555">)</span>
+                <span style="color:#555">.</span><span style="color:#309">build</span><span style="color:#555">();</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Test</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">shouldHaveAMessageInResponse</span><span style="color: #555555">()</span> <span style="color: #006699; font-weight: bold">throws</span> Exception <span style="color: #555555">{</span>
+    <span style="color:#99f">@Test</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">shouldHaveAMessageInResponse</span><span style="color:#555">()</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
         mockMvc
-                <span style="color: #555555">.</span><span style="color: #330099">perform</span><span style="color: #555555">(</span>get<span style="color: #555555">(</span><span style="color: #CC3300">&quot;/test/hello&quot;</span><span style="color: #555555">)</span>
-                        <span style="color: #555555">.</span><span style="color: #330099">contentType</span><span style="color: #555555">(</span>APPLICATION_JSON<span style="color: #555555">))</span>
-                <span style="color: #555555">.</span><span style="color: #330099">andDo</span><span style="color: #555555">(</span>print<span style="color: #555555">())</span>
-                <span style="color: #555555">.</span><span style="color: #330099">andExpect</span><span style="color: #555555">(</span>status<span style="color: #555555">().</span><span style="color: #330099">isOk</span><span style="color: #555555">())</span>
-                <span style="color: #555555">.</span><span style="color: #330099">andExpect</span><span style="color: #555555">(</span>header<span style="color: #555555">().</span><span style="color: #330099">string</span><span style="color: #555555">(</span>CONTENT_TYPE<span style="color: #555555">,</span> APPLICATION_JSON_VALUE<span style="color: #555555">))</span>
-                <span style="color: #555555">.</span><span style="color: #330099">andExpect</span><span style="color: #555555">(</span>jsonPath<span style="color: #555555">(</span><span style="color: #CC3300">&quot;message&quot;</span><span style="color: #555555">).</span><span style="color: #330099">value</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;hello&quot;</span><span style="color: #555555">));</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+                <span style="color:#555">.</span><span style="color:#309">perform</span><span style="color:#555">(</span>get<span style="color:#555">(</span><span style="color:#c30">&#34;/test/hello&#34;</span><span style="color:#555">)</span>
+                        <span style="color:#555">.</span><span style="color:#309">contentType</span><span style="color:#555">(</span>APPLICATION_JSON<span style="color:#555">))</span>
+                <span style="color:#555">.</span><span style="color:#309">andDo</span><span style="color:#555">(</span>print<span style="color:#555">())</span>
+                <span style="color:#555">.</span><span style="color:#309">andExpect</span><span style="color:#555">(</span>status<span style="color:#555">().</span><span style="color:#309">isOk</span><span style="color:#555">())</span>
+                <span style="color:#555">.</span><span style="color:#309">andExpect</span><span style="color:#555">(</span>header<span style="color:#555">().</span><span style="color:#309">string</span><span style="color:#555">(</span>CONTENT_TYPE<span style="color:#555">,</span> APPLICATION_JSON_VALUE<span style="color:#555">))</span>
+                <span style="color:#555">.</span><span style="color:#309">andExpect</span><span style="color:#555">(</span>jsonPath<span style="color:#555">(</span><span style="color:#c30">&#34;message&#34;</span><span style="color:#555">).</span><span style="color:#309">value</span><span style="color:#555">(</span><span style="color:#c30">&#34;hello&#34;</span><span style="color:#555">));</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>Now, lets try and write a similar test for an end point uses <code>DeferredResult</code> to do asynchronous request processing. The end point in this example just wraps the JSON structure in <code>DeferredResult</code> and returns, whereas there will be a long running asynchronous process in a more useful case. But the idea remains the same.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>    <span style="color: #9999FF">@RequestMapping</span><span style="color: #555555">(</span>value <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;/deferred&quot;</span><span style="color: #555555">,</span>
-            method <span style="color: #555555">=</span> GET<span style="color: #555555">,</span>
-            consumes <span style="color: #555555">=</span> APPLICATION_JSON_VALUE<span style="color: #555555">,</span>
-            produces <span style="color: #555555">=</span> APPLICATION_JSON_VALUE
-    <span style="color: #555555">)</span>
-    <span style="color: #9999FF">@ResponseStatus</span><span style="color: #555555">(</span>OK<span style="color: #555555">)</span>
-    <span style="color: #006699; font-weight: bold">public</span> DeferredResult<span style="color: #555555">&lt;</span>Map<span style="color: #555555">&gt;</span> <span style="color: #CC00FF">deferred</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-        DeferredResult<span style="color: #555555">&lt;</span>Map<span style="color: #555555">&gt;</span> deferredResult <span style="color: #555555">=</span> <span style="color: #006699; font-weight: bold">new</span> DeferredResult<span style="color: #555555">&lt;&gt;();</span>
-        deferredResult<span style="color: #555555">.</span><span style="color: #330099">setResult</span><span style="color: #555555">(</span>helloMessage<span style="color: #555555">());</span>
-        <span style="color: #006699; font-weight: bold">return</span> deferredResult<span style="color: #555555">;</span>
-    <span style="color: #555555">}</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span>value <span style="color:#555">=</span> <span style="color:#c30">&#34;/deferred&#34;</span><span style="color:#555">,</span>
+            method <span style="color:#555">=</span> GET<span style="color:#555">,</span>
+            consumes <span style="color:#555">=</span> APPLICATION_JSON_VALUE<span style="color:#555">,</span>
+            produces <span style="color:#555">=</span> APPLICATION_JSON_VALUE
+    <span style="color:#555">)</span>
+    <span style="color:#99f">@ResponseStatus</span><span style="color:#555">(</span>OK<span style="color:#555">)</span>
+    <span style="color:#069;font-weight:bold">public</span> DeferredResult<span style="color:#555">&lt;</span>Map<span style="color:#555">&gt;</span> <span style="color:#c0f">deferred</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+        DeferredResult<span style="color:#555">&lt;</span>Map<span style="color:#555">&gt;</span> deferredResult <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">new</span> DeferredResult<span style="color:#555">&lt;&gt;();</span>
+        deferredResult<span style="color:#555">.</span><span style="color:#309">setResult</span><span style="color:#555">(</span>helloMessage<span style="color:#555">());</span>
+        <span style="color:#069;font-weight:bold">return</span> deferredResult<span style="color:#555">;</span>
+    <span style="color:#555">}</span></code></pre></div>
 <p>If our test for this end point were to use the same mechanism as the previous test, we will start observing an interesting error.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>    <span style="color: #9999FF">@Test</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">shouldHaveAMessageInDeferredResponse</span><span style="color: #555555">()</span> <span style="color: #006699; font-weight: bold">throws</span> Exception <span style="color: #555555">{</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#99f">@Test</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">shouldHaveAMessageInDeferredResponse</span><span style="color:#555">()</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
         mockMvc
-                <span style="color: #555555">.</span><span style="color: #330099">perform</span><span style="color: #555555">(</span>get<span style="color: #555555">(</span><span style="color: #CC3300">&quot;/test/deferred&quot;</span><span style="color: #555555">)</span>
-                        <span style="color: #555555">.</span><span style="color: #330099">contentType</span><span style="color: #555555">(</span>APPLICATION_JSON<span style="color: #555555">))</span>
-                <span style="color: #555555">.</span><span style="color: #330099">andExpect</span><span style="color: #555555">(</span>status<span style="color: #555555">().</span><span style="color: #330099">isOk</span><span style="color: #555555">())</span>
-                <span style="color: #555555">.</span><span style="color: #330099">andExpect</span><span style="color: #555555">(</span>header<span style="color: #555555">().</span><span style="color: #330099">string</span><span style="color: #555555">(</span>CONTENT_TYPE<span style="color: #555555">,</span> APPLICATION_JSON_VALUE<span style="color: #555555">))</span>
-                <span style="color: #555555">.</span><span style="color: #330099">andExpect</span><span style="color: #555555">(</span>jsonPath<span style="color: #555555">(</span><span style="color: #CC3300">&quot;message&quot;</span><span style="color: #555555">).</span><span style="color: #330099">value</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;hello&quot;</span><span style="color: #555555">));</span>
-    <span style="color: #555555">}</span>
-</pre></div>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>Response header Content-Type expected:&lt;application/json&gt; but was:&lt;null&gt;
-</pre></div>
-
+                <span style="color:#555">.</span><span style="color:#309">perform</span><span style="color:#555">(</span>get<span style="color:#555">(</span><span style="color:#c30">&#34;/test/deferred&#34;</span><span style="color:#555">)</span>
+                        <span style="color:#555">.</span><span style="color:#309">contentType</span><span style="color:#555">(</span>APPLICATION_JSON<span style="color:#555">))</span>
+                <span style="color:#555">.</span><span style="color:#309">andExpect</span><span style="color:#555">(</span>status<span style="color:#555">().</span><span style="color:#309">isOk</span><span style="color:#555">())</span>
+                <span style="color:#555">.</span><span style="color:#309">andExpect</span><span style="color:#555">(</span>header<span style="color:#555">().</span><span style="color:#309">string</span><span style="color:#555">(</span>CONTENT_TYPE<span style="color:#555">,</span> APPLICATION_JSON_VALUE<span style="color:#555">))</span>
+                <span style="color:#555">.</span><span style="color:#309">andExpect</span><span style="color:#555">(</span>jsonPath<span style="color:#555">(</span><span style="color:#c30">&#34;message&#34;</span><span style="color:#555">).</span><span style="color:#309">value</span><span style="color:#555">(</span><span style="color:#c30">&#34;hello&#34;</span><span style="color:#555">));</span>
+    <span style="color:#555">}</span></code></pre></div><div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">Response header Content-Type expected:&lt;application/json&gt; but was:&lt;null&gt;</code></pre></div>
 <p>This happened because MockMvc did not wait for the asynchronous process to finish. The solution to this involves using MockMvc&rsquo;s <code>asyncDispatch</code>. AsyncDispatch creates a new request that continues from the result of a previous MockMvc request that started the asynchronous process.
 The test re-written using <code>asyncDispatch</code> would be as follows:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>    <span style="color: #9999FF">@Test</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">shouldHaveAMessageInDeferredResponseWithAsyncDispatch</span><span style="color: #555555">()</span> <span style="color: #006699; font-weight: bold">throws</span> Exception <span style="color: #555555">{</span>
-        MvcResult result <span style="color: #555555">=</span> mockMvc
-                <span style="color: #555555">.</span><span style="color: #330099">perform</span><span style="color: #555555">(</span>get<span style="color: #555555">(</span><span style="color: #CC3300">&quot;/test/deferred&quot;</span><span style="color: #555555">)</span>
-                        <span style="color: #555555">.</span><span style="color: #330099">contentType</span><span style="color: #555555">(</span>APPLICATION_JSON<span style="color: #555555">))</span>
-                <span style="color: #555555">.</span><span style="color: #330099">andReturn</span><span style="color: #555555">();</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#99f">@Test</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">shouldHaveAMessageInDeferredResponseWithAsyncDispatch</span><span style="color:#555">()</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
+        MvcResult result <span style="color:#555">=</span> mockMvc
+                <span style="color:#555">.</span><span style="color:#309">perform</span><span style="color:#555">(</span>get<span style="color:#555">(</span><span style="color:#c30">&#34;/test/deferred&#34;</span><span style="color:#555">)</span>
+                        <span style="color:#555">.</span><span style="color:#309">contentType</span><span style="color:#555">(</span>APPLICATION_JSON<span style="color:#555">))</span>
+                <span style="color:#555">.</span><span style="color:#309">andReturn</span><span style="color:#555">();</span>
 
         mockMvc
-                <span style="color: #555555">.</span><span style="color: #330099">perform</span><span style="color: #555555">(</span>asyncDispatch<span style="color: #555555">(</span>result<span style="color: #555555">))</span>
-                <span style="color: #555555">.</span><span style="color: #330099">andExpect</span><span style="color: #555555">(</span>status<span style="color: #555555">().</span><span style="color: #330099">isOk</span><span style="color: #555555">())</span>
-                <span style="color: #555555">.</span><span style="color: #330099">andExpect</span><span style="color: #555555">(</span>header<span style="color: #555555">().</span><span style="color: #330099">string</span><span style="color: #555555">(</span>CONTENT_TYPE<span style="color: #555555">,</span> APPLICATION_JSON_VALUE<span style="color: #555555">))</span>
-                <span style="color: #555555">.</span><span style="color: #330099">andExpect</span><span style="color: #555555">(</span>jsonPath<span style="color: #555555">(</span><span style="color: #CC3300">&quot;message&quot;</span><span style="color: #555555">).</span><span style="color: #330099">value</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;hello&quot;</span><span style="color: #555555">));</span>
-    <span style="color: #555555">}</span>
-</pre></div>
-
+                <span style="color:#555">.</span><span style="color:#309">perform</span><span style="color:#555">(</span>asyncDispatch<span style="color:#555">(</span>result<span style="color:#555">))</span>
+                <span style="color:#555">.</span><span style="color:#309">andExpect</span><span style="color:#555">(</span>status<span style="color:#555">().</span><span style="color:#309">isOk</span><span style="color:#555">())</span>
+                <span style="color:#555">.</span><span style="color:#309">andExpect</span><span style="color:#555">(</span>header<span style="color:#555">().</span><span style="color:#309">string</span><span style="color:#555">(</span>CONTENT_TYPE<span style="color:#555">,</span> APPLICATION_JSON_VALUE<span style="color:#555">))</span>
+                <span style="color:#555">.</span><span style="color:#309">andExpect</span><span style="color:#555">(</span>jsonPath<span style="color:#555">(</span><span style="color:#c30">&#34;message&#34;</span><span style="color:#555">).</span><span style="color:#309">value</span><span style="color:#555">(</span><span style="color:#c30">&#34;hello&#34;</span><span style="color:#555">));</span>
+    <span style="color:#555">}</span></code></pre></div>
 <p>The same approach can be employed to test when controllers use Java 8&rsquo;s <code>CompletableFuture</code>.</p>
             <p class="comments">
   If you have questions or comments about this blog post, you can get in touch with me on Twitter <a href="https://twitter.com/sdqali">@sdqali</a>.
 </p>
-
-            <div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Found this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and explanations for specific Java, Spring and other programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
 
           </div>
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">

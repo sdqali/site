@@ -120,90 +120,56 @@ Clearly, monitoring files for changes, shouldn&rsquo;t be big deal. I decided to
 <p><code>~/src/sdq/ocr$ ./autorun.py &quot;python Test*.py&quot;</code></p>
 
 <p>That would start <code>autorun.py</code> and every time I modify a file in the present directory the command  <code>python Test*.py</code> is executed. In my case, I am using the unittest framework that comes with Python. So everytime, a file is updates, it runs all my unit tests, as seen below:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>sadiquea@sadiquea-laptop:~/src/sdq/ocr$ ./autorun.py <span style="color: #CC3300">&quot;python Test*.py&quot;</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sadiquea@sadiquea-laptop:~/src/sdq/ocr$ ./autorun.py <span style="color:#c30">&#34;python Test*.py&#34;</span>
 Autorunner in action
 .............
 
 ----------------------------------------------------------------------
 
-Ran <span style="color: #FF6600">13</span> tests in <span style="color: #FF6600">0</span>.763s
+Ran <span style="color:#f60">13</span> tests in <span style="color:#f60">0</span>.763s
 
-OK
-</pre></div>
-
+OK</code></pre></div>
 <p>If I were working with Ruby and wanted to run all my unit tests when I modify the files, I could start the tool like this: <code>./autorun.py &quot;rake spec&quot;</code></p>
 
 <p>I would really like to add the ability to exclude some files/subdirectories from being watched for changes.</p>
 
 <p>Here is the code snippet that does the trick:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #0099FF; font-style: italic">#!/usr/bin/env python</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#09f;font-style:italic">#!/usr/bin/env python</span>
 
-<span style="color: #006699; font-weight: bold">import</span> <span style="color: #00CCFF; font-weight: bold">sys</span>
-<span style="color: #006699; font-weight: bold">import</span> <span style="color: #00CCFF; font-weight: bold">os</span>
-<span style="color: #006699; font-weight: bold">import</span> <span style="color: #00CCFF; font-weight: bold">pyinotify</span>
+<span style="color:#069;font-weight:bold">import</span> <span style="color:#0cf;font-weight:bold">sys</span>
+<span style="color:#069;font-weight:bold">import</span> <span style="color:#0cf;font-weight:bold">os</span>
+<span style="color:#069;font-weight:bold">import</span> <span style="color:#0cf;font-weight:bold">pyinotify</span>
 
-<span style="color: #006699; font-weight: bold">if</span> <span style="color: #336666">len</span>(sys<span style="color: #555555">.</span>argv)<span style="color: #555555">==</span><span style="color: #FF6600">1</span>:
-    <span style="color: #006699; font-weight: bold">print</span> <span style="color: #CC3300">&quot;Please pass a command to excute as a parameter&quot;</span>
-    <span style="color: #006699; font-weight: bold">print</span> <span style="color: #CC3300">&quot;For example autorun.py &#39;ruby foo.rb&#39;&quot;</span>
-    sys<span style="color: #555555">.</span>exit()
+<span style="color:#069;font-weight:bold">if</span> <span style="color:#366">len</span>(sys<span style="color:#555">.</span>argv)<span style="color:#555">==</span><span style="color:#f60">1</span>:
+    <span style="color:#069;font-weight:bold">print</span> <span style="color:#c30"></span><span style="color:#c30">&#34;Please pass a command to excute as a parameter&#34;</span>
+    <span style="color:#069;font-weight:bold">print</span> <span style="color:#c30"></span><span style="color:#c30">&#34;For example autorun.py &#39;ruby foo.rb&#39;&#34;</span>
+    sys<span style="color:#555">.</span><span style="color:#366">exit</span>()
 
-commandToRun <span style="color: #555555">=</span> sys<span style="color: #555555">.</span>argv[<span style="color: #FF6600">1</span>]
+commandToRun <span style="color:#555">=</span> sys<span style="color:#555">.</span>argv[<span style="color:#f60">1</span>]
 
-watchManager <span style="color: #555555">=</span> pyinotify<span style="color: #555555">.</span>WatchManager()
-mask <span style="color: #555555">=</span> pyinotify<span style="color: #555555">.</span>IN_MODIFY
+watchManager <span style="color:#555">=</span> pyinotify<span style="color:#555">.</span>WatchManager()
+mask <span style="color:#555">=</span> pyinotify<span style="color:#555">.</span>IN_MODIFY
 
-<span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">ActionProcesser</span>(pyinotify<span style="color: #555555">.</span>ProcessEvent):
-    <span style="color: #006699; font-weight: bold">def</span> <span style="color: #CC00FF">process_IN_MODIFY</span>(<span style="color: #336666">self</span>, event):
-        <span style="color: #006699; font-weight: bold">print</span> <span style="color: #CC3300">&quot;Autorunner in action&quot;</span>
-        os<span style="color: #555555">.</span>system(commandToRun)
+<span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">ActionProcesser</span>(pyinotify<span style="color:#555">.</span>ProcessEvent):
+    <span style="color:#069;font-weight:bold">def</span> <span style="color:#c0f">process_IN_MODIFY</span>(self, event):
+        <span style="color:#069;font-weight:bold">print</span> <span style="color:#c30"></span><span style="color:#c30">&#34;Autorunner in action&#34;</span>
+        os<span style="color:#555">.</span>system(commandToRun)
 
-notifier <span style="color: #555555">=</span> pyinotify<span style="color: #555555">.</span>Notifier(watchManager, ActionProcesser())
+notifier <span style="color:#555">=</span> pyinotify<span style="color:#555">.</span>Notifier(watchManager, ActionProcesser())
 
-wdd <span style="color: #555555">=</span> watchManager<span style="color: #555555">.</span>add_watch(os<span style="color: #555555">.</span>getcwd(), mask, rec<span style="color: #555555">=</span><span style="color: #336666">True</span>)
+wdd <span style="color:#555">=</span> watchManager<span style="color:#555">.</span>add_watch(os<span style="color:#555">.</span>getcwd(), mask, rec<span style="color:#555">=</span>True)
 
-<span style="color: #006699; font-weight: bold">while</span> <span style="color: #336666">True</span>:
-    <span style="color: #006699; font-weight: bold">try</span>:
-        notifier<span style="color: #555555">.</span>process_events()
-        <span style="color: #006699; font-weight: bold">if</span> notifier<span style="color: #555555">.</span>check_events():
-            notifier<span style="color: #555555">.</span>read_events()
-    <span style="color: #006699; font-weight: bold">except</span> <span style="color: #CC0000; font-weight: bold">KeyboardInterrupt</span>:
-        notifier<span style="color: #555555">.</span>stop()
-        <span style="color: #006699; font-weight: bold">break</span>
-</pre></div>
-
+<span style="color:#069;font-weight:bold">while</span> True:
+    <span style="color:#069;font-weight:bold">try</span>:
+        notifier<span style="color:#555">.</span>process_events()
+        <span style="color:#069;font-weight:bold">if</span> notifier<span style="color:#555">.</span>check_events():
+            notifier<span style="color:#555">.</span>read_events()
+    <span style="color:#069;font-weight:bold">except</span> <span style="color:#c00;font-weight:bold">KeyboardInterrupt</span>:
+        notifier<span style="color:#555">.</span>stop()
+        <span style="color:#069;font-weight:bold">break</span></code></pre></div>
             <p class="comments">
   If you have questions or comments about this blog post, you can get in touch with me on Twitter <a href="https://twitter.com/sdqali">@sdqali</a>.
 </p>
-
-            <div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Found this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and explanations for specific Java, Spring and other programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
 
           </div>
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">

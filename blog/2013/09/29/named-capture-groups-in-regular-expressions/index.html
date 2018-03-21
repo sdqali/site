@@ -121,74 +121,38 @@
 <p>Ruby has supported named capture groups since version 1.9. Each match group is named by using <code>?&lt;name&gt;</code> inside the match group and these matches are made available has a hash and each match can be accessed by using the match group name as the key.</p>
 
 <p><em>WestCoastJustin</em>&rsquo;s example will look like this in Ruby:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #0099FF; font-style: italic">#!/usr/bin/env ruby</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ruby" data-lang="ruby"><span style="color:#09f;font-style:italic">#!/usr/bin/env ruby</span>
 
-test_string <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;Today&#39;s date is: 9/28/2013.&quot;</span>
+test_string <span style="color:#555">=</span> <span style="color:#c30">&#34;Today&#39;s date is: 9/28/2013.&#34;</span>
 
-match <span style="color: #555555">=</span> test_string<span style="color: #555555">.</span>match <span style="color: #33AAAA">/(?&lt;month&gt;\d{1,2})\/(?&lt;day&gt;\d{1,2})\/(?&lt;year&gt;\d{4})/</span>
-<span style="color: #336666">puts</span> match<span style="color: #555555">.</span>inspect
-<span style="color: #336666">puts</span> match<span style="color: #555555">[</span><span style="color: #FFCC33">:month</span><span style="color: #555555">]</span>
-<span style="color: #336666">puts</span> match<span style="color: #555555">[</span><span style="color: #FFCC33">:day</span><span style="color: #555555">]</span>
-<span style="color: #336666">puts</span> match<span style="color: #555555">[</span><span style="color: #FFCC33">:year</span><span style="color: #555555">]</span>
-</pre></div>
-
+match <span style="color:#555">=</span> test_string<span style="color:#555">.</span>match <span style="color:#3aa">/(?&lt;month&gt;\d{1,2})\/(?&lt;day&gt;\d{1,2})\/(?&lt;year&gt;\d{4})/</span>
+<span style="color:#366">puts</span> match<span style="color:#555">.</span>inspect
+<span style="color:#366">puts</span> match<span style="color:#555">[</span><span style="color:#fc3">:month</span><span style="color:#555">]</span>
+<span style="color:#366">puts</span> match<span style="color:#555">[</span><span style="color:#fc3">:day</span><span style="color:#555">]</span>
+<span style="color:#366">puts</span> match<span style="color:#555">[</span><span style="color:#fc3">:year</span><span style="color:#555">]</span></code></pre></div>
 <p>This is much easier to understand because looking at it, it makes it clear that the intent of matching the first group of 1 or 2 digits is to look for the <strong>month</strong> in the date. Similarly, the intent of the <em>day</em> and <em>year</em> matches are easier to understand.</p>
 
 <p>This will result in:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>&gt; ruby /tmp/named_matches.rb
-<span style="color: #0099FF; font-style: italic">#&lt;MatchData &quot;9/28/2013&quot; month:&quot;9&quot; day:&quot;28&quot; year:&quot;2013&quot;&gt;</span>
-<span style="color: #FF6600">9</span>
-<span style="color: #FF6600">28</span>
-<span style="color: #FF6600">2013</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">&gt; ruby /tmp/named_matches.rb
+<span style="color:#09f;font-style:italic">#&lt;MatchData &#34;9/28/2013&#34; month:&#34;9&#34; day:&#34;28&#34; year:&#34;2013&#34;&gt;
+</span><span style="color:#09f;font-style:italic"></span><span style="color:#f60">9</span>
+<span style="color:#f60">28</span>
+<span style="color:#f60">2013</span></code></pre></div>
 <p>##Python
 Python&rsquo;s <code>re</code> module supports named match groups using the <code>?P&lt;name&gt;</code> pattern. After a pattern search, the results are placed in a <code>dict</code>.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #0099FF; font-style: italic">#!/usr/bin/env ruby</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#09f;font-style:italic">#!/usr/bin/env ruby</span>
 
-<span style="color: #006699; font-weight: bold">import</span> <span style="color: #00CCFF; font-weight: bold">re</span>
+<span style="color:#069;font-weight:bold">import</span> <span style="color:#0cf;font-weight:bold">re</span>
 
-test_string <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;Today&#39;s date is: 9/28/2013.&quot;</span>
-pattern <span style="color: #555555">=</span> re<span style="color: #555555">.</span>compile(<span style="color: #CC3300">r&quot;(?P&lt;month&gt;\d{1,2})\/(?P&lt;day&gt;\d{1,2})\/(?P&lt;year&gt;\d{4})&quot;</span>)
-match_dict <span style="color: #555555">=</span> pattern<span style="color: #555555">.</span>search(test_string)<span style="color: #555555">.</span>groupdict()
-<span style="color: #006699; font-weight: bold">print</span>(match_dict)
-</pre></div>
-
+test_string <span style="color:#555">=</span> <span style="color:#c30"></span><span style="color:#c30">&#34;Today&#39;s date is: 9/28/2013.&#34;</span>
+pattern <span style="color:#555">=</span> re<span style="color:#555">.</span><span style="color:#366">compile</span>(<span style="color:#c30">r</span><span style="color:#c30">&#34;(?P&lt;month&gt;\d{1,2})\/(?P&lt;day&gt;\d{1,2})\/(?P&lt;year&gt;\d{4})&#34;</span>)
+match_dict <span style="color:#555">=</span> pattern<span style="color:#555">.</span>search(test_string)<span style="color:#555">.</span>groupdict()
+<span style="color:#069;font-weight:bold">print</span>(match_dict)</code></pre></div>
 <p>JavaScript does not support named capture groups. There are a lot of <a href="http://trentrichardson.com/2011/08/02/javascript-regexp-match-named-captures/">hacks</a> aimed at providing this functionality. The XRegExp library <a href="http://xregexp.com/syntax/#namedCapture">supports</a> named capture groups.</p>
 
             <p class="comments">
   If you have questions or comments about this blog post, you can get in touch with me on Twitter <a href="https://twitter.com/sdqali">@sdqali</a>.
 </p>
-
-            <div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Found this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and explanations for specific Java, Spring and other programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
 
           </div>
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">

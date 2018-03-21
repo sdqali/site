@@ -131,195 +131,123 @@ Most of the Spring controllers in the real world accept a lot of different types
 <h2 id="argument-resolvers">Argument Resolvers</h2>
 
 <p>Spring uses argument resolvers to determine how to parse a particular argument required by a controller method from HTTP request body, the URL, URL parameters and HTTP headers. For example when a method expects a request header as in the following example, Spring uses a particular resolver named <code>RequestHeaderMethodArgumentResolver</code> to resolve this argument. All argument resolvers implement the <code>HandlerMethodArgumentResolver</code> interface whose contract is:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">interface</span> <span style="color: #00AA88; font-weight: bold">HandlerMethodArgumentResolver</span> <span style="color: #555555">{</span>
-    <span style="color: #007788; font-weight: bold">boolean</span> <span style="color: #CC00FF">supportsParameter</span><span style="color: #555555">(</span>MethodParameter parameter<span style="color: #555555">);</span>
-    Object <span style="color: #CC00FF">resolveArgument</span><span style="color: #555555">(</span>MethodParameter parameter<span style="color: #555555">,</span> ModelAndViewContainer mavContainer<span style="color: #555555">,</span>
-            NativeWebRequest webRequest<span style="color: #555555">,</span> WebDataBinderFactory binderFactory<span style="color: #555555">)</span> <span style="color: #006699; font-weight: bold">throws</span> Exception<span style="color: #555555">;</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">interface</span> <span style="color:#0a8;font-weight:bold">HandlerMethodArgumentResolver</span> <span style="color:#555">{</span>
+    <span style="color:#078;font-weight:bold">boolean</span> <span style="color:#c0f">supportsParameter</span><span style="color:#555">(</span>MethodParameter parameter<span style="color:#555">);</span>
+    Object <span style="color:#c0f">resolveArgument</span><span style="color:#555">(</span>MethodParameter parameter<span style="color:#555">,</span> ModelAndViewContainer mavContainer<span style="color:#555">,</span>
+            NativeWebRequest webRequest<span style="color:#555">,</span> WebDataBinderFactory binderFactory<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> Exception<span style="color:#555">;</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>The <code>supportsParameter</code> method determines if this resolver is capable of parsing a given parameter and <code>resolveArgument</code> specifies how it‘s value should be computed. Notice how this method has the web <code>NativeWebRequest</code> argument passed to it to allow the look up of request parameters like body, url and headers.</p>
 
 <p>For this example, the MetaData that we are interested in can be represented as a type:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">MetaData</span> <span style="color: #555555">{</span>
-    <span style="color: #9999FF">@JsonProperty</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;data&quot;</span><span style="color: #555555">)</span>
-    <span style="color: #006699; font-weight: bold">private</span> Map<span style="color: #555555">&lt;</span>String<span style="color: #555555">,</span> String<span style="color: #555555">&gt;</span> map  <span style="color: #555555">=</span> <span style="color: #006699; font-weight: bold">new</span> HashMap<span style="color: #555555">&lt;&gt;();</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">MetaData</span> <span style="color:#555">{</span>
+    <span style="color:#99f">@JsonProperty</span><span style="color:#555">(</span><span style="color:#c30">&#34;data&#34;</span><span style="color:#555">)</span>
+    <span style="color:#069;font-weight:bold">private</span> Map<span style="color:#555">&lt;</span>String<span style="color:#555">,</span> String<span style="color:#555">&gt;</span> map  <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">new</span> HashMap<span style="color:#555">&lt;&gt;();</span>
 
-    <span style="color: #006699; font-weight: bold">private</span> <span style="color: #CC00FF">MetaData</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#069;font-weight:bold">private</span> <span style="color:#c0f">MetaData</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #CC00FF">MetaData</span><span style="color: #555555">(</span>Map<span style="color: #555555">&lt;</span>String<span style="color: #555555">,</span> String<span style="color: #555555">&gt;</span> map<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">this</span><span style="color: #555555">.</span><span style="color: #330099">map</span> <span style="color: #555555">=</span> map<span style="color: #555555">;</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">MetaData</span><span style="color:#555">(</span>Map<span style="color:#555">&lt;</span>String<span style="color:#555">,</span> String<span style="color:#555">&gt;</span> map<span style="color:#555">)</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">this</span><span style="color:#555">.</span><span style="color:#309">map</span> <span style="color:#555">=</span> map<span style="color:#555">;</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #006699; font-weight: bold">public</span> String <span style="color: #CC00FF">get</span><span style="color: #555555">(</span>String key<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> map<span style="color: #555555">.</span><span style="color: #330099">get</span><span style="color: #555555">(</span>key<span style="color: #555555">);</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+    <span style="color:#069;font-weight:bold">public</span> String <span style="color:#c0f">get</span><span style="color:#555">(</span>String key<span style="color:#555">)</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> map<span style="color:#555">.</span><span style="color:#309">get</span><span style="color:#555">(</span>key<span style="color:#555">);</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>An argument resolver to compute this from the incoming request can be written as follows:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">MetaDataResolver</span> <span style="color: #006699; font-weight: bold">implements</span> HandlerMethodArgumentResolver <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">private</span> <span style="color: #006699; font-weight: bold">static</span> <span style="color: #006699; font-weight: bold">final</span> String TRANSACTION_ID <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;TRANSACTION-ID&quot;</span><span style="color: #555555">;</span>
-    <span style="color: #006699; font-weight: bold">private</span> <span style="color: #006699; font-weight: bold">static</span> <span style="color: #006699; font-weight: bold">final</span> String ACCESS_KEY <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;ACCESS-KEY&quot;</span><span style="color: #555555">;</span>
-    <span style="color: #006699; font-weight: bold">private</span> List<span style="color: #555555">&lt;</span>String<span style="color: #555555">&gt;</span> metaDataHeaderNames <span style="color: #555555">=</span> Arrays<span style="color: #555555">.</span><span style="color: #330099">asList</span><span style="color: #555555">(</span>TRANSACTION_ID<span style="color: #555555">,</span> ACCESS_KEY<span style="color: #555555">);</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">MetaDataResolver</span> <span style="color:#069;font-weight:bold">implements</span> HandlerMethodArgumentResolver <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">static</span> <span style="color:#069;font-weight:bold">final</span> String TRANSACTION_ID <span style="color:#555">=</span> <span style="color:#c30">&#34;TRANSACTION-ID&#34;</span><span style="color:#555">;</span>
+    <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">static</span> <span style="color:#069;font-weight:bold">final</span> String ACCESS_KEY <span style="color:#555">=</span> <span style="color:#c30">&#34;ACCESS-KEY&#34;</span><span style="color:#555">;</span>
+    <span style="color:#069;font-weight:bold">private</span> List<span style="color:#555">&lt;</span>String<span style="color:#555">&gt;</span> metaDataHeaderNames <span style="color:#555">=</span> Arrays<span style="color:#555">.</span><span style="color:#309">asList</span><span style="color:#555">(</span>TRANSACTION_ID<span style="color:#555">,</span> ACCESS_KEY<span style="color:#555">);</span>
 
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">boolean</span> <span style="color: #CC00FF">supportsParameter</span><span style="color: #555555">(</span>MethodParameter parameter<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> parameter<span style="color: #555555">.</span><span style="color: #330099">getParameterType</span><span style="color: #555555">().</span><span style="color: #330099">equals</span><span style="color: #555555">(</span>MetaData<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">);</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">boolean</span> <span style="color:#c0f">supportsParameter</span><span style="color:#555">(</span>MethodParameter parameter<span style="color:#555">)</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> parameter<span style="color:#555">.</span><span style="color:#309">getParameterType</span><span style="color:#555">().</span><span style="color:#309">equals</span><span style="color:#555">(</span>MetaData<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">);</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> Object <span style="color: #CC00FF">resolveArgument</span><span style="color: #555555">(</span>MethodParameter parameter<span style="color: #555555">,</span> ModelAndViewContainer mavContainer<span style="color: #555555">,</span> NativeWebRequest webRequest<span style="color: #555555">,</span> WebDataBinderFactory binderFactory<span style="color: #555555">)</span> <span style="color: #006699; font-weight: bold">throws</span> Exception <span style="color: #555555">{</span>
-        HashMap<span style="color: #555555">&lt;</span>String<span style="color: #555555">,</span> String<span style="color: #555555">&gt;</span> map <span style="color: #555555">=</span> <span style="color: #006699; font-weight: bold">new</span> HashMap<span style="color: #555555">&lt;&gt;();</span>
-        metaDataHeaderNames<span style="color: #555555">.</span><span style="color: #330099">forEach</span><span style="color: #555555">(</span>name <span style="color: #555555">-&gt;</span> <span style="color: #555555">{</span>
-            <span style="color: #006699; font-weight: bold">if</span> <span style="color: #555555">(</span>webRequest<span style="color: #555555">.</span><span style="color: #330099">getHeader</span><span style="color: #555555">(</span>name<span style="color: #555555">)</span> <span style="color: #555555">!=</span> <span style="color: #006699; font-weight: bold">null</span><span style="color: #555555">)</span> <span style="color: #555555">{</span>
-                map<span style="color: #555555">.</span><span style="color: #330099">put</span><span style="color: #555555">(</span>name<span style="color: #555555">,</span> webRequest<span style="color: #555555">.</span><span style="color: #330099">getHeader</span><span style="color: #555555">(</span>name<span style="color: #555555">));</span>
-            <span style="color: #555555">}</span>
-        <span style="color: #555555">});</span>
-        <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">new</span> MetaData<span style="color: #555555">(</span>map<span style="color: #555555">);</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
-<p>This resolver will try and compute the value for the argument if the arguments type is <code>MetaData</code>. It computes it by extracting all the headers representing the meta data from the request.
-<div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Finding this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and actionable explanations for specific programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
-</p>
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> Object <span style="color:#c0f">resolveArgument</span><span style="color:#555">(</span>MethodParameter parameter<span style="color:#555">,</span> ModelAndViewContainer mavContainer<span style="color:#555">,</span> NativeWebRequest webRequest<span style="color:#555">,</span> WebDataBinderFactory binderFactory<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
+        HashMap<span style="color:#555">&lt;</span>String<span style="color:#555">,</span> String<span style="color:#555">&gt;</span> map <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">new</span> HashMap<span style="color:#555">&lt;&gt;();</span>
+        metaDataHeaderNames<span style="color:#555">.</span><span style="color:#309">forEach</span><span style="color:#555">(</span>name <span style="color:#555">-&gt;</span> <span style="color:#555">{</span>
+            <span style="color:#069;font-weight:bold">if</span> <span style="color:#555">(</span>webRequest<span style="color:#555">.</span><span style="color:#309">getHeader</span><span style="color:#555">(</span>name<span style="color:#555">)</span> <span style="color:#555">!=</span> <span style="color:#069;font-weight:bold">null</span><span style="color:#555">)</span> <span style="color:#555">{</span>
+                map<span style="color:#555">.</span><span style="color:#309">put</span><span style="color:#555">(</span>name<span style="color:#555">,</span> webRequest<span style="color:#555">.</span><span style="color:#309">getHeader</span><span style="color:#555">(</span>name<span style="color:#555">));</span>
+            <span style="color:#555">}</span>
+        <span style="color:#555">});</span>
+        <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">new</span> MetaData<span style="color:#555">(</span>map<span style="color:#555">);</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
+<p>This resolver will try and compute the value for the argument if the arguments type is <code>MetaData</code>. It computes it by extracting all the headers representing the meta data from the request.</p>
 
 <h2 id="using-in-a-controller-method">Using in a controller method</h2>
 
 <p>This parameter can be accessed in a controller method as follows:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@RestController</span>
-<span style="color: #9999FF">@RequestMapping</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;/profiles&quot;</span><span style="color: #555555">)</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">ProfileController</span> <span style="color: #555555">{</span>
-    <span style="color: #9999FF">@Autowired</span>
-    ProfileService profileService<span style="color: #555555">;</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@RestController</span>
+<span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span><span style="color:#c30">&#34;/profiles&#34;</span><span style="color:#555">)</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">ProfileController</span> <span style="color:#555">{</span>
+    <span style="color:#99f">@Autowired</span>
+    ProfileService profileService<span style="color:#555">;</span>
 
-    <span style="color: #9999FF">@RequestMapping</span><span style="color: #555555">(</span>path <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;/&quot;</span><span style="color: #555555">,</span>
-    method <span style="color: #555555">=</span> RequestMethod<span style="color: #555555">.</span><span style="color: #330099">POST</span><span style="color: #555555">)</span>
-    <span style="color: #006699; font-weight: bold">public</span> Map<span style="color: #555555">&lt;</span>String<span style="color: #555555">,</span> String<span style="color: #555555">&gt;</span> <span style="color: #CC00FF">create</span><span style="color: #555555">(</span><span style="color: #9999FF">@RequestBody</span> Profile profile<span style="color: #555555">,</span> MetaData metaData<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        profileService<span style="color: #555555">.</span><span style="color: #330099">create</span><span style="color: #555555">(</span>profile<span style="color: #555555">,</span> metaData<span style="color: #555555">);</span>
-        System<span style="color: #555555">.</span><span style="color: #330099">out</span><span style="color: #555555">.</span><span style="color: #330099">printf</span><span style="color: #555555">(</span>metaData<span style="color: #555555">.</span><span style="color: #330099">toString</span><span style="color: #555555">());</span>
-        <span style="color: #006699; font-weight: bold">return</span> Collections<span style="color: #555555">.</span><span style="color: #330099">singletonMap</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;message&quot;</span><span style="color: #555555">,</span> <span style="color: #CC3300">&quot;success&quot;</span><span style="color: #555555">);</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+    <span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span>path <span style="color:#555">=</span> <span style="color:#c30">&#34;/&#34;</span><span style="color:#555">,</span>
+    method <span style="color:#555">=</span> RequestMethod<span style="color:#555">.</span><span style="color:#309">POST</span><span style="color:#555">)</span>
+    <span style="color:#069;font-weight:bold">public</span> Map<span style="color:#555">&lt;</span>String<span style="color:#555">,</span> String<span style="color:#555">&gt;</span> <span style="color:#c0f">create</span><span style="color:#555">(</span><span style="color:#99f">@RequestBody</span> Profile profile<span style="color:#555">,</span> MetaData metaData<span style="color:#555">)</span> <span style="color:#555">{</span>
+        profileService<span style="color:#555">.</span><span style="color:#309">create</span><span style="color:#555">(</span>profile<span style="color:#555">,</span> metaData<span style="color:#555">);</span>
+        System<span style="color:#555">.</span><span style="color:#309">out</span><span style="color:#555">.</span><span style="color:#309">printf</span><span style="color:#555">(</span>metaData<span style="color:#555">.</span><span style="color:#309">toString</span><span style="color:#555">());</span>
+        <span style="color:#069;font-weight:bold">return</span> Collections<span style="color:#555">.</span><span style="color:#309">singletonMap</span><span style="color:#555">(</span><span style="color:#c30">&#34;message&#34;</span><span style="color:#555">,</span> <span style="color:#c30">&#34;success&#34;</span><span style="color:#555">);</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>If we were to run this app and make a request with the following headers, we will see that the MetaData instance did not get constructed with the right parameters.</p>
 
 <h2 id="wiring-up-the-custom-resolver">Wiring up the custom resolver</h2>
 
 <p>For this resolver to work, it needs to be added to the chain of resolvers that Spring uses. This can be done by extending <code>WebMvcConfigurerAdapter</code>‘s <code>addArgumentResolvers</code> method as follows:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@Configuration</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">Config</span> <span style="color: #006699; font-weight: bold">extends</span> WebMvcConfigurerAdapter <span style="color: #555555">{</span>
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">addArgumentResolvers</span><span style="color: #555555">(</span>List<span style="color: #555555">&lt;</span>HandlerMethodArgumentResolver<span style="color: #555555">&gt;</span> argumentResolvers<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        argumentResolvers<span style="color: #555555">.</span><span style="color: #330099">add</span><span style="color: #555555">(</span><span style="color: #006699; font-weight: bold">new</span> MetaDataResolver<span style="color: #555555">());</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Configuration</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">Config</span> <span style="color:#069;font-weight:bold">extends</span> WebMvcConfigurerAdapter <span style="color:#555">{</span>
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">addArgumentResolvers</span><span style="color:#555">(</span>List<span style="color:#555">&lt;</span>HandlerMethodArgumentResolver<span style="color:#555">&gt;</span> argumentResolvers<span style="color:#555">)</span> <span style="color:#555">{</span>
+        argumentResolvers<span style="color:#555">.</span><span style="color:#309">add</span><span style="color:#555">(</span><span style="color:#069;font-weight:bold">new</span> MetaDataResolver<span style="color:#555">());</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <h2 id="testing-using-mockmvc">Testing using MockMvc</h2>
 
 <p>In order to test the behavior of a controller in the presence of a custom argument resolver using MockMvc, the resolver need to be added to the list of resolvers that MockMvc is going to use.
  An example test for the above class is as follows:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@RunWith</span><span style="color: #555555">(</span>MockitoJUnitRunner<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">)</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">ProfileControllerTest</span> <span style="color: #006699; font-weight: bold">extends</span> TestCase <span style="color: #555555">{</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@RunWith</span><span style="color:#555">(</span>MockitoJUnitRunner<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">)</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">ProfileControllerTest</span> <span style="color:#069;font-weight:bold">extends</span> TestCase <span style="color:#555">{</span>
 
-    <span style="color: #006699; font-weight: bold">private</span> ProfileController profileController<span style="color: #555555">;</span>
-    <span style="color: #006699; font-weight: bold">private</span> MockMvc mockMvc<span style="color: #555555">;</span>
-    <span style="color: #006699; font-weight: bold">private</span> ObjectMapper objectMapper<span style="color: #555555">;</span>
+    <span style="color:#069;font-weight:bold">private</span> ProfileController profileController<span style="color:#555">;</span>
+    <span style="color:#069;font-weight:bold">private</span> MockMvc mockMvc<span style="color:#555">;</span>
+    <span style="color:#069;font-weight:bold">private</span> ObjectMapper objectMapper<span style="color:#555">;</span>
 
-    <span style="color: #9999FF">@Mock</span>
-    <span style="color: #006699; font-weight: bold">private</span> ProfileService profileService<span style="color: #555555">;</span>
+    <span style="color:#99f">@Mock</span>
+    <span style="color:#069;font-weight:bold">private</span> ProfileService profileService<span style="color:#555">;</span>
 
-    <span style="color: #9999FF">@Before</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">setUp</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-        objectMapper <span style="color: #555555">=</span> <span style="color: #006699; font-weight: bold">new</span> ObjectMapper<span style="color: #555555">();</span>
-        profileController <span style="color: #555555">=</span> <span style="color: #006699; font-weight: bold">new</span> ProfileController<span style="color: #555555">(</span>profileService<span style="color: #555555">);</span>
-        mockMvc <span style="color: #555555">=</span> MockMvcBuilders
-                <span style="color: #555555">.</span><span style="color: #330099">standaloneSetup</span><span style="color: #555555">(</span>profileController<span style="color: #555555">)</span>
-                <span style="color: #555555">.</span><span style="color: #330099">setCustomArgumentResolvers</span><span style="color: #555555">(</span><span style="color: #006699; font-weight: bold">new</span> MetaDataResolver<span style="color: #555555">())</span>
-                <span style="color: #555555">.</span><span style="color: #330099">build</span><span style="color: #555555">();</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#99f">@Before</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">setUp</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+        objectMapper <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">new</span> ObjectMapper<span style="color:#555">();</span>
+        profileController <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">new</span> ProfileController<span style="color:#555">(</span>profileService<span style="color:#555">);</span>
+        mockMvc <span style="color:#555">=</span> MockMvcBuilders
+                <span style="color:#555">.</span><span style="color:#309">standaloneSetup</span><span style="color:#555">(</span>profileController<span style="color:#555">)</span>
+                <span style="color:#555">.</span><span style="color:#309">setCustomArgumentResolvers</span><span style="color:#555">(</span><span style="color:#069;font-weight:bold">new</span> MetaDataResolver<span style="color:#555">())</span>
+                <span style="color:#555">.</span><span style="color:#309">build</span><span style="color:#555">();</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Test</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">shouldCreateAProfile</span><span style="color: #555555">()</span> <span style="color: #006699; font-weight: bold">throws</span> Exception <span style="color: #555555">{</span>
-        Profile profile <span style="color: #555555">=</span> <span style="color: #006699; font-weight: bold">new</span> Profile<span style="color: #555555">(</span><span style="color: #CC3300">&quot;foo&quot;</span><span style="color: #555555">,</span> <span style="color: #CC3300">&quot;foo@bar.com&quot;</span><span style="color: #555555">);</span>
-        MetaData metaData <span style="color: #555555">=</span> <span style="color: #006699; font-weight: bold">new</span> MetaData<span style="color: #555555">(</span>Collections<span style="color: #555555">.</span><span style="color: #330099">singletonMap</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;TRANSACTION-ID&quot;</span><span style="color: #555555">,</span> <span style="color: #CC3300">&quot;foo&quot;</span><span style="color: #555555">));</span>
+    <span style="color:#99f">@Test</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">shouldCreateAProfile</span><span style="color:#555">()</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
+        Profile profile <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">new</span> Profile<span style="color:#555">(</span><span style="color:#c30">&#34;foo&#34;</span><span style="color:#555">,</span> <span style="color:#c30">&#34;foo@bar.com&#34;</span><span style="color:#555">);</span>
+        MetaData metaData <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">new</span> MetaData<span style="color:#555">(</span>Collections<span style="color:#555">.</span><span style="color:#309">singletonMap</span><span style="color:#555">(</span><span style="color:#c30">&#34;TRANSACTION-ID&#34;</span><span style="color:#555">,</span> <span style="color:#c30">&#34;foo&#34;</span><span style="color:#555">));</span>
 
-        mockMvc<span style="color: #555555">.</span><span style="color: #330099">perform</span><span style="color: #555555">(</span>post<span style="color: #555555">(</span><span style="color: #CC3300">&quot;/profiles/&quot;</span><span style="color: #555555">)</span>
-                <span style="color: #555555">.</span><span style="color: #330099">content</span><span style="color: #555555">(</span>objectMapper<span style="color: #555555">.</span><span style="color: #330099">writeValueAsBytes</span><span style="color: #555555">(</span>profile<span style="color: #555555">))</span>
-                <span style="color: #555555">.</span><span style="color: #330099">contentType</span><span style="color: #555555">(</span>MediaType<span style="color: #555555">.</span><span style="color: #330099">APPLICATION_JSON</span><span style="color: #555555">)</span>
-                <span style="color: #555555">.</span><span style="color: #330099">header</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;TRANSACTION-ID&quot;</span><span style="color: #555555">,</span> <span style="color: #CC3300">&quot;foo&quot;</span><span style="color: #555555">))</span>
-                <span style="color: #555555">.</span><span style="color: #330099">andExpect</span><span style="color: #555555">(</span>status<span style="color: #555555">().</span><span style="color: #330099">isOk</span><span style="color: #555555">());</span>
-        Mockito<span style="color: #555555">.</span><span style="color: #330099">verify</span><span style="color: #555555">(</span>profileService<span style="color: #555555">).</span><span style="color: #330099">create</span><span style="color: #555555">(</span>eq<span style="color: #555555">(</span>profile<span style="color: #555555">),</span> eq<span style="color: #555555">(</span>metaData<span style="color: #555555">));</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+        mockMvc<span style="color:#555">.</span><span style="color:#309">perform</span><span style="color:#555">(</span>post<span style="color:#555">(</span><span style="color:#c30">&#34;/profiles/&#34;</span><span style="color:#555">)</span>
+                <span style="color:#555">.</span><span style="color:#309">content</span><span style="color:#555">(</span>objectMapper<span style="color:#555">.</span><span style="color:#309">writeValueAsBytes</span><span style="color:#555">(</span>profile<span style="color:#555">))</span>
+                <span style="color:#555">.</span><span style="color:#309">contentType</span><span style="color:#555">(</span>MediaType<span style="color:#555">.</span><span style="color:#309">APPLICATION_JSON</span><span style="color:#555">)</span>
+                <span style="color:#555">.</span><span style="color:#309">header</span><span style="color:#555">(</span><span style="color:#c30">&#34;TRANSACTION-ID&#34;</span><span style="color:#555">,</span> <span style="color:#c30">&#34;foo&#34;</span><span style="color:#555">))</span>
+                <span style="color:#555">.</span><span style="color:#309">andExpect</span><span style="color:#555">(</span>status<span style="color:#555">().</span><span style="color:#309">isOk</span><span style="color:#555">());</span>
+        Mockito<span style="color:#555">.</span><span style="color:#309">verify</span><span style="color:#555">(</span>profileService<span style="color:#555">).</span><span style="color:#309">create</span><span style="color:#555">(</span>eq<span style="color:#555">(</span>profile<span style="color:#555">),</span> eq<span style="color:#555">(</span>metaData<span style="color:#555">));</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>This test is self-explanatory–we wire up the argument resolver, make a request with one of the meta data headers and expect the profile service to be invoked with the right parameters.</p>
             <p class="comments">
   If you have questions or comments about this blog post, you can get in touch with me on Twitter <a href="https://twitter.com/sdqali">@sdqali</a>.
 </p>
-
-            <div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Found this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and explanations for specific Java, Spring and other programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
 
           </div>
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">

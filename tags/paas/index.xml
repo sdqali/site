@@ -2,62 +2,23 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Paas on {code that works}</title>
-    <link>https://sdqali.in/tags/paas/?utm_source=site&amp;utm_medium=feed</link>
+    <link>https://sdqali.in/tags/paas/</link>
     <description>Recent content in Paas on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
     <lastBuildDate>Thu, 21 May 2015 22:58:41 -0700</lastBuildDate>
-    <atom:link href="/tags/paas/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    
+	<atom:link href="https://sdqali.in/tags/paas/index.xml" rel="self" type="application/rss+xml" />
+    
     
     <item>
       <title>Making sense of Cloud Foundry security group declarations</title>
-      <link>https://sdqali.in/blog/2015/05/21/making-sense-of-cloud-foundry-security-group-declarations/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sdqali.in/blog/2015/05/21/making-sense-of-cloud-foundry-security-group-declarations/</link>
       <pubDate>Thu, 21 May 2015 22:58:41 -0700</pubDate>
       
-      <guid>https://sdqali.in/blog/2015/05/21/making-sense-of-cloud-foundry-security-group-declarations/?utm_source=site&amp;utm_medium=feed</guid>
+      <guid>https://sdqali.in/blog/2015/05/21/making-sense-of-cloud-foundry-security-group-declarations/</guid>
       <description>&lt;p&gt;Cloud Foundry allows fine grained declaration of security groups, down to IP address ranges and Ports. While this provides great flexibility, making sense of why each rule in a security group exists and what each does is really difficult because of the limitations of the security group declaration mechanism.&lt;/p&gt;
 
-&lt;p&gt;&lt;/p&gt;
-
-&lt;p&gt;The Cloud Foundry command line tool allows the creation of security groups from JSON declarations. The &lt;code&gt;create-security-group&lt;/code&gt; command works like so:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&amp;gt; cf create-security-group SECURITY_GROUP PATH_TO_JSON_RULES_FILE
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;The JSON file needs to declare an array of rules where each rule has the following structure:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;{
-   &lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;protocol&amp;quot;&lt;/span&gt;: &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;tcp&amp;quot;&lt;/span&gt;,
-   &lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;destination&amp;quot;&lt;/span&gt;: &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;10.244.1.18&amp;quot;&lt;/span&gt;,
-   &lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;ports&amp;quot;&lt;/span&gt;: &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;3306&amp;quot;&lt;/span&gt;,
-   &lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;log&amp;quot;&lt;/span&gt;: &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;true&lt;/span&gt;
-}
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;In my Cloud Foundry environment, I have a security group assigned to a &lt;code&gt;Space&lt;/code&gt; with the following declaration:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;[
-  {&lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;protocol&amp;quot;&lt;/span&gt;:&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;tcp&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;destination&amp;quot;&lt;/span&gt;:&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;&amp;lt;ip-foo&amp;gt;&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;ports&amp;quot;&lt;/span&gt;:&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;3306&amp;quot;&lt;/span&gt;},
-  {&lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;protocol&amp;quot;&lt;/span&gt;:&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;tcp&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;destination&amp;quot;&lt;/span&gt;:&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;&amp;lt;some-ip&amp;gt;-&amp;lt;another-ip&amp;gt;&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;ports&amp;quot;&lt;/span&gt;:&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;55882&amp;quot;&lt;/span&gt;},
-  {&lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;protocol&amp;quot;&lt;/span&gt;:&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;tcp&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;destination&amp;quot;&lt;/span&gt;:&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;&amp;lt;ip-bar&amp;gt;&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;ports&amp;quot;&lt;/span&gt;:&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;443&amp;quot;&lt;/span&gt;}
-]
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;With only 3 rules in place, it is already confusing what service each rule is for and why they are there.&lt;/p&gt;
-
-&lt;p&gt;I believe this can be easily improved by allowing an extra field &lt;code&gt;comment&lt;/code&gt; that provides context about each rule. With this in place, the rules will look like this:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;[
-  {&lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;protocol&amp;quot;&lt;/span&gt;:&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;tcp&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;destination&amp;quot;&lt;/span&gt;:&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;&amp;lt;ip-foo&amp;gt;&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;ports&amp;quot;&lt;/span&gt;:&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;3306&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;comment&amp;quot;&lt;/span&gt;: &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Allow database connection to PostgreSQL at hosted-postgres-service.com&amp;quot;&lt;/span&gt;},
-  {&lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;protocol&amp;quot;&lt;/span&gt;:&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;tcp&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;destination&amp;quot;&lt;/span&gt;:&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;&amp;lt;some-ip&amp;gt;-&amp;lt;another-ip&amp;gt;&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;ports&amp;quot;&lt;/span&gt;:&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;55882&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;comment&amp;quot;&lt;/span&gt;: &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Allow logging to hosted-logging-service.com&amp;quot;&lt;/span&gt;},
-  {&lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;protocol&amp;quot;&lt;/span&gt;:&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;tcp&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;destination&amp;quot;&lt;/span&gt;:&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;&amp;lt;ip-bar&amp;gt;&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;ports&amp;quot;&lt;/span&gt;:&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;443&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;comment&amp;quot;&lt;/span&gt;: &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Allow monitoring service at hosted-monitoring-service.com&amp;quot;&lt;/span&gt;}
-]
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;As things stand, Cloud Foundry Cloud Controller does not allow any extra fields to exist in a rule. For example, the above declaration will cause an error while trying to create a security group.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&amp;gt; cf create-security-group sample-space-security-group spec.json
-
-Server error, status code: &lt;span style=&#34;color: #FF6600&#34;&gt;400&lt;/span&gt;, error code: &lt;span style=&#34;color: #FF6600&#34;&gt;300001&lt;/span&gt;, message: The security group is invalid: rules rule number &lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt; contains the invalid field &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;comment&amp;#39;&lt;/span&gt;, rules rule number &lt;span style=&#34;color: #FF6600&#34;&gt;2&lt;/span&gt; contains the invalid field &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;comment&amp;#39;&lt;/span&gt;, rules rule number &lt;span style=&#34;color: #FF6600&#34;&gt;3&lt;/span&gt; contains the invalid field &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;comment&amp;#39;&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;If JSON allowed comments, commenting would result in a slightly more readable declaration file, although it won&amp;rsquo;t be stored in the Cloud Controller database and hence won&amp;rsquo;t be available upon querying with &lt;code&gt;cf security-group &amp;lt;security-group-name&amp;gt;&lt;/code&gt;. This is a moot point anyway, as JSON &lt;a href=&#34;https://plus.google.com/+DouglasCrockfordEsq/posts/RK8qyGVaGSr&#34;&gt;explicitly&lt;/a&gt; doesn&amp;rsquo;t allow comments. There are workarounds that involve minifying the JSON input before parsing the configurations, but I don&amp;rsquo;t think that is the right direction to head to.&lt;/p&gt;
-
-&lt;p&gt;I have filed a &lt;a href=&#34;https://github.com/cloudfoundry/cloud_controller_ng/issues/382&#34;&gt;ticket&lt;/a&gt; against Cloud Controller to address this issue. It &lt;a href=&#34;https://github.com/cloudfoundry/cloud_controller_ng/blob/cacb5563264208e920f4b7fecc7060f89b929fbb/lib/cloud_controller/rule_validator.rb#L6&#34;&gt;doesn&amp;rsquo;t look like a difficult&lt;/a&gt; feature to implement. Hopefully this is available in Cloud Controller soon.&lt;/p&gt;</description>
+&lt;p&gt;&lt;/p&gt;</description>
     </item>
     
   </channel>

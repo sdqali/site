@@ -130,36 +130,30 @@ Rate limiting or throttling is the practice of limiting how frequently legitimat
 <p>We will create a simple Rails application with a single API endpoint at <code>foo.json</code>. The code needed for this is as follows:</p>
 
 <p>Routes:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #0099FF; font-style: italic"># config/routes.rb</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ruby" data-lang="ruby"><span style="color:#09f;font-style:italic"># config/routes.rb</span>
 
-<span style="color: #336600">RailsThrottle</span><span style="color: #555555">::</span><span style="color: #336600">Application</span><span style="color: #555555">.</span>routes<span style="color: #555555">.</span>draw <span style="color: #006699; font-weight: bold">do</span>
-  get <span style="color: #CC3300">&#39;foo.json&#39;</span> <span style="color: #555555">=&gt;</span> <span style="color: #CC3300">&#39;foo#index&#39;</span>
-<span style="color: #006699; font-weight: bold">end</span>
-</pre></div>
-
+<span style="color:#360">RailsThrottle</span><span style="color:#555">::</span><span style="color:#360">Application</span><span style="color:#555">.</span>routes<span style="color:#555">.</span>draw <span style="color:#069;font-weight:bold">do</span>
+  get <span style="color:#c30">&#39;foo.json&#39;</span> <span style="color:#555">=&gt;</span> <span style="color:#c30">&#39;foo#index&#39;</span>
+<span style="color:#069;font-weight:bold">end</span></code></pre></div>
 <p>The controller:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #0099FF; font-style: italic"># app/controllers/foo_controller.rb</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ruby" data-lang="ruby"><span style="color:#09f;font-style:italic"># app/controllers/foo_controller.rb</span>
 
-<span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">FooController</span> <span style="color: #555555">&lt;</span> <span style="color: #336600">ApplicationController</span>
-  <span style="color: #006699; font-weight: bold">def</span> <span style="color: #CC00FF">index</span>
-    render <span style="color: #FFCC33">json</span>: {<span style="color: #FFCC33">foo</span>: <span style="color: #FFCC33">:bar</span>}
-  <span style="color: #006699; font-weight: bold">end</span>
-<span style="color: #006699; font-weight: bold">end</span>
-</pre></div>
-
+<span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">FooController</span> <span style="color:#555">&lt;</span> <span style="color:#360">ApplicationController</span>
+  <span style="color:#069;font-weight:bold">def</span> <span style="color:#0a8;font-weight:bold"></span><span style="color:#555"></span><span style="color:#c0f">index</span>
+    render <span style="color:#fc3">json</span>: {<span style="color:#fc3">foo</span>: <span style="color:#fc3">:bar</span>}
+  <span style="color:#069;font-weight:bold">end</span>
+<span style="color:#069;font-weight:bold">end</span></code></pre></div>
 <h3 id="storing-the-rate-data">Storing the rate data</h3>
 
-<p>We need a place to store each client&rsquo;s IP address and the number of requests it made. We need to increment this count for each request and reset the count to zero after a time period. Considering these needs, <a href="http://redis.io/">Redis</a> is a great fit for this data store. Redis stores key value pairs and allows expiry time to be specified for each entry. Redis also comes with an <code>INCR</code> <sup class="footnote-ref" id="fnref:1"><a rel="footnote" href="#fn:1">1</a></sup> command that ensures that increment operations are atomic. This will be useful to us if we were to run multiple instances of our app behind a load balancer.</p>
+<p>We need a place to store each client&rsquo;s IP address and the number of requests it made. We need to increment this count for each request and reset the count to zero after a time period. Considering these needs, <a href="http://redis.io/">Redis</a> is a great fit for this data store. Redis stores key value pairs and allows expiry time to be specified for each entry. Redis also comes with an <code>INCR</code> <sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup> command that ensures that increment operations are atomic. This will be useful to us if we were to run multiple instances of our app behind a load balancer.</p>
 
-<p>To setup the application to use Redis, we will need to install the <code>redis</code> <sup class="footnote-ref" id="fnref:2"><a rel="footnote" href="#fn:2">2</a></sup> gem. Once we have the gem, we will add a new <code>initializer</code> named <code>throttle.rb</code> which configures our Redis client.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #0099FF; font-style: italic"># config/initializers/throttle.rb</span>
+<p>To setup the application to use Redis, we will need to install the <code>redis</code> <sup class="footnote-ref" id="fnref:2"><a href="#fn:2">2</a></sup> gem. Once we have the gem, we will add a new <code>initializer</code> named <code>throttle.rb</code> which configures our Redis client.</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ruby" data-lang="ruby"><span style="color:#09f;font-style:italic"># config/initializers/throttle.rb</span>
 
-<span style="color: #336666">require</span> <span style="color: #CC3300">&quot;redis&quot;</span>
+<span style="color:#366">require</span> <span style="color:#c30">&#34;redis&#34;</span>
 
-redis_conf  <span style="color: #555555">=</span> <span style="color: #336600">YAML</span><span style="color: #555555">.</span>load(<span style="color: #336600">File</span><span style="color: #555555">.</span>join(<span style="color: #336600">Rails</span><span style="color: #555555">.</span>root, <span style="color: #CC3300">&quot;config&quot;</span>, <span style="color: #CC3300">&quot;redis.yml&quot;</span>))
-<span style="color: #336600">REDIS</span> <span style="color: #555555">=</span> <span style="color: #336600">Redis</span><span style="color: #555555">.</span>new(<span style="color: #FFCC33">:host</span> <span style="color: #555555">=&gt;</span> redis_conf<span style="color: #555555">[</span><span style="color: #CC3300">&quot;host&quot;</span><span style="color: #555555">]</span>, <span style="color: #FFCC33">:port</span> <span style="color: #555555">=&gt;</span> redis_conf<span style="color: #555555">[</span><span style="color: #CC3300">&quot;port&quot;</span><span style="color: #555555">]</span>)
-</pre></div>
-
+redis_conf  <span style="color:#555">=</span> <span style="color:#360">YAML</span><span style="color:#555">.</span>load(<span style="color:#360">File</span><span style="color:#555">.</span>join(<span style="color:#360">Rails</span><span style="color:#555">.</span>root, <span style="color:#c30">&#34;config&#34;</span>, <span style="color:#c30">&#34;redis.yml&#34;</span>))
+<span style="color:#360">REDIS</span> <span style="color:#555">=</span> <span style="color:#360">Redis</span><span style="color:#555">.</span>new(<span style="color:#fc3">:host</span> <span style="color:#555">=&gt;</span> redis_conf<span style="color:#555">[</span><span style="color:#c30">&#34;host&#34;</span><span style="color:#555">]</span>, <span style="color:#fc3">:port</span> <span style="color:#555">=&gt;</span> redis_conf<span style="color:#555">[</span><span style="color:#c30">&#34;port&#34;</span><span style="color:#555">]</span>)</code></pre></div>
 <p>This will load the Redis server&rsquo;s host and port from the configuration file located at <code>config/redis.yml</code>. This file will look like this:</p>
 
 <pre><code># config/redis.yml
@@ -170,30 +164,28 @@ port: 6379
 
 <h3 id="using-a-before-filter-for-rate-limiting">Using a <code>before_filter</code> for rate limiting.</h3>
 
-<p>The first step is to log the number of requests each client is making. This can easily be achieved with a <code>before_filter</code> <sup class="footnote-ref" id="fnref:3"><a rel="footnote" href="#fn:3">3</a></sup>. Let&rsquo;s add the filter into the <code>ApplicationController</code>.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #0099FF; font-style: italic"># app/controllers/application_controller.rb</span>
+<p>The first step is to log the number of requests each client is making. This can easily be achieved with a <code>before_filter</code> <sup class="footnote-ref" id="fnref:3"><a href="#fn:3">3</a></sup>. Let&rsquo;s add the filter into the <code>ApplicationController</code>.</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ruby" data-lang="ruby"><span style="color:#09f;font-style:italic"># app/controllers/application_controller.rb</span>
 
-<span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">ApplicationController</span> <span style="color: #555555">&lt;</span> <span style="color: #336600">ActionController</span><span style="color: #555555">::</span><span style="color: #336600">Base</span>
-  <span style="color: #555555">...</span>
+<span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">ApplicationController</span> <span style="color:#555">&lt;</span> <span style="color:#360">ActionController</span><span style="color:#555">::</span><span style="color:#360">Base</span>
+  <span style="color:#555">...</span>
 
-  before_filter <span style="color: #FFCC33">:throttle</span>
+  before_filter <span style="color:#fc3">:throttle</span>
 
-  <span style="color: #006699; font-weight: bold">def</span> <span style="color: #CC00FF">throttle</span>
-    client_ip <span style="color: #555555">=</span> request<span style="color: #555555">.</span>env<span style="color: #555555">[</span><span style="color: #CC3300">&quot;REMOTE_ADDR&quot;</span><span style="color: #555555">]</span>
-    key <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;count:</span><span style="color: #AA0000">#{</span>client_ip<span style="color: #AA0000">}</span><span style="color: #CC3300">&quot;</span>
-    count <span style="color: #555555">=</span> <span style="color: #336600">REDIS</span><span style="color: #555555">.</span>get(key)
+  <span style="color:#069;font-weight:bold">def</span> <span style="color:#0a8;font-weight:bold"></span><span style="color:#555"></span><span style="color:#c0f">throttle</span>
+    client_ip <span style="color:#555">=</span> request<span style="color:#555">.</span>env<span style="color:#555">[</span><span style="color:#c30">&#34;REMOTE_ADDR&#34;</span><span style="color:#555">]</span>
+    key <span style="color:#555">=</span> <span style="color:#c30">&#34;count:</span><span style="color:#a00">#{</span>client_ip<span style="color:#a00">}</span><span style="color:#c30">&#34;</span>
+    count <span style="color:#555">=</span> <span style="color:#360">REDIS</span><span style="color:#555">.</span>get(key)
 
-    <span style="color: #006699; font-weight: bold">unless</span> count
-      <span style="color: #336600">REDIS</span><span style="color: #555555">.</span>set(key, <span style="color: #FF6600">0</span>)
-    <span style="color: #006699; font-weight: bold">end</span>
-    <span style="color: #336600">REDIS</span><span style="color: #555555">.</span>incr(key)
-    <span style="color: #006699">true</span>
-  <span style="color: #006699; font-weight: bold">end</span>
+    <span style="color:#069;font-weight:bold">unless</span> count
+      <span style="color:#360">REDIS</span><span style="color:#555">.</span>set(key, <span style="color:#f60">0</span><span style="color:#555"></span>)
+    <span style="color:#069;font-weight:bold">end</span>
+    <span style="color:#360">REDIS</span><span style="color:#555">.</span>incr(key)
+    <span style="color:#069">true</span>
+  <span style="color:#069;font-weight:bold">end</span>
 
-  <span style="color: #555555">...</span>
-<span style="color: #006699; font-weight: bold">end</span>
-</pre></div>
-
+  <span style="color:#555">...</span>
+<span style="color:#069;font-weight:bold">end</span></code></pre></div>
 <p>Since this <code>before_filter</code> belongs to the <code>ApplicationController</code>, it will be applied to all requests, unless a specific controller chooses to skip it. So before every request is processed, the filter grabs the client&rsquo;s IP and checks whether there is a count in Redis for this IP. If there is no count key, it creates one. Finally it increments the count.</p>
 
 <p>At this point, the filter just records the requests made, but does not limit requests. Let&rsquo;s go ahead and implement limiting. We need to specify the time window for rate limiting and how many requests should be allowed in that time window. We will allow a client a maximum of <code>60</code> requests in <code>15</code> minutes. The following constants need to be defined in <code>throttle.rb</code>.</p>
@@ -203,51 +195,47 @@ THROTTLE_MAX_REQUESTS = 60
 </code></pre>
 
 <p>The filter needs to be changed to respond with error messages when the rate limit is exceeded.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #0099FF; font-style: italic"># app/controllers/application_controller.rb</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ruby" data-lang="ruby"><span style="color:#09f;font-style:italic"># app/controllers/application_controller.rb</span>
 
-<span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">ApplicationController</span> <span style="color: #555555">&lt;</span> <span style="color: #336600">ActionController</span><span style="color: #555555">::</span><span style="color: #336600">Base</span>
-  <span style="color: #555555">...</span>
+<span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">ApplicationController</span> <span style="color:#555">&lt;</span> <span style="color:#360">ActionController</span><span style="color:#555">::</span><span style="color:#360">Base</span>
+  <span style="color:#555">...</span>
 
-  before_filter <span style="color: #FFCC33">:throttle</span>
+  before_filter <span style="color:#fc3">:throttle</span>
 
-  <span style="color: #006699; font-weight: bold">def</span> <span style="color: #CC00FF">throttle</span>
-    client_ip <span style="color: #555555">=</span> request<span style="color: #555555">.</span>env<span style="color: #555555">[</span><span style="color: #CC3300">&quot;REMOTE_ADDR&quot;</span><span style="color: #555555">]</span>
-    key <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;count:</span><span style="color: #AA0000">#{</span>client_ip<span style="color: #AA0000">}</span><span style="color: #CC3300">&quot;</span>
-    count <span style="color: #555555">=</span> <span style="color: #336600">REDIS</span><span style="color: #555555">.</span>get(key)
+  <span style="color:#069;font-weight:bold">def</span> <span style="color:#0a8;font-weight:bold"></span><span style="color:#555"></span><span style="color:#c0f">throttle</span>
+    client_ip <span style="color:#555">=</span> request<span style="color:#555">.</span>env<span style="color:#555">[</span><span style="color:#c30">&#34;REMOTE_ADDR&#34;</span><span style="color:#555">]</span>
+    key <span style="color:#555">=</span> <span style="color:#c30">&#34;count:</span><span style="color:#a00">#{</span>client_ip<span style="color:#a00">}</span><span style="color:#c30">&#34;</span>
+    count <span style="color:#555">=</span> <span style="color:#360">REDIS</span><span style="color:#555">.</span>get(key)
 
-    <span style="color: #006699; font-weight: bold">unless</span> count
-      <span style="color: #336600">REDIS</span><span style="color: #555555">.</span>set(key, <span style="color: #FF6600">0</span>)
-      <span style="color: #336600">REDIS</span><span style="color: #555555">.</span>expire(key, <span style="color: #336600">THROTTLE_TIME_WINDOW</span>)
-      <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699">true</span>
-    <span style="color: #006699; font-weight: bold">end</span>
+    <span style="color:#069;font-weight:bold">unless</span> count
+      <span style="color:#360">REDIS</span><span style="color:#555">.</span>set(key, <span style="color:#f60">0</span><span style="color:#555"></span>)
+      <span style="color:#360">REDIS</span><span style="color:#555">.</span>expire(key, <span style="color:#360">THROTTLE_TIME_WINDOW</span>)
+      <span style="color:#069;font-weight:bold">return</span> <span style="color:#069">true</span>
+    <span style="color:#069;font-weight:bold">end</span>
 
-    <span style="color: #006699; font-weight: bold">if</span> count<span style="color: #555555">.</span>to_i <span style="color: #555555">&gt;=</span> <span style="color: #336600">THROTTLE_MAX_REQUESTS</span>
-      render <span style="color: #FFCC33">:status</span> <span style="color: #555555">=&gt;</span> <span style="color: #FF6600">429</span>, <span style="color: #FFCC33">:json</span> <span style="color: #555555">=&gt;</span> {<span style="color: #FFCC33">:message</span> <span style="color: #555555">=&gt;</span> <span style="color: #CC3300">&quot;You have fired too many requests. Please wait for some time.&quot;</span>}
-      <span style="color: #006699; font-weight: bold">return</span>
-    <span style="color: #006699; font-weight: bold">end</span>
-    <span style="color: #336600">REDIS</span><span style="color: #555555">.</span>incr(key)
-    <span style="color: #006699">true</span>
-  <span style="color: #006699; font-weight: bold">end</span>
+    <span style="color:#069;font-weight:bold">if</span> count<span style="color:#555">.</span>to_i <span style="color:#555">&gt;=</span> <span style="color:#360">THROTTLE_MAX_REQUESTS</span>
+      render <span style="color:#fc3">:status</span> <span style="color:#555">=&gt;</span> <span style="color:#f60">429</span><span style="color:#555"></span>, <span style="color:#fc3">:json</span> <span style="color:#555">=&gt;</span> {<span style="color:#fc3">:message</span> <span style="color:#555">=&gt;</span> <span style="color:#c30">&#34;You have fired too many requests. Please wait for some time.&#34;</span>}
+      <span style="color:#069;font-weight:bold">return</span>
+    <span style="color:#069;font-weight:bold">end</span>
+    <span style="color:#360">REDIS</span><span style="color:#555">.</span>incr(key)
+    <span style="color:#069">true</span>
+  <span style="color:#069;font-weight:bold">end</span>
 
-  <span style="color: #555555">...</span>
-<span style="color: #006699; font-weight: bold">end</span>
-</pre></div>
-
-<p>When the limit is reached, subsequent requests will be responded with an error message and the HTTP status code <code>429</code>. The 429 <sup class="footnote-ref" id="fnref:4"><a rel="footnote" href="#fn:4">4</a></sup> status code indicates that the user has sent too many requests in a given amount of time.</p>
+  <span style="color:#555">...</span>
+<span style="color:#069;font-weight:bold">end</span></code></pre></div>
+<p>When the limit is reached, subsequent requests will be responded with an error message and the HTTP status code <code>429</code>. The 429 <sup class="footnote-ref" id="fnref:4"><a href="#fn:4">4</a></sup> status code indicates that the user has sent too many requests in a given amount of time.</p>
 
 <p>Let&rsquo;s go ahead and test this.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>bash$ <span style="color: #006699; font-weight: bold">for</span> i in <span style="color: #555555">{</span><span style="color: #FF6600">1</span>..100<span style="color: #555555">}</span>
-<span style="color: #006699; font-weight: bold">do</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">bash$ <span style="color:#069;font-weight:bold">for</span> i in <span style="color:#555">{</span><span style="color:#f60">1</span>..100<span style="color:#555">}</span>
+<span style="color:#069;font-weight:bold">do</span>
 curl -i http://localhost:3000/foo.json &gt;&gt; /dev/null
-<span style="color: #006699; font-weight: bold">done</span>
+<span style="color:#069;font-weight:bold">done</span>
 
-bash$ less log/development.log | grep <span style="color: #CC3300">&quot;200 OK&quot;</span> | wc -l
-      <span style="color: #FF6600">60</span>
+bash$ less log/development.log | grep <span style="color:#c30">&#34;200 OK&#34;</span> | wc -l
+      <span style="color:#f60">60</span>
 
-bash$ less log/development.log | grep <span style="color: #CC3300">&quot;429 Too Many Requests&quot;</span> | wc -l
-      <span style="color: #FF6600">40</span>
-</pre></div>
-
+bash$ less log/development.log | grep <span style="color:#c30">&#34;429 Too Many Requests&#34;</span> | wc -l
+      <span style="color:#f60">40</span></code></pre></div>
 <p>As you can see after <code>60</code> requests, all requests get the <code>429</code> response.</p>
 
 <h3 id="improvements">Improvements</h3>
@@ -274,36 +262,6 @@ bash$ less log/development.log | grep <span style="color: #CC3300">&quot;429 Too
             <p class="comments">
   If you have questions or comments about this blog post, you can get in touch with me on Twitter <a href="https://twitter.com/sdqali">@sdqali</a>.
 </p>
-
-            <div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Found this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and explanations for specific Java, Spring and other programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
 
           </div>
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">

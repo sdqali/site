@@ -2,49 +2,22 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Jruby on {code that works}</title>
-    <link>https://sdqali.in/categories/jruby/?utm_source=site&amp;utm_medium=feed</link>
+    <link>https://sdqali.in/categories/jruby/</link>
     <description>Recent content in Jruby on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
     <lastBuildDate>Tue, 16 Mar 2010 00:00:00 +0000</lastBuildDate>
-    <atom:link href="/categories/jruby/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    
+	<atom:link href="https://sdqali.in/categories/jruby/index.xml" rel="self" type="application/rss+xml" />
+    
     
     <item>
       <title>Java Arrays in JRuby</title>
-      <link>https://sdqali.in/blog/2010/03/16/java-arrays-in-jruby/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sdqali.in/blog/2010/03/16/java-arrays-in-jruby/</link>
       <pubDate>Tue, 16 Mar 2010 00:00:00 +0000</pubDate>
       
-      <guid>https://sdqali.in/blog/2010/03/16/java-arrays-in-jruby/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>&lt;p&gt;Recently my team encountered a frustrating thing while working with a Java library in JRuby. It took us long to figure out what was going wrong. This is an attempt to write down what was happening.&lt;/p&gt;
-
-&lt;p&gt;You are in Ruby world, a world of weak typing, no type casting and pure bliss in coding. You forget that some languages care about the type of elements in an Array. And you end up spending a lot of time figuring out why you are staring at a stupid looking exception.&lt;/p&gt;
-
-&lt;p&gt;I will be using a dummy example for describing the problem.&lt;/p&gt;
-
-&lt;p&gt;The following code snippet tries to compare two arrays in JRuby using Java Arrays&amp;rsquo; equals method. In JRuby world, one would expect this to work. Actually, one should not, but Ruby really gets into you.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #336666&#34;&gt;require&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;java&amp;#39;&lt;/span&gt;
-import &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;java.util.Arrays&amp;#39;&lt;/span&gt;
-
-&lt;span style=&#34;color: #336666&#34;&gt;puts&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Arrays equal&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color: #336600&#34;&gt;Arrays&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;equals(&lt;span style=&#34;color: #555555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;2&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;3&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;]&lt;/span&gt;, &lt;span style=&#34;color: #555555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;2&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;3&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;]&lt;/span&gt;)
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;Well, it does not. You get an error:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;no equals with arguments matching &lt;span style=&#34;color: #555555&#34;&gt;[&lt;/span&gt;class org.jruby.RubyArray, class org.jruby.RubyArray&lt;span style=&#34;color: #555555&#34;&gt;]&lt;/span&gt; on object Java::JavaUtil::Arrays &lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;NameError&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;This error message is informative. In our case, our unit tests threw an error that was very difficult to make any sense of. The reason why this fails is obvious.&lt;/p&gt;
-
-&lt;p&gt;Java does care about the Type of things that form an Array. So you need to cast it to the correct type.&lt;/p&gt;
-
-&lt;p&gt;Here is the code that actually works:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #336666&#34;&gt;require&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;java&amp;#39;&lt;/span&gt;
-import &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;java.util.Arrays&amp;#39;&lt;/span&gt;
-
-&lt;span style=&#34;color: #336666&#34;&gt;puts&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Arrays equal&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color: #336600&#34;&gt;Arrays&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;equals(&lt;span style=&#34;color: #555555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt;,&lt;span style=&#34;color: #FF6600&#34;&gt;2&lt;/span&gt;,&lt;span style=&#34;color: #FF6600&#34;&gt;3&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;].&lt;/span&gt;to_java(java&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;lang&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;Integer),
-                                     &lt;span style=&#34;color: #555555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt;,&lt;span style=&#34;color: #FF6600&#34;&gt;2&lt;/span&gt;,&lt;span style=&#34;color: #FF6600&#34;&gt;3&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;].&lt;/span&gt;to_java(java&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;lang&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;Integer))
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;The &lt;code&gt;to_java&lt;/code&gt; method casts the elements of the Ruby array into Java array with elements of type specified.&lt;/p&gt;
-</description>
+      <guid>https://sdqali.in/blog/2010/03/16/java-arrays-in-jruby/</guid>
+      <description>Recently my team encountered a frustrating thing while working with a Java library in JRuby. It took us long to figure out what was going wrong. This is an attempt to write down what was happening.
+You are in Ruby world, a world of weak typing, no type casting and pure bliss in coding. You forget that some languages care about the type of elements in an Array. And you end up spending a lot of time figuring out why you are staring at a stupid looking exception.</description>
     </item>
     
   </channel>

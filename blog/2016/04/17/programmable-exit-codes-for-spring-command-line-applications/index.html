@@ -117,15 +117,13 @@
 <p></p>
 
 <p>The following example demonstrates this problem. Here we have a simple implementation of <code>CommandLineRunner</code> that simply throws a <code>RuntimeException</code> when started.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@Component</span>
-<span style="color: #9999FF">@Profile</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;exception&quot;</span><span style="color: #555555">)</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">WillThrow</span> <span style="color: #006699; font-weight: bold">implements</span> CommandLineRunner <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">run</span><span style="color: #555555">(</span>String<span style="color: #555555">...</span> args<span style="color: #555555">)</span> <span style="color: #006699; font-weight: bold">throws</span> Exception <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">throw</span> <span style="color: #006699; font-weight: bold">new</span> RuntimeException<span style="color: #555555">(</span><span style="color: #CC3300">&quot;This should kill the application&quot;</span><span style="color: #555555">);</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Component</span>
+<span style="color:#99f">@Profile</span><span style="color:#555">(</span><span style="color:#c30">&#34;exception&#34;</span><span style="color:#555">)</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">WillThrow</span> <span style="color:#069;font-weight:bold">implements</span> CommandLineRunner <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">run</span><span style="color:#555">(</span>String<span style="color:#555">...</span> args<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">throw</span> <span style="color:#069;font-weight:bold">new</span> RuntimeException<span style="color:#555">(</span><span style="color:#c30">&#34;This should kill the application&#34;</span><span style="color:#555">);</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>When this application runs, we will see that the exit code is <code>0</code>, as expected.</p>
 
 <pre><code>$ java -Dspring.profiles.active=exception -jar build/libs/exit-code-demo-1.0-SNAPSHOT.jar &gt;&gt; /dev/null 2&amp;&gt;1
@@ -134,15 +132,13 @@ $ echo $?
 </code></pre>
 
 <p>A simple way to propagate the right exit code is to use <code>java.lang.System#exit</code> and specify an error code. The following snippet shows this:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@Component</span>
-<span style="color: #9999FF">@Profile</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;exit&quot;</span><span style="color: #555555">)</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">WillExit</span> <span style="color: #006699; font-weight: bold">implements</span> CommandLineRunner <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">run</span><span style="color: #555555">(</span>String<span style="color: #555555">...</span> args<span style="color: #555555">)</span> <span style="color: #006699; font-weight: bold">throws</span> Exception <span style="color: #555555">{</span>
-        System<span style="color: #555555">.</span><span style="color: #330099">exit</span><span style="color: #555555">(</span><span style="color: #FF6600">3</span><span style="color: #555555">);</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Component</span>
+<span style="color:#99f">@Profile</span><span style="color:#555">(</span><span style="color:#c30">&#34;exit&#34;</span><span style="color:#555">)</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">WillExit</span> <span style="color:#069;font-weight:bold">implements</span> CommandLineRunner <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">run</span><span style="color:#555">(</span>String<span style="color:#555">...</span> args<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
+        System<span style="color:#555">.</span><span style="color:#309">exit</span><span style="color:#555">(</span>3<span style="color:#555">);</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>When run:</p>
 
 <pre><code>$ java -Dspring.profiles.active=exit -jar build/libs/exit-code-demo-1.0-SNAPSHOT.jar &gt;&gt; /dev/null 2&amp;&gt;1
@@ -150,62 +146,28 @@ $ echo $?
 3
 </code></pre>
 
-<p>This looks straightforward and easy. However, exiting the application from within the <code>CommandLineRunner</code> makes integration testing of this application difficult. Our tests will simply stop execution at that point without giving us the opportunity to assert anything.
-<div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Finding this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and actionable explanations for specific programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
-</p>
+<p>This looks straightforward and easy. However, exiting the application from within the <code>CommandLineRunner</code> makes integration testing of this application difficult. Our tests will simply stop execution at that point without giving us the opportunity to assert anything.</p>
 
-<p>At work, while looking for a solution to this, we stumbled across Spring&rsquo;s <code>ExitCodeGenerator</code> <sup class="footnote-ref" id="fnref:1"><a rel="footnote" href="#fn:1">1</a></sup>. It is an interface whose implementations Spring uses to look up what exit code to use. There are at least two ways to make use of <code>ExitCodeGenerator</code> - one involves making the application&rsquo;s Exceptions implement <code>ExitCodeGenerator</code> and the other involves making the command line runners themselves implement <code>ExitCodeGenerator</code>. We will look at the first approach here.</p>
+<p>At work, while looking for a solution to this, we stumbled across Spring&rsquo;s <code>ExitCodeGenerator</code> <sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup>. It is an interface whose implementations Spring uses to look up what exit code to use. There are at least two ways to make use of <code>ExitCodeGenerator</code> - one involves making the application&rsquo;s Exceptions implement <code>ExitCodeGenerator</code> and the other involves making the command line runners themselves implement <code>ExitCodeGenerator</code>. We will look at the first approach here.</p>
 
 <p>Our new command line runner will be as:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@Component</span>
-<span style="color: #9999FF">@Profile</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;exception&quot;</span><span style="color: #555555">)</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">WillThrow</span> <span style="color: #006699; font-weight: bold">implements</span> CommandLineRunner<span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">run</span><span style="color: #555555">(</span>String<span style="color: #555555">...</span> args<span style="color: #555555">)</span> <span style="color: #006699; font-weight: bold">throws</span> Exception <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">throw</span> <span style="color: #006699; font-weight: bold">new</span> ExceptionWithExitCode<span style="color: #555555">(</span><span style="color: #CC3300">&quot;Hello&quot;</span><span style="color: #555555">);</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Component</span>
+<span style="color:#99f">@Profile</span><span style="color:#555">(</span><span style="color:#c30">&#34;exception&#34;</span><span style="color:#555">)</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">WillThrow</span> <span style="color:#069;font-weight:bold">implements</span> CommandLineRunner<span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">run</span><span style="color:#555">(</span>String<span style="color:#555">...</span> args<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">throw</span> <span style="color:#069;font-weight:bold">new</span> ExceptionWithExitCode<span style="color:#555">(</span><span style="color:#c30">&#34;Hello&#34;</span><span style="color:#555">);</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>And the exception will resemble:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">ExceptionWithExitCode</span> <span style="color: #006699; font-weight: bold">extends</span> RuntimeException <span style="color: #006699; font-weight: bold">implements</span> ExitCodeGenerator <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #CC00FF">ExceptionWithExitCode</span><span style="color: #555555">(</span>String message<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">super</span><span style="color: #555555">(</span>message<span style="color: #555555">);</span>
-    <span style="color: #555555">}</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">ExceptionWithExitCode</span> <span style="color:#069;font-weight:bold">extends</span> RuntimeException <span style="color:#069;font-weight:bold">implements</span> ExitCodeGenerator <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">ExceptionWithExitCode</span><span style="color:#555">(</span>String message<span style="color:#555">)</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">super</span><span style="color:#555">(</span>message<span style="color:#555">);</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">int</span> <span style="color: #CC00FF">getExitCode</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> <span style="color: #FF6600">13</span><span style="color: #555555">;</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">int</span> <span style="color:#c0f">getExitCode</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> 13<span style="color:#555">;</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>When the application runs:</p>
 
 <pre><code>$ java -Dspring.profiles.active=exception -jar build/libs/exit-code-demo-1.0-SNAPSHOT.jar &gt;&gt; /dev/null 2&amp;&gt;1
@@ -228,36 +190,6 @@ $ echo $?
             <p class="comments">
   If you have questions or comments about this blog post, you can get in touch with me on Twitter <a href="https://twitter.com/sdqali">@sdqali</a>.
 </p>
-
-            <div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Found this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and explanations for specific Java, Spring and other programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
 
           </div>
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">

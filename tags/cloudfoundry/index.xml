@@ -2,126 +2,34 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Cloudfoundry on {code that works}</title>
-    <link>https://sdqali.in/tags/cloudfoundry/?utm_source=site&amp;utm_medium=feed</link>
+    <link>https://sdqali.in/tags/cloudfoundry/</link>
     <description>Recent content in Cloudfoundry on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
     <lastBuildDate>Thu, 21 May 2015 22:58:41 -0700</lastBuildDate>
-    <atom:link href="/tags/cloudfoundry/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    
+	<atom:link href="https://sdqali.in/tags/cloudfoundry/index.xml" rel="self" type="application/rss+xml" />
+    
     
     <item>
       <title>Making sense of Cloud Foundry security group declarations</title>
-      <link>https://sdqali.in/blog/2015/05/21/making-sense-of-cloud-foundry-security-group-declarations/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sdqali.in/blog/2015/05/21/making-sense-of-cloud-foundry-security-group-declarations/</link>
       <pubDate>Thu, 21 May 2015 22:58:41 -0700</pubDate>
       
-      <guid>https://sdqali.in/blog/2015/05/21/making-sense-of-cloud-foundry-security-group-declarations/?utm_source=site&amp;utm_medium=feed</guid>
+      <guid>https://sdqali.in/blog/2015/05/21/making-sense-of-cloud-foundry-security-group-declarations/</guid>
       <description>&lt;p&gt;Cloud Foundry allows fine grained declaration of security groups, down to IP address ranges and Ports. While this provides great flexibility, making sense of why each rule in a security group exists and what each does is really difficult because of the limitations of the security group declaration mechanism.&lt;/p&gt;
 
-&lt;p&gt;&lt;/p&gt;
-
-&lt;p&gt;The Cloud Foundry command line tool allows the creation of security groups from JSON declarations. The &lt;code&gt;create-security-group&lt;/code&gt; command works like so:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&amp;gt; cf create-security-group SECURITY_GROUP PATH_TO_JSON_RULES_FILE
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;The JSON file needs to declare an array of rules where each rule has the following structure:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;{
-   &lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;protocol&amp;quot;&lt;/span&gt;: &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;tcp&amp;quot;&lt;/span&gt;,
-   &lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;destination&amp;quot;&lt;/span&gt;: &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;10.244.1.18&amp;quot;&lt;/span&gt;,
-   &lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;ports&amp;quot;&lt;/span&gt;: &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;3306&amp;quot;&lt;/span&gt;,
-   &lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;log&amp;quot;&lt;/span&gt;: &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;true&lt;/span&gt;
-}
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;In my Cloud Foundry environment, I have a security group assigned to a &lt;code&gt;Space&lt;/code&gt; with the following declaration:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;[
-  {&lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;protocol&amp;quot;&lt;/span&gt;:&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;tcp&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;destination&amp;quot;&lt;/span&gt;:&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;&amp;lt;ip-foo&amp;gt;&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;ports&amp;quot;&lt;/span&gt;:&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;3306&amp;quot;&lt;/span&gt;},
-  {&lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;protocol&amp;quot;&lt;/span&gt;:&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;tcp&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;destination&amp;quot;&lt;/span&gt;:&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;&amp;lt;some-ip&amp;gt;-&amp;lt;another-ip&amp;gt;&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;ports&amp;quot;&lt;/span&gt;:&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;55882&amp;quot;&lt;/span&gt;},
-  {&lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;protocol&amp;quot;&lt;/span&gt;:&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;tcp&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;destination&amp;quot;&lt;/span&gt;:&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;&amp;lt;ip-bar&amp;gt;&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;ports&amp;quot;&lt;/span&gt;:&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;443&amp;quot;&lt;/span&gt;}
-]
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;With only 3 rules in place, it is already confusing what service each rule is for and why they are there.&lt;/p&gt;
-
-&lt;p&gt;I believe this can be easily improved by allowing an extra field &lt;code&gt;comment&lt;/code&gt; that provides context about each rule. With this in place, the rules will look like this:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;[
-  {&lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;protocol&amp;quot;&lt;/span&gt;:&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;tcp&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;destination&amp;quot;&lt;/span&gt;:&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;&amp;lt;ip-foo&amp;gt;&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;ports&amp;quot;&lt;/span&gt;:&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;3306&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;comment&amp;quot;&lt;/span&gt;: &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Allow database connection to PostgreSQL at hosted-postgres-service.com&amp;quot;&lt;/span&gt;},
-  {&lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;protocol&amp;quot;&lt;/span&gt;:&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;tcp&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;destination&amp;quot;&lt;/span&gt;:&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;&amp;lt;some-ip&amp;gt;-&amp;lt;another-ip&amp;gt;&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;ports&amp;quot;&lt;/span&gt;:&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;55882&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;comment&amp;quot;&lt;/span&gt;: &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Allow logging to hosted-logging-service.com&amp;quot;&lt;/span&gt;},
-  {&lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;protocol&amp;quot;&lt;/span&gt;:&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;tcp&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;destination&amp;quot;&lt;/span&gt;:&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;&amp;lt;ip-bar&amp;gt;&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;ports&amp;quot;&lt;/span&gt;:&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;443&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #330099; font-weight: bold&#34;&gt;&amp;quot;comment&amp;quot;&lt;/span&gt;: &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Allow monitoring service at hosted-monitoring-service.com&amp;quot;&lt;/span&gt;}
-]
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;As things stand, Cloud Foundry Cloud Controller does not allow any extra fields to exist in a rule. For example, the above declaration will cause an error while trying to create a security group.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&amp;gt; cf create-security-group sample-space-security-group spec.json
-
-Server error, status code: &lt;span style=&#34;color: #FF6600&#34;&gt;400&lt;/span&gt;, error code: &lt;span style=&#34;color: #FF6600&#34;&gt;300001&lt;/span&gt;, message: The security group is invalid: rules rule number &lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt; contains the invalid field &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;comment&amp;#39;&lt;/span&gt;, rules rule number &lt;span style=&#34;color: #FF6600&#34;&gt;2&lt;/span&gt; contains the invalid field &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;comment&amp;#39;&lt;/span&gt;, rules rule number &lt;span style=&#34;color: #FF6600&#34;&gt;3&lt;/span&gt; contains the invalid field &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;comment&amp;#39;&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;If JSON allowed comments, commenting would result in a slightly more readable declaration file, although it won&amp;rsquo;t be stored in the Cloud Controller database and hence won&amp;rsquo;t be available upon querying with &lt;code&gt;cf security-group &amp;lt;security-group-name&amp;gt;&lt;/code&gt;. This is a moot point anyway, as JSON &lt;a href=&#34;https://plus.google.com/+DouglasCrockfordEsq/posts/RK8qyGVaGSr&#34;&gt;explicitly&lt;/a&gt; doesn&amp;rsquo;t allow comments. There are workarounds that involve minifying the JSON input before parsing the configurations, but I don&amp;rsquo;t think that is the right direction to head to.&lt;/p&gt;
-
-&lt;p&gt;I have filed a &lt;a href=&#34;https://github.com/cloudfoundry/cloud_controller_ng/issues/382&#34;&gt;ticket&lt;/a&gt; against Cloud Controller to address this issue. It &lt;a href=&#34;https://github.com/cloudfoundry/cloud_controller_ng/blob/cacb5563264208e920f4b7fecc7060f89b929fbb/lib/cloud_controller/rule_validator.rb#L6&#34;&gt;doesn&amp;rsquo;t look like a difficult&lt;/a&gt; feature to implement. Hopefully this is available in Cloud Controller soon.&lt;/p&gt;</description>
+&lt;p&gt;&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Configuring Cloud Foundry Java Memory Parameters</title>
-      <link>https://sdqali.in/blog/2015/05/20/configuring-cloud-foundry-java-memory-parameters/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sdqali.in/blog/2015/05/20/configuring-cloud-foundry-java-memory-parameters/</link>
       <pubDate>Wed, 20 May 2015 19:42:56 -0700</pubDate>
       
-      <guid>https://sdqali.in/blog/2015/05/20/configuring-cloud-foundry-java-memory-parameters/?utm_source=site&amp;utm_medium=feed</guid>
+      <guid>https://sdqali.in/blog/2015/05/20/configuring-cloud-foundry-java-memory-parameters/</guid>
       <description>&lt;p&gt;This week I have been trying out Cloud Foundry. Today while trying to set up monitoring through AppDynamics, the sample application that I was using started crashing because of a Java memory error. This blog post discusses how to prevent this from happening by configuring Java memory parameters used by the application.&lt;/p&gt;
 
-&lt;p&gt;&lt;/p&gt;
-
-&lt;p&gt;This is what was in the Cloud Foundry logs.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;May &lt;span style=&#34;color: #FF6600&#34;&gt;20&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;18&lt;/span&gt;:14:51 CloudFoundry 6767b9fd-1874-43cb-a4f8-7470a17c90ae/&lt;span style=&#34;color: #555555&#34;&gt;[&lt;/span&gt;App/2&lt;span style=&#34;color: #555555&#34;&gt;]&lt;/span&gt;:  /bin/bash: line &lt;span style=&#34;color: #FF6600&#34;&gt;31&lt;/span&gt;:    &lt;span style=&#34;color: #FF6600&#34;&gt;32&lt;/span&gt; Killed                  &lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;SERVER_PORT&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #003333&#34;&gt;$PORT&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;$PWD&lt;/span&gt;/.java-buildpack/open_jdk_jre/bin/java -cp &lt;span style=&#34;color: #003333&#34;&gt;$PWD&lt;/span&gt;/.:&lt;span style=&#34;color: #003333&#34;&gt;$PWD&lt;/span&gt;/.java-buildpack/spring_auto_reconfiguration/spring_auto_reconfiguration-1.4.0_RELEASE.jar -Djava.io.tmpdir&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #003333&#34;&gt;$TMPDIR&lt;/span&gt; -XX:OnOutOfMemoryError&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #003333&#34;&gt;$PWD&lt;/span&gt;/.java-buildpack/open_jdk_jre/bin/killjava.sh -Xmx499200K -Xms499200K -XX:MaxPermSize&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;65M -XX:PermSize&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;65M -Xss1M -javaagent:&lt;span style=&#34;color: #003333&#34;&gt;$PWD&lt;/span&gt;/.java-buildpack/app_dynamics_agent/javaagent.jar -Dappdynamics.agent.applicationName&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;******&amp;#39;&lt;/span&gt; -Dappdynamics.agent.tierName&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;******&amp;#39;&lt;/span&gt; -Dappdynamics.agent.nodeName&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;$(&lt;/span&gt;expr &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #003333&#34;&gt;$VCAP_APPLICATION&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;&lt;/span&gt; : &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;.*instance_id[&amp;quot;: ]*&amp;quot;\([a-z0-9]\+\)&amp;quot;.*&amp;#39;&lt;/span&gt;&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;)&lt;/span&gt; -Dappdynamics.agent.accountAccessKey&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;****** -Dappdynamics.agent.accountName&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;******* -Dappdynamics.controller.hostName&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;******.saas.appdynamics.com -Dappdynamics.controller.port&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;443&lt;/span&gt; -Dappdynamics.controller.ssl.enabled&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #336666&#34;&gt;true&lt;/span&gt; org.springframework.boot.loader.JarLauncher &lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;It can be seen that the &lt;code&gt;MaxPermSize&lt;/code&gt; is set to &lt;code&gt;65M&lt;/code&gt;. Now, this is not something I configured for this app. This value was assigned by the Java build pack generated by Cloud Foundry when the app was deployed. This can be in the &lt;a href=&#34;https://github.com/cloudfoundry/java-buildpack&#34;&gt;Java build pack&lt;/a&gt;&amp;rsquo;s OpenJDK JRE configuration.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;# config/open_jdk_jre.yml&lt;/span&gt;
-&lt;span style=&#34;color: #00CCFF; font-weight: bold&#34;&gt;---&lt;/span&gt;
-jre:
-  version: 1.8.0_+
-  repository_root: &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;{default.repository.root}/openjdk/{platform}/{architecture}&amp;quot;&lt;/span&gt;
-memory_calculator:
-  version: 1.+
-  repository_root: &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;{default.repository.root}/memory-calculator/{platform}/{architecture}&amp;quot;&lt;/span&gt;
-  memory_sizes:
-    metaspace: 64m..
-    permgen: 64m..
-  memory_heuristics:
-    heap: 75
-    metaspace: 10
-    permgen: 10
-    stack: 5
-    native: 10
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;The only way to change this value is to change the configurations of the Java build pack. There are two ways to do this:&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;Fork the build pack, modify the default memory parameters and use this build pack to deploy.&lt;/li&gt;
-&lt;li&gt;Override the memory parameters used by the build pack at deploy time.&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;Option 1 seems to be an overkill and Cloud Foundry provides a &lt;a href=&#34;https://github.com/cloudfoundry/java-buildpack/blob/master/README.md#configuration-and-extension&#34;&gt;relatively easy method&lt;/a&gt; to override build pack parameters. Option 2 is the approach I decided to take.&lt;/p&gt;
-
-&lt;p&gt;There are &lt;a href=&#34;https://github.com/cloudfoundry/java-buildpack/blob/master/docs/jre-open_jdk_jre.md&#34;&gt;two sets of mappings&lt;/a&gt; that control the various Java memory configurations - &lt;code&gt;memory_sizes&lt;/code&gt; and &lt;code&gt;memory_heuristics&lt;/code&gt;. Together, these two parameters provide a lot of &lt;a href=&#34;https://github.com/cloudfoundry/java-buildpack/blob/master/docs/jre-open_jdk_jre.md#memory-calculation&#34;&gt;flexibility&lt;/a&gt; to control memory allocation. For the particular issue my application faced, all I need to do is to force an appropriate value for &lt;code&gt;MaxPermSize&lt;/code&gt; and this can be done by setting the &lt;code&gt;JBP_CONFIG_OPEN_JDK_MEMORY_CALCULATOR&lt;/code&gt; environment variable as:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;cf set-env app-name JBP_CONFIG_OPEN_JDK_MEMORY_CALCULATOR &lt;span style=&#34;color: #555555&#34;&gt;[&lt;/span&gt;memory_sizes: &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;metaspace: 128m&lt;span style=&#34;color: #555555&#34;&gt;}]&lt;/span&gt;&lt;span style=&#34;color: #AA0000; background-color: #FFAAAA&#34;&gt;&amp;#39;&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;While this configurations works for applications running under Java &lt;code&gt;1.8&lt;/code&gt;, the right parameter to use for applications running under Java &lt;code&gt;1.7&lt;/code&gt; is &lt;code&gt;permgen&lt;/code&gt;.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;cf set-env app-name JBP_CONFIG_OPEN_JDK_JRE &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;[memory_sizes: {metaspace: 128m}]&amp;#39;&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;After re-staging the application and making sure the application works as expected, I added this environment variable to the application&amp;rsquo;s &lt;code&gt;manifest.yml&lt;/code&gt; file.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #00CCFF; font-weight: bold&#34;&gt;---&lt;/span&gt;
-applications:
-- name: test-app
-  ...
-  env:
-    JBP_CONFIG_OPEN_JDK_MEMORY_CALCULATOR: &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;[memory_sizes:&lt;/span&gt;&lt;span style=&#34;color: #003333&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;{metaspace:&lt;/span&gt;&lt;span style=&#34;color: #003333&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;128m}]&amp;quot;&lt;/span&gt;
-  ...
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;To see how to adjust the memory parameters by modifying the Java build pack, see Haydon Ryan&amp;rsquo;s blog post &lt;a href=&#34;http://www.haydonryan.com/java-8-increasing-metaspace-size-in-cloud-foundry/&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;</description>
+&lt;p&gt;&lt;/p&gt;</description>
     </item>
     
   </channel>

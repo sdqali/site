@@ -23,7 +23,7 @@
 </head>
 
   <meta name="description" content="I use the flyspell-mode as a spell checking mechanism in emacs. Recently, I moved to Mac OS X, and I began to get this error whenever I started emacs:
-Error enabling Flyspell mode: (Searching for program No such file or directory aspell)  I had installed aspell with Homebrew. The issue seemed to be that Emacs was unable to find the aspell binary. Homebrew installs binaries in /usr/local/bin and it was in my $PATH." />
+Error enabling Flyspell mode: (Searching for program No such file or directory aspell) I had installed aspell with Homebrew. The issue seemed to be that Emacs was unable to find the aspell binary. Homebrew installs binaries in /usr/local/bin and it was in my $PATH." />
   <meta content="mac-osx, emacs, homebrew, development, elisp" name="keywords">
 
   
@@ -32,12 +32,12 @@ Error enabling Flyspell mode: (Searching for program No such file or directory a
   <meta name="twitter:creator" content="@sdqali">
   <meta name="twitter:title" content="Fixing Flyspell for Emacs in Mac OS X">
   <meta name="twitter:description" content="I use the flyspell-mode as a spell checking mechanism in emacs. Recently, I moved to Mac OS X, and I began to get this error whenever I started emacs:
-Error enabling Flyspell mode: (Searching for program No such file or directory aspell)  I had installed aspell with Homebrew. The issue seemed to be that Emacs was unable to find the aspell binary. Homebrew installs binaries in /usr/local/bin and it was in my $PATH.">
+Error enabling Flyspell mode: (Searching for program No such file or directory aspell) I had installed aspell with Homebrew. The issue seemed to be that Emacs was unable to find the aspell binary. Homebrew installs binaries in /usr/local/bin and it was in my $PATH.">
   <meta name="twitter:image" content="https://sdqali.in//images/threaded-blue-on-black-cropped.jpg">
 
   <meta property="og:title" content="Fixing Flyspell for Emacs in Mac OS X" />
   <meta property="og:description" content="I use the flyspell-mode as a spell checking mechanism in emacs. Recently, I moved to Mac OS X, and I began to get this error whenever I started emacs:
-Error enabling Flyspell mode: (Searching for program No such file or directory aspell)  I had installed aspell with Homebrew. The issue seemed to be that Emacs was unable to find the aspell binary. Homebrew installs binaries in /usr/local/bin and it was in my $PATH." itemprop="description"/>
+Error enabling Flyspell mode: (Searching for program No such file or directory aspell) I had installed aspell with Homebrew. The issue seemed to be that Emacs was unable to find the aspell binary. Homebrew installs binaries in /usr/local/bin and it was in my $PATH." itemprop="description"/>
   <meta property="og:url" content="https://sdqali.in/blog/2012/05/04/fixing-flyspell-for-emacs-in-mac-os-x/" />
   <meta property="og:image" content="https://sdqali.in//images/threaded-blue-on-black-cropped.jpg" />
   <body>
@@ -118,57 +118,21 @@ Error enabling Flyspell mode: (Searching for program No such file or directory a
             
 
 <p>I use the <a href="http://www.emacswiki.org/emacs/FlySpell">flyspell-mode</a> as a spell checking mechanism in emacs. Recently, I moved to Mac OS X, and I began to get this error whenever I started emacs:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>Error enabling Flyspell mode:
-<span style="color: #555555">(</span>Searching <span style="color: #006699; font-weight: bold">for</span> program No such file or directory aspell<span style="color: #555555">)</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">Error enabling Flyspell mode:
+<span style="color:#555">(</span>Searching <span style="color:#069;font-weight:bold">for</span> program No such file or directory aspell<span style="color:#555">)</span></code></pre></div>
 <p>I had installed aspell with Homebrew. The issue seemed to be that Emacs was unable to find the aspell binary. Homebrew installs binaries in <strong>/usr/local/bin</strong> and it was in my $PATH. It turns out Emacs uses it&rsquo;s own exec path to look for binaries to execute in sub-processes. So the fix is to add the <strong>/usr/local/bin</strong> path to the exec-path. This is the change needed to the <strong>~/.emacs</strong> file:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span> <span style="color: #555555">&#39;</span>(<span style="color: #003333">exec-path</span> (<span style="color: #006699; font-weight: bold">quote</span> (<span style="color: #CC3300">&quot;/usr/bin&quot;</span> <span style="color: #CC3300">&quot;/bin&quot;</span> <span style="color: #CC3300">&quot;/usr/sbin&quot;</span> <span style="color: #CC3300">&quot;/sbin&quot;</span> <span style="color: #CC3300">&quot;/usr/local/bin&quot;</span>))))
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lisp" data-lang="lisp"> <span style="color:#555">&#39;</span>(<span style="color:#033">exec-path</span> (<span style="color:#033">quote</span> (<span style="color:#c30">&#34;/usr/bin&#34;</span> <span style="color:#c30">&#34;/bin&#34;</span> <span style="color:#c30">&#34;/usr/sbin&#34;</span> <span style="color:#c30">&#34;/sbin&#34;</span> <span style="color:#c30">&#34;/usr/local/bin&#34;</span>))))</code></pre></div>
 <p>Notice the <strong>/usr/local/bin</strong> in there.</p>
 
 <h2 id="update">Update</h2>
 
 <p>This does not seem to work. A better way to do this is to add the
 following:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>(<span style="color: #003333">setenv</span> <span style="color: #CC3300">&quot;PATH&quot;</span> (<span style="color: #003333">concat</span> (<span style="color: #003333">getenv</span> <span style="color: #CC3300">&quot;PATH&quot;</span>) <span style="color: #CC3300">&quot;:/usr/local/bin&quot;</span>))
-(<span style="color: #006699; font-weight: bold">setq</span> <span style="color: #003333">exec-path</span> (<span style="color: #336666">append</span> <span style="color: #003333">exec-path</span> <span style="color: #555555">&#39;</span>(<span style="color: #CC3300">&quot;/usr/local/bin&quot;</span>)))
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lisp" data-lang="lisp">(<span style="color:#033">setenv</span> <span style="color:#c30">&#34;PATH&#34;</span> (<span style="color:#033">concat</span> (<span style="color:#033">getenv</span> <span style="color:#c30">&#34;PATH&#34;</span>) <span style="color:#c30">&#34;:/usr/local/bin&#34;</span>))
+(<span style="color:#033">setq</span> <span style="color:#033">exec-path</span> (<span style="color:#033">append</span> <span style="color:#033">exec-path</span> <span style="color:#555">&#39;</span>(<span style="color:#c30">&#34;/usr/local/bin&#34;</span>)))</code></pre></div>
             <p class="comments">
   If you have questions or comments about this blog post, you can get in touch with me on Twitter <a href="https://twitter.com/sdqali">@sdqali</a>.
 </p>
-
-            <div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Found this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and explanations for specific Java, Spring and other programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
 
           </div>
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">

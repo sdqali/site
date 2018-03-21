@@ -2,42 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Scm on {code that works}</title>
-    <link>https://sdqali.in/categories/scm/?utm_source=site&amp;utm_medium=feed</link>
+    <link>https://sdqali.in/categories/scm/</link>
     <description>Recent content in Scm on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
     <lastBuildDate>Sun, 29 Apr 2012 00:00:00 +0000</lastBuildDate>
-    <atom:link href="/categories/scm/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    
+	<atom:link href="https://sdqali.in/categories/scm/index.xml" rel="self" type="application/rss+xml" />
+    
     
     <item>
       <title>Finding un-merged commits with git cherry</title>
-      <link>https://sdqali.in/blog/2012/04/29/finding-un-merged-commits-with-git-cherry/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sdqali.in/blog/2012/04/29/finding-un-merged-commits-with-git-cherry/</link>
       <pubDate>Sun, 29 Apr 2012 00:00:00 +0000</pubDate>
       
-      <guid>https://sdqali.in/blog/2012/04/29/finding-un-merged-commits-with-git-cherry/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>&lt;div class=&#39;post&#39;&gt;
-&lt;div dir=&#34;ltr&#34; style=&#34;text-align: left;&#34; trbidi=&#34;on&#34;&gt;&lt;br /&gt;In a project
-  that I was a part of in the recent past, we used Story
-  Branching. While it afforded us flexibility in pulling and pushing
-  stories in and out of releases, it has given us some scares in the
-  past. Somebody makes commits against a story, but the commit does not
-  get merged to the correct release branch where it is supposed to go or
-  gets merged to another release. The solution was to hunt down the
-  commits that are missing or have creeped in.&lt;br /&gt;&lt;br /&gt;This is where
-  the &lt;i&gt;&lt;a href=&#34;http://linux.die.net/man/1/git-cherry&#34;
-            target=&#34;_blank&#34;&gt;&lt;b&gt;git cherry&lt;/b&gt;&lt;/a&gt;&lt;/i&gt; command is
-  useful. Git cherry finds commits not merged from a branch to
-  another. From the man
-  page:&lt;br /&gt;&lt;blockquote class=&#34;tr_bq&#34;&gt;&amp;nbsp;&#34;Every commit that doesn&#39;t
-    exist in the &amp;lt;upstream&amp;gt; branch has its id (sha1) reported,
-    prefixed by a symbol. The ones that have equivalent change already
-    in the &amp;lt;upstream&amp;gt; branch&amp;nbsp;are prefixed with a minus (-)
-    sign, and those that only exist in the &amp;lt;head&amp;gt; branch are
-    prefixed with a plus (+) symbol&#34;&lt;/blockquote&gt;&lt;br /&gt;
-
-&lt;!--more--&gt;
-
-Consider the following example. I have two branches - master and release-23.&lt;br /&gt;&lt;br /&gt;&lt;script src=&#34;https://gist.github.com/2549851.js?file=gistfile1.sh&#34;&gt;&lt;/script&gt;&lt;br /&gt;&lt;br /&gt;The branch release-23 has three commits:&lt;br /&gt;&lt;br /&gt;&lt;script src=&#34;https://gist.github.com/2549874.js?file=gistfile1.sh&#34;&gt;&lt;/script&gt;&lt;br /&gt;&lt;br /&gt;The branch master have two commits:&lt;br /&gt;&lt;br /&gt;&lt;script src=&#34;https://gist.github.com/2549880.js?file=gistfile1.sh&#34;&gt;&lt;/script&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;ul style=&#34;text-align: left;&#34;&gt;&lt;li&gt;Commit &lt;i&gt;1afda04ccbf2f834663ca8ec3eaf6e3b917581fb (Added foo)&lt;/i&gt; is present in both branches.&lt;/li&gt;&lt;li&gt;Commit &lt;i&gt;2a446b1a19253a69c4bb133eedb311c14b2906e8 (Added bar)&lt;/i&gt; in the release-23 branch was merged to master, but the commit message was later ammended and its sha became &lt;i&gt;8c71e1b2232c1a524e1de20553180676fb971f86 (Amended. This was Added bar)&lt;/i&gt;.&lt;/li&gt;&lt;li&gt;Commit &lt;i&gt;f06e4df25724ad0dd51702a10f075d39368e1963 (Added zoom)&lt;/i&gt; is present only in the release-23 branch.&lt;/li&gt;&lt;/ul&gt;&lt;br /&gt;&lt;br /&gt;If we do a &lt;i&gt;&lt;b&gt;git cherry&lt;/b&gt;&lt;/i&gt; now with master as the upstream and release-23 as head:&lt;br /&gt;&lt;br /&gt;&lt;script src=&#34;https://gist.github.com/2549897.js?file=gistfile1.sh&#34;&gt;&lt;/script&gt;&lt;br /&gt;&lt;br /&gt;This tells us that&lt;br /&gt;&lt;br /&gt;&lt;ol style=&#34;text-align: left;&#34;&gt;&lt;li&gt;An equivalent of commit &lt;i&gt;2a446b1a19253a69c4bb133eedb311c14b2906e8 (Added bar)&lt;/i&gt; is present in the master branch, as indicated by the (-) sign.&lt;/li&gt;&lt;li&gt;Commit &lt;i&gt;f06e4df25724ad0dd51702a10f075d39368e1963 (Added zoom)&lt;/i&gt; is present only in the release-23 branch, as indicated by the (+) sign.&lt;/li&gt;&lt;/ol&gt;&lt;br /&gt;&lt;br /&gt;If we were to do &lt;i&gt;&lt;b&gt;git cherry&lt;/b&gt;&lt;/i&gt; the other way around, ie. with release-23 as the upstream and master as the head:&lt;br /&gt;&lt;br /&gt;&lt;script src=&#34;https://gist.github.com/2549909.js?file=gistfile1.sh&#34;&gt;&lt;/script&gt;&lt;br /&gt;&lt;br /&gt;This tells us that&lt;br /&gt;&lt;br /&gt;&lt;ol style=&#34;text-align: left;&#34;&gt;&lt;li&gt;An equivalent of commit &lt;i&gt;8c71e1b2232c1a524e1de20553180676fb971f86 (Amended. This was Added bar)&lt;/i&gt; is present in the master branch, as indicated by the (-) sign.&lt;/li&gt;&lt;li&gt;There are no commits in master that are not present in release-23.&lt;/li&gt;&lt;/ol&gt;&lt;br /&gt;&lt;div&gt;That is pretty much what the &lt;b&gt;&lt;i&gt;git cherry&lt;/i&gt;&lt;/b&gt; command does.&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
-</description>
+      <guid>https://sdqali.in/blog/2012/04/29/finding-un-merged-commits-with-git-cherry/</guid>
+      <description>In a project that I was a part of in the recent past, we used Story Branching. While it afforded us flexibility in pulling and pushing stories in and out of releases, it has given us some scares in the past. Somebody makes commits against a story, but the commit does not get merged to the correct release branch where it is supposed to go or gets merged to another release.</description>
     </item>
     
   </channel>

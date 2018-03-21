@@ -122,63 +122,27 @@ You are in Ruby world, a world of weak typing, no type casting and pure bliss in
 <p>I will be using a dummy example for describing the problem.</p>
 
 <p>The following code snippet tries to compare two arrays in JRuby using Java Arrays&rsquo; equals method. In JRuby world, one would expect this to work. Actually, one should not, but Ruby really gets into you.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #336666">require</span> <span style="color: #CC3300">&#39;java&#39;</span>
-import <span style="color: #CC3300">&#39;java.util.Arrays&#39;</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ruby" data-lang="ruby"><span style="color:#366">require</span> <span style="color:#c30">&#39;java&#39;</span>
+import <span style="color:#c30">&#39;java.util.Arrays&#39;</span>
 
-<span style="color: #336666">puts</span> <span style="color: #CC3300">&quot;Arrays equal&quot;</span> <span style="color: #006699; font-weight: bold">if</span> <span style="color: #336600">Arrays</span><span style="color: #555555">.</span>equals(<span style="color: #555555">[</span><span style="color: #FF6600">1</span>, <span style="color: #FF6600">2</span>, <span style="color: #FF6600">3</span><span style="color: #555555">]</span>, <span style="color: #555555">[</span><span style="color: #FF6600">1</span>, <span style="color: #FF6600">2</span>, <span style="color: #FF6600">3</span><span style="color: #555555">]</span>)
-</pre></div>
-
+<span style="color:#366">puts</span> <span style="color:#c30">&#34;Arrays equal&#34;</span> <span style="color:#069;font-weight:bold">if</span> <span style="color:#360">Arrays</span><span style="color:#555">.</span>equals(<span style="color:#555">[</span><span style="color:#f60">1</span><span style="color:#555"></span>, <span style="color:#f60">2</span><span style="color:#555"></span>, <span style="color:#f60">3</span><span style="color:#555">]</span>, <span style="color:#555">[</span><span style="color:#f60">1</span><span style="color:#555"></span>, <span style="color:#f60">2</span><span style="color:#555"></span>, <span style="color:#f60">3</span><span style="color:#555">]</span>)</code></pre></div>
 <p>Well, it does not. You get an error:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>no equals with arguments matching <span style="color: #555555">[</span>class org.jruby.RubyArray, class org.jruby.RubyArray<span style="color: #555555">]</span> on object Java::JavaUtil::Arrays <span style="color: #555555">(</span>NameError<span style="color: #555555">)</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">no equals with arguments matching <span style="color:#555">[</span>class org.jruby.RubyArray, class org.jruby.RubyArray<span style="color:#555">]</span> on object Java::JavaUtil::Arrays <span style="color:#555">(</span>NameError<span style="color:#555">)</span></code></pre></div>
 <p>This error message is informative. In our case, our unit tests threw an error that was very difficult to make any sense of. The reason why this fails is obvious.</p>
 
 <p>Java does care about the Type of things that form an Array. So you need to cast it to the correct type.</p>
 
 <p>Here is the code that actually works:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #336666">require</span> <span style="color: #CC3300">&#39;java&#39;</span>
-import <span style="color: #CC3300">&#39;java.util.Arrays&#39;</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ruby" data-lang="ruby"><span style="color:#366">require</span> <span style="color:#c30">&#39;java&#39;</span>
+import <span style="color:#c30">&#39;java.util.Arrays&#39;</span>
 
-<span style="color: #336666">puts</span> <span style="color: #CC3300">&quot;Arrays equal&quot;</span> <span style="color: #006699; font-weight: bold">if</span> <span style="color: #336600">Arrays</span><span style="color: #555555">.</span>equals(<span style="color: #555555">[</span><span style="color: #FF6600">1</span>,<span style="color: #FF6600">2</span>,<span style="color: #FF6600">3</span><span style="color: #555555">].</span>to_java(java<span style="color: #555555">.</span>lang<span style="color: #555555">.</span>Integer),
-                                     <span style="color: #555555">[</span><span style="color: #FF6600">1</span>,<span style="color: #FF6600">2</span>,<span style="color: #FF6600">3</span><span style="color: #555555">].</span>to_java(java<span style="color: #555555">.</span>lang<span style="color: #555555">.</span>Integer))
-</pre></div>
-
+<span style="color:#366">puts</span> <span style="color:#c30">&#34;Arrays equal&#34;</span> <span style="color:#069;font-weight:bold">if</span> <span style="color:#360">Arrays</span><span style="color:#555">.</span>equals(<span style="color:#555">[</span><span style="color:#f60">1</span><span style="color:#555"></span>,<span style="color:#f60">2</span><span style="color:#555"></span>,<span style="color:#f60">3</span><span style="color:#555">].</span>to_java(java<span style="color:#555">.</span>lang<span style="color:#555">.</span>Integer),
+                                     <span style="color:#555">[</span><span style="color:#f60">1</span><span style="color:#555"></span>,<span style="color:#f60">2</span><span style="color:#555"></span>,<span style="color:#f60">3</span><span style="color:#555">].</span>to_java(java<span style="color:#555">.</span>lang<span style="color:#555">.</span>Integer))</code></pre></div>
 <p>The <code>to_java</code> method casts the elements of the Ruby array into Java array with elements of type specified.</p>
 
             <p class="comments">
   If you have questions or comments about this blog post, you can get in touch with me on Twitter <a href="https://twitter.com/sdqali">@sdqali</a>.
 </p>
-
-            <div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Found this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and explanations for specific Java, Spring and other programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
 
           </div>
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">

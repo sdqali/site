@@ -126,156 +126,117 @@ These are the blog posts in this series:</p>
 </ul>
 
 <p>Our fist step is to configure Spring Security to allow access to the login end point we will be building. This can be done as follows:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@Configuration</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">SecurityConfig</span> <span style="color: #006699; font-weight: bold">extends</span> WebSecurityConfigurerAdapter <span style="color: #555555">{</span>
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">protected</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">configure</span><span style="color: #555555">(</span>HttpSecurity http<span style="color: #555555">)</span> <span style="color: #006699; font-weight: bold">throws</span> Exception <span style="color: #555555">{</span>
-        http<span style="color: #555555">.</span><span style="color: #330099">csrf</span><span style="color: #555555">().</span><span style="color: #330099">ignoringAntMatchers</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;/login&quot;</span><span style="color: #555555">);</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Configuration</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">SecurityConfig</span> <span style="color:#069;font-weight:bold">extends</span> WebSecurityConfigurerAdapter <span style="color:#555">{</span>
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">protected</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">configure</span><span style="color:#555">(</span>HttpSecurity http<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
+        http<span style="color:#555">.</span><span style="color:#309">csrf</span><span style="color:#555">().</span><span style="color:#309">ignoringAntMatchers</span><span style="color:#555">(</span><span style="color:#c30">&#34;/login&#34;</span><span style="color:#555">);</span>
 
-        http<span style="color: #555555">.</span><span style="color: #330099">authorizeRequests</span><span style="color: #555555">()</span>
-                <span style="color: #555555">.</span><span style="color: #330099">antMatchers</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;/login&quot;</span><span style="color: #555555">)</span>
-                <span style="color: #555555">.</span><span style="color: #330099">permitAll</span><span style="color: #555555">()</span>
-                <span style="color: #555555">.</span><span style="color: #330099">antMatchers</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;/**/*&quot;</span><span style="color: #555555">)</span>
-                <span style="color: #555555">.</span><span style="color: #330099">denyAll</span><span style="color: #555555">();</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+        http<span style="color:#555">.</span><span style="color:#309">authorizeRequests</span><span style="color:#555">()</span>
+                <span style="color:#555">.</span><span style="color:#309">antMatchers</span><span style="color:#555">(</span><span style="color:#c30">&#34;/login&#34;</span><span style="color:#555">)</span>
+                <span style="color:#555">.</span><span style="color:#309">permitAll</span><span style="color:#555">()</span>
+                <span style="color:#555">.</span><span style="color:#309">antMatchers</span><span style="color:#555">(</span><span style="color:#c30">&#34;/**/*&#34;</span><span style="color:#555">)</span>
+                <span style="color:#555">.</span><span style="color:#309">denyAll</span><span style="color:#555">();</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>We are turning off authentication and CSRF token checking for the <code>/login</code> end point.</p>
 
 <p>Next, we build a <code>LoginController</code> to issue tokens up on a user presenting valid credentials:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@RestController</span>
-<span style="color: #9999FF">@RequestMapping</span><span style="color: #555555">(</span>path <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;/login&quot;</span><span style="color: #555555">)</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">LoginController</span> <span style="color: #555555">{</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@RestController</span>
+<span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span>path <span style="color:#555">=</span> <span style="color:#c30">&#34;/login&#34;</span><span style="color:#555">)</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">LoginController</span> <span style="color:#555">{</span>
 
-    <span style="color: #006699; font-weight: bold">private</span> <span style="color: #006699; font-weight: bold">final</span> LoginService loginService<span style="color: #555555">;</span>
-    <span style="color: #006699; font-weight: bold">private</span> <span style="color: #006699; font-weight: bold">final</span> JwtService jwtService<span style="color: #555555">;</span>
+    <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">final</span> LoginService loginService<span style="color:#555">;</span>
+    <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">final</span> JwtService jwtService<span style="color:#555">;</span>
 
-    <span style="color: #9999FF">@SuppressWarnings</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;unused&quot;</span><span style="color: #555555">)</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #CC00FF">LoginController</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">this</span><span style="color: #555555">(</span><span style="color: #006699; font-weight: bold">null</span><span style="color: #555555">,</span> <span style="color: #006699; font-weight: bold">null</span><span style="color: #555555">);</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#99f">@SuppressWarnings</span><span style="color:#555">(</span><span style="color:#c30">&#34;unused&#34;</span><span style="color:#555">)</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">LoginController</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">this</span><span style="color:#555">(</span><span style="color:#069;font-weight:bold">null</span><span style="color:#555">,</span> <span style="color:#069;font-weight:bold">null</span><span style="color:#555">);</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Autowired</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #CC00FF">LoginController</span><span style="color: #555555">(</span>LoginService loginService<span style="color: #555555">,</span> JwtService jwtService<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">this</span><span style="color: #555555">.</span><span style="color: #330099">loginService</span> <span style="color: #555555">=</span> loginService<span style="color: #555555">;</span>
-        <span style="color: #006699; font-weight: bold">this</span><span style="color: #555555">.</span><span style="color: #330099">jwtService</span> <span style="color: #555555">=</span> jwtService<span style="color: #555555">;</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#99f">@Autowired</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">LoginController</span><span style="color:#555">(</span>LoginService loginService<span style="color:#555">,</span> JwtService jwtService<span style="color:#555">)</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">this</span><span style="color:#555">.</span><span style="color:#309">loginService</span> <span style="color:#555">=</span> loginService<span style="color:#555">;</span>
+        <span style="color:#069;font-weight:bold">this</span><span style="color:#555">.</span><span style="color:#309">jwtService</span> <span style="color:#555">=</span> jwtService<span style="color:#555">;</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@RequestMapping</span><span style="color: #555555">(</span>path <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;&quot;</span><span style="color: #555555">,</span>
-            method <span style="color: #555555">=</span> POST<span style="color: #555555">,</span>
-            produces <span style="color: #555555">=</span> APPLICATION_JSON_VALUE<span style="color: #555555">)</span>
-    <span style="color: #006699; font-weight: bold">public</span> MinimalProfile <span style="color: #CC00FF">login</span><span style="color: #555555">(</span><span style="color: #9999FF">@RequestBody</span> LoginCredentials credentials<span style="color: #555555">,</span>
-                                HttpServletResponse response<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> loginService<span style="color: #555555">.</span><span style="color: #330099">login</span><span style="color: #555555">(</span>credentials<span style="color: #555555">)</span>
-                <span style="color: #555555">.</span><span style="color: #330099">map</span><span style="color: #555555">(</span>minimalProfile <span style="color: #555555">-&gt;</span> <span style="color: #555555">{</span>
-                    <span style="color: #006699; font-weight: bold">try</span> <span style="color: #555555">{</span>
-                        response<span style="color: #555555">.</span><span style="color: #330099">setHeader</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;Token&quot;</span><span style="color: #555555">,</span> jwtService<span style="color: #555555">.</span><span style="color: #330099">tokenFor</span><span style="color: #555555">(</span>minimalProfile<span style="color: #555555">));</span>
-                    <span style="color: #555555">}</span> <span style="color: #006699; font-weight: bold">catch</span> <span style="color: #555555">(</span>Exception e<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-                        <span style="color: #006699; font-weight: bold">throw</span> <span style="color: #006699; font-weight: bold">new</span> RuntimeException<span style="color: #555555">(</span>e<span style="color: #555555">);</span>
-                    <span style="color: #555555">}</span>
-                    <span style="color: #006699; font-weight: bold">return</span> minimalProfile<span style="color: #555555">;</span>
-                <span style="color: #555555">})</span>
-                <span style="color: #555555">.</span><span style="color: #330099">orElseThrow</span><span style="color: #555555">(()</span> <span style="color: #555555">-&gt;</span> <span style="color: #006699; font-weight: bold">new</span> FailedToLoginException<span style="color: #555555">(</span>credentials<span style="color: #555555">.</span><span style="color: #330099">getUsername</span><span style="color: #555555">()));</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
+    <span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span>path <span style="color:#555">=</span> <span style="color:#c30">&#34;&#34;</span><span style="color:#555">,</span>
+            method <span style="color:#555">=</span> POST<span style="color:#555">,</span>
+            produces <span style="color:#555">=</span> APPLICATION_JSON_VALUE<span style="color:#555">)</span>
+    <span style="color:#069;font-weight:bold">public</span> MinimalProfile <span style="color:#c0f">login</span><span style="color:#555">(</span><span style="color:#99f">@RequestBody</span> LoginCredentials credentials<span style="color:#555">,</span>
+                                HttpServletResponse response<span style="color:#555">)</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> loginService<span style="color:#555">.</span><span style="color:#309">login</span><span style="color:#555">(</span>credentials<span style="color:#555">)</span>
+                <span style="color:#555">.</span><span style="color:#309">map</span><span style="color:#555">(</span>minimalProfile <span style="color:#555">-&gt;</span> <span style="color:#555">{</span>
+                    <span style="color:#069;font-weight:bold">try</span> <span style="color:#555">{</span>
+                        response<span style="color:#555">.</span><span style="color:#309">setHeader</span><span style="color:#555">(</span><span style="color:#c30">&#34;Token&#34;</span><span style="color:#555">,</span> jwtService<span style="color:#555">.</span><span style="color:#309">tokenFor</span><span style="color:#555">(</span>minimalProfile<span style="color:#555">));</span>
+                    <span style="color:#555">}</span> <span style="color:#069;font-weight:bold">catch</span> <span style="color:#555">(</span>Exception e<span style="color:#555">)</span> <span style="color:#555">{</span>
+                        <span style="color:#069;font-weight:bold">throw</span> <span style="color:#069;font-weight:bold">new</span> RuntimeException<span style="color:#555">(</span>e<span style="color:#555">);</span>
+                    <span style="color:#555">}</span>
+                    <span style="color:#069;font-weight:bold">return</span> minimalProfile<span style="color:#555">;</span>
+                <span style="color:#555">})</span>
+                <span style="color:#555">.</span><span style="color:#309">orElseThrow</span><span style="color:#555">(()</span> <span style="color:#555">-&gt;</span> <span style="color:#069;font-weight:bold">new</span> FailedToLoginException<span style="color:#555">(</span>credentials<span style="color:#555">.</span><span style="color:#309">getUsername</span><span style="color:#555">()));</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
+<p>We use the login service to verify the credentials and it returns an <code>Optional&lt;MinimalProfile&gt;</code>. If there is a valid <code>MinimalProfile</code>, we ask the <code>JwtService</code> to issue a token.</p>
 
-<p>We use the login service to verify the credentials and it returns an <code>Optional&lt;MinimalProfile&gt;</code>. If there is a valid <code>MinimalProfile</code>, we ask the <code>JwtService</code> to issue a token.
-<div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Finding this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and actionable explanations for specific programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
+<p>The <code>LoginService</code> uses the <code>ProfileService</code> to load a profile matching the user name and the password presented by the user.</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Component</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">LoginService</span> <span style="color:#555">{</span>
 
-The <code>LoginService</code> uses the <code>ProfileService</code> to load a profile matching the user name and the password presented by the user.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@Component</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">LoginService</span> <span style="color: #555555">{</span>
+    <span style="color:#069;font-weight:bold">private</span> ProfileService profileService<span style="color:#555">;</span>
 
-    <span style="color: #006699; font-weight: bold">private</span> ProfileService profileService<span style="color: #555555">;</span>
+    <span style="color:#99f">@SuppressWarnings</span><span style="color:#555">(</span><span style="color:#c30">&#34;unused&#34;</span><span style="color:#555">)</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">LoginService</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">this</span><span style="color:#555">(</span><span style="color:#069;font-weight:bold">null</span><span style="color:#555">);</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@SuppressWarnings</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;unused&quot;</span><span style="color: #555555">)</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #CC00FF">LoginService</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">this</span><span style="color: #555555">(</span><span style="color: #006699; font-weight: bold">null</span><span style="color: #555555">);</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#99f">@Autowired</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">LoginService</span><span style="color:#555">(</span>ProfileService profileService<span style="color:#555">)</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">this</span><span style="color:#555">.</span><span style="color:#309">profileService</span> <span style="color:#555">=</span> profileService<span style="color:#555">;</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Autowired</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #CC00FF">LoginService</span><span style="color: #555555">(</span>ProfileService profileService<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">this</span><span style="color: #555555">.</span><span style="color: #330099">profileService</span> <span style="color: #555555">=</span> profileService<span style="color: #555555">;</span>
-    <span style="color: #555555">}</span>
-
-    <span style="color: #006699; font-weight: bold">public</span> Optional<span style="color: #555555">&lt;</span>MinimalProfile<span style="color: #555555">&gt;</span> <span style="color: #CC00FF">login</span><span style="color: #555555">(</span>LoginCredentials credentials<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> profileService<span style="color: #555555">.</span><span style="color: #330099">get</span><span style="color: #555555">(</span>credentials<span style="color: #555555">.</span><span style="color: #330099">getUsername</span><span style="color: #555555">())</span>
-                <span style="color: #555555">.</span><span style="color: #330099">filter</span><span style="color: #555555">(</span>profile <span style="color: #555555">-&gt;</span> profile<span style="color: #555555">.</span><span style="color: #330099">getLogin</span><span style="color: #555555">().</span><span style="color: #330099">getPassword</span><span style="color: #555555">().</span><span style="color: #330099">equals</span><span style="color: #555555">(</span>credentials<span style="color: #555555">.</span><span style="color: #330099">getPassword</span><span style="color: #555555">()))</span>
-                <span style="color: #555555">.</span><span style="color: #330099">map</span><span style="color: #555555">(</span>profile <span style="color: #555555">-&gt;</span> <span style="color: #006699; font-weight: bold">new</span> MinimalProfile<span style="color: #555555">(</span>profile<span style="color: #555555">));</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+    <span style="color:#069;font-weight:bold">public</span> Optional<span style="color:#555">&lt;</span>MinimalProfile<span style="color:#555">&gt;</span> <span style="color:#c0f">login</span><span style="color:#555">(</span>LoginCredentials credentials<span style="color:#555">)</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> profileService<span style="color:#555">.</span><span style="color:#309">get</span><span style="color:#555">(</span>credentials<span style="color:#555">.</span><span style="color:#309">getUsername</span><span style="color:#555">())</span>
+                <span style="color:#555">.</span><span style="color:#309">filter</span><span style="color:#555">(</span>profile <span style="color:#555">-&gt;</span> profile<span style="color:#555">.</span><span style="color:#309">getLogin</span><span style="color:#555">().</span><span style="color:#309">getPassword</span><span style="color:#555">().</span><span style="color:#309">equals</span><span style="color:#555">(</span>credentials<span style="color:#555">.</span><span style="color:#309">getPassword</span><span style="color:#555">()))</span>
+                <span style="color:#555">.</span><span style="color:#309">map</span><span style="color:#555">(</span>profile <span style="color:#555">-&gt;</span> <span style="color:#069;font-weight:bold">new</span> MinimalProfile<span style="color:#555">(</span>profile<span style="color:#555">));</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>Please note that in real applications, you never want to do this. You should be comparing the hashed version of the password presented by the user with the hashed version of the password stored in the database.</p>
 
-<p>The <code>JwtService</code> creates a token using the profile information and an expiration date of 2 hours with the <code>HMASHA256</code> algorithm. It uses the key provided by <code>SecretKeyProvider</code>. For creating the JWT token, we use the excellent jjwt <sup class="footnote-ref" id="fnref:1"><a rel="footnote" href="#fn:1">1</a></sup> library we introduced in <a href="/blog/2016/07/02/jwt-authentication-with-spring-web---part-1/">part 1</a>.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@Component</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">JwtService</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">private</span> <span style="color: #006699; font-weight: bold">static</span> <span style="color: #006699; font-weight: bold">final</span> String ISSUER <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;in.sdqali.jwt&quot;</span><span style="color: #555555">;</span>
-    <span style="color: #006699; font-weight: bold">private</span> SecretKeyProvider secretKeyProvider<span style="color: #555555">;</span>
+<p>The <code>JwtService</code> creates a token using the profile information and an expiration date of 2 hours with the <code>HMASHA256</code> algorithm. It uses the key provided by <code>SecretKeyProvider</code>. For creating the JWT token, we use the excellent jjwt <sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup> library we introduced in <a href="/blog/2016/07/02/jwt-authentication-with-spring-web---part-1/">part 1</a>.</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Component</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">JwtService</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">static</span> <span style="color:#069;font-weight:bold">final</span> String ISSUER <span style="color:#555">=</span> <span style="color:#c30">&#34;in.sdqali.jwt&#34;</span><span style="color:#555">;</span>
+    <span style="color:#069;font-weight:bold">private</span> SecretKeyProvider secretKeyProvider<span style="color:#555">;</span>
 
-    <span style="color: #9999FF">@SuppressWarnings</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;unused&quot;</span><span style="color: #555555">)</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #CC00FF">JwtService</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">this</span><span style="color: #555555">(</span><span style="color: #006699; font-weight: bold">null</span><span style="color: #555555">);</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#99f">@SuppressWarnings</span><span style="color:#555">(</span><span style="color:#c30">&#34;unused&#34;</span><span style="color:#555">)</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">JwtService</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">this</span><span style="color:#555">(</span><span style="color:#069;font-weight:bold">null</span><span style="color:#555">);</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Autowired</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #CC00FF">JwtService</span><span style="color: #555555">(</span>SecretKeyProvider secretKeyProvider<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">this</span><span style="color: #555555">.</span><span style="color: #330099">secretKeyProvider</span> <span style="color: #555555">=</span> secretKeyProvider<span style="color: #555555">;</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#99f">@Autowired</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">JwtService</span><span style="color:#555">(</span>SecretKeyProvider secretKeyProvider<span style="color:#555">)</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">this</span><span style="color:#555">.</span><span style="color:#309">secretKeyProvider</span> <span style="color:#555">=</span> secretKeyProvider<span style="color:#555">;</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #006699; font-weight: bold">public</span> String <span style="color: #CC00FF">tokenFor</span><span style="color: #555555">(</span>MinimalProfile minimalProfile<span style="color: #555555">)</span> <span style="color: #006699; font-weight: bold">throws</span> IOException<span style="color: #555555">,</span> URISyntaxException <span style="color: #555555">{</span>
-        <span style="color: #007788; font-weight: bold">byte</span><span style="color: #555555">[]</span> secretKey <span style="color: #555555">=</span> secretKeyProvider<span style="color: #555555">.</span><span style="color: #330099">getKey</span><span style="color: #555555">();</span>
-        Date expiration <span style="color: #555555">=</span> Date<span style="color: #555555">.</span><span style="color: #330099">from</span><span style="color: #555555">(</span>LocalDateTime<span style="color: #555555">.</span><span style="color: #330099">now</span><span style="color: #555555">().</span><span style="color: #330099">plusHours</span><span style="color: #555555">(</span><span style="color: #FF6600">2</span><span style="color: #555555">).</span><span style="color: #330099">toInstant</span><span style="color: #555555">(</span>UTC<span style="color: #555555">));</span>
-        <span style="color: #006699; font-weight: bold">return</span> Jwts<span style="color: #555555">.</span><span style="color: #330099">builder</span><span style="color: #555555">()</span>
-                <span style="color: #555555">.</span><span style="color: #330099">setSubject</span><span style="color: #555555">(</span>minimalProfile<span style="color: #555555">.</span><span style="color: #330099">getUsername</span><span style="color: #555555">())</span>
-                <span style="color: #555555">.</span><span style="color: #330099">setExpiration</span><span style="color: #555555">(</span>expiration<span style="color: #555555">)</span>
-                <span style="color: #555555">.</span><span style="color: #330099">setIssuer</span><span style="color: #555555">(</span>ISSUER<span style="color: #555555">)</span>
-                <span style="color: #555555">.</span><span style="color: #330099">signWith</span><span style="color: #555555">(</span>SignatureAlgorithm<span style="color: #555555">.</span><span style="color: #330099">HS512</span><span style="color: #555555">,</span> secretKey<span style="color: #555555">)</span>
-                <span style="color: #555555">.</span><span style="color: #330099">compact</span><span style="color: #555555">();</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+    <span style="color:#069;font-weight:bold">public</span> String <span style="color:#c0f">tokenFor</span><span style="color:#555">(</span>MinimalProfile minimalProfile<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> IOException<span style="color:#555">,</span> URISyntaxException <span style="color:#555">{</span>
+        <span style="color:#078;font-weight:bold">byte</span><span style="color:#555">[]</span> secretKey <span style="color:#555">=</span> secretKeyProvider<span style="color:#555">.</span><span style="color:#309">getKey</span><span style="color:#555">();</span>
+        Date expiration <span style="color:#555">=</span> Date<span style="color:#555">.</span><span style="color:#309">from</span><span style="color:#555">(</span>LocalDateTime<span style="color:#555">.</span><span style="color:#309">now</span><span style="color:#555">().</span><span style="color:#309">plusHours</span><span style="color:#555">(</span>2<span style="color:#555">).</span><span style="color:#309">toInstant</span><span style="color:#555">(</span>UTC<span style="color:#555">));</span>
+        <span style="color:#069;font-weight:bold">return</span> Jwts<span style="color:#555">.</span><span style="color:#309">builder</span><span style="color:#555">()</span>
+                <span style="color:#555">.</span><span style="color:#309">setSubject</span><span style="color:#555">(</span>minimalProfile<span style="color:#555">.</span><span style="color:#309">getUsername</span><span style="color:#555">())</span>
+                <span style="color:#555">.</span><span style="color:#309">setExpiration</span><span style="color:#555">(</span>expiration<span style="color:#555">)</span>
+                <span style="color:#555">.</span><span style="color:#309">setIssuer</span><span style="color:#555">(</span>ISSUER<span style="color:#555">)</span>
+                <span style="color:#555">.</span><span style="color:#309">signWith</span><span style="color:#555">(</span>SignatureAlgorithm<span style="color:#555">.</span><span style="color:#309">HS512</span><span style="color:#555">,</span> secretKey<span style="color:#555">)</span>
+                <span style="color:#555">.</span><span style="color:#309">compact</span><span style="color:#555">();</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>The <code>SecretKeyProvider</code> in this example will simply load the secret key from a file, where it is stored in plain text. In a real application, you may store and encrypted version of it and decrypt it when required.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@Component</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">SecretKeyProvider</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">byte</span><span style="color: #555555">[]</span> <span style="color: #CC00FF">getKey</span><span style="color: #555555">()</span> <span style="color: #006699; font-weight: bold">throws</span> URISyntaxException<span style="color: #555555">,</span> IOException <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> Files<span style="color: #555555">.</span><span style="color: #330099">readAllBytes</span><span style="color: #555555">(</span>Paths<span style="color: #555555">.</span><span style="color: #330099">get</span><span style="color: #555555">(</span><span style="color: #006699; font-weight: bold">this</span><span style="color: #555555">.</span><span style="color: #330099">getClass</span><span style="color: #555555">().</span><span style="color: #330099">getResource</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;/jwt.key&quot;</span><span style="color: #555555">).</span><span style="color: #330099">toURI</span><span style="color: #555555">()));</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Component</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">SecretKeyProvider</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">byte</span><span style="color:#555">[]</span> <span style="color:#c0f">getKey</span><span style="color:#555">()</span> <span style="color:#069;font-weight:bold">throws</span> URISyntaxException<span style="color:#555">,</span> IOException <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> Files<span style="color:#555">.</span><span style="color:#309">readAllBytes</span><span style="color:#555">(</span>Paths<span style="color:#555">.</span><span style="color:#309">get</span><span style="color:#555">(</span><span style="color:#069;font-weight:bold">this</span><span style="color:#555">.</span><span style="color:#309">getClass</span><span style="color:#555">().</span><span style="color:#309">getResource</span><span style="color:#555">(</span><span style="color:#c30">&#34;/jwt.key&#34;</span><span style="color:#555">).</span><span style="color:#309">toURI</span><span style="color:#555">()));</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>With this code, a client can authenticate and receive a JWT. When request is made with correct username and password:</p>
 
 <pre><code>$ curl -v -X POST &quot;http://localhost:8080/login&quot; -d '{&quot;username&quot;:&quot;greenrabbit948&quot;, &quot;password&quot;:&quot;celeste&quot;}' --header &quot;Content-Type: application/json&quot;   | jq .
@@ -352,36 +313,6 @@ Date: Wed, 06 Jul 2016 06:05:46 GMT
             <p class="comments">
   If you have questions or comments about this blog post, you can get in touch with me on Twitter <a href="https://twitter.com/sdqali">@sdqali</a>.
 </p>
-
-            <div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Found this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and explanations for specific Java, Spring and other programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
 
           </div>
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">

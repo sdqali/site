@@ -2,151 +2,41 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Git on {code that works}</title>
-    <link>https://sdqali.in/categories/git/?utm_source=site&amp;utm_medium=feed</link>
+    <link>https://sdqali.in/categories/git/</link>
     <description>Recent content in Git on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
     <lastBuildDate>Mon, 29 Apr 2013 00:00:00 +0000</lastBuildDate>
-    <atom:link href="/categories/git/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    
+	<atom:link href="https://sdqali.in/categories/git/index.xml" rel="self" type="application/rss+xml" />
+    
     
     <item>
       <title>Emacs hack: Viewing Git logs while composing commit messages</title>
-      <link>https://sdqali.in/blog/2013/04/29/emacs-hack-viewing-git-logs-while-composing-commit-messages/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sdqali.in/blog/2013/04/29/emacs-hack-viewing-git-logs-while-composing-commit-messages/</link>
       <pubDate>Mon, 29 Apr 2013 00:00:00 +0000</pubDate>
       
-      <guid>https://sdqali.in/blog/2013/04/29/emacs-hack-viewing-git-logs-while-composing-commit-messages/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>&lt;p&gt;I use Emacs as my editor to compose Git commit messages. I almost never commit from the terminal with &lt;code&gt;git commit -m&lt;/code&gt;. This approach has two advantages: I get a chance to verify what is being committed and get to compose the message using a proper editor complete with spell checking provided by &lt;em&gt;flyspell mode&lt;/em&gt;. One thing I wish I had access to while composing commit messages is the git log. This is useful to refer to work items and encourages one to use a consistent style in the messages. This was easier in the terminal as one could do something like &lt;code&gt;git log -n 3&lt;/code&gt; and then commit with the &lt;code&gt;-m&lt;/code&gt; flag.&lt;/p&gt;
-
-&lt;p&gt;I decided to fix this today and some tinkering later came up with a hack tp do this.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Git commit messages are stored in the &lt;code&gt;COMMIT_EDITMSG&lt;/code&gt; file under &lt;code&gt;.git/&lt;/code&gt;. So the first thing to do is to ensure that this file always gets loaded with a custom minor mode. This can be done as follows:&lt;/li&gt;
-&lt;/ul&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #003333&#34;&gt;add-to-list&lt;/span&gt; &lt;span style=&#34;color: #FFCC33&#34;&gt;&amp;#39;auto-mode-alist&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;&amp;#39;&lt;/span&gt;(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;\\COMMIT_EDITMSG\\&amp;#39;&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;load-magit-log-when-committing-mode&lt;/span&gt;))
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;The minor mode does not need to do anything. The definition would be like this:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #003333&#34;&gt;define-minor-mode&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;load-magit-log-when-committing-mode&lt;/span&gt;
-  &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;dummy&amp;quot;&lt;/span&gt;)
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Next step is to add a custom hook that gets run after loading the minor mode. This hook calls the function to load git logs. The code for this is:&lt;/li&gt;
-&lt;/ul&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #003333&#34;&gt;add-hook&lt;/span&gt; &lt;span style=&#34;color: #FFCC33&#34;&gt;&amp;#39;load-magit-log-when-committing-mode-hook&lt;/span&gt; &lt;span style=&#34;color: #FFCC33&#34;&gt;&amp;#39;show-magit-log-hook&lt;/span&gt;)
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;ul&gt;
-&lt;li&gt;The actual function to load git logs. It calls &lt;code&gt;magit-log&lt;/code&gt; to load the logs and then opens the original &lt;code&gt;COMMIT_EDITMSG&lt;/code&gt; in the other frame.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #336666&#34;&gt;defun&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;show-magit-log-hook&lt;/span&gt; ()
-  (&lt;span style=&#34;color: #003333&#34;&gt;cd&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;..&amp;quot;&lt;/span&gt;)
-  (&lt;span style=&#34;color: #003333&#34;&gt;magit-log&lt;/span&gt;)
-  (&lt;span style=&#34;color: #003333&#34;&gt;switch-to-buffer-other-window&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;COMMIT_EDITMSG&amp;quot;&lt;/span&gt;))
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;This is how Emacs looks while committing with this hack in place:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://sdqali.in/images/screenshot_git_commit_log.png&#34; alt=&#34;&amp;quot;Screenshot showing git commit log&amp;quot;&#34; title=&#34;Screenshot showing git commit log&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;If you want to use this, copy the following snippet to your &lt;code&gt;init.el&lt;/code&gt;.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;;; load-magit-log-when-committing-mode&lt;/span&gt;
-(&lt;span style=&#34;color: #003333&#34;&gt;define-minor-mode&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;load-magit-log-when-committing-mode&lt;/span&gt;
-  &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;dummy&amp;quot;&lt;/span&gt;)
-
-&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;;; the hook&lt;/span&gt;
-(&lt;span style=&#34;color: #336666&#34;&gt;defun&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;show-magit-log-hook&lt;/span&gt; ()
-  (&lt;span style=&#34;color: #003333&#34;&gt;cd&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;..&amp;quot;&lt;/span&gt;)
-  (&lt;span style=&#34;color: #003333&#34;&gt;magit-log&lt;/span&gt;)
-  (&lt;span style=&#34;color: #003333&#34;&gt;switch-to-buffer-other-window&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;COMMIT_EDITMSG&amp;quot;&lt;/span&gt;))
-
-&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;;; add the hook&lt;/span&gt;
-(&lt;span style=&#34;color: #003333&#34;&gt;add-hook&lt;/span&gt; &lt;span style=&#34;color: #FFCC33&#34;&gt;&amp;#39;load-magit-log-when-committing-mode-hook&lt;/span&gt; &lt;span style=&#34;color: #FFCC33&#34;&gt;&amp;#39;show-magit-log-hook&lt;/span&gt;)
-
-&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;;; load the mode for commit message&lt;/span&gt;
-(&lt;span style=&#34;color: #003333&#34;&gt;add-to-list&lt;/span&gt; &lt;span style=&#34;color: #FFCC33&#34;&gt;&amp;#39;auto-mode-alist&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;&amp;#39;&lt;/span&gt;(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;\\COMMIT_EDITMSG\\&amp;#39;&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;load-magit-log-when-committing-mode&lt;/span&gt;))
-&lt;/pre&gt;&lt;/div&gt;
-</description>
+      <guid>https://sdqali.in/blog/2013/04/29/emacs-hack-viewing-git-logs-while-composing-commit-messages/</guid>
+      <description>I use Emacs as my editor to compose Git commit messages. I almost never commit from the terminal with git commit -m. This approach has two advantages: I get a chance to verify what is being committed and get to compose the message using a proper editor complete with spell checking provided by flyspell mode. One thing I wish I had access to while composing commit messages is the git log.</description>
     </item>
     
     <item>
       <title>Configure Git&#39;s comment character</title>
-      <link>https://sdqali.in/blog/2013/04/14/configure-gits-comment-character/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sdqali.in/blog/2013/04/14/configure-gits-comment-character/</link>
       <pubDate>Sun, 14 Apr 2013 00:00:00 +0000</pubDate>
       
-      <guid>https://sdqali.in/blog/2013/04/14/configure-gits-comment-character/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>&lt;p&gt;TL;DR -
-Use the &lt;code&gt;core.commentchar&lt;/code&gt; configuration to change the character Git uses to mark comment lines in commit messages.&lt;/p&gt;
-
-&lt;p&gt;My team has a convention of putting the number of the current Issue/Ticket/Story that we are working on at the beginning of every commit message. This is great because it lets us make sense of the history of our code by helping us answer&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;What were the changes made to the code base to build a feature or fix an issue?&lt;/li&gt;
-&lt;li&gt;Given a changeset, why was it put in place?&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;We use the format &lt;code&gt;#123 Foo bar&lt;/code&gt; for the message where &lt;code&gt;123&lt;/code&gt; is the issue number because it lets &lt;a href=&#34;http://www.thoughtworks-studios.com/mingle&#34;&gt;Mingle&lt;/a&gt;, our project management tool track the commits made against each card.&lt;/p&gt;
-
-&lt;p&gt;Things work fine, except for me. I almost never use &lt;code&gt;git ci -m&lt;/code&gt;. I like Git to open up an editor (almost always Emacs), and type my comment message out. But if I type the commit message according to the convention, because the line starts with a &lt;code&gt;#&lt;/code&gt;, Git would treat it as a comment and the commit will be aborted.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;#123 Foobar
-# Please enter the commit message for your changes. Lines starting
-# with &amp;#39;#&amp;#39; will be ignored, and an empty message aborts the commit.
-# On branch source
-#
-# Changes to be committed:
-#   (use &amp;quot;git reset HEAD &amp;lt;file&amp;gt;...&amp;quot; to unstage)
-...
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;I have been getting around this issue by pre-pending a space before the message. So I was really happy to see that Git &lt;code&gt;1.8.2&lt;/code&gt; ships with a new configuration &lt;code&gt;core.commentchar&lt;/code&gt;. This let&amp;rsquo;s you configure the characters that marks a comment in the commit message. From the &lt;a href=&#34;http://git-scm.com/docs/git-config&#34;&gt;doc&lt;/a&gt;:
-&amp;gt; core.commentchar
-&amp;gt;
-&amp;gt;    Commands such as commit and tag that lets you edit messages consider a line that begins with this character commented, and removes them after the editor returns (default #).&lt;/p&gt;
-
-&lt;p&gt;So with this set to &lt;code&gt;$&lt;/code&gt;, I can just type in my commit message.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;#123 Foobar
-$ Please enter the commit message for your changes. Lines starting
-$ with &amp;#39;$&amp;#39; will be ignored, and an empty message aborts the commit.
-$ On branch source
-$
-$ Changes to be committed:
-$   (use &amp;quot;git reset HEAD &amp;lt;file&amp;gt;...&amp;quot; to unstage)
-...
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;This configuration is available only in versions &lt;code&gt;1.8.2&lt;/code&gt; and later.&lt;/p&gt;
-</description>
+      <guid>https://sdqali.in/blog/2013/04/14/configure-gits-comment-character/</guid>
+      <description>TL;DR - Use the core.commentchar configuration to change the character Git uses to mark comment lines in commit messages.
+My team has a convention of putting the number of the current Issue/Ticket/Story that we are working on at the beginning of every commit message. This is great because it lets us make sense of the history of our code by helping us answer
+ What were the changes made to the code base to build a feature or fix an issue?</description>
     </item>
     
     <item>
       <title>Finding un-merged commits with git cherry</title>
-      <link>https://sdqali.in/blog/2012/04/29/finding-un-merged-commits-with-git-cherry/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sdqali.in/blog/2012/04/29/finding-un-merged-commits-with-git-cherry/</link>
       <pubDate>Sun, 29 Apr 2012 00:00:00 +0000</pubDate>
       
-      <guid>https://sdqali.in/blog/2012/04/29/finding-un-merged-commits-with-git-cherry/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>&lt;div class=&#39;post&#39;&gt;
-&lt;div dir=&#34;ltr&#34; style=&#34;text-align: left;&#34; trbidi=&#34;on&#34;&gt;&lt;br /&gt;In a project
-  that I was a part of in the recent past, we used Story
-  Branching. While it afforded us flexibility in pulling and pushing
-  stories in and out of releases, it has given us some scares in the
-  past. Somebody makes commits against a story, but the commit does not
-  get merged to the correct release branch where it is supposed to go or
-  gets merged to another release. The solution was to hunt down the
-  commits that are missing or have creeped in.&lt;br /&gt;&lt;br /&gt;This is where
-  the &lt;i&gt;&lt;a href=&#34;http://linux.die.net/man/1/git-cherry&#34;
-            target=&#34;_blank&#34;&gt;&lt;b&gt;git cherry&lt;/b&gt;&lt;/a&gt;&lt;/i&gt; command is
-  useful. Git cherry finds commits not merged from a branch to
-  another. From the man
-  page:&lt;br /&gt;&lt;blockquote class=&#34;tr_bq&#34;&gt;&amp;nbsp;&#34;Every commit that doesn&#39;t
-    exist in the &amp;lt;upstream&amp;gt; branch has its id (sha1) reported,
-    prefixed by a symbol. The ones that have equivalent change already
-    in the &amp;lt;upstream&amp;gt; branch&amp;nbsp;are prefixed with a minus (-)
-    sign, and those that only exist in the &amp;lt;head&amp;gt; branch are
-    prefixed with a plus (+) symbol&#34;&lt;/blockquote&gt;&lt;br /&gt;
-
-&lt;!--more--&gt;
-
-Consider the following example. I have two branches - master and release-23.&lt;br /&gt;&lt;br /&gt;&lt;script src=&#34;https://gist.github.com/2549851.js?file=gistfile1.sh&#34;&gt;&lt;/script&gt;&lt;br /&gt;&lt;br /&gt;The branch release-23 has three commits:&lt;br /&gt;&lt;br /&gt;&lt;script src=&#34;https://gist.github.com/2549874.js?file=gistfile1.sh&#34;&gt;&lt;/script&gt;&lt;br /&gt;&lt;br /&gt;The branch master have two commits:&lt;br /&gt;&lt;br /&gt;&lt;script src=&#34;https://gist.github.com/2549880.js?file=gistfile1.sh&#34;&gt;&lt;/script&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;ul style=&#34;text-align: left;&#34;&gt;&lt;li&gt;Commit &lt;i&gt;1afda04ccbf2f834663ca8ec3eaf6e3b917581fb (Added foo)&lt;/i&gt; is present in both branches.&lt;/li&gt;&lt;li&gt;Commit &lt;i&gt;2a446b1a19253a69c4bb133eedb311c14b2906e8 (Added bar)&lt;/i&gt; in the release-23 branch was merged to master, but the commit message was later ammended and its sha became &lt;i&gt;8c71e1b2232c1a524e1de20553180676fb971f86 (Amended. This was Added bar)&lt;/i&gt;.&lt;/li&gt;&lt;li&gt;Commit &lt;i&gt;f06e4df25724ad0dd51702a10f075d39368e1963 (Added zoom)&lt;/i&gt; is present only in the release-23 branch.&lt;/li&gt;&lt;/ul&gt;&lt;br /&gt;&lt;br /&gt;If we do a &lt;i&gt;&lt;b&gt;git cherry&lt;/b&gt;&lt;/i&gt; now with master as the upstream and release-23 as head:&lt;br /&gt;&lt;br /&gt;&lt;script src=&#34;https://gist.github.com/2549897.js?file=gistfile1.sh&#34;&gt;&lt;/script&gt;&lt;br /&gt;&lt;br /&gt;This tells us that&lt;br /&gt;&lt;br /&gt;&lt;ol style=&#34;text-align: left;&#34;&gt;&lt;li&gt;An equivalent of commit &lt;i&gt;2a446b1a19253a69c4bb133eedb311c14b2906e8 (Added bar)&lt;/i&gt; is present in the master branch, as indicated by the (-) sign.&lt;/li&gt;&lt;li&gt;Commit &lt;i&gt;f06e4df25724ad0dd51702a10f075d39368e1963 (Added zoom)&lt;/i&gt; is present only in the release-23 branch, as indicated by the (+) sign.&lt;/li&gt;&lt;/ol&gt;&lt;br /&gt;&lt;br /&gt;If we were to do &lt;i&gt;&lt;b&gt;git cherry&lt;/b&gt;&lt;/i&gt; the other way around, ie. with release-23 as the upstream and master as the head:&lt;br /&gt;&lt;br /&gt;&lt;script src=&#34;https://gist.github.com/2549909.js?file=gistfile1.sh&#34;&gt;&lt;/script&gt;&lt;br /&gt;&lt;br /&gt;This tells us that&lt;br /&gt;&lt;br /&gt;&lt;ol style=&#34;text-align: left;&#34;&gt;&lt;li&gt;An equivalent of commit &lt;i&gt;8c71e1b2232c1a524e1de20553180676fb971f86 (Amended. This was Added bar)&lt;/i&gt; is present in the master branch, as indicated by the (-) sign.&lt;/li&gt;&lt;li&gt;There are no commits in master that are not present in release-23.&lt;/li&gt;&lt;/ol&gt;&lt;br /&gt;&lt;div&gt;That is pretty much what the &lt;b&gt;&lt;i&gt;git cherry&lt;/i&gt;&lt;/b&gt; command does.&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
-</description>
+      <guid>https://sdqali.in/blog/2012/04/29/finding-un-merged-commits-with-git-cherry/</guid>
+      <description>In a project that I was a part of in the recent past, we used Story Branching. While it afforded us flexibility in pulling and pushing stories in and out of releases, it has given us some scares in the past. Somebody makes commits against a story, but the commit does not get merged to the correct release branch where it is supposed to go or gets merged to another release.</description>
     </item>
     
   </channel>

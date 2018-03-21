@@ -137,21 +137,15 @@
 <p>Windows provides two ways to deal with certificates from the command line - <a href="http://technet.microsoft.com/en-us/library/cc732443%28WS.10%29.aspx" title="Certutil">Certutil</a> and <a href="http://msdn.microsoft.com/en-us/library/e78byta0.aspx" title="certmgr.exe">certmgr.exe</a>. We decided to go with Certutil because it is present out of the box on Windows 7 and Windows Server 2008, while certmgr.exe is part of the .Net runtime. This blog post will deal with Certutil.</p>
 
 <h3 id="adding-a-certificate">Adding a certificate</h3>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>certutil.exe -addstore -user root foo.crt
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">certutil.exe -addstore -user root foo.crt</code></pre></div>
 <p>This will install the <code>foo.crt</code> certificate to the Trusted Root Certification Authorities store for the current user.</p>
 
 <h3 id="view-certificates-in-a-store">View certificates in a store</h3>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>certutil.exe -viewstore -user root
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">certutil.exe -viewstore -user root</code></pre></div>
 <p>This will list all the certificates in the Trusted Root Certification Authorities store for the current user. One drawback is that it throws up a Window to list as opposed to using STDOUT for output.</p>
 
 <h3 id="list-certificates-in-a-store">List certificates in a store</h3>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>certutil.exe -user -store root
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">certutil.exe -user -store root</code></pre></div>
 <p>This will list all the certificates in the Trusted Root Certification Authorities store for the current user to STDOUT.</p>
 
 <p>There are more detailed explanations <a href="http://technet.microsoft.com/en-us/library/cc772898(WS.10).aspx">here</a>.</p>
@@ -163,20 +157,14 @@
 <p>Mac OS X ships the <a href="https://developer.apple.com/library/mac/#documentation/Darwin/Reference/Manpages/man1/security.1.html">security</a> tool to let the user manage certificates and keychains.</p>
 
 <h3 id="adding-a-certificate-1">Adding a certificate</h3>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>security add-certificate foo.crt
-security add-trusted-cert foo.crt
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">security add-certificate foo.crt
+security add-trusted-cert foo.crt</code></pre></div>
 <p>The first line will add <code>foo.crt</code> to the current user&rsquo;s keychain, while the second line ensures that the newly added certificate is trusted. This would mean that the certificate will be trusted for SSL, EAP and Code Signing. To get more fine grained control over what to trust the certificate for, the <code>-p (policy)</code> flag can be used.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>security add-trusted-cert -p ssl foo.crt
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">security add-trusted-cert -p ssl foo.crt</code></pre></div>
 <p>This will trust the certificate only for SSL interactions.</p>
 
 <h3 id="listing-certificates">Listing certificates</h3>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>security find-certificates -a -e foo@bar.com
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">security find-certificates -a -e foo@bar.com</code></pre></div>
 <p>This would list all the certificates where e-mail address of the issuer <code>foo@bar.com</code>. Other fields that can be used for matching include <code>-c (name)</code>.</p>
 
 <h2 id="linux">Linux</h2>
@@ -186,15 +174,11 @@ security add-trusted-cert foo.crt
 <p>On Linux, the best we could find was <a href="http://www.mozilla.org/projects/security/pki/nss/tools/certutil.html certutil">certutil</a> which is part of Mozilla&rsquo;s NSS project.</p>
 
 <h3 id="adding-a-certificate-2">Adding a certificate</h3>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>certutil -A -d sql:~/.pki/nssdb -t C -n <span style="color: #CC3300">&quot;Certificate Common Name&quot;</span> -i foo.crt
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">certutil -A -d sql:~/.pki/nssdb -t C -n <span style="color:#c30">&#34;Certificate Common Name&#34;</span> -i foo.crt</code></pre></div>
 <p>This will add <code>foo.crt</code> to the certificate database <code>~/.pki/nssdb</code>. This is where applications like Chromium look for certificates.</p>
 
 <h3 id="listing-certificates-1">Listing certificates</h3>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>certutil -L -d sql:~/.pki/nssdb -n <span style="color: #CC3300">&quot;Certificate Common Name&quot;</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">certutil -L -d sql:~/.pki/nssdb -n <span style="color:#c30">&#34;Certificate Common Name&#34;</span></code></pre></div>
 <p>This will list the certificates in the <code>~/.pki/nssdb</code> with the common name &ldquo;Certificate Common Name&rdquo;.</p>
 
 <h2 id="firefox">Firefox</h2>
@@ -214,36 +198,6 @@ security add-trusted-cert foo.crt
             <p class="comments">
   If you have questions or comments about this blog post, you can get in touch with me on Twitter <a href="https://twitter.com/sdqali">@sdqali</a>.
 </p>
-
-            <div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Found this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and explanations for specific Java, Spring and other programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
 
           </div>
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">

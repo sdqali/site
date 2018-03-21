@@ -2,122 +2,23 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Mockmvc on {code that works}</title>
-    <link>https://sdqali.in/tags/mockmvc/?utm_source=site&amp;utm_medium=feed</link>
+    <link>https://sdqali.in/tags/mockmvc/</link>
     <description>Recent content in Mockmvc on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
     <lastBuildDate>Tue, 24 Nov 2015 05:45:06 -0500</lastBuildDate>
-    <atom:link href="/tags/mockmvc/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    
+	<atom:link href="https://sdqali.in/tags/mockmvc/index.xml" rel="self" type="application/rss+xml" />
+    
     
     <item>
       <title>Testing async responses using MockMvc</title>
-      <link>https://sdqali.in/blog/2015/11/24/testing-async-responses-using-mockmvc/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sdqali.in/blog/2015/11/24/testing-async-responses-using-mockmvc/</link>
       <pubDate>Tue, 24 Nov 2015 05:45:06 -0500</pubDate>
       
-      <guid>https://sdqali.in/blog/2015/11/24/testing-async-responses-using-mockmvc/?utm_source=site&amp;utm_medium=feed</guid>
+      <guid>https://sdqali.in/blog/2015/11/24/testing-async-responses-using-mockmvc/</guid>
       <description>&lt;p&gt;There are times when a Spring MVC end point performs asynchronous operations. Testing these end points using MockMvc can be tricky because of the asynchronous nature in which the result of the operation is eventually returned. This blog post describes how to write tests in such scenarios.&lt;/p&gt;
 
-&lt;p&gt;&lt;/p&gt;
-
-&lt;p&gt;Let&amp;rsquo;s take a look at the following example. In this example, we have a simple end point that responds with a JSON object when invoked.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #9999FF&#34;&gt;@RestController&lt;/span&gt;
-&lt;span style=&#34;color: #9999FF&#34;&gt;@RequestMapping&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;/test&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
-&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #00AA88; font-weight: bold&#34;&gt;ExampleController&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-    &lt;span style=&#34;color: #9999FF&#34;&gt;@RequestMapping&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;value &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;/hello&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt;
-            method &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; GET&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt;
-            consumes &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; APPLICATION_JSON_VALUE&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt;
-            produces &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; APPLICATION_JSON_VALUE&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
-    &lt;span style=&#34;color: #9999FF&#34;&gt;@ResponseStatus&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;OK&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; Map&lt;span style=&#34;color: #555555&#34;&gt;&amp;lt;&lt;/span&gt;String&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; Object&lt;span style=&#34;color: #555555&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;hello&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(){&lt;/span&gt;
-        &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; helloMessage&lt;span style=&#34;color: #555555&#34;&gt;();&lt;/span&gt;
-    &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;private&lt;/span&gt; Map&lt;span style=&#34;color: #555555&#34;&gt;&amp;lt;&lt;/span&gt;String&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; Object&lt;span style=&#34;color: #555555&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;helloMessage&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-        &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; Collections&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;singletonMap&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;message&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;hello&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;);&lt;/span&gt;
-    &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-&lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;Writing a MockMvc test for this controller is fairly simple. The following test invokes the end point and asserts that the end point returns:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;The right HTTP response code &lt;code&gt;200&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;The right Content-Type &lt;code&gt;application/json&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;The right JSON message&lt;/li&gt;
-&lt;/ul&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #9999FF&#34;&gt;@RunWith&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;MockitoJUnitRunner&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
-&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color: #00AA88; font-weight: bold&#34;&gt;ExampleControllerTest&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;static&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;final&lt;/span&gt; String CONTENT_TYPE &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Content-Type&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;private&lt;/span&gt; ExampleController controller&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;private&lt;/span&gt; MockMvc mockMvc&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
-
-    &lt;span style=&#34;color: #9999FF&#34;&gt;@Before&lt;/span&gt;
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007788; font-weight: bold&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;setUp&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-        controller &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;new&lt;/span&gt; ExampleController&lt;span style=&#34;color: #555555&#34;&gt;();&lt;/span&gt;
-        mockMvc &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; MockMvcBuilders
-                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;standaloneSetup&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;controller&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
-                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;build&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;();&lt;/span&gt;
-    &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-
-    &lt;span style=&#34;color: #9999FF&#34;&gt;@Test&lt;/span&gt;
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007788; font-weight: bold&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;shouldHaveAMessageInResponse&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;throws&lt;/span&gt; Exception &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-        mockMvc
-                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;perform&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;get&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;/test/hello&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
-                        &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;contentType&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;APPLICATION_JSON&lt;span style=&#34;color: #555555&#34;&gt;))&lt;/span&gt;
-                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;andDo&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;print&lt;span style=&#34;color: #555555&#34;&gt;())&lt;/span&gt;
-                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;andExpect&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;status&lt;span style=&#34;color: #555555&#34;&gt;().&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;isOk&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;())&lt;/span&gt;
-                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;andExpect&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;header&lt;span style=&#34;color: #555555&#34;&gt;().&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;string&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;CONTENT_TYPE&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; APPLICATION_JSON_VALUE&lt;span style=&#34;color: #555555&#34;&gt;))&lt;/span&gt;
-                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;andExpect&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;jsonPath&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;message&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;).&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;hello&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;));&lt;/span&gt;
-    &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-&lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;Now, lets try and write a similar test for an end point uses &lt;code&gt;DeferredResult&lt;/code&gt; to do asynchronous request processing. The end point in this example just wraps the JSON structure in &lt;code&gt;DeferredResult&lt;/code&gt; and returns, whereas there will be a long running asynchronous process in a more useful case. But the idea remains the same.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;    &lt;span style=&#34;color: #9999FF&#34;&gt;@RequestMapping&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;value &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;/deferred&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt;
-            method &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; GET&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt;
-            consumes &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; APPLICATION_JSON_VALUE&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt;
-            produces &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; APPLICATION_JSON_VALUE
-    &lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
-    &lt;span style=&#34;color: #9999FF&#34;&gt;@ResponseStatus&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;OK&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; DeferredResult&lt;span style=&#34;color: #555555&#34;&gt;&amp;lt;&lt;/span&gt;Map&lt;span style=&#34;color: #555555&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;deferred&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-        DeferredResult&lt;span style=&#34;color: #555555&#34;&gt;&amp;lt;&lt;/span&gt;Map&lt;span style=&#34;color: #555555&#34;&gt;&amp;gt;&lt;/span&gt; deferredResult &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;new&lt;/span&gt; DeferredResult&lt;span style=&#34;color: #555555&#34;&gt;&amp;lt;&amp;gt;();&lt;/span&gt;
-        deferredResult&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;setResult&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;helloMessage&lt;span style=&#34;color: #555555&#34;&gt;());&lt;/span&gt;
-        &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; deferredResult&lt;span style=&#34;color: #555555&#34;&gt;;&lt;/span&gt;
-    &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;If our test for this end point were to use the same mechanism as the previous test, we will start observing an interesting error.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;    &lt;span style=&#34;color: #9999FF&#34;&gt;@Test&lt;/span&gt;
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007788; font-weight: bold&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;shouldHaveAMessageInDeferredResponse&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;throws&lt;/span&gt; Exception &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-        mockMvc
-                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;perform&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;get&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;/test/deferred&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
-                        &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;contentType&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;APPLICATION_JSON&lt;span style=&#34;color: #555555&#34;&gt;))&lt;/span&gt;
-                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;andExpect&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;status&lt;span style=&#34;color: #555555&#34;&gt;().&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;isOk&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;())&lt;/span&gt;
-                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;andExpect&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;header&lt;span style=&#34;color: #555555&#34;&gt;().&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;string&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;CONTENT_TYPE&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; APPLICATION_JSON_VALUE&lt;span style=&#34;color: #555555&#34;&gt;))&lt;/span&gt;
-                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;andExpect&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;jsonPath&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;message&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;).&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;hello&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;));&lt;/span&gt;
-    &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;Response header Content-Type expected:&amp;lt;application/json&amp;gt; but was:&amp;lt;null&amp;gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;This happened because MockMvc did not wait for the asynchronous process to finish. The solution to this involves using MockMvc&amp;rsquo;s &lt;code&gt;asyncDispatch&lt;/code&gt;. AsyncDispatch creates a new request that continues from the result of a previous MockMvc request that started the asynchronous process.
-The test re-written using &lt;code&gt;asyncDispatch&lt;/code&gt; would be as follows:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;    &lt;span style=&#34;color: #9999FF&#34;&gt;@Test&lt;/span&gt;
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color: #007788; font-weight: bold&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;shouldHaveAMessageInDeferredResponseWithAsyncDispatch&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;throws&lt;/span&gt; Exception &lt;span style=&#34;color: #555555&#34;&gt;{&lt;/span&gt;
-        MvcResult result &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; mockMvc
-                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;perform&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;get&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;/test/deferred&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;)&lt;/span&gt;
-                        &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;contentType&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;APPLICATION_JSON&lt;span style=&#34;color: #555555&#34;&gt;))&lt;/span&gt;
-                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;andReturn&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;();&lt;/span&gt;
-
-        mockMvc
-                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;perform&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;asyncDispatch&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;result&lt;span style=&#34;color: #555555&#34;&gt;))&lt;/span&gt;
-                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;andExpect&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;status&lt;span style=&#34;color: #555555&#34;&gt;().&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;isOk&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;())&lt;/span&gt;
-                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;andExpect&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;header&lt;span style=&#34;color: #555555&#34;&gt;().&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;string&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;CONTENT_TYPE&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; APPLICATION_JSON_VALUE&lt;span style=&#34;color: #555555&#34;&gt;))&lt;/span&gt;
-                &lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;andExpect&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;jsonPath&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;message&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;).&lt;/span&gt;&lt;span style=&#34;color: #330099&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;hello&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;));&lt;/span&gt;
-    &lt;span style=&#34;color: #555555&#34;&gt;}&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;The same approach can be employed to test when controllers use Java 8&amp;rsquo;s &lt;code&gt;CompletableFuture&lt;/code&gt;.&lt;/p&gt;</description>
+&lt;p&gt;&lt;/p&gt;</description>
     </item>
     
   </channel>

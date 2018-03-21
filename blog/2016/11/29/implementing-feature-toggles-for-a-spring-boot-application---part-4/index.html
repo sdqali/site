@@ -127,118 +127,82 @@
 <p>This raises the interesting question - Are bean level switches really feature toggles, considering that they can never be altered without application restarts? A better approach would be to consider bean switches as purely configurations and use facades that route commands to either of the beans based on a feature flag. In the example configuration provided, is treating the choice between storing sessions in-memory / Redis an actual feature, considering it does not provide any value to the end-user?</p>
 
 <p>To ensure that we are not tying feature toggling to restarts, we will remove the meta-annotation we introduced to <code>FeatureToggle</code> in <a href="/blog/2016/11/21/implementing-feature-toggles-for-a-spring-boot-application---part-1/">part 1</a>.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@Target</span><span style="color: #555555">({</span>ElementType<span style="color: #555555">.</span><span style="color: #330099">TYPE</span><span style="color: #555555">,</span> ElementType<span style="color: #555555">.</span><span style="color: #330099">METHOD</span><span style="color: #555555">})</span>
-<span style="color: #9999FF">@Retention</span><span style="color: #555555">(</span>RetentionPolicy<span style="color: #555555">.</span><span style="color: #330099">RUNTIME</span><span style="color: #555555">)</span>
-<span style="color: #9999FF">@Documented</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #9999FF">@interface</span> FeatureToggle <span style="color: #555555">{</span>
-  String <span style="color: #CC00FF">feature</span><span style="color: #555555">();</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Target</span><span style="color:#555">({</span>ElementType<span style="color:#555">.</span><span style="color:#309">TYPE</span><span style="color:#555">,</span> ElementType<span style="color:#555">.</span><span style="color:#309">METHOD</span><span style="color:#555">})</span>
+<span style="color:#99f">@Retention</span><span style="color:#555">(</span>RetentionPolicy<span style="color:#555">.</span><span style="color:#309">RUNTIME</span><span style="color:#555">)</span>
+<span style="color:#99f">@Documented</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#99f">@interface</span> FeatureToggle <span style="color:#555">{</span>
+  String <span style="color:#c0f">feature</span><span style="color:#555">();</span>
 
-  <span style="color: #007788; font-weight: bold">boolean</span> <span style="color: #CC00FF">expectedToBeOn</span><span style="color: #555555">()</span> <span style="color: #006699; font-weight: bold">default</span> <span style="color: #006699; font-weight: bold">true</span><span style="color: #555555">;</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+  <span style="color:#078;font-weight:bold">boolean</span> <span style="color:#c0f">expectedToBeOn</span><span style="color:#555">()</span> <span style="color:#069;font-weight:bold">default</span> <span style="color:#069;font-weight:bold">true</span><span style="color:#555">;</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>With this change, we no longer have the ability to toggle off an entire controller. Having to annotate all handler methods in a controller is going to be a painful, error-prone approach. In order to provide the ability to toggle entire controllers, we can modify the <code>FeatureInterceptor</code> to look for annotations present on the controller class in addition to annotations present on the handler methods.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">FeatureInterceptor</span> <span style="color: #006699; font-weight: bold">implements</span> HandlerInterceptor <span style="color: #555555">{</span>
-  <span style="color: #006699; font-weight: bold">private</span> <span style="color: #006699; font-weight: bold">final</span> FeatureRepository featureRepository<span style="color: #555555">;</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">FeatureInterceptor</span> <span style="color:#069;font-weight:bold">implements</span> HandlerInterceptor <span style="color:#555">{</span>
+  <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">final</span> FeatureRepository featureRepository<span style="color:#555">;</span>
 
-  <span style="color: #006699; font-weight: bold">public</span> <span style="color: #CC00FF">FeatureInterceptor</span><span style="color: #555555">(</span>FeatureRepository featureRepository<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">this</span><span style="color: #555555">.</span><span style="color: #330099">featureRepository</span> <span style="color: #555555">=</span> featureRepository<span style="color: #555555">;</span>
-  <span style="color: #555555">}</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">FeatureInterceptor</span><span style="color:#555">(</span>FeatureRepository featureRepository<span style="color:#555">)</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">this</span><span style="color:#555">.</span><span style="color:#309">featureRepository</span> <span style="color:#555">=</span> featureRepository<span style="color:#555">;</span>
+  <span style="color:#555">}</span>
 
-  <span style="color: #9999FF">@Override</span>
-  <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">boolean</span> <span style="color: #CC00FF">preHandle</span><span style="color: #555555">(</span>HttpServletRequest httpServletRequest<span style="color: #555555">,</span> HttpServletResponse httpServletResponse<span style="color: #555555">,</span> Object handler<span style="color: #555555">)</span> <span style="color: #006699; font-weight: bold">throws</span> Exception <span style="color: #555555">{</span>
-    HandlerMethod handlerMethod <span style="color: #555555">=</span> <span style="color: #555555">(</span>HandlerMethod<span style="color: #555555">)</span> handler<span style="color: #555555">;</span>
-    <span style="color: #006699; font-weight: bold">if</span> <span style="color: #555555">(</span>handleMethodAnnotation<span style="color: #555555">(</span>handlerMethod<span style="color: #555555">)</span> <span style="color: #555555">&amp;&amp;</span>
-        handleTypeAnnotation<span style="color: #555555">(</span>handlerMethod<span style="color: #555555">.</span><span style="color: #330099">getBeanType</span><span style="color: #555555">()))</span>  <span style="color: #555555">{</span>
-      <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">true</span><span style="color: #555555">;</span>
-    <span style="color: #555555">}</span>
-    httpServletResponse<span style="color: #555555">.</span><span style="color: #330099">setStatus</span><span style="color: #555555">(</span>HttpServletResponse<span style="color: #555555">.</span><span style="color: #330099">SC_NOT_FOUND</span><span style="color: #555555">);</span>
-    <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">false</span><span style="color: #555555">;</span>
-  <span style="color: #555555">}</span>
+  <span style="color:#99f">@Override</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">boolean</span> <span style="color:#c0f">preHandle</span><span style="color:#555">(</span>HttpServletRequest httpServletRequest<span style="color:#555">,</span> HttpServletResponse httpServletResponse<span style="color:#555">,</span> Object handler<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
+    HandlerMethod handlerMethod <span style="color:#555">=</span> <span style="color:#555">(</span>HandlerMethod<span style="color:#555">)</span> handler<span style="color:#555">;</span>
+    <span style="color:#069;font-weight:bold">if</span> <span style="color:#555">(</span>handleMethodAnnotation<span style="color:#555">(</span>handlerMethod<span style="color:#555">)</span> <span style="color:#555">&amp;&amp;</span>
+        handleTypeAnnotation<span style="color:#555">(</span>handlerMethod<span style="color:#555">.</span><span style="color:#309">getBeanType</span><span style="color:#555">()))</span>  <span style="color:#555">{</span>
+      <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">true</span><span style="color:#555">;</span>
+    <span style="color:#555">}</span>
+    httpServletResponse<span style="color:#555">.</span><span style="color:#309">setStatus</span><span style="color:#555">(</span>HttpServletResponse<span style="color:#555">.</span><span style="color:#309">SC_NOT_FOUND</span><span style="color:#555">);</span>
+    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">false</span><span style="color:#555">;</span>
+  <span style="color:#555">}</span>
 
-  <span style="color: #006699; font-weight: bold">private</span> <span style="color: #007788; font-weight: bold">boolean</span> <span style="color: #CC00FF">handleTypeAnnotation</span><span style="color: #555555">(</span>Class<span style="color: #555555">&lt;?&gt;</span> controllerType<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-    FeatureToggle controllerTypeAnnotation <span style="color: #555555">=</span> controllerType<span style="color: #555555">.</span><span style="color: #330099">getAnnotation</span><span style="color: #555555">(</span>FeatureToggle<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">);</span>
-    <span style="color: #006699; font-weight: bold">return</span> checkFeatureState<span style="color: #555555">(</span>controllerTypeAnnotation<span style="color: #555555">);</span>
-  <span style="color: #555555">}</span>
+  <span style="color:#069;font-weight:bold">private</span> <span style="color:#078;font-weight:bold">boolean</span> <span style="color:#c0f">handleTypeAnnotation</span><span style="color:#555">(</span>Class<span style="color:#555">&lt;?&gt;</span> controllerType<span style="color:#555">)</span> <span style="color:#555">{</span>
+    FeatureToggle controllerTypeAnnotation <span style="color:#555">=</span> controllerType<span style="color:#555">.</span><span style="color:#309">getAnnotation</span><span style="color:#555">(</span>FeatureToggle<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">);</span>
+    <span style="color:#069;font-weight:bold">return</span> checkFeatureState<span style="color:#555">(</span>controllerTypeAnnotation<span style="color:#555">);</span>
+  <span style="color:#555">}</span>
 
-  <span style="color: #006699; font-weight: bold">private</span> <span style="color: #007788; font-weight: bold">boolean</span> <span style="color: #CC00FF">handleMethodAnnotation</span><span style="color: #555555">(</span>HandlerMethod handlerMethod<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-    FeatureToggle methodAnnotation <span style="color: #555555">=</span> handlerMethod<span style="color: #555555">.</span><span style="color: #330099">getMethodAnnotation</span><span style="color: #555555">(</span>FeatureToggle<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">);</span>
-    <span style="color: #006699; font-weight: bold">return</span> checkFeatureState<span style="color: #555555">(</span>methodAnnotation<span style="color: #555555">);</span>
-  <span style="color: #555555">}</span>
+  <span style="color:#069;font-weight:bold">private</span> <span style="color:#078;font-weight:bold">boolean</span> <span style="color:#c0f">handleMethodAnnotation</span><span style="color:#555">(</span>HandlerMethod handlerMethod<span style="color:#555">)</span> <span style="color:#555">{</span>
+    FeatureToggle methodAnnotation <span style="color:#555">=</span> handlerMethod<span style="color:#555">.</span><span style="color:#309">getMethodAnnotation</span><span style="color:#555">(</span>FeatureToggle<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">);</span>
+    <span style="color:#069;font-weight:bold">return</span> checkFeatureState<span style="color:#555">(</span>methodAnnotation<span style="color:#555">);</span>
+  <span style="color:#555">}</span>
 
-  <span style="color: #006699; font-weight: bold">private</span> <span style="color: #007788; font-weight: bold">boolean</span> <span style="color: #CC00FF">checkFeatureState</span><span style="color: #555555">(</span>FeatureToggle methodAnnotation<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">if</span> <span style="color: #555555">(</span>methodAnnotation <span style="color: #555555">==</span> <span style="color: #006699; font-weight: bold">null</span><span style="color: #555555">)</span> <span style="color: #555555">{</span>
-      <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">true</span><span style="color: #555555">;</span>
-    <span style="color: #555555">}</span>
+  <span style="color:#069;font-weight:bold">private</span> <span style="color:#078;font-weight:bold">boolean</span> <span style="color:#c0f">checkFeatureState</span><span style="color:#555">(</span>FeatureToggle methodAnnotation<span style="color:#555">)</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">if</span> <span style="color:#555">(</span>methodAnnotation <span style="color:#555">==</span> <span style="color:#069;font-weight:bold">null</span><span style="color:#555">)</span> <span style="color:#555">{</span>
+      <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">true</span><span style="color:#555">;</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #006699; font-weight: bold">if</span><span style="color: #555555">(</span>featureRepository<span style="color: #555555">.</span><span style="color: #330099">isOn</span><span style="color: #555555">(</span>methodAnnotation<span style="color: #555555">.</span><span style="color: #330099">feature</span><span style="color: #555555">())</span> <span style="color: #555555">==</span> <span style="color: #006699; font-weight: bold">null</span><span style="color: #555555">)</span> <span style="color: #555555">{</span>
-      <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">true</span><span style="color: #555555">;</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#069;font-weight:bold">if</span><span style="color:#555">(</span>featureRepository<span style="color:#555">.</span><span style="color:#309">isOn</span><span style="color:#555">(</span>methodAnnotation<span style="color:#555">.</span><span style="color:#309">feature</span><span style="color:#555">())</span> <span style="color:#555">==</span> <span style="color:#069;font-weight:bold">null</span><span style="color:#555">)</span> <span style="color:#555">{</span>
+      <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">true</span><span style="color:#555">;</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #006699; font-weight: bold">if</span><span style="color: #555555">(</span>methodAnnotation<span style="color: #555555">.</span><span style="color: #330099">expectedToBeOn</span><span style="color: #555555">()</span> <span style="color: #555555">==</span> featureRepository<span style="color: #555555">.</span><span style="color: #330099">isOn</span><span style="color: #555555">(</span>methodAnnotation<span style="color: #555555">.</span><span style="color: #330099">feature</span><span style="color: #555555">()))</span> <span style="color: #555555">{</span>
-      <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">true</span><span style="color: #555555">;</span>
-    <span style="color: #555555">}</span>
-    <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">false</span><span style="color: #555555">;</span>
-  <span style="color: #555555">}</span>
+    <span style="color:#069;font-weight:bold">if</span><span style="color:#555">(</span>methodAnnotation<span style="color:#555">.</span><span style="color:#309">expectedToBeOn</span><span style="color:#555">()</span> <span style="color:#555">==</span> featureRepository<span style="color:#555">.</span><span style="color:#309">isOn</span><span style="color:#555">(</span>methodAnnotation<span style="color:#555">.</span><span style="color:#309">feature</span><span style="color:#555">()))</span> <span style="color:#555">{</span>
+      <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">true</span><span style="color:#555">;</span>
+    <span style="color:#555">}</span>
+    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">false</span><span style="color:#555">;</span>
+  <span style="color:#555">}</span>
 
-  <span style="color: #9999FF">@Override</span>
-  <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">postHandle</span><span style="color: #555555">(</span>HttpServletRequest httpServletRequest<span style="color: #555555">,</span> HttpServletResponse httpServletResponse<span style="color: #555555">,</span> Object o<span style="color: #555555">,</span> ModelAndView modelAndView<span style="color: #555555">)</span> <span style="color: #006699; font-weight: bold">throws</span> Exception <span style="color: #555555">{</span>
+  <span style="color:#99f">@Override</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">postHandle</span><span style="color:#555">(</span>HttpServletRequest httpServletRequest<span style="color:#555">,</span> HttpServletResponse httpServletResponse<span style="color:#555">,</span> Object o<span style="color:#555">,</span> ModelAndView modelAndView<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
 
-  <span style="color: #555555">}</span>
+  <span style="color:#555">}</span>
 
-  <span style="color: #9999FF">@Override</span>
-  <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">void</span> <span style="color: #CC00FF">afterCompletion</span><span style="color: #555555">(</span>HttpServletRequest httpServletRequest<span style="color: #555555">,</span> HttpServletResponse httpServletResponse<span style="color: #555555">,</span> Object o<span style="color: #555555">,</span> Exception e<span style="color: #555555">)</span> <span style="color: #006699; font-weight: bold">throws</span> Exception <span style="color: #555555">{</span>
+  <span style="color:#99f">@Override</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">afterCompletion</span><span style="color:#555">(</span>HttpServletRequest httpServletRequest<span style="color:#555">,</span> HttpServletResponse httpServletResponse<span style="color:#555">,</span> Object o<span style="color:#555">,</span> Exception e<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
 
-  <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+  <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>This will correctly intercept requests routed to handler methods even if the annotation is at the controller level instead of the method level.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #9999FF">@RestController</span>
-<span style="color: #9999FF">@RequestMapping</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;/foo&quot;</span><span style="color: #555555">)</span>
-<span style="color: #9999FF">@FeatureToggle</span><span style="color: #555555">(</span>feature <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;feature.foo&quot;</span><span style="color: #555555">)</span>
-<span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">FooController</span> <span style="color: #555555">{</span>
-  <span style="color: #9999FF">@RequestMapping</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;&quot;</span><span style="color: #555555">)</span>
-  <span style="color: #006699; font-weight: bold">public</span> Map <span style="color: #CC00FF">hello</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">return</span> Collections<span style="color: #555555">.</span><span style="color: #330099">singletonMap</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;message&quot;</span><span style="color: #555555">,</span> <span style="color: #CC3300">&quot;hello foo!&quot;</span><span style="color: #555555">);</span>
-  <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@RestController</span>
+<span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span><span style="color:#c30">&#34;/foo&#34;</span><span style="color:#555">)</span>
+<span style="color:#99f">@FeatureToggle</span><span style="color:#555">(</span>feature <span style="color:#555">=</span> <span style="color:#c30">&#34;feature.foo&#34;</span><span style="color:#555">)</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">FooController</span> <span style="color:#555">{</span>
+  <span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span><span style="color:#c30">&#34;&#34;</span><span style="color:#555">)</span>
+  <span style="color:#069;font-weight:bold">public</span> Map <span style="color:#c0f">hello</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">return</span> Collections<span style="color:#555">.</span><span style="color:#309">singletonMap</span><span style="color:#555">(</span><span style="color:#c30">&#34;message&#34;</span><span style="color:#555">,</span> <span style="color:#c30">&#34;hello foo!&#34;</span><span style="color:#555">);</span>
+  <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>Now that we have a feature toggling mechanism in place that no longer depends on application restarts, in the next part, we will look at providing this information to the application from a source that does not require restarts.</p>
             <p class="comments">
   If you have questions or comments about this blog post, you can get in touch with me on Twitter <a href="https://twitter.com/sdqali">@sdqali</a>.
 </p>
-
-            <div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Found this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and explanations for specific Java, Spring and other programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
 
           </div>
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">

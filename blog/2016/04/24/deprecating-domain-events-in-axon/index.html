@@ -118,108 +118,72 @@
 
 <p></p>
 
-<p>Obviously, we need an Upcaster <sup class="footnote-ref" id="fnref:1"><a rel="footnote" href="#fn:1">1</a></sup> to take care of this situation. The Upcaster in this scenario will have to upcast this event to something representing the non-existence of this event, regardless of the revision. There are two ways to address this issue - Upcasting to an explicit NoOpEvent and upcasting to an empty list.</p>
+<p>Obviously, we need an Upcaster <sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup> to take care of this situation. The Upcaster in this scenario will have to upcast this event to something representing the non-existence of this event, regardless of the revision. There are two ways to address this issue - Upcasting to an explicit NoOpEvent and upcasting to an empty list.</p>
 
 <h2 id="upcasting-to-a-noopevent">Upcasting to a NoOpEvent</h2>
 
 <p>Given an event <code>ValidationForFirstNameFailedEvent</code>, an upcaster that upcasts to a <code>NoOpEvent</code> can be implemented as follows:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">DeprecateValidationForFirstNameFailedEventUpcaster</span> <span style="color: #006699; font-weight: bold">extends</span> AbstractSingleEntryUpcaster <span style="color: #555555">{</span>
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">protected</span> Object <span style="color: #CC00FF">doUpcast</span><span style="color: #555555">(</span>SerializedObject intermediateRepresentation<span style="color: #555555">,</span> UpcastingContext context<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">new</span> SimpleSerializedType<span style="color: #555555">(</span>NoOpEvent<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">.</span><span style="color: #330099">getName</span><span style="color: #555555">(),</span> <span style="color: #CC3300">&quot;1&quot;</span><span style="color: #555555">);</span>
-    <span style="color: #555555">}</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">DeprecateValidationForFirstNameFailedEventUpcaster</span> <span style="color:#069;font-weight:bold">extends</span> AbstractSingleEntryUpcaster <span style="color:#555">{</span>
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">protected</span> Object <span style="color:#c0f">doUpcast</span><span style="color:#555">(</span>SerializedObject intermediateRepresentation<span style="color:#555">,</span> UpcastingContext context<span style="color:#555">)</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">new</span> SimpleSerializedType<span style="color:#555">(</span>NoOpEvent<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">.</span><span style="color:#309">getName</span><span style="color:#555">(),</span> <span style="color:#c30">&#34;1&#34;</span><span style="color:#555">);</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">protected</span> SerializedType <span style="color: #CC00FF">doUpcast</span><span style="color: #555555">(</span>SerializedType serializedType<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">new</span> SimpleSerializedType<span style="color: #555555">(</span>NoOpEvent<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">.</span><span style="color: #330099">getName</span><span style="color: #555555">(),</span> <span style="color: #CC3300">&quot;1&quot;</span><span style="color: #555555">);</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">protected</span> SerializedType <span style="color:#c0f">doUpcast</span><span style="color:#555">(</span>SerializedType serializedType<span style="color:#555">)</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">new</span> SimpleSerializedType<span style="color:#555">(</span>NoOpEvent<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">.</span><span style="color:#309">getName</span><span style="color:#555">(),</span> <span style="color:#c30">&#34;1&#34;</span><span style="color:#555">);</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">boolean</span> <span style="color: #CC00FF">canUpcast</span><span style="color: #555555">(</span>SerializedType serializedType<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> serializedType<span style="color: #555555">.</span><span style="color: #330099">getName</span><span style="color: #555555">().</span><span style="color: #330099">equals</span><span style="color: #555555">(</span>ValidationForFirstNameFailedEvent<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">.</span><span style="color: #330099">getName</span><span style="color: #555555">());</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">boolean</span> <span style="color:#c0f">canUpcast</span><span style="color:#555">(</span>SerializedType serializedType<span style="color:#555">)</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> serializedType<span style="color:#555">.</span><span style="color:#309">getName</span><span style="color:#555">().</span><span style="color:#309">equals</span><span style="color:#555">(</span>ValidationForFirstNameFailedEvent<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">.</span><span style="color:#309">getName</span><span style="color:#555">());</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> Class <span style="color: #CC00FF">expectedRepresentationType</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> JsonNode<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">;</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
-<p>As expected, this upcaster does not look at the revision of the intermediate representation and simply looks at the type of the event. And it completely discards any fields in the event and returns a simple type of the <code>NoOpEvent</code> class. Note that in this case, we are serializing the event as JSON using Jackson, hence the expected representation type is <code>com.fasterxml.jackson.databind.JsonNode</code>. If we were to use Axon&rsquo;s default XML serialization, the expected representation type will be <code>org.dom4j.Document</code>
-<div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Finding this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and actionable explanations for specific programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
-</p>
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> Class <span style="color:#c0f">expectedRepresentationType</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> JsonNode<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">;</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
+<p>As expected, this upcaster does not look at the revision of the intermediate representation and simply looks at the type of the event. And it completely discards any fields in the event and returns a simple type of the <code>NoOpEvent</code> class. Note that in this case, we are serializing the event as JSON using Jackson, hence the expected representation type is <code>com.fasterxml.jackson.databind.JsonNode</code>. If we were to use Axon&rsquo;s default XML serialization, the expected representation type will be <code>org.dom4j.Document</code></p>
 
 <h3 id="upcasting-to-an-empty-list">Upcasting to an empty list</h3>
 
 <p>Upcasting to an empty list can be easily achieved by implementing <code>Upcaster&lt;T&gt;</code> instead of extending <code>AbstractSingleEntryUpcaster</code>.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">ValidationForFirstNameFailedEventToEmptyListUpcaster</span> <span style="color: #006699; font-weight: bold">implements</span> Upcaster<span style="color: #555555">&lt;</span>JsonNode<span style="color: #555555">&gt;</span> <span style="color: #555555">{</span>
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">boolean</span> <span style="color: #CC00FF">canUpcast</span><span style="color: #555555">(</span>SerializedType serializedType<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> serializedType<span style="color: #555555">.</span><span style="color: #330099">getName</span><span style="color: #555555">().</span><span style="color: #330099">equals</span><span style="color: #555555">(</span>ValidationForFirstNameFailedEvent<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">.</span><span style="color: #330099">getName</span><span style="color: #555555">());</span>
-    <span style="color: #555555">}</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">ValidationForFirstNameFailedEventToEmptyListUpcaster</span> <span style="color:#069;font-weight:bold">implements</span> Upcaster<span style="color:#555">&lt;</span>JsonNode<span style="color:#555">&gt;</span> <span style="color:#555">{</span>
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">boolean</span> <span style="color:#c0f">canUpcast</span><span style="color:#555">(</span>SerializedType serializedType<span style="color:#555">)</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> serializedType<span style="color:#555">.</span><span style="color:#309">getName</span><span style="color:#555">().</span><span style="color:#309">equals</span><span style="color:#555">(</span>ValidationForFirstNameFailedEvent<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">.</span><span style="color:#309">getName</span><span style="color:#555">());</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> Class<span style="color: #555555">&lt;</span>JsonNode<span style="color: #555555">&gt;</span> <span style="color: #CC00FF">expectedRepresentationType</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> JsonNode<span style="color: #555555">.</span><span style="color: #330099">class</span><span style="color: #555555">;</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> Class<span style="color:#555">&lt;</span>JsonNode<span style="color:#555">&gt;</span> <span style="color:#c0f">expectedRepresentationType</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> JsonNode<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">;</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> List<span style="color: #555555">&lt;</span>SerializedObject<span style="color: #555555">&lt;?&gt;&gt;</span> upcast<span style="color: #555555">(</span>SerializedObject<span style="color: #555555">&lt;</span>JsonNode<span style="color: #555555">&gt;</span> intermediateRepresentation<span style="color: #555555">,</span>
-        List<span style="color: #555555">&lt;</span>SerializedType<span style="color: #555555">&gt;</span> expectedTypes<span style="color: #555555">,</span> UpcastingContext context<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> Collections<span style="color: #555555">.</span><span style="color: #330099">emptyList</span><span style="color: #555555">();</span>
-    <span style="color: #555555">}</span>
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> List<span style="color:#555">&lt;</span>SerializedObject<span style="color:#555">&lt;?&gt;&gt;</span> upcast<span style="color:#555">(</span>SerializedObject<span style="color:#555">&lt;</span>JsonNode<span style="color:#555">&gt;</span> intermediateRepresentation<span style="color:#555">,</span>
+        List<span style="color:#555">&lt;</span>SerializedType<span style="color:#555">&gt;</span> expectedTypes<span style="color:#555">,</span> UpcastingContext context<span style="color:#555">)</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> Collections<span style="color:#555">.</span><span style="color:#309">emptyList</span><span style="color:#555">();</span>
+    <span style="color:#555">}</span>
 
-    <span style="color: #9999FF">@Override</span>
-    <span style="color: #006699; font-weight: bold">public</span> List<span style="color: #555555">&lt;</span>SerializedType<span style="color: #555555">&gt;</span> <span style="color: #CC00FF">upcast</span><span style="color: #555555">(</span>SerializedType serializedType<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-        <span style="color: #006699; font-weight: bold">return</span> Collections<span style="color: #555555">.</span><span style="color: #330099">emptyList</span><span style="color: #555555">();</span>
-    <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+    <span style="color:#99f">@Override</span>
+    <span style="color:#069;font-weight:bold">public</span> List<span style="color:#555">&lt;</span>SerializedType<span style="color:#555">&gt;</span> <span style="color:#c0f">upcast</span><span style="color:#555">(</span>SerializedType serializedType<span style="color:#555">)</span> <span style="color:#555">{</span>
+        <span style="color:#069;font-weight:bold">return</span> Collections<span style="color:#555">.</span><span style="color:#309">emptyList</span><span style="color:#555">();</span>
+    <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>This can also be done through extending <code>AbstractSingleEntryUpcaster</code> and returning <code>null</code> from both <code>upcast</code> methods. The class in turns returns empty lists for us. This is evident if we look at the JavaDoc for the methods</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>    <span style="color: #0099FF; font-style: italic">/**</span>
-<span style="color: #0099FF; font-style: italic">     * Upcasts the given &lt;code&gt;intermediateRepresentation&lt;/code&gt; into zero or more other representations. The returned</span>
-<span style="color: #0099FF; font-style: italic">     * list of Serialized Objects must match the given list of serialized types.</span>
-<span style="color: #0099FF; font-style: italic">     * &lt;p/&gt;</span>
-<span style="color: #0099FF; font-style: italic">     * This method may return &lt;code&gt;null&lt;/code&gt; to indicate a deprecated object.</span>
-<span style="color: #0099FF; font-style: italic">     *</span>
-<span style="color: #0099FF; font-style: italic">     * @param intermediateRepresentation The representation of the object to upcast</span>
-<span style="color: #0099FF; font-style: italic">     * @param context                    An instance describing the context of the object to upcast</span>
-<span style="color: #0099FF; font-style: italic">     * @return the new representation of the object</span>
-<span style="color: #0099FF; font-style: italic">     */</span>
-    <span style="color: #006699; font-weight: bold">protected</span> <span style="color: #006699; font-weight: bold">abstract</span> T <span style="color: #CC00FF">doUpcast</span><span style="color: #555555">(</span>SerializedObject<span style="color: #555555">&lt;</span>T<span style="color: #555555">&gt;</span> intermediateRepresentation<span style="color: #555555">,</span>
-                                  UpcastingContext context<span style="color: #555555">);</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#09f;font-style:italic">/**
+</span><span style="color:#09f;font-style:italic">     * Upcasts the given &lt;code&gt;intermediateRepresentation&lt;/code&gt; into zero or more other representations. The returned
+</span><span style="color:#09f;font-style:italic">     * list of Serialized Objects must match the given list of serialized types.
+</span><span style="color:#09f;font-style:italic">     * &lt;p/&gt;
+</span><span style="color:#09f;font-style:italic">     * This method may return &lt;code&gt;null&lt;/code&gt; to indicate a deprecated object.
+</span><span style="color:#09f;font-style:italic">     *
+</span><span style="color:#09f;font-style:italic">     * @param intermediateRepresentation The representation of the object to upcast
+</span><span style="color:#09f;font-style:italic">     * @param context                    An instance describing the context of the object to upcast
+</span><span style="color:#09f;font-style:italic">     * @return the new representation of the object
+</span><span style="color:#09f;font-style:italic">     */</span>
+    <span style="color:#069;font-weight:bold">protected</span> <span style="color:#069;font-weight:bold">abstract</span> T <span style="color:#c0f">doUpcast</span><span style="color:#555">(</span>SerializedObject<span style="color:#555">&lt;</span>T<span style="color:#555">&gt;</span> intermediateRepresentation<span style="color:#555">,</span>
+                                  UpcastingContext context<span style="color:#555">);</span></code></pre></div>
 <p>I posted this question in the <a href="https://groups.google.com/forum/#!topic/axonframework/G2tlU06mRPM">Axon mailing list</a> as well as our internal developer mailing list and upcasting to an empty list was the more popular choice. Allard Buijze, the creator of Axon had this to say:</p>
 
 <blockquote>
@@ -240,36 +204,6 @@ So you achieve the same thing, but explicit always beats implicit in DDD ;-)</p>
             <p class="comments">
   If you have questions or comments about this blog post, you can get in touch with me on Twitter <a href="https://twitter.com/sdqali">@sdqali</a>.
 </p>
-
-            <div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Found this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and explanations for specific Java, Spring and other programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
 
           </div>
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">

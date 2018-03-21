@@ -2,127 +2,31 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Regexp on {code that works}</title>
-    <link>https://sdqali.in/categories/regexp/?utm_source=site&amp;utm_medium=feed</link>
+    <link>https://sdqali.in/categories/regexp/</link>
     <description>Recent content in Regexp on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
     <lastBuildDate>Tue, 01 Oct 2013 00:00:00 +0000</lastBuildDate>
-    <atom:link href="/categories/regexp/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    
+	<atom:link href="https://sdqali.in/categories/regexp/index.xml" rel="self" type="application/rss+xml" />
+    
     
     <item>
       <title>Ruby, Named Capture Groups and Local Variables</title>
-      <link>https://sdqali.in/blog/2013/10/01/ruby-named-capture-groups-and-local-variables/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sdqali.in/blog/2013/10/01/ruby-named-capture-groups-and-local-variables/</link>
       <pubDate>Tue, 01 Oct 2013 00:00:00 +0000</pubDate>
       
-      <guid>https://sdqali.in/blog/2013/10/01/ruby-named-capture-groups-and-local-variables/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>
-
-&lt;p&gt;Ruby&amp;rsquo;s regular expressions support &lt;a href=&#34;https://sdqali.in/blog/2013/09/29/named-capture-groups-in-regular-expressions/&#34;&gt;named capture groups&lt;/a&gt;, since 1.9. However, there is a weird behaviour while using named capture groups with the &lt;code&gt;Regexp#=~&lt;/code&gt; method. When named capture groups are used with &lt;code&gt;=~&lt;/code&gt;, the captured values are placed in local variables with the same name as the capture group. The following example demonstrates this:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;#!/usr/bin/env ruby&lt;/span&gt;
-
-month &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;January&amp;quot;&lt;/span&gt;
-test_string &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Today&amp;#39;s date is: 9/28/2013.&amp;quot;&lt;/span&gt;
-&lt;span style=&#34;color: #33AAAA&#34;&gt;/(?&amp;lt;month&amp;gt;\d{1,2})\/(?&amp;lt;day&amp;gt;\d{1,2})\/(?&amp;lt;year&amp;gt;\d{4})/&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;=~&lt;/span&gt; test_string
-&lt;span style=&#34;color: #336666&#34;&gt;puts&lt;/span&gt; month&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;inspect
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;This when executed will print &lt;code&gt;9&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;The official documentation &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:1&#34;&gt;&lt;a rel=&#34;footnote&#34; href=&#34;#fn:1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; says:&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;When named capture groups are used with a literal regexp on the left-hand side of an expression and the =~ operator, the captured text is also assigned to local variables with corresponding names.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;This local variable assignment does not happen if the regular expression is on the right-hand side of the expression or the regular expression contains a variable interpolation.&lt;/p&gt;
-
-&lt;h3 id=&#34;regexp-on-right-hand-side&#34;&gt;Regexp on right-hand side&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;#!/usr/bin/env ruby&lt;/span&gt;
-
-month &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;January&amp;quot;&lt;/span&gt;
-test_string &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Today&amp;#39;s date is: 9/28/2013.&amp;quot;&lt;/span&gt;
-test_string &lt;span style=&#34;color: #555555&#34;&gt;=~&lt;/span&gt; &lt;span style=&#34;color: #33AAAA&#34;&gt;/(?&amp;lt;month&amp;gt;\d{1,2})\/(?&amp;lt;day&amp;gt;\d{1,2})\/(?&amp;lt;year&amp;gt;\d{4})/&lt;/span&gt;
-&lt;span style=&#34;color: #336666&#34;&gt;puts&lt;/span&gt; month&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;inspect
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;This will print &lt;code&gt;January&lt;/code&gt;.&lt;/p&gt;
-
-&lt;h3 id=&#34;regexp-with-interpolation&#34;&gt;Regexp with interpolation&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;#!/usr/bin/env ruby&lt;/span&gt;
-
-month &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;January&amp;quot;&lt;/span&gt;
-&lt;span style=&#34;color: #336600&#34;&gt;DAY&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;day&amp;quot;&lt;/span&gt;
-test_string &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Today&amp;#39;s date is: 9/28/2013.&amp;quot;&lt;/span&gt;
-&lt;span style=&#34;color: #33AAAA&#34;&gt;/(?&amp;lt;month&amp;gt;\d{1,2})\/(?&amp;lt;&lt;/span&gt;&lt;span style=&#34;color: #AA0000&#34;&gt;#{&lt;/span&gt;&lt;span style=&#34;color: #336600&#34;&gt;DAY&lt;/span&gt;&lt;span style=&#34;color: #AA0000&#34;&gt;}&lt;/span&gt;&lt;span style=&#34;color: #33AAAA&#34;&gt;&amp;gt;\d{1,2})\/(?&amp;lt;year&amp;gt;\d{4})/&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;=~&lt;/span&gt; test_string
-&lt;span style=&#34;color: #336666&#34;&gt;puts&lt;/span&gt; month&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;inspect
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;This will print &lt;code&gt;January&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;This behaviour is present only for the &lt;code&gt;Regexp#=~&lt;/code&gt; method and not for &lt;code&gt;Regexp#match&lt;/code&gt;. So it is safer to use the latter without worrying about unintended side effects.&lt;/p&gt;
-
-&lt;p&gt;PS: Hat tip to &lt;a href=&#34;http://www.nilenso.com/people.html#gja&#34;&gt;Tejas&lt;/a&gt; for telling me about this quirk.&lt;/p&gt;
-&lt;div class=&#34;footnotes&#34;&gt;
-
-&lt;hr /&gt;
-
-&lt;ol&gt;
-&lt;li id=&#34;fn:1&#34;&gt;Ruby docs for &lt;a href=&#34;http://www.ruby-doc.org/core-1.9.3/Regexp.html#label-Capturing&#34;&gt;Class: Regexp (Ruby 1.9.3)&lt;/a&gt;.
- &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:1&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/div&gt;
-</description>
+      <guid>https://sdqali.in/blog/2013/10/01/ruby-named-capture-groups-and-local-variables/</guid>
+      <description>Ruby&amp;rsquo;s regular expressions support named capture groups, since 1.9. However, there is a weird behaviour while using named capture groups with the Regexp#=~ method. When named capture groups are used with =~, the captured values are placed in local variables with the same name as the capture group. The following example demonstrates this:
+#!/usr/bin/env ruby month = &amp;#34;January&amp;#34; test_string = &amp;#34;Today&amp;#39;s date is: 9/28/2013.&amp;#34; /(?&amp;lt;month&amp;gt;\d{1,2})\/(?&amp;lt;day&amp;gt;\d{1,2})\/(?&amp;lt;year&amp;gt;\d{4})/ =~ test_string puts month.inspect This when executed will print 9.</description>
     </item>
     
     <item>
       <title>Named Capture Groups in Regular Expressions</title>
-      <link>https://sdqali.in/blog/2013/09/29/named-capture-groups-in-regular-expressions/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sdqali.in/blog/2013/09/29/named-capture-groups-in-regular-expressions/</link>
       <pubDate>Sun, 29 Sep 2013 00:00:00 +0000</pubDate>
       
-      <guid>https://sdqali.in/blog/2013/09/29/named-capture-groups-in-regular-expressions/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>
-
-&lt;p&gt;I will admit that I find regular expressions somewhat hard to parse. While the thinking process needed to write a regular expression is iterative and hence results in the correct expression suitable for the situation, once it is written it lacks readability. I have faced that pain of trying to grok a complex regular expression written years ago. So I was pleasantly surprised when I saw &lt;a href=&#34;https://news.ycombinator.com/item?id=6463144&#34;&gt;this example&lt;/a&gt; from Hacker News user &lt;em&gt;WestCoastJustin&lt;/em&gt;. I found it very easy to understand because of the names he had assigned to each capture group in the expression.&lt;/p&gt;
-
-&lt;h2 id=&#34;ruby&#34;&gt;Ruby&lt;/h2&gt;
-
-&lt;p&gt;Ruby has supported named capture groups since version 1.9. Each match group is named by using &lt;code&gt;?&amp;lt;name&amp;gt;&lt;/code&gt; inside the match group and these matches are made available has a hash and each match can be accessed by using the match group name as the key.&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;WestCoastJustin&lt;/em&gt;&amp;rsquo;s example will look like this in Ruby:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;#!/usr/bin/env ruby&lt;/span&gt;
-
-test_string &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Today&amp;#39;s date is: 9/28/2013.&amp;quot;&lt;/span&gt;
-
-match &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; test_string&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;match &lt;span style=&#34;color: #33AAAA&#34;&gt;/(?&amp;lt;month&amp;gt;\d{1,2})\/(?&amp;lt;day&amp;gt;\d{1,2})\/(?&amp;lt;year&amp;gt;\d{4})/&lt;/span&gt;
-&lt;span style=&#34;color: #336666&#34;&gt;puts&lt;/span&gt; match&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;inspect
-&lt;span style=&#34;color: #336666&#34;&gt;puts&lt;/span&gt; match&lt;span style=&#34;color: #555555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #FFCC33&#34;&gt;:month&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;]&lt;/span&gt;
-&lt;span style=&#34;color: #336666&#34;&gt;puts&lt;/span&gt; match&lt;span style=&#34;color: #555555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #FFCC33&#34;&gt;:day&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;]&lt;/span&gt;
-&lt;span style=&#34;color: #336666&#34;&gt;puts&lt;/span&gt; match&lt;span style=&#34;color: #555555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #FFCC33&#34;&gt;:year&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;]&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;This is much easier to understand because looking at it, it makes it clear that the intent of matching the first group of 1 or 2 digits is to look for the &lt;strong&gt;month&lt;/strong&gt; in the date. Similarly, the intent of the &lt;em&gt;day&lt;/em&gt; and &lt;em&gt;year&lt;/em&gt; matches are easier to understand.&lt;/p&gt;
-
-&lt;p&gt;This will result in:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&amp;gt; ruby /tmp/named_matches.rb
-&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;#&amp;lt;MatchData &amp;quot;9/28/2013&amp;quot; month:&amp;quot;9&amp;quot; day:&amp;quot;28&amp;quot; year:&amp;quot;2013&amp;quot;&amp;gt;&lt;/span&gt;
-&lt;span style=&#34;color: #FF6600&#34;&gt;9&lt;/span&gt;
-&lt;span style=&#34;color: #FF6600&#34;&gt;28&lt;/span&gt;
-&lt;span style=&#34;color: #FF6600&#34;&gt;2013&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;##Python
-Python&amp;rsquo;s &lt;code&gt;re&lt;/code&gt; module supports named match groups using the &lt;code&gt;?P&amp;lt;name&amp;gt;&lt;/code&gt; pattern. After a pattern search, the results are placed in a &lt;code&gt;dict&lt;/code&gt;.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;#!/usr/bin/env ruby&lt;/span&gt;
-
-&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color: #00CCFF; font-weight: bold&#34;&gt;re&lt;/span&gt;
-
-test_string &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Today&amp;#39;s date is: 9/28/2013.&amp;quot;&lt;/span&gt;
-pattern &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; re&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;compile(&lt;span style=&#34;color: #CC3300&#34;&gt;r&amp;quot;(?P&amp;lt;month&amp;gt;\d{1,2})\/(?P&amp;lt;day&amp;gt;\d{1,2})\/(?P&amp;lt;year&amp;gt;\d{4})&amp;quot;&lt;/span&gt;)
-match_dict &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; pattern&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;search(test_string)&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;groupdict()
-&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;print&lt;/span&gt;(match_dict)
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;JavaScript does not support named capture groups. There are a lot of &lt;a href=&#34;http://trentrichardson.com/2011/08/02/javascript-regexp-match-named-captures/&#34;&gt;hacks&lt;/a&gt; aimed at providing this functionality. The XRegExp library &lt;a href=&#34;http://xregexp.com/syntax/#namedCapture&#34;&gt;supports&lt;/a&gt; named capture groups.&lt;/p&gt;
-</description>
+      <guid>https://sdqali.in/blog/2013/09/29/named-capture-groups-in-regular-expressions/</guid>
+      <description>I will admit that I find regular expressions somewhat hard to parse. While the thinking process needed to write a regular expression is iterative and hence results in the correct expression suitable for the situation, once it is written it lacks readability. I have faced that pain of trying to grok a complex regular expression written years ago. So I was pleasantly surprised when I saw this example from Hacker News user WestCoastJustin.</description>
     </item>
     
   </channel>

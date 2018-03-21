@@ -115,96 +115,64 @@
 <h3 id="the-problem">The problem</h3>
 
 <p>The application has a Canvas object on which it needs to draw arbitrary images. The Canvas&rsquo;s dimensions are set to <strong>450px</strong> by <strong>300px</strong>. The image that needs to be drawn will have unknown aspect ratio. The ideal case will be when the image&rsquo;s aspect ratio is <strong>3:2</strong>, just like the canvas. In this case, there is no need for any adjustments to be made and the image can be drawn like this:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">var</span> canvas <span style="color: #555555">=</span> <span style="color: #336666">document</span>.getElementById(<span style="color: #CC3300">&#39;canvas&#39;</span>);
-<span style="color: #006699; font-weight: bold">var</span> context <span style="color: #555555">=</span> canvas.getContext(<span style="color: #CC3300">&#39;2d&#39;</span>);
-<span style="color: #006699; font-weight: bold">var</span> imageObj <span style="color: #555555">=</span> <span style="color: #006699; font-weight: bold">new</span> Image();
-imageObj.onload <span style="color: #555555">=</span> <span style="color: #006699; font-weight: bold">function</span>() {
-	context.drawImage(imageObj, <span style="color: #FF6600">0</span>, <span style="color: #FF6600">0</span>, canvas.width, canvas.height);
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#069;font-weight:bold">var</span> canvas <span style="color:#555">=</span> <span style="color:#366">document</span>.getElementById(<span style="color:#c30">&#39;canvas&#39;</span>);
+<span style="color:#069;font-weight:bold">var</span> context <span style="color:#555">=</span> canvas.getContext(<span style="color:#c30">&#39;2d&#39;</span>);
+<span style="color:#069;font-weight:bold">var</span> imageObj <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">new</span> Image();
+imageObj.onload <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">function</span>() {
+	context.drawImage(imageObj, <span style="color:#f60">0</span>, <span style="color:#f60">0</span>, canvas.width, canvas.height);
 }
-</pre></div>
-
+</code></pre></div>
 <p>But fitting images with aspect ratios different from the Canvas can be a little tricky. The fundamental problem here is that when aspect ratio is different, there is only one pair of edges-either vertical or horizontal-that can be fitted on to the canvas. The image will have to be placed in the center along the other axis. The following diagram illustrates this.</p>
 
 <p><img src="/images/canvas_fitting.png" alt="Canvas fitting" title="Canvas fitting" /></p>
 
 <p>Since fitting depends on the aspect ratio, the code should take it into consideration. The following code compares the ratios and chooses to fit the image horizontally or vertically.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">var</span> canvas <span style="color: #555555">=</span> <span style="color: #336666">document</span>.getElementById(<span style="color: #CC3300">&#39;canvas&#39;</span>);
-<span style="color: #006699; font-weight: bold">var</span> context <span style="color: #555555">=</span> canvas.getContext(<span style="color: #CC3300">&#39;2d&#39;</span>);
-<span style="color: #006699; font-weight: bold">var</span> imageObj <span style="color: #555555">=</span> <span style="color: #006699; font-weight: bold">new</span> Image();
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#069;font-weight:bold">var</span> canvas <span style="color:#555">=</span> <span style="color:#366">document</span>.getElementById(<span style="color:#c30">&#39;canvas&#39;</span>);
+<span style="color:#069;font-weight:bold">var</span> context <span style="color:#555">=</span> canvas.getContext(<span style="color:#c30">&#39;2d&#39;</span>);
+<span style="color:#069;font-weight:bold">var</span> imageObj <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">new</span> Image();
 
-<span style="color: #006699; font-weight: bold">var</span> fitImageOn <span style="color: #555555">=</span> <span style="color: #006699; font-weight: bold">function</span>(canvas, imageObj) {
-	<span style="color: #006699; font-weight: bold">var</span> imageAspectRatio <span style="color: #555555">=</span> imageObj.width <span style="color: #555555">/</span> imageObj.height;
-	<span style="color: #006699; font-weight: bold">var</span> canvasAspectRatio <span style="color: #555555">=</span> canvas.width <span style="color: #555555">/</span> canvas.height;
-	<span style="color: #006699; font-weight: bold">var</span> renderableHeight, renderableWidth, xStart, yStart;
+<span style="color:#069;font-weight:bold">var</span> fitImageOn <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">function</span>(canvas, imageObj) {
+	<span style="color:#069;font-weight:bold">var</span> imageAspectRatio <span style="color:#555">=</span> imageObj.width <span style="color:#a00;background-color:#faa">/ imageObj.height;</span>
+	<span style="color:#069;font-weight:bold">var</span> canvasAspectRatio <span style="color:#555">=</span> canvas.width <span style="color:#a00;background-color:#faa">/ canvas.height;</span>
+	<span style="color:#069;font-weight:bold">var</span> renderableHeight, renderableWidth, xStart, yStart;
 
-	<span style="color: #0099FF; font-style: italic">// If image&#39;s aspect ratio is less than canvas&#39;s we fit on height</span>
-	<span style="color: #0099FF; font-style: italic">// and place the image centrally along width</span>
-	<span style="color: #006699; font-weight: bold">if</span>(imageAspectRatio <span style="color: #555555">&lt;</span> canvasAspectRatio) {
-		renderableHeight <span style="color: #555555">=</span> canvas.height;
-		renderableWidth <span style="color: #555555">=</span> imageObj.width <span style="color: #555555">*</span> (renderableHeight <span style="color: #555555">/</span> imageObj.height);
-		xStart <span style="color: #555555">=</span> (canvas.width <span style="color: #555555">-</span> renderableWidth) <span style="color: #555555">/</span> <span style="color: #FF6600">2</span>;
-		yStart <span style="color: #555555">=</span> <span style="color: #FF6600">0</span>;
+	<span style="color:#09f;font-style:italic">// If image&#39;s aspect ratio is less than canvas&#39;s we fit on height
+</span><span style="color:#09f;font-style:italic"></span>	<span style="color:#09f;font-style:italic">// and place the image centrally along width
+</span><span style="color:#09f;font-style:italic"></span>	<span style="color:#069;font-weight:bold">if</span>(imageAspectRatio <span style="color:#555">&lt;</span> canvasAspectRatio) {
+		renderableHeight <span style="color:#555">=</span> canvas.height;
+		renderableWidth <span style="color:#555">=</span> imageObj.width <span style="color:#555">*</span> (renderableHeight <span style="color:#a00;background-color:#faa">/ imageObj.height);</span>
+		xStart <span style="color:#555">=</span> (canvas.width <span style="color:#555">-</span> renderableWidth) <span style="color:#a00;background-color:#faa">/ 2;</span>
+		yStart <span style="color:#555">=</span> <span style="color:#f60">0</span>;
 	}
 
-	<span style="color: #0099FF; font-style: italic">// If image&#39;s aspect ratio is greater than canvas&#39;s we fit on width</span>
-	<span style="color: #0099FF; font-style: italic">// and place the image centrally along height</span>
-	<span style="color: #006699; font-weight: bold">else</span> <span style="color: #006699; font-weight: bold">if</span>(imageAspectRatio <span style="color: #555555">&gt;</span> canvasAspectRatio) {
-		renderableWidth <span style="color: #555555">=</span> canvas.width
-		renderableHeight <span style="color: #555555">=</span> imageObj.height <span style="color: #555555">*</span> (renderableWidth <span style="color: #555555">/</span> imageObj.width);
-		xStart <span style="color: #555555">=</span> <span style="color: #FF6600">0</span>;
-		yStart <span style="color: #555555">=</span> (canvas.height <span style="color: #555555">-</span> renderableHeight) <span style="color: #555555">/</span> <span style="color: #FF6600">2</span>;
+	<span style="color:#09f;font-style:italic">// If image&#39;s aspect ratio is greater than canvas&#39;s we fit on width
+</span><span style="color:#09f;font-style:italic"></span>	<span style="color:#09f;font-style:italic">// and place the image centrally along height
+</span><span style="color:#09f;font-style:italic"></span>	<span style="color:#069;font-weight:bold">else</span> <span style="color:#069;font-weight:bold">if</span>(imageAspectRatio <span style="color:#555">&gt;</span> canvasAspectRatio) {
+		renderableWidth <span style="color:#555">=</span> canvas.width
+		renderableHeight <span style="color:#555">=</span> imageObj.height <span style="color:#555">*</span> (renderableWidth <span style="color:#a00;background-color:#faa">/ imageObj.width);</span>
+		xStart <span style="color:#555">=</span> <span style="color:#f60">0</span>;
+		yStart <span style="color:#555">=</span> (canvas.height <span style="color:#555">-</span> renderableHeight) <span style="color:#a00;background-color:#faa">/ 2;</span>
 	}
 
-	<span style="color: #0099FF; font-style: italic">// Happy path - keep aspect ratio</span>
-	<span style="color: #006699; font-weight: bold">else</span> {
-		renderableHeight <span style="color: #555555">=</span> canvas.height;
-		renderableWidth <span style="color: #555555">=</span> canvas.width;
-		xStart <span style="color: #555555">=</span> <span style="color: #FF6600">0</span>;
-		yStart <span style="color: #555555">=</span> <span style="color: #FF6600">0</span>;
+	<span style="color:#09f;font-style:italic">// Happy path - keep aspect ratio
+</span><span style="color:#09f;font-style:italic"></span>	<span style="color:#069;font-weight:bold">else</span> {
+		renderableHeight <span style="color:#555">=</span> canvas.height;
+		renderableWidth <span style="color:#555">=</span> canvas.width;
+		xStart <span style="color:#555">=</span> <span style="color:#f60">0</span>;
+		yStart <span style="color:#555">=</span> <span style="color:#f60">0</span>;
 	}
 	context.drawImage(imageObj, xStart, yStart, renderableWidth, renderableHeight);
 };
 
-imageObj.onload <span style="color: #555555">=</span> <span style="color: #006699; font-weight: bold">function</span>() {
+imageObj.onload <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">function</span>() {
 	fitImageOn(canvas, imageObj)
 };
-</pre></div>
-
+</code></pre></div>
 <p>A demo of this code in action can be found <a href="/demos/canvas_fitting.html">here</a>.</p>
 
             <p class="comments">
   If you have questions or comments about this blog post, you can get in touch with me on Twitter <a href="https://twitter.com/sdqali">@sdqali</a>.
 </p>
-
-            <div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Found this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and explanations for specific Java, Spring and other programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
 
           </div>
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">

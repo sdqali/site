@@ -2,75 +2,22 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Algorithms on {code that works}</title>
-    <link>https://sdqali.in/categories/algorithms/?utm_source=site&amp;utm_medium=feed</link>
+    <link>https://sdqali.in/categories/algorithms/</link>
     <description>Recent content in Algorithms on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
     <lastBuildDate>Thu, 20 Mar 2014 00:00:00 +0000</lastBuildDate>
-    <atom:link href="/categories/algorithms/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    
+	<atom:link href="https://sdqali.in/categories/algorithms/index.xml" rel="self" type="application/rss+xml" />
+    
     
     <item>
       <title>Clojure Dojo - Levenshtein edit distance</title>
-      <link>https://sdqali.in/blog/2014/03/20/clojure-dojo---levenshtein-edit-distance/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sdqali.in/blog/2014/03/20/clojure-dojo---levenshtein-edit-distance/</link>
       <pubDate>Thu, 20 Mar 2014 00:00:00 +0000</pubDate>
       
-      <guid>https://sdqali.in/blog/2014/03/20/clojure-dojo---levenshtein-edit-distance/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>
-
-&lt;p&gt;I have been playing around with Clojure and after familiarising myself with the core, I decided to start writing little programs that forces me to choose the right idioms. I am starting off with Levenshtein edit distance of two strings.&lt;/p&gt;
-
-&lt;h3 id=&#34;levenshtein-edit-distance&#34;&gt;Levenshtein edit distance&lt;/h3&gt;
-
-&lt;p&gt;Levenshtein edit distance between two string is a way of quantifying how similar or dissimilar they are, lower distance implying higher similarity. The algorithm to calculate Levenshtein distance is fairly simple - the algorithm cares about three operations that can be performed at a particular position in a string to move it towards the other - insertion, deletion and substitution.&lt;/p&gt;
-
-&lt;p&gt;This can be recursively solved for two strings &lt;code&gt;A0:AS&lt;/code&gt; and &lt;code&gt;B0:BS&lt;/code&gt; by comparing &lt;code&gt;AS&lt;/code&gt;, &lt;code&gt;B0:BS&lt;/code&gt;; &lt;code&gt;A0:AS&lt;/code&gt;, &lt;code&gt;BS&lt;/code&gt; and &lt;code&gt;AS&lt;/code&gt;, &lt;code&gt;BS&lt;/code&gt;.&lt;/p&gt;
-
-&lt;h3 id=&#34;code&#34;&gt;Code&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;ns &lt;/span&gt;&lt;span style=&#34;color: #003333&#34;&gt;clojure_dojo.core&lt;/span&gt;)
-
-(&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;defn &lt;/span&gt;&lt;span style=&#34;color: #003333&#34;&gt;edit-distance&lt;/span&gt;
-  &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Return the Levenshtein edit distance between two strings&amp;quot;&lt;/span&gt;
-  [&lt;span style=&#34;color: #336666&#34;&gt;first &lt;/span&gt;&lt;span style=&#34;color: #003333&#34;&gt;second&lt;/span&gt;]
-  (&lt;span style=&#34;color: #CC00FF&#34;&gt;cond&lt;/span&gt;
-   (&lt;span style=&#34;color: #CC00FF&#34;&gt;empty?&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;first&lt;/span&gt;) (&lt;span style=&#34;color: #336666&#34;&gt;count &lt;/span&gt;&lt;span style=&#34;color: #003333&#34;&gt;second&lt;/span&gt;)
-   (&lt;span style=&#34;color: #CC00FF&#34;&gt;empty?&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;second&lt;/span&gt;) (&lt;span style=&#34;color: #336666&#34;&gt;count &lt;/span&gt;&lt;span style=&#34;color: #003333&#34;&gt;first&lt;/span&gt;)
-   &lt;span style=&#34;color: #FFCC33&#34;&gt;:else&lt;/span&gt; (&lt;span style=&#34;color: #336666&#34;&gt;min &lt;/span&gt;(&lt;span style=&#34;color: #336666&#34;&gt;+ &lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt; (&lt;span style=&#34;color: #CC00FF&#34;&gt;edit-distance&lt;/span&gt; (&lt;span style=&#34;color: #336666&#34;&gt;drop &lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;first&lt;/span&gt;) &lt;span style=&#34;color: #003333&#34;&gt;second&lt;/span&gt;))
-              (&lt;span style=&#34;color: #336666&#34;&gt;+ &lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt; (&lt;span style=&#34;color: #CC00FF&#34;&gt;edit-distance&lt;/span&gt; &lt;span style=&#34;color: #336666&#34;&gt;first &lt;/span&gt;(&lt;span style=&#34;color: #336666&#34;&gt;drop &lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;second&lt;/span&gt;)))
-              (&lt;span style=&#34;color: #336666&#34;&gt;+ &lt;/span&gt;(&lt;span style=&#34;color: #CC00FF&#34;&gt;cond&lt;/span&gt;
-                  (&lt;span style=&#34;color: #336666&#34;&gt;= &lt;/span&gt;(&lt;span style=&#34;color: #336666&#34;&gt;take &lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;first&lt;/span&gt;) (&lt;span style=&#34;color: #336666&#34;&gt;take &lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;second&lt;/span&gt;)) &lt;span style=&#34;color: #FF6600&#34;&gt;0&lt;/span&gt;
-                  &lt;span style=&#34;color: #FFCC33&#34;&gt;:else&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt;)
-                 (&lt;span style=&#34;color: #CC00FF&#34;&gt;edit-distance&lt;/span&gt; (&lt;span style=&#34;color: #336666&#34;&gt;drop &lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;first&lt;/span&gt;) (&lt;span style=&#34;color: #336666&#34;&gt;drop &lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;second&lt;/span&gt;))))))
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;h3 id=&#34;test&#34;&gt;Test&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;(&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;ns &lt;/span&gt;&lt;span style=&#34;color: #003333&#34;&gt;clojure_dojo.t-core&lt;/span&gt;
-  (&lt;span style=&#34;color: #FFCC33&#34;&gt;:use&lt;/span&gt; &lt;span style=&#34;color: #003333&#34;&gt;midje.sweet&lt;/span&gt;)
-  (&lt;span style=&#34;color: #FFCC33&#34;&gt;:use&lt;/span&gt; [&lt;span style=&#34;color: #003333&#34;&gt;clojure_dojo.core&lt;/span&gt;]))
-
-(&lt;span style=&#34;color: #CC00FF&#34;&gt;facts&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;about `edit-distance`&amp;quot;&lt;/span&gt;
-       (&lt;span style=&#34;color: #CC00FF&#34;&gt;fact&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;it returns length of other string if one string is empty&amp;quot;&lt;/span&gt;
-             (&lt;span style=&#34;color: #CC00FF&#34;&gt;edit-distance&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;foo&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;&amp;quot;&lt;/span&gt;) &lt;span style=&#34;color: #003333&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;3&lt;/span&gt;
-             (&lt;span style=&#34;color: #CC00FF&#34;&gt;edit-distance&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;foo&amp;quot;&lt;/span&gt;) &lt;span style=&#34;color: #003333&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;3&lt;/span&gt;)
-       (&lt;span style=&#34;color: #CC00FF&#34;&gt;fact&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;detects deletions&amp;quot;&lt;/span&gt;
-             (&lt;span style=&#34;color: #CC00FF&#34;&gt;edit-distance&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;foo&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;oo&amp;quot;&lt;/span&gt;) &lt;span style=&#34;color: #003333&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt;)
-       (&lt;span style=&#34;color: #CC00FF&#34;&gt;fact&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;detects substitutions&amp;quot;&lt;/span&gt;
-             (&lt;span style=&#34;color: #CC00FF&#34;&gt;edit-distance&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;ab&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;cd&amp;quot;&lt;/span&gt;) &lt;span style=&#34;color: #003333&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;2&lt;/span&gt;)
-       (&lt;span style=&#34;color: #CC00FF&#34;&gt;fact&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;detects additions needed&amp;quot;&lt;/span&gt;
-             (&lt;span style=&#34;color: #CC00FF&#34;&gt;edit-distance&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;oo&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;foo&amp;quot;&lt;/span&gt;) &lt;span style=&#34;color: #003333&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt;
-             (&lt;span style=&#34;color: #CC00FF&#34;&gt;edit-distance&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;kit&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;sitting&amp;quot;&lt;/span&gt;) &lt;span style=&#34;color: #003333&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;5&lt;/span&gt;
-             (&lt;span style=&#34;color: #CC00FF&#34;&gt;edit-distance&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;intention&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;execution&amp;quot;&lt;/span&gt;) &lt;span style=&#34;color: #003333&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;5&lt;/span&gt;
-             (&lt;span style=&#34;color: #CC00FF&#34;&gt;edit-distance&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;sittin&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;sitting&amp;quot;&lt;/span&gt;) &lt;span style=&#34;color: #003333&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt;))
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;h3 id=&#34;the-problem-with-this-approach&#34;&gt;The problem with this approach&lt;/h3&gt;
-
-&lt;p&gt;This solution looks fine - it passes the tests. However, if we carefully observe the recursion tree, we notice that there are sub-problems that are solved multiple times and this makes this algorithm&amp;rsquo;s order of complexity Θ(3^min(m, n)). This can be observed from the call tree of this recursion.&lt;/p&gt;
-
-&lt;h3 id=&#34;improvement&#34;&gt;Improvement&lt;/h3&gt;
-
-&lt;p&gt;Recursive algorithms of this nature can be improved in two ways - memoization during recursion or applying &lt;a href=&#34;https://en.wikipedia.org/wiki/Dynamic_programming&#34;&gt;Dynamic Programming&lt;/a&gt; in a bottom up manner. The next blog post in this series will deal with how these two approaches can be done in Clojure.&lt;/p&gt;
-
-&lt;p&gt;The code for the above solution is on &lt;a href=&#34;https://github.com/sdqali/clojure-dojo&#34;&gt;GitHub&lt;/a&gt;.&lt;/p&gt;
-</description>
+      <guid>https://sdqali.in/blog/2014/03/20/clojure-dojo---levenshtein-edit-distance/</guid>
+      <description>I have been playing around with Clojure and after familiarising myself with the core, I decided to start writing little programs that forces me to choose the right idioms. I am starting off with Levenshtein edit distance of two strings.
+Levenshtein edit distance Levenshtein edit distance between two string is a way of quantifying how similar or dissimilar they are, lower distance implying higher similarity. The algorithm to calculate Levenshtein distance is fairly simple - the algorithm cares about three operations that can be performed at a particular position in a string to move it towards the other - insertion, deletion and substitution.</description>
     </item>
     
   </channel>

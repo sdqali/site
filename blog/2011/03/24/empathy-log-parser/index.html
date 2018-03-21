@@ -116,67 +116,35 @@ Just another excuse to write code. So I came up with the following. It was easy 
 <p>Just another excuse to write code. So I came up with the following. It was easy to write and it does not do much - It uses the Hpricot gem to parse the XML and prints the name of the people involved in the chat and their messages in a human readable form. What? You are one of those souls who actually enjoy reading XML? Well, I am not one of those.</p>
 
 <p>So here is the code:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #0099FF; font-style: italic">#!/usr/bin/env ruby</span>
-<span style="color: #0099FF; font-style: italic"># empathy_lp.rb</span>
-<span style="color: #0099FF; font-style: italic"># Usage - ./empathy_lp.rb /tmp/20110323.log</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ruby" data-lang="ruby"><span style="color:#09f;font-style:italic">#!/usr/bin/env ruby</span>
+<span style="color:#09f;font-style:italic"># empathy_lp.rb</span>
+<span style="color:#09f;font-style:italic"># Usage - ./empathy_lp.rb /tmp/20110323.log</span>
 
-<span style="color: #336666">require</span> <span style="color: #CC3300">&#39;rubygems&#39;</span>
-<span style="color: #336666">require</span> <span style="color: #CC3300">&#39;hpricot&#39;</span>
+<span style="color:#366">require</span> <span style="color:#c30">&#39;rubygems&#39;</span>
+<span style="color:#366">require</span> <span style="color:#c30">&#39;hpricot&#39;</span>
 
-<span style="color: #006699; font-weight: bold">module</span> <span style="color: #00CCFF; font-weight: bold">EmpathyLP</span>
-  <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">LogParser</span>
-    <span style="color: #006699; font-weight: bold">def</span> <span style="color: #CC00FF">initialize</span> file_path
-      conversation_xml <span style="color: #555555">=</span> <span style="color: #336600">IO</span><span style="color: #555555">.</span>readlines(file_path)<span style="color: #555555">.</span>to_s
-      <span style="color: #003333">@doc</span> <span style="color: #555555">=</span> <span style="color: #336600">Hpricot</span> conversation_xml
-    <span style="color: #006699; font-weight: bold">end</span>
+<span style="color:#069;font-weight:bold">module</span> <span style="color:#0cf;font-weight:bold">EmpathyLP</span>
+  <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">LogParser</span>
+    <span style="color:#069;font-weight:bold">def</span> <span style="color:#0a8;font-weight:bold"></span><span style="color:#555"></span><span style="color:#c0f">initialize</span> file_path
+      conversation_xml <span style="color:#555">=</span> <span style="color:#360">IO</span><span style="color:#555">.</span>readlines(file_path)<span style="color:#555">.</span>to_s
+      @doc <span style="color:#555">=</span> <span style="color:#360">Hpricot</span> conversation_xml
+    <span style="color:#069;font-weight:bold">end</span>
 
-    <span style="color: #006699; font-weight: bold">def</span> <span style="color: #CC00FF">messages</span>
-      (<span style="color: #003333">@doc</span><span style="color: #555555">/</span><span style="color: #CC3300">&quot;message&quot;</span>)<span style="color: #555555">.</span>map <span style="color: #006699; font-weight: bold">do</span> <span style="color: #555555">|</span>m<span style="color: #555555">|</span>
-        m<span style="color: #555555">.</span>attributes<span style="color: #555555">[</span><span style="color: #CC3300">&#39;name&#39;</span><span style="color: #555555">]</span> <span style="color: #555555">+</span> <span style="color: #CC3300">&quot;: &quot;</span> <span style="color: #555555">+</span> m<span style="color: #555555">.</span>inner_text
-      <span style="color: #006699; font-weight: bold">end</span>
-    <span style="color: #006699; font-weight: bold">end</span>
-  <span style="color: #006699; font-weight: bold">end</span>
-<span style="color: #006699; font-weight: bold">end</span>
-
-path <span style="color: #555555">=</span> <span style="color: #336600">ARGV</span><span style="color: #555555">.</span>first
-<span style="color: #336666">puts</span> <span style="color: #336600">EmpathyLP</span><span style="color: #555555">::</span><span style="color: #336600">LogParser</span><span style="color: #555555">.</span>new(path)<span style="color: #555555">.</span>messages
-</pre></div>
-
+    <span style="color:#069;font-weight:bold">def</span> <span style="color:#0a8;font-weight:bold"></span><span style="color:#555"></span><span style="color:#c0f">messages</span>
+      (@doc<span style="color:#3aa">/&#34;message&#34;).map do |m|
+</span><span style="color:#3aa">        m.attributes[&#39;name&#39;] + &#34;: &#34; + m.inner_text
+</span><span style="color:#3aa">      end
+</span><span style="color:#3aa">    end
+</span><span style="color:#3aa">  end
+</span><span style="color:#3aa">end
+</span><span style="color:#3aa">
+</span><span style="color:#3aa">path = ARGV.first
+</span><span style="color:#3aa">puts EmpathyLP::LogParser.new(path).messages</span></code></pre></div>
 <p>I will modify this slightly to show a timestamp for each message.</p>
 
             <p class="comments">
   If you have questions or comments about this blog post, you can get in touch with me on Twitter <a href="https://twitter.com/sdqali">@sdqali</a>.
 </p>
-
-            <div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Found this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and explanations for specific Java, Spring and other programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
 
           </div>
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">

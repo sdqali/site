@@ -134,114 +134,76 @@
 </ul>
 
 <p>Because this is for human consumption, the end point will display the feature state in the following format:</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>{
-  <span style="color: #330099; font-weight: bold">&quot;available&quot;</span>: [
-    <span style="color: #CC3300">&quot;feature.hello&quot;</span>,
-    <span style="color: #CC3300">&quot;feature.bar&quot;</span>
-    <span style="color: #AA0000; background-color: #FFAAAA">...</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+  <span style="color:#309;font-weight:bold">&#34;available&#34;</span>: [
+    <span style="color:#c30">&#34;feature.hello&#34;</span>,
+    <span style="color:#c30">&#34;feature.bar&#34;</span>
+    <span style="color:#a00;background-color:#faa">...</span>
   ],
-  <span style="color: #330099; font-weight: bold">&quot;enabled&quot;</span>: [
-    <span style="color: #CC3300">&quot;feature.hello&quot;</span>
-    <span style="color: #AA0000; background-color: #FFAAAA">...</span>
+  <span style="color:#309;font-weight:bold">&#34;enabled&#34;</span>: [
+    <span style="color:#c30">&#34;feature.hello&#34;</span>
+    <span style="color:#a00;background-color:#faa">...</span>
   ]
-}
-</pre></div>
-
+}</code></pre></div>
 <p>Management end points in Spring Boot are created by implementing the <code>EndPoint</code> interface. In our case, the end point will depend on <code>FeatureRepository</code> to do the heavy lifting.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">FeatureEndpoint</span> <span style="color: #006699; font-weight: bold">implements</span> Endpoint<span style="color: #555555">&lt;</span>HashMap<span style="color: #555555">&lt;</span>String<span style="color: #555555">,</span> Set<span style="color: #555555">&lt;</span>String<span style="color: #555555">&gt;&gt;&gt;</span> <span style="color: #555555">{</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">FeatureEndpoint</span> <span style="color:#069;font-weight:bold">implements</span> Endpoint<span style="color:#555">&lt;</span>HashMap<span style="color:#555">&lt;</span>String<span style="color:#555">,</span> Set<span style="color:#555">&lt;</span>String<span style="color:#555">&gt;&gt;&gt;</span> <span style="color:#555">{</span>
 
-  <span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">static</span> <span style="color: #006699; font-weight: bold">final</span> String ID <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;features&quot;</span><span style="color: #555555">;</span>
-  <span style="color: #006699; font-weight: bold">private</span> <span style="color: #006699; font-weight: bold">final</span> FeatureRepository featureRepository<span style="color: #555555">;</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">static</span> <span style="color:#069;font-weight:bold">final</span> String ID <span style="color:#555">=</span> <span style="color:#c30">&#34;features&#34;</span><span style="color:#555">;</span>
+  <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">final</span> FeatureRepository featureRepository<span style="color:#555">;</span>
 
-  <span style="color: #006699; font-weight: bold">public</span> <span style="color: #CC00FF">FeatureEndpoint</span><span style="color: #555555">(</span>FeatureRepository featureRepository<span style="color: #555555">)</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">this</span><span style="color: #555555">.</span><span style="color: #330099">featureRepository</span> <span style="color: #555555">=</span> featureRepository<span style="color: #555555">;</span>
-  <span style="color: #555555">}</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">FeatureEndpoint</span><span style="color:#555">(</span>FeatureRepository featureRepository<span style="color:#555">)</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">this</span><span style="color:#555">.</span><span style="color:#309">featureRepository</span> <span style="color:#555">=</span> featureRepository<span style="color:#555">;</span>
+  <span style="color:#555">}</span>
 
-  <span style="color: #9999FF">@Override</span>
-  <span style="color: #006699; font-weight: bold">public</span> String <span style="color: #CC00FF">getId</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">return</span> ID<span style="color: #555555">;</span>
-  <span style="color: #555555">}</span>
+  <span style="color:#99f">@Override</span>
+  <span style="color:#069;font-weight:bold">public</span> String <span style="color:#c0f">getId</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">return</span> ID<span style="color:#555">;</span>
+  <span style="color:#555">}</span>
 
-  <span style="color: #9999FF">@Override</span>
-  <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">boolean</span> <span style="color: #CC00FF">isEnabled</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">true</span><span style="color: #555555">;</span>
-  <span style="color: #555555">}</span>
+  <span style="color:#99f">@Override</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">boolean</span> <span style="color:#c0f">isEnabled</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">true</span><span style="color:#555">;</span>
+  <span style="color:#555">}</span>
 
-  <span style="color: #9999FF">@Override</span>
-  <span style="color: #006699; font-weight: bold">public</span> <span style="color: #007788; font-weight: bold">boolean</span> <span style="color: #CC00FF">isSensitive</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">return</span> <span style="color: #006699; font-weight: bold">false</span><span style="color: #555555">;</span>
-  <span style="color: #555555">}</span>
+  <span style="color:#99f">@Override</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">boolean</span> <span style="color:#c0f">isSensitive</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">false</span><span style="color:#555">;</span>
+  <span style="color:#555">}</span>
 
-  <span style="color: #9999FF">@Override</span>
-  <span style="color: #006699; font-weight: bold">public</span> HashMap<span style="color: #555555">&lt;</span>String<span style="color: #555555">,</span> Set<span style="color: #555555">&lt;</span>String<span style="color: #555555">&gt;&gt;</span> <span style="color: #CC00FF">invoke</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-    HashMap<span style="color: #555555">&lt;</span>String<span style="color: #555555">,</span> Set<span style="color: #555555">&lt;</span>String<span style="color: #555555">&gt;&gt;</span> map <span style="color: #555555">=</span> <span style="color: #006699; font-weight: bold">new</span> HashMap<span style="color: #555555">&lt;&gt;();</span>
-    map<span style="color: #555555">.</span><span style="color: #330099">put</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;enabled&quot;</span><span style="color: #555555">,</span> featureRepository<span style="color: #555555">.</span><span style="color: #330099">enabledKeys</span><span style="color: #555555">());</span>
-    map<span style="color: #555555">.</span><span style="color: #330099">put</span><span style="color: #555555">(</span><span style="color: #CC3300">&quot;available&quot;</span><span style="color: #555555">,</span> featureRepository<span style="color: #555555">.</span><span style="color: #330099">featureKeys</span><span style="color: #555555">());</span>
-    <span style="color: #006699; font-weight: bold">return</span> map<span style="color: #555555">;</span>
-  <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+  <span style="color:#99f">@Override</span>
+  <span style="color:#069;font-weight:bold">public</span> HashMap<span style="color:#555">&lt;</span>String<span style="color:#555">,</span> Set<span style="color:#555">&lt;</span>String<span style="color:#555">&gt;&gt;</span> <span style="color:#c0f">invoke</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+    HashMap<span style="color:#555">&lt;</span>String<span style="color:#555">,</span> Set<span style="color:#555">&lt;</span>String<span style="color:#555">&gt;&gt;</span> map <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">new</span> HashMap<span style="color:#555">&lt;&gt;();</span>
+    map<span style="color:#555">.</span><span style="color:#309">put</span><span style="color:#555">(</span><span style="color:#c30">&#34;enabled&#34;</span><span style="color:#555">,</span> featureRepository<span style="color:#555">.</span><span style="color:#309">enabledKeys</span><span style="color:#555">());</span>
+    map<span style="color:#555">.</span><span style="color:#309">put</span><span style="color:#555">(</span><span style="color:#c30">&#34;available&#34;</span><span style="color:#555">,</span> featureRepository<span style="color:#555">.</span><span style="color:#309">featureKeys</span><span style="color:#555">());</span>
+    <span style="color:#069;font-weight:bold">return</span> map<span style="color:#555">;</span>
+  <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>In order to retrieve the keys for features that are toggled on, we will create an <code>enabledKeys</code> method in the repository.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">public</span> <span style="color: #006699; font-weight: bold">class</span> <span style="color: #00AA88; font-weight: bold">FeatureRepository</span> <span style="color: #555555">{</span>
-  <span style="color: #0099FF; font-style: italic">// ...</span>
-  <span style="color: #006699; font-weight: bold">public</span> Set<span style="color: #555555">&lt;</span>String<span style="color: #555555">&gt;</span> <span style="color: #CC00FF">enabledKeys</span><span style="color: #555555">()</span> <span style="color: #555555">{</span>
-    <span style="color: #006699; font-weight: bold">return</span> featureKeys<span style="color: #555555">().</span><span style="color: #330099">stream</span><span style="color: #555555">()</span>
-        <span style="color: #555555">.</span><span style="color: #330099">filter</span><span style="color: #555555">(</span>f <span style="color: #555555">-&gt;</span> isOn<span style="color: #555555">(</span>f<span style="color: #555555">))</span>
-        <span style="color: #555555">.</span><span style="color: #330099">collect</span><span style="color: #555555">(</span>Collectors<span style="color: #555555">.</span><span style="color: #330099">toSet</span><span style="color: #555555">());</span>
-  <span style="color: #555555">}</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">FeatureRepository</span> <span style="color:#555">{</span>
+  <span style="color:#09f;font-style:italic">// ...
+</span><span style="color:#09f;font-style:italic"></span>  <span style="color:#069;font-weight:bold">public</span> Set<span style="color:#555">&lt;</span>String<span style="color:#555">&gt;</span> <span style="color:#c0f">enabledKeys</span><span style="color:#555">()</span> <span style="color:#555">{</span>
+    <span style="color:#069;font-weight:bold">return</span> featureKeys<span style="color:#555">().</span><span style="color:#309">stream</span><span style="color:#555">()</span>
+        <span style="color:#555">.</span><span style="color:#309">filter</span><span style="color:#555">(</span>f <span style="color:#555">-&gt;</span> isOn<span style="color:#555">(</span>f<span style="color:#555">))</span>
+        <span style="color:#555">.</span><span style="color:#309">collect</span><span style="color:#555">(</span>Collectors<span style="color:#555">.</span><span style="color:#309">toSet</span><span style="color:#555">());</span>
+  <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>With this end point in place and the <code>management.context-path</code> set to <code>management</code> in our properties, this end point will produce the following output.</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #555555">&gt;</span> curl <span style="color: #555555">-</span>s <span style="color: #CC3300">&quot;http://localhost:8080/management/features&quot;</span> <span style="color: #555555">|</span> jq <span style="color: #555555">.</span>
-<span style="color: #555555">{</span>
-  <span style="color: #CC3300">&quot;available&quot;</span><span style="color: #555555">:</span> <span style="color: #555555">[</span>
-    <span style="color: #CC3300">&quot;feature.foo&quot;</span><span style="color: #555555">,</span>
-    <span style="color: #CC3300">&quot;feature.hello&quot;</span>
-  <span style="color: #555555">],</span>
-  <span style="color: #CC3300">&quot;enabled&quot;</span><span style="color: #555555">:</span> <span style="color: #555555">[</span>
-    <span style="color: #CC3300">&quot;feature.hello&quot;</span>
-  <span style="color: #555555">]</span>
-<span style="color: #555555">}</span>
-</pre></div>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#555">&gt;</span> curl <span style="color:#555">-</span>s <span style="color:#c30">&#34;http://localhost:8080/management/features&#34;</span> <span style="color:#555">|</span> jq <span style="color:#555">.</span>
+<span style="color:#555">{</span>
+  <span style="color:#c30">&#34;available&#34;</span><span style="color:#555">:</span> <span style="color:#555">[</span>
+    <span style="color:#c30">&#34;feature.foo&#34;</span><span style="color:#555">,</span>
+    <span style="color:#c30">&#34;feature.hello&#34;</span>
+  <span style="color:#555">],</span>
+  <span style="color:#c30">&#34;enabled&#34;</span><span style="color:#555">:</span> <span style="color:#555">[</span>
+    <span style="color:#c30">&#34;feature.hello&#34;</span>
+  <span style="color:#555">]</span>
+<span style="color:#555">}</span></code></pre></div>
 <p>It is important to note that our end point has it’s sensitivity flag set to false by default. You should consider the <a href="http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-endpoints.html#_security_with_healthindicators">security implications</a> of that before choosing to leave it false.</p>
 
 <p>In the next blog post in this <a href="/series/feature-toggles/">series</a>, we will explore how our feature toggle mechanism so far have introduced a dependency on the application being restarted and how to eliminate this dependency.</p>
             <p class="comments">
   If you have questions or comments about this blog post, you can get in touch with me on Twitter <a href="https://twitter.com/sdqali">@sdqali</a>.
 </p>
-
-            <div class="signup col-lg-12 col-lg-offset-0 col-md-12 col-md-offset-0">
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0">
-    <h3>Found this article useful?</h3>
-    <div>
-      My posts with working code - tested and verified - and explanations for specific Java, Spring and other programming problems. Delivered each week for free.
-    </div>
-  </div>
-  <div class="col-lg-6 col-lg-offset-0 col-md-6 col-md-offset-0" id="mc_embed_signup">
-    <form action="//codethatworks.us14.list-manage.com/subscribe/post?u=52d266a23636b031a38de6d70&amp;id=b7e69e463e" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
-      <div id="mc_embed_signup_scroll">
-        <div class="mc-field-group form-group">
-          <label for="mce-FNAME">First Name</label>
-          <input type="text" value="" name="FNAME" class="form-control" id="mce-FNAME">
-        </div>
-        <div class="mc-field-group form-group">
-          <label for="mce-EMAIL">Email Address</label>
-          <input type="email" value="" name="EMAIL" class="email form-control" id="mce-EMAIL">
-        </div>
-        <div id="mce-responses" class="form-group">
-          <div class="response" id="mce-error-response" style="display:none" class="alert alert-success" role="alert"></div>
-          <div class="response" id="mce-success-response" style="display:none" class="alert alert-success" role="alert"></div>
-        </div>
-        <button type="submit" class="btn btn-success" id="mc-embedded-subscribe" name="subscribe">Join the Newsletter</button>
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_52d266a23636b031a38de6d70_b7e69e463e" tabindex="-1" value=""></div>
-      </div>
-    </form>
-    <p class="no-spam">I won't send you spam. Unsubscribe at any time.</p>
-  </div>
-</div>
 
           </div>
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
