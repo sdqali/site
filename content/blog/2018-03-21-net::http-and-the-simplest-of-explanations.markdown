@@ -41,7 +41,7 @@ At this point, the attention turns to the RSpec tests. What if the tests have so
 200
 ```
 
-Okay, does the library we use for the test even use `Faraday`? Let's open the source code for that and poke around. Nah, it uses `Net::Http`. Let's try the example from it's documentation:
+Okay, does the library we use for the test even use `Faraday`? Let's open the source code for that and poke around. Nah, it uses `Net::Http`. Let's try the example from [it's documentation](https://ruby-doc.org/stdlib-2.5.0/libdoc/net/http/rdoc/Net/HTTP.html):
 ```irb
 > require 'net/http'
 => true
