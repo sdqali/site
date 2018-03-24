@@ -7,6 +7,7 @@ tags:
   - java
 ---
 Jackson is a great tool to have in your tool set if you deal with JSON or XML. It facilitates easy serialization and de-serialization to and from Java classes with a convenient annotation based interface. With the same set of annotations, we can achieve both XML and JSON serialization and de-serialization. With Jackson's `data-format-xml` it is even possible to give the same Class a different JSON and XML representation. 
+<!--more-->
 
 ```java
 @JacksonXmlRootElement(localName = "user-account")
