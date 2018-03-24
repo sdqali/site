@@ -23,7 +23,7 @@
 </head>
 
   <meta name="description" content="Jackson is a great tool to have in your tool set if you deal with JSON or XML. It facilitates easy serialization and de-serialization to and from Java classes with a convenient annotation based interface. With the same set of annotations, we can achieve both XML and JSON serialization and de-serialization. With Jackson&rsquo;s data-format-xml it is even possible to give the same Class a different JSON and XML representation.
-@JacksonXmlRootElement(localName = &#34;user-account&#34;) @JsonRootName(&#34;user&#34;) public class Account { private String name; private String emailAddress; @JsonProperty(&#34;name&#34;) @JacksonXmlProperty(localName = &#34;name&#34;) public String getName() { return name; } @JsonProperty(&#34;email_address&#34;) @JacksonXmlProperty(localName = &#34;email-address&#34;) public String getEmailAddress() { return emailAddress; } // ." />
+" />
   <meta content="jackson, freebuilder, java" name="keywords">
 
   
@@ -32,12 +32,12 @@
   <meta name="twitter:creator" content="@sdqali">
   <meta name="twitter:title" content="A Jackson and FreeBuilder quirk">
   <meta name="twitter:description" content="Jackson is a great tool to have in your tool set if you deal with JSON or XML. It facilitates easy serialization and de-serialization to and from Java classes with a convenient annotation based interface. With the same set of annotations, we can achieve both XML and JSON serialization and de-serialization. With Jackson&rsquo;s data-format-xml it is even possible to give the same Class a different JSON and XML representation.
-@JacksonXmlRootElement(localName = &#34;user-account&#34;) @JsonRootName(&#34;user&#34;) public class Account { private String name; private String emailAddress; @JsonProperty(&#34;name&#34;) @JacksonXmlProperty(localName = &#34;name&#34;) public String getName() { return name; } @JsonProperty(&#34;email_address&#34;) @JacksonXmlProperty(localName = &#34;email-address&#34;) public String getEmailAddress() { return emailAddress; } // .">
+">
   <meta name="twitter:image" content="https://sdqali.in/">
 
   <meta property="og:title" content="A Jackson and FreeBuilder quirk" />
   <meta property="og:description" content="Jackson is a great tool to have in your tool set if you deal with JSON or XML. It facilitates easy serialization and de-serialization to and from Java classes with a convenient annotation based interface. With the same set of annotations, we can achieve both XML and JSON serialization and de-serialization. With Jackson&rsquo;s data-format-xml it is even possible to give the same Class a different JSON and XML representation.
-@JacksonXmlRootElement(localName = &#34;user-account&#34;) @JsonRootName(&#34;user&#34;) public class Account { private String name; private String emailAddress; @JsonProperty(&#34;name&#34;) @JacksonXmlProperty(localName = &#34;name&#34;) public String getName() { return name; } @JsonProperty(&#34;email_address&#34;) @JacksonXmlProperty(localName = &#34;email-address&#34;) public String getEmailAddress() { return emailAddress; } // ." itemprop="description"/>
+" itemprop="description"/>
   <meta property="og:url" content="https://sdqali.in/blog/2018/03/22/a-jackson-and-freebuilder-quirk/" />
   <meta property="og:image" content="https://sdqali.in/" />
   <body>
@@ -111,7 +111,8 @@
          itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div class="row">
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-            <p>Jackson is a great tool to have in your tool set if you deal with JSON or XML. It facilitates easy serialization and de-serialization to and from Java classes with a convenient annotation based interface. With the same set of annotations, we can achieve both XML and JSON serialization and de-serialization. With Jackson&rsquo;s <code>data-format-xml</code> it is even possible to give the same Class a different JSON and XML representation.</p>
+            <p>Jackson is a great tool to have in your tool set if you deal with JSON or XML. It facilitates easy serialization and de-serialization to and from Java classes with a convenient annotation based interface. With the same set of annotations, we can achieve both XML and JSON serialization and de-serialization. With Jackson&rsquo;s <code>data-format-xml</code> it is even possible to give the same Class a different JSON and XML representation.
+</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@JacksonXmlRootElement</span><span style="color:#555">(</span>localName <span style="color:#555">=</span> <span style="color:#c30">&#34;user-account&#34;</span><span style="color:#555">)</span>
 <span style="color:#99f">@JsonRootName</span><span style="color:#555">(</span><span style="color:#c30">&#34;user&#34;</span><span style="color:#555">)</span>
 <span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">Account</span> <span style="color:#555">{</span>
@@ -190,7 +191,6 @@ com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException: Unrecognized f
 <p>After digging around, it turns out that FreeBuilder <a href="https://github.com/inferred/FreeBuilder/blob/master/src/main/java/org/inferred/freebuilder/processor/JacksonSupport.java#L40">keeps only</a> the <code>@JsonProperty</code> annotation on methods that it finds. This in turn causes the object created by the builder to have methods whose <code>@JacksonXmlProperty</code> annotations are stripped of, which in turn causes Jackson to look for the camel-cased versions of the attribute names. I have opened a new <a href="https://github.com/inferred/FreeBuilder/issues/294">GitHub issue</a> for this.</p>
 
 <p>Until this is resolved, if you use FreeBuilder and need to have different XML and JSON representation, you will have to write a custom Jackson <a href="https://github.com/FasterXML/jackson-docs/wiki/JacksonHowToCustomSerializers">Serializer</a> and Deserializer.</p>
-
             <p class="comments">
   If you have questions or comments about this blog post, you can get in touch with me on Twitter <a href="https://twitter.com/sdqali">@sdqali</a>.
 </p>
