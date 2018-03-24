@@ -5,8 +5,96 @@
     <link>https://sdqali.in/?utm_source=site&amp;utm_medium=feed</link>
     <description>Recent content in {code that works} on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
-    <lastBuildDate>Wed, 21 Mar 2018 19:44:03 -0700</lastBuildDate>
+    <lastBuildDate>Thu, 22 Mar 2018 22:21:42 -0700</lastBuildDate>
     <atom:link href="/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>A Jackson and FreeBuilder quirk</title>
+      <link>https://sdqali.in/blog/2018/03/22/a-jackson-and-freebuilder-quirk/?utm_source=site&amp;utm_medium=feed</link>
+      <pubDate>Thu, 22 Mar 2018 22:21:42 -0700</pubDate>
+      
+      <guid>https://sdqali.in/blog/2018/03/22/a-jackson-and-freebuilder-quirk/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;Jackson is a great tool to have in your tool set if you deal with JSON or XML. It facilitates easy serialization and de-serialization to and from Java classes with a convenient annotation based interface. With the same set of annotations, we can achieve both XML and JSON serialization and de-serialization. With Jackson&amp;rsquo;s &lt;code&gt;data-format-xml&lt;/code&gt; it is even possible to give the same Class a different JSON and XML representation.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#99f&#34;&gt;@JacksonXmlRootElement&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;localName &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;user-account&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
+&lt;span style=&#34;color:#99f&#34;&gt;@JsonRootName&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;user&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
+&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;Account&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
+  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;private&lt;/span&gt; String name&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
+  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;private&lt;/span&gt; String emailAddress&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
+
+  &lt;span style=&#34;color:#99f&#34;&gt;@JsonProperty&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;name&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
+  &lt;span style=&#34;color:#99f&#34;&gt;@JacksonXmlProperty&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;localName &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;name&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
+  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; String &lt;span style=&#34;color:#c0f&#34;&gt;getName&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
+    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; name&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
+  &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
+
+  &lt;span style=&#34;color:#99f&#34;&gt;@JsonProperty&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;email_address&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
+  &lt;span style=&#34;color:#99f&#34;&gt;@JacksonXmlProperty&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;localName &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;email-address&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
+  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; String &lt;span style=&#34;color:#c0f&#34;&gt;getEmailAddress&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
+    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; emailAddress&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
+  &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
+
+  &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// ...
+&lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;When this gets used, it does the serialization and de-serializaion to and from XML and JSON in different forms:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;jsonMapper &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;new&lt;/span&gt; ObjectMapper&lt;span style=&#34;color:#555&#34;&gt;();&lt;/span&gt;
+jsonMapper&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;configure&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;WRAP_ROOT_VALUE&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;true&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
+jsonMapper&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;configure&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;UNWRAP_ROOT_VALUE&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;true&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
+xmlMapper &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;new&lt;/span&gt; XmlMapper&lt;span style=&#34;color:#555&#34;&gt;();&lt;/span&gt;
+
+&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// ...
+&lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;
+Account account &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;new&lt;/span&gt; Account&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;John Doe&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;john@example.com&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
+
+String jsonString &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; jsonMapper&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;writeValueAsString&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;account&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
+System&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;jsonString&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
+Account deSerializedAccount &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; jsonMapper&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;readValue&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;jsonString&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; Account&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
+assertEquals&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;account&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; deSerializedAccount&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
+
+String xmlString &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; xmlMapper&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;writeValueAsString&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;account&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
+System&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;xmlString&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
+deSerializedAccount &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; xmlMapper&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;readValue&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;xmlString&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; Account&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
+assertEquals&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;account&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; deSerializedAccount&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;user&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;name&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;John Doe&amp;#34;&lt;/span&gt;,&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;email_address&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;john@example.com&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;}}&lt;/span&gt;
+&amp;lt;user-account&amp;gt;&amp;lt;name&amp;gt;John Doe&amp;lt;/name&amp;gt;&amp;lt;email-address&amp;gt;john@example.com&amp;lt;/email-address&amp;gt;&amp;lt;/user-account&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Things get really interesting when we introduce &lt;a href=&#34;http://freebuilder.inferred.org/&#34;&gt;FreeBuilder&lt;/a&gt;. FreeBuilder supports Jackson and we will be able to do serialization correctly. However, XML de-serialization does not work as expected.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;cksonXmlRootElement&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;localName &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;user-account&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
+&lt;span style=&#34;color:#99f&#34;&gt;@JsonRootName&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;user&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
+&lt;span style=&#34;color:#99f&#34;&gt;@FreeBuilder&lt;/span&gt;
+&lt;span style=&#34;color:#99f&#34;&gt;@JsonDeserialize&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;builder &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; Account&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;Builder&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
+&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;interface&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;Account&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
+  &lt;span style=&#34;color:#99f&#34;&gt;@JsonProperty&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;name&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
+  &lt;span style=&#34;color:#99f&#34;&gt;@JacksonXmlProperty&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;localName &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;name&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
+  String &lt;span style=&#34;color:#c0f&#34;&gt;getName&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;();&lt;/span&gt;
+
+  &lt;span style=&#34;color:#99f&#34;&gt;@JsonProperty&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;email_address&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
+  &lt;span style=&#34;color:#99f&#34;&gt;@JacksonXmlProperty&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;localName &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;email-address&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
+  String &lt;span style=&#34;color:#c0f&#34;&gt;getEmailAddress&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;();&lt;/span&gt;
+
+  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;Builder&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;extends&lt;/span&gt; Account_Builder &lt;span style=&#34;color:#555&#34;&gt;{}&lt;/span&gt;
+&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;Account account &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;new&lt;/span&gt; Account&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;Builder&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt;
+    &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;setEmailAddress&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;john@example.com&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
+    &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;setName&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;John Doe&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
+    &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;build&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;();&lt;/span&gt;
+
+String jsonString &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; jsonMapper&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;writeValueAsString&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;account&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
+System&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;jsonString&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
+Account deSerializedAccount &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; jsonMapper&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;readValue&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;jsonString&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; Account&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
+assertEquals&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;account&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; deSerializedAccount&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
+
+String xmlString &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; xmlMapper&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;writeValueAsString&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;account&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
+System&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;println&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;xmlString&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
+deSerializedAccount &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; xmlMapper&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;readValue&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;xmlString&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; Account&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
+assertEquals&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;account&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; deSerializedAccount&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This will cause Jackson to throw an error while de-serializing XML, even though de-serializing to JSON works as expected.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;user&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;name&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;John Doe&amp;#34;&lt;/span&gt;,&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;email_address&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;john@example.com&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;}}&lt;/span&gt;
+&amp;lt;user-account&amp;gt;&amp;lt;name&amp;gt;John Doe&amp;lt;/name&amp;gt;&amp;lt;email-address&amp;gt;john@example.com&amp;lt;/email-address&amp;gt;&amp;lt;/user-account&amp;gt;
+
+com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException: Unrecognized field &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;email-address&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;class in.sdqali.json.Account&lt;span style=&#34;color:#033&#34;&gt;$Builder&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;, not marked as ignorable &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;3&lt;/span&gt; known properties: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;emailAddress&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;email_address&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;name&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;])&lt;/span&gt;
+ at &lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;Source: &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;StringReader&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;; line: &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;, column: &lt;span style=&#34;color:#f60&#34;&gt;83&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;through reference chain: in.sdqali.json.Account&lt;span style=&#34;color:#033&#34;&gt;$Builder&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;email-address&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;])&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;After digging around, it turns out that FreeBuilder &lt;a href=&#34;https://github.com/inferred/FreeBuilder/blob/master/src/main/java/org/inferred/freebuilder/processor/JacksonSupport.java#L40&#34;&gt;keeps only&lt;/a&gt; the &lt;code&gt;@JsonProperty&lt;/code&gt; annotation on methods that it finds. This in turn causes the object created by the builder to have methods whose &lt;code&gt;@JacksonXmlProperty&lt;/code&gt; annotations are stripped of, which in turn causes Jackson to look for the camel-cased versions of the attribute names. I have opened a new &lt;a href=&#34;https://github.com/inferred/FreeBuilder/issues/294&#34;&gt;GitHub issue&lt;/a&gt; for this.&lt;/p&gt;
+
+&lt;p&gt;Until this is resolved, if you use FreeBuilder and need to have different XML and JSON representation, you will have to write a custom Jackson &lt;a href=&#34;https://github.com/FasterXML/jackson-docs/wiki/JacksonHowToCustomSerializers&#34;&gt;Serializer&lt;/a&gt; and Deserializer.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Net::HTTP and the simplest of explanations</title>
@@ -2407,212 +2495,6 @@ $ curl -s &amp;quot;http://localhost:8080/profile/details/yellowfrog347&amp;quot
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;In the next blog post, the fifth is this series, we will move on to building the front end with Angular JS and managing authentication from the front end. The source code for this example for the progress made from part 1 through part 4 is available on &lt;a href=&#34;https://github.com/sdqali/jwt-demo/tree/verify_tokens&#34;&gt;GitHub&lt;/a&gt;.&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>JWT authentication with Spring Web - Part 3</title>
-      <link>https://sdqali.in/blog/2016/07/05/jwt-authentication-with-spring-web---part-3/?utm_source=site&amp;utm_medium=feed</link>
-      <pubDate>Tue, 05 Jul 2016 22:30:53 -0700</pubDate>
-      
-      <guid>https://sdqali.in/blog/2016/07/05/jwt-authentication-with-spring-web---part-3/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>&lt;p&gt;In the &lt;a href=&#34;https://sdqali.in/blog/2016/07/03/jwt-authentication-with-spring-web---part-2/&#34;&gt;previous blog post&lt;/a&gt;, we built the Spring API that responds with Profile information. Continuing on the path to building authentication with JWT, in this blog post, we will create a login mechanism that issues a JWT when the user presents the correct credentials.&lt;/p&gt;
-
-&lt;p&gt;
-These are the blog posts in this series:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://sdqali.in/blog/2016/07/02/jwt-authentication-with-spring-web---part-1/&#34;&gt;Part 1&lt;/a&gt; - Discussion of JWT and implementation&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://sdqali.in/blog/2016/07/03/jwt-authentication-with-spring-web---part-2/&#34;&gt;Part 2&lt;/a&gt; - A Spring User Profiles API&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://sdqali.in/blog/2016/07/05/jwt-authentication-with-spring-web---part-3/&#34;&gt;Part 3&lt;/a&gt; - Issuing a token from the server&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://sdqali.in/blog/2016/07/07/jwt-authentication-with-spring-web---part-4/&#34;&gt;Part 4&lt;/a&gt; - Verifying the token sent back by the client&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://sdqali.in/blog/2016/07/13/jwt-authentication-with-spring-web---part-5/&#34;&gt;Part 5&lt;/a&gt; - Securing the front end&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Our fist step is to configure Spring Security to allow access to the login end point we will be building. This can be done as follows:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#99f&#34;&gt;@Configuration&lt;/span&gt;
-&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;SecurityConfig&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;extends&lt;/span&gt; WebSecurityConfigurerAdapter &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-    &lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;protected&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;configure&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;HttpSecurity http&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;throws&lt;/span&gt; Exception &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-        http&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;csrf&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;().&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;ignoringAntMatchers&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/login&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
-
-        http&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;authorizeRequests&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt;
-                &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;antMatchers&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/login&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
-                &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;permitAll&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt;
-                &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;antMatchers&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/**/*&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
-                &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;denyAll&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;();&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;We are turning off authentication and CSRF token checking for the &lt;code&gt;/login&lt;/code&gt; end point.&lt;/p&gt;
-
-&lt;p&gt;Next, we build a &lt;code&gt;LoginController&lt;/code&gt; to issue tokens up on a user presenting valid credentials:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#99f&#34;&gt;@RestController&lt;/span&gt;
-&lt;span style=&#34;color:#99f&#34;&gt;@RequestMapping&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;path &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/login&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
-&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;LoginController&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;final&lt;/span&gt; LoginService loginService&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;final&lt;/span&gt; JwtService jwtService&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-
-    &lt;span style=&#34;color:#99f&#34;&gt;@SuppressWarnings&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;unused&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;LoginController&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;this&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;null&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;null&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-    &lt;span style=&#34;color:#99f&#34;&gt;@Autowired&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;LoginController&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;LoginService loginService&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; JwtService jwtService&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;this&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;loginService&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; loginService&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;this&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;jwtService&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; jwtService&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-    &lt;span style=&#34;color:#99f&#34;&gt;@RequestMapping&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;path &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt;
-            method &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; POST&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt;
-            produces &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; APPLICATION_JSON_VALUE&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; MinimalProfile &lt;span style=&#34;color:#c0f&#34;&gt;login&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#99f&#34;&gt;@RequestBody&lt;/span&gt; LoginCredentials credentials&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt;
-                                HttpServletResponse response&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; loginService&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;login&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;credentials&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
-                &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;map&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;minimalProfile &lt;span style=&#34;color:#555&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-                    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;try&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-                        response&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;setHeader&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Token&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; jwtService&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;tokenFor&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;minimalProfile&lt;span style=&#34;color:#555&#34;&gt;));&lt;/span&gt;
-                    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;catch&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;Exception e&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-                        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;throw&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;new&lt;/span&gt; RuntimeException&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;e&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
-                    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-                    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; minimalProfile&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-                &lt;span style=&#34;color:#555&#34;&gt;})&lt;/span&gt;
-                &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;orElseThrow&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(()&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;new&lt;/span&gt; FailedToLoginException&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;credentials&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;getUsername&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()));&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;We use the login service to verify the credentials and it returns an &lt;code&gt;Optional&amp;lt;MinimalProfile&amp;gt;&lt;/code&gt;. If there is a valid &lt;code&gt;MinimalProfile&lt;/code&gt;, we ask the &lt;code&gt;JwtService&lt;/code&gt; to issue a token.&lt;/p&gt;
-
-&lt;p&gt;The &lt;code&gt;LoginService&lt;/code&gt; uses the &lt;code&gt;ProfileService&lt;/code&gt; to load a profile matching the user name and the password presented by the user.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#99f&#34;&gt;@Component&lt;/span&gt;
-&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;LoginService&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;private&lt;/span&gt; ProfileService profileService&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-
-    &lt;span style=&#34;color:#99f&#34;&gt;@SuppressWarnings&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;unused&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;LoginService&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;this&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;null&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-    &lt;span style=&#34;color:#99f&#34;&gt;@Autowired&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;LoginService&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;ProfileService profileService&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;this&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;profileService&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; profileService&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; Optional&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;MinimalProfile&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;login&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;LoginCredentials credentials&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; profileService&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;get&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;credentials&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;getUsername&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;())&lt;/span&gt;
-                &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;filter&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;profile &lt;span style=&#34;color:#555&#34;&gt;-&amp;gt;&lt;/span&gt; profile&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;getLogin&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;().&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;getPassword&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;().&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;equals&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;credentials&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;getPassword&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()))&lt;/span&gt;
-                &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;map&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;profile &lt;span style=&#34;color:#555&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;new&lt;/span&gt; MinimalProfile&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;profile&lt;span style=&#34;color:#555&#34;&gt;));&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;Please note that in real applications, you never want to do this. You should be comparing the hashed version of the password presented by the user with the hashed version of the password stored in the database.&lt;/p&gt;
-
-&lt;p&gt;The &lt;code&gt;JwtService&lt;/code&gt; creates a token using the profile information and an expiration date of 2 hours with the &lt;code&gt;HMASHA256&lt;/code&gt; algorithm. It uses the key provided by &lt;code&gt;SecretKeyProvider&lt;/code&gt;. For creating the JWT token, we use the excellent jjwt &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; library we introduced in &lt;a href=&#34;https://sdqali.in/blog/2016/07/02/jwt-authentication-with-spring-web---part-1/&#34;&gt;part 1&lt;/a&gt;.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#99f&#34;&gt;@Component&lt;/span&gt;
-&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;JwtService&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;static&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;final&lt;/span&gt; String ISSUER &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;in.sdqali.jwt&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;private&lt;/span&gt; SecretKeyProvider secretKeyProvider&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-
-    &lt;span style=&#34;color:#99f&#34;&gt;@SuppressWarnings&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;unused&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;JwtService&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;this&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;null&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-    &lt;span style=&#34;color:#99f&#34;&gt;@Autowired&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;JwtService&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;SecretKeyProvider secretKeyProvider&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;this&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;secretKeyProvider&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; secretKeyProvider&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; String &lt;span style=&#34;color:#c0f&#34;&gt;tokenFor&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;MinimalProfile minimalProfile&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;throws&lt;/span&gt; IOException&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; URISyntaxException &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-        &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;byte&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;[]&lt;/span&gt; secretKey &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; secretKeyProvider&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;getKey&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;();&lt;/span&gt;
-        Date expiration &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; Date&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;from&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;LocalDateTime&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;now&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;().&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;plusHours&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;2&lt;span style=&#34;color:#555&#34;&gt;).&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;toInstant&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;UTC&lt;span style=&#34;color:#555&#34;&gt;));&lt;/span&gt;
-        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; Jwts&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;builder&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt;
-                &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;setSubject&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;minimalProfile&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;getUsername&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;())&lt;/span&gt;
-                &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;setExpiration&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;expiration&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
-                &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;setIssuer&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;ISSUER&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
-                &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;signWith&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;SignatureAlgorithm&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;HS512&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; secretKey&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
-                &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;compact&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;();&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;The &lt;code&gt;SecretKeyProvider&lt;/code&gt; in this example will simply load the secret key from a file, where it is stored in plain text. In a real application, you may store and encrypted version of it and decrypt it when required.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#99f&#34;&gt;@Component&lt;/span&gt;
-&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;SecretKeyProvider&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;byte&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;[]&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;getKey&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;throws&lt;/span&gt; URISyntaxException&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; IOException &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; Files&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;readAllBytes&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;Paths&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;get&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;this&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;getClass&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;().&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;getResource&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/jwt.key&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;).&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;toURI&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()));&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;With this code, a client can authenticate and receive a JWT. When request is made with correct username and password:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;$ curl -v -X POST &amp;quot;http://localhost:8080/login&amp;quot; -d &#39;{&amp;quot;username&amp;quot;:&amp;quot;greenrabbit948&amp;quot;, &amp;quot;password&amp;quot;:&amp;quot;celeste&amp;quot;}&#39; --header &amp;quot;Content-Type: application/json&amp;quot;   | jq .
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0*   Trying ::1...
-* Connected to localhost (::1) port 8080 (#0)
-&amp;gt; POST /login HTTP/1.1
-&amp;gt; Host: localhost:8080
-&amp;gt; User-Agent: curl/7.43.0
-&amp;gt; Accept: */*
-&amp;gt; Content-Type: application/json
-&amp;gt; Content-Length: 51
-&amp;gt;
-} [51 bytes data]
-* upload completely sent off: 51 out of 51 bytes
-&amp;lt; HTTP/1.1 200 OK
-&amp;lt; Server: Apache-Coyote/1.1
-&amp;lt; X-Content-Type-Options: nosniff
-&amp;lt; X-XSS-Protection: 1; mode=block
-&amp;lt; Cache-Control: no-cache, no-store, max-age=0, must-revalidate
-&amp;lt; Pragma: no-cache
-&amp;lt; Expires: 0
-&amp;lt; X-Frame-Options: DENY
-&amp;lt; Token: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqd3QtZGVtbyIsImV4cCI6MTQ2Nzc2Njk3MSwiaXNzIjoiaW4uc2RxYWxpLmp3dCJ9.eu_OuBIkc4BfcTsTu4t_6TCwyLkH4HcuQzvWIMzNQYdxXiWA77SfvwCe4mdc7C17mXdtBAsvFGDj7A9fzI0M1w
-&amp;lt; Content-Type: application/json;charset=UTF-8
-&amp;lt; Transfer-Encoding: chunked
-&amp;lt; Date: Wed, 06 Jul 2016 06:02:51 GMT
-&amp;lt;
-{ [164 bytes data]
-100   211    0   160  100    51  15071   4804 --:--:-- --:--:-- --:--:-- 16000
-* Connection #0 to host localhost left intact
-{
-  &amp;quot;username&amp;quot;: &amp;quot;greenrabbit948&amp;quot;,
-  &amp;quot;name&amp;quot;: {
-    &amp;quot;title&amp;quot;: &amp;quot;miss&amp;quot;,
-    &amp;quot;first&amp;quot;: &amp;quot;dionaura&amp;quot;,
-    &amp;quot;last&amp;quot;: &amp;quot;rodrigues&amp;quot;
-  },
-  &amp;quot;thumbnail&amp;quot;: &amp;quot;https://randomuser.me/api/portraits/thumb/women/78.jpg&amp;quot;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We can see the &lt;code&gt;Token&lt;/code&gt; header has value &lt;code&gt;eyJhbGciOiJIUzUxMiJ9.
-eyJzdWIiOiJqd3QtZGVtbyIsImV4cCI6MTQ2Nzc2Njk3MSwiaXNzIjoiaW4uc2RxYWxpLmp3dCJ9.
-eu_OuBIkc4BfcTsTu4t_6TCwyLkH4HcuQzvWIMzNQYdxXiWA77SfvwCe4mdc7C17mXdtBAsvFGDj
-7A9fzI0M1w&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;If we were to present invalid credentials, the API will return a &lt;code&gt;401&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;$ curl -i -X POST &amp;quot;http://localhost:8080/login&amp;quot; -d &#39;{&amp;quot;username&amp;quot;:&amp;quot;greenrabbit948&amp;quot;, &amp;quot;password&amp;quot;:&amp;quot;wrongpassword&amp;quot;}&#39; --header &amp;quot;Content-Type: application/json&amp;quot;
-HTTP/1.1 401 Unauthorized
-Server: Apache-Coyote/1.1
-X-Content-Type-Options: nosniff
-X-XSS-Protection: 1; mode=block
-Cache-Control: no-cache, no-store, max-age=0, must-revalidate
-Pragma: no-cache
-Expires: 0
-X-Frame-Options: DENY
-Content-Length: 0
-Date: Wed, 06 Jul 2016 06:05:46 GMT
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;In the next blog post, the fourth is this series, we will move on to verifying the token presented by the client for subsequent requests. The source code for this example for the progress made from part 1 through part 3 is available on &lt;a href=&#34;https://github.com/sdqali/jwt-demo/tree/09b02336e4b7c746cb4c134dc020243aef827b66&#34;&gt;GitHub&lt;/a&gt;.&lt;/p&gt;
-&lt;div class=&#34;footnotes&#34;&gt;
-
-&lt;hr /&gt;
-
-&lt;ol&gt;
-&lt;li id=&#34;fn:1&#34;&gt;jjwt - Java JWT: JSON Web Token for Java and Android, available on &lt;a href=&#34;https://github.com/jwtk/jjwt&#34;&gt;GitHub&lt;/a&gt;.
- &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:1&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/div&gt;</description>
     </item>
     
   </channel>
