@@ -39,6 +39,7 @@ Things work fine, except for me. I almost never use `git ci -m`. I like Git to o
 ```
 
 I have been getting around this issue by pre-pending a space before the message. So I was really happy to see that Git `1.8.2` ships with a new configuration `core.commentchar`. This let's you configure the characters that marks a comment in the commit message. From the [doc](http://git-scm.com/docs/git-config):
+
 > core.commentchar
 >
 >    Commands such as commit and tag that lets you edit messages consider a line that begins with this character commented, and removes them after the editor returns (default #).
