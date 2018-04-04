@@ -5,8 +5,75 @@
     <link>https://sdqali.in/?utm_source=site&amp;utm_medium=feed</link>
     <description>Recent content in {code that works} on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
-    <lastBuildDate>Thu, 22 Mar 2018 22:21:42 -0700</lastBuildDate>
+    <lastBuildDate>Tue, 03 Apr 2018 22:40:08 -0700</lastBuildDate>
     <atom:link href="/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Command line clients for gRPC - 1</title>
+      <link>https://sdqali.in/blog/2018/04/03/command-line-clients-for-grpc---1/?utm_source=site&amp;utm_medium=feed</link>
+      <pubDate>Tue, 03 Apr 2018 22:40:08 -0700</pubDate>
+      
+      <guid>https://sdqali.in/blog/2018/04/03/command-line-clients-for-grpc---1/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;We are in the middle of considering replacing JSON over HTTP with gRPC for communication between our internal services. One of my concerns about this was how we would be able to debug and poke around things in a world where we will no longer be able to use cURL. I have been looking at cURL like command line utilities we can use to replace most of the capabilities, if not all of cURL. So far, I have looked at &lt;a href=&#34;https://github.com/fullstorydev/grpcurl&#34;&gt;grpcurl&lt;/a&gt;, &lt;a href=&#34;https://github.com/grpc/grpc/blob/master/doc/command_line_tool.md&#34;&gt;grpc_cli&lt;/a&gt; and &lt;a href=&#34;https://github.com/grpc-ecosystem/polyglot&#34;&gt;polyglot&lt;/a&gt; .In these blog posts, we will try and compare these tools.
+&lt;/p&gt;
+
+&lt;p&gt;In this example, we will be running the example implementations provided by the &lt;a href=&#34;https://github.com/grpc/grpc-java/tree/master/examples&#34;&gt;grpc-java&lt;/a&gt; project and using the command line tools against the services from these examples. We will also be running these services without enabling reflection.&lt;/p&gt;
+
+&lt;h2 id=&#34;grpcurl&#34;&gt;grpcurl&lt;/h2&gt;
+
+&lt;p&gt;One of the things that immediately struck me when I started looking at grpcurl was how neat it&amp;rsquo;s command line interface was, especially in comparison with that of polyglot. grpcurl is written in Go and expects you to provide &lt;code&gt;protoset&lt;/code&gt; files that contain service descriptors exported from the &lt;code&gt;proto&lt;/code&gt; files of the service.&lt;/p&gt;
+
+&lt;p&gt;For example, for the &lt;code&gt;hello-world&lt;/code&gt; service from the examples, the &lt;code&gt;protoset&lt;/code&gt; files can be generated using:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&amp;gt; &lt;span style=&#34;color:#366&#34;&gt;pwd&lt;/span&gt;
+grpc-java/examples/src/main/proto
+&amp;gt; protoc --proto_path&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;./ &lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;\
+&lt;/span&gt;&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;&lt;/span&gt;    --descriptor_set_out&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;helloworld.protoset &lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;\
+&lt;/span&gt;&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;&lt;/span&gt;    --include_imports &lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;\
+&lt;/span&gt;&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;&lt;/span&gt;    ./helloworld.proto&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This will produce a &lt;code&gt;protoset&lt;/code&gt; file named &lt;code&gt;helloworld.protoset&lt;/code&gt;. Using this, we can now list the services available:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&amp;gt; grpcurl -protoset ./helloworld.protoset list
+helloworld.Greeter&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;We can also list all the methods available in a service:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&amp;gt; grpcurl -protoset ./helloworld.protoset list helloworld.Greeter
+SayHello&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;There is also a describe command that produces description of a service:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&amp;gt; grpcurl -protoset ./helloworld.protoset describe helloworld.Greeter
+helloworld.Greeter is a service:
+&lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
+  &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;name&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Greeter&amp;#34;&lt;/span&gt;,
+  &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;method&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;
+    &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
+      &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;name&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;SayHello&amp;#34;&lt;/span&gt;,
+      &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;inputType&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;.helloworld.HelloRequest&amp;#34;&lt;/span&gt;,
+      &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;outputType&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;.helloworld.HelloReply&amp;#34;&lt;/span&gt;,
+      &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;options&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
+
+      &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
+    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
+  &lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;,
+  &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;options&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
+
+  &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Now we can execute the method on this service running on a server by specifying the address and the path to the method:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&amp;gt; grpcurl -plaintext -protoset ./helloworld.protoset -d &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;{&amp;#34;name&amp;#34;:&amp;#34;World&amp;#34;}&amp;#39;&lt;/span&gt; localhost:50051 helloworld.Greeter/SayHello
+&lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
+  &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;message&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Hello World&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;It can also read the JSON data to pass to the server from STDIN, by setting the value of &lt;code&gt;-d&lt;/code&gt; to &lt;code&gt;@&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&amp;gt; &lt;span style=&#34;color:#366&#34;&gt;echo&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;{&amp;#34;name&amp;#34;: &amp;#34;World&amp;#34;}&amp;#39;&lt;/span&gt; | grpcurl -plaintext -protoset ./helloworld.protoset -d @ localhost:50051 helloworld.Greeter/SayHello
+&lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
+  &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;message&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Hello World&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;In both these examples, we passed the &lt;code&gt;-plaintext&lt;/code&gt; switch because our server is not running with TLS.&lt;/p&gt;
+
+&lt;p&gt;If we were to &lt;a href=&#34;https://github.com/grpc/grpc-java/blob/master/documentation/server-reflection-tutorial.md&#34;&gt;turn on reflection&lt;/a&gt;, we will no longer need to depend on the &lt;code&gt;protoset&lt;/code&gt; file.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&amp;gt; &lt;span style=&#34;color:#366&#34;&gt;echo&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;{&amp;#34;name&amp;#34;: &amp;#34;World&amp;#34;}&amp;#39;&lt;/span&gt; | grpcurl -plaintext -d @ localhost:50051 helloworld.Greeter/SayHello
+&lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
+  &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;message&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Hello World&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Overall, I like what the creator of grpcurl have done. The only thing I dont like is the fact that when reflection is turned off, we have to generate &lt;code&gt;protoset&lt;/code&gt; files. It would have been great if it could just look at the existing &lt;code&gt;proto&lt;/code&gt; files, which is what &lt;code&gt;polyglot&lt;/code&gt; does. We will look at polyglot in the next blog post.&lt;/p&gt;</description>
+    </item>
     
     <item>
       <title>A Jackson and FreeBuilder quirk</title>
@@ -2217,284 +2284,6 @@ These are the blog posts in this series:&lt;/p&gt;
 &lt;p&gt;It also has a link for signing out. With this code in place, we can start our Spring application and sign in from the browser.&lt;/p&gt;
 
 &lt;p&gt;This is the last of this series of blog posts on JWT and Spring. We built an API capable of authenticating with JWTs and a front end capable of authenticating against this API. The code for the complete example is available on &lt;a href=&#34;https://github.com/sdqali/jwt-demo&#34;&gt;GitHub&lt;/a&gt;.&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>JWT authentication with Spring Web - Part 4</title>
-      <link>https://sdqali.in/blog/2016/07/07/jwt-authentication-with-spring-web---part-4/?utm_source=site&amp;utm_medium=feed</link>
-      <pubDate>Thu, 07 Jul 2016 23:47:53 -0700</pubDate>
-      
-      <guid>https://sdqali.in/blog/2016/07/07/jwt-authentication-with-spring-web---part-4/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>&lt;p&gt;In parts 1 through 3 of this series, we built a Spring API that can issue a JWT when a user successfully authenticates. In this blog post, we will add the capability to verify the JWT presented by the client for subsequent requests.
-
-These are the blog posts in this series:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://sdqali.in/blog/2016/07/02/jwt-authentication-with-spring-web---part-1/&#34;&gt;Part 1&lt;/a&gt; - Discussion of JWT and implementation&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://sdqali.in/blog/2016/07/03/jwt-authentication-with-spring-web---part-2/&#34;&gt;Part 2&lt;/a&gt; - A Spring User Profiles API&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://sdqali.in/blog/2016/07/05/jwt-authentication-with-spring-web---part-3/&#34;&gt;Part 3&lt;/a&gt; - Issuing a token from the server&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://sdqali.in/blog/2016/07/07/jwt-authentication-with-spring-web---part-4/&#34;&gt;Part 4&lt;/a&gt; - Verifying the token sent back by the client&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://sdqali.in/blog/2016/07/13/jwt-authentication-with-spring-web---part-5/&#34;&gt;Part 5&lt;/a&gt; - Securing the front end&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;We will start by configuring Spring security with a filter to capture the JWT passed by the client in the &lt;code&gt;Authorization&lt;/code&gt; header. We will wire up this filter to go before the &lt;code&gt;UsernamePasswordAuthenticationFilter&lt;/code&gt; provided by Spring security.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#99f&#34;&gt;@Configuration&lt;/span&gt;
-&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;SecurityConfig&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;extends&lt;/span&gt; WebSecurityConfigurerAdapter &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-
-    &lt;span style=&#34;color:#99f&#34;&gt;@Autowired&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;private&lt;/span&gt; JwtAuthFilter jwtAuthFilter&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// ...
-&lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;
-    &lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;protected&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;configure&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;HttpSecurity http&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;throws&lt;/span&gt; Exception &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-        http&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;csrf&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;().&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;disable&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;();&lt;/span&gt;
-
-        http&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;authorizeRequests&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt;
-                &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;antMatchers&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/login&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
-                &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;permitAll&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt;
-                &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;antMatchers&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/**/*&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
-                &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;hasAuthority&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;ROLE_USER&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
-                &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;and&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt;
-                &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;addFilterBefore&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;jwtAuthFilter&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; UsernamePasswordAuthenticationFilter&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
-                &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// ...
-&lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;The filter captures the &lt;code&gt;Authorization&lt;/code&gt; header and creates a &lt;code&gt;JwtAuthToken&lt;/code&gt; and sets that as the current authentication for the request.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#99f&#34;&gt;@Component&lt;/span&gt;
-&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;JwtAuthFilter&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;implements&lt;/span&gt; Filter &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-    &lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;init&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;FilterConfig filterConfig&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;throws&lt;/span&gt; ServletException &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-    &lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;doFilter&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;ServletRequest request&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; ServletResponse response&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; FilterChain chain&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;throws&lt;/span&gt; IOException&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; ServletException &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-        HttpServletRequest servletRequest &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;HttpServletRequest&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; request&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-        String authorization &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; servletRequest&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;getHeader&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Authorization&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
-        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;authorization &lt;span style=&#34;color:#555&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;null&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-            JwtAuthToken token &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;new&lt;/span&gt; JwtAuthToken&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;authorization&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;replaceAll&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Bearer &amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;));&lt;/span&gt;
-            SecurityContextHolder&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;getContext&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;().&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;setAuthentication&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;token&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
-        &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-        chain&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;doFilter&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;request&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; response&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-    &lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;destroy&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;The &lt;code&gt;JwtAuthToken&lt;/code&gt; is simply a conduit to carry the token and although it implements the &lt;code&gt;Authentication&lt;/code&gt; interface, it does not do much.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;JwtAuthToken&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;implements&lt;/span&gt; Authentication &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;final&lt;/span&gt; String token&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;JwtAuthToken&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;String token&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;this&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;token&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; token&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-    &lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; Collection&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;?&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;extends&lt;/span&gt; GrantedAuthority&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;getAuthorities&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;null&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-    &lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; Object &lt;span style=&#34;color:#c0f&#34;&gt;getCredentials&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; token&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-    &lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; Object &lt;span style=&#34;color:#c0f&#34;&gt;getDetails&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;null&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-    &lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; Object &lt;span style=&#34;color:#c0f&#34;&gt;getPrincipal&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;null&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-    &lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;boolean&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;isAuthenticated&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;false&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-    &lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;setAuthenticated&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;boolean&lt;/span&gt; isAuthenticated&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;throws&lt;/span&gt; IllegalArgumentException &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-    &lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; String &lt;span style=&#34;color:#c0f&#34;&gt;getName&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;null&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;At this point, we need to tell Spring Security how to verify the tokens. This can be done by providing a custom &lt;code&gt;AuthenticationProvider&lt;/code&gt;. This can be done by overriding the &lt;code&gt;configure&lt;/code&gt; method.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#99f&#34;&gt;@Configuration&lt;/span&gt;
-&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;SecurityConfig&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;extends&lt;/span&gt; WebSecurityConfigurerAdapter &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-    &lt;span style=&#34;color:#99f&#34;&gt;@Autowired&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;private&lt;/span&gt; JwtAuthenticationProvider jwtAuthenticationProvider&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-
-    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// ...
-&lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;configure&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;AuthenticationManagerBuilder auth&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;throws&lt;/span&gt; Exception &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-        auth&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;authenticationProvider&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;jwtAuthenticationProvider&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-    &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// ...
-&lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;The &lt;code&gt;JwtAuthenticationProvider&lt;/code&gt; receives the &lt;code&gt;Authentication&lt;/code&gt; instance set on the &lt;code&gt;SecurityContext&lt;/code&gt;, which in our case is the &lt;code&gt;JwtAuthToken&lt;/code&gt; we set using the &lt;code&gt;JwtAuthFilter&lt;/code&gt;. This token is then verified using the &lt;code&gt;JwtService&lt;/code&gt;. If the token is valid, we return a &lt;code&gt;JwtAuthenticatedProfile&lt;/code&gt; or throw an exception if it is invalid.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#99f&#34;&gt;@Component&lt;/span&gt;
-&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;JwtAuthenticationProvider&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;implements&lt;/span&gt; AuthenticationProvider &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;final&lt;/span&gt; JwtService jwtService&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-
-    &lt;span style=&#34;color:#99f&#34;&gt;@SuppressWarnings&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;unused&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;JwtAuthenticationProvider&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;this&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;null&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-    &lt;span style=&#34;color:#99f&#34;&gt;@Autowired&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;JwtAuthenticationProvider&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;JwtService jwtService&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;this&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;jwtService&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; jwtService&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-    &lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; Authentication &lt;span style=&#34;color:#c0f&#34;&gt;authenticate&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;Authentication authentication&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;throws&lt;/span&gt; AuthenticationException &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;try&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-            Optional&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;MinimalProfile&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt; possibleProfile &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; jwtService&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;verify&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;((&lt;/span&gt;String&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; authentication&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;getCredentials&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;());&lt;/span&gt;
-            &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;new&lt;/span&gt; JwtAuthenticatedProfile&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;possibleProfile&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;get&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;());&lt;/span&gt;
-        &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;catch&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;Exception e&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-            &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;throw&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;new&lt;/span&gt; JwtAuthenticationException&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Failed to verify token&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; e&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
-        &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-    &lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;boolean&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;supports&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;Class&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;?&amp;gt;&lt;/span&gt; authentication&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; JwtAuthToken&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;equals&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;authentication&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;&lt;code&gt;JwtAuthenticatedProfile&lt;/code&gt; is another implementation of &lt;code&gt;Authentication&lt;/code&gt; that wraps the user&amp;rsquo;s profile information:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;JwtAuthenticatedProfile&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;implements&lt;/span&gt; Authentication &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;final&lt;/span&gt; MinimalProfile minimalProfile&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;JwtAuthenticatedProfile&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;MinimalProfile minimalProfile&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;this&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;minimalProfile&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; minimalProfile&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-    &lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; Collection&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;?&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;extends&lt;/span&gt; GrantedAuthority&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;getAuthorities&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; Collections&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;singletonList&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;new&lt;/span&gt; SimpleGrantedAuthority&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;ROLE_USER&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;));&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-    &lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; Object &lt;span style=&#34;color:#c0f&#34;&gt;getCredentials&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;null&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-    &lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; Object &lt;span style=&#34;color:#c0f&#34;&gt;getDetails&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;null&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-    &lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; Object &lt;span style=&#34;color:#c0f&#34;&gt;getPrincipal&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;null&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-    &lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;boolean&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;isAuthenticated&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;true&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-    &lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;setAuthenticated&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;boolean&lt;/span&gt; isAuthenticated&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;throws&lt;/span&gt; IllegalArgumentException &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-    &lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; String &lt;span style=&#34;color:#c0f&#34;&gt;getName&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; minimalProfile&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;getUsername&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;();&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;Next, we implement the verify functionality in &lt;code&gt;JwtService&lt;/code&gt;.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; Optional&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;MinimalProfile&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;verify&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;String token&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;throws&lt;/span&gt; IOException&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; URISyntaxException &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-        &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;byte&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;[]&lt;/span&gt; secretKey &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; secretKeyProvider&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;getKey&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;();&lt;/span&gt;
-        Jws&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;Claims&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt; claims &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; Jwts&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;parser&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;().&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;setSigningKey&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;secretKey&lt;span style=&#34;color:#555&#34;&gt;).&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;parseClaimsJws&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;token&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
-        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; profileService&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;minimal&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;claims&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;getBody&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;().&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;getSubject&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;().&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;toString&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;());&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;When we generated the JWT, we had set the username as the JWT subject.&lt;/p&gt;
-
-&lt;p&gt;The last thing to do is to ensure that we handle exceptions that occur during token verification gracefully. Since the token verification is happening outside controllers, we won&amp;rsquo;t be able to leverage &lt;code&gt;ControllerAdvice&lt;/code&gt; to handle exceptions. This is where Spring Security&amp;rsquo;s &lt;code&gt;AuthenticationEntryPoint&lt;/code&gt; comes in to play. We will configure a custom &lt;code&gt;AuthenticationEntryPoint&lt;/code&gt; as follows:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;        http&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;authorizeRequests&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt;
-                &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;antMatchers&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/login&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/bower_components/**/*&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/app/**/*&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/index.html&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
-                &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;permitAll&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt;
-                &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;antMatchers&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/**/*&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
-                &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;hasAuthority&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;ROLE_USER&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
-                &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;and&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt;
-                &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;addFilterBefore&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;jwtAuthFilter&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; UsernamePasswordAuthenticationFilter&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
-                &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;exceptionHandling&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt;
-                &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;authenticationEntryPoint&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;jwtAuthEndPoint&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;Our entry point, sets the HTTP status to &lt;code&gt;403&lt;/code&gt;, and sets the response body to a JSON showing the error.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#99f&#34;&gt;@Component&lt;/span&gt;
-&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;JwtAuthenticationEntryPoint&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;implements&lt;/span&gt; AuthenticationEntryPoint &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-    &lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;commence&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;HttpServletRequest httpServletRequest&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; HttpServletResponse httpServletResponse&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; AuthenticationException e&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
-            &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;throws&lt;/span&gt; IOException&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; ServletException &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-        httpServletResponse&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;setStatus&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;SC_FORBIDDEN&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
-        httpServletResponse&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;setContentType&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;MediaType&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;APPLICATION_JSON_VALUE&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
-
-        String message&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;e&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;getCause&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;null&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-            message &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; e&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;getCause&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;().&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;getMessage&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;();&lt;/span&gt;
-        &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;else&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-            message &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; e&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;getMessage&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;();&lt;/span&gt;
-        &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-        &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;byte&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;[]&lt;/span&gt; body &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;new&lt;/span&gt; ObjectMapper&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt;
-                &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;writeValueAsBytes&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;Collections&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;singletonMap&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;error&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; message&lt;span style=&#34;color:#555&#34;&gt;));&lt;/span&gt;
-        httpServletResponse&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;getOutputStream&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;().&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;write&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;body&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;With this configuration in place, we can request a token and make a subsequent request with the received JWT.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;$ curl -i -X POST &amp;quot;http://localhost:8080/login&amp;quot; -d &#39;{&amp;quot;username&amp;quot;:&amp;quot;greenrabbit948&amp;quot;, &amp;quot;password&amp;quot;:&amp;quot;celeste&amp;quot;}&#39; --header &amp;quot;Content-Type: application/json&amp;quot;
-HTTP/1.1 200 OK
-Server: Apache-Coyote/1.1
-X-Content-Type-Options: nosniff
-X-XSS-Protection: 1; mode=block
-Cache-Control: no-cache, no-store, max-age=0, must-revalidate
-Pragma: no-cache
-Expires: 0
-X-Frame-Options: DENY
-Token: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJncmVlbnJhYmJpdDk0OCIsImV4cCI6MTQ2ODE0MDg1MiwiaXNzIjoiaW4uc2RxYWxpLmp3dCJ9.t9pqrOmYfaVkzuAQgo4D4VbN2PibQuHPuPA6RKYU-keTzbFAX58l77hQTc4Cq28HpjFOeiDvNpNEgilNHFOfVA
-Content-Type: application/json;charset=UTF-8
-Transfer-Encoding: chunked
-Date: Sun, 10 Jul 2016 06:54:12 GMT
-
-{&amp;quot;username&amp;quot;:&amp;quot;greenrabbit948&amp;quot;,&amp;quot;name&amp;quot;:{&amp;quot;title&amp;quot;:&amp;quot;miss&amp;quot;,&amp;quot;first&amp;quot;:&amp;quot;dionaura&amp;quot;,&amp;quot;last&amp;quot;:&amp;quot;rodrigues&amp;quot;},&amp;quot;thumbnail&amp;quot;:&amp;quot;https://randomuser.me/api/portraits/thumb/women/78.jpg&amp;quot;}
-
-$ curl -s &amp;quot;http://localhost:8080/profile/details/yellowfrog347&amp;quot; --header &amp;quot;Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJncmVlbnJhYmJpdDk0OCIsImV4cCI6MTQ2ODE0MDg1MiwiaXNzIjoiaW4uc2RxYWxpLmp3dCJ9.t9pqrOmYfaVkzuAQgo4D4VbN2PibQuHPuPA6RKYU-keTzbFAX58l77hQTc4Cq28HpjFOeiDvNpNEgilNHFOfVA&amp;quot; | jq .
-{
-  &amp;quot;picture&amp;quot;: {
-    &amp;quot;large&amp;quot;: &amp;quot;https://randomuser.me/api/portraits/women/71.jpg&amp;quot;,
-    &amp;quot;medium&amp;quot;: &amp;quot;https://randomuser.me/api/portraits/med/women/71.jpg&amp;quot;,
-    &amp;quot;thumbnail&amp;quot;: &amp;quot;https://randomuser.me/api/portraits/thumb/women/71.jpg&amp;quot;
-  },
-  &amp;quot;name&amp;quot;: {
-    &amp;quot;title&amp;quot;: &amp;quot;ms&amp;quot;,
-    &amp;quot;first&amp;quot;: &amp;quot;sofia&amp;quot;,
-    &amp;quot;last&amp;quot;: &amp;quot;hansen&amp;quot;
-  },
-  &amp;quot;email&amp;quot;: &amp;quot;sofia.hansen@example.com&amp;quot;,
-  &amp;quot;username&amp;quot;: &amp;quot;yellowfrog347&amp;quot;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;If we were to make a request with an invalid JWT, we will receive an error:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;$ curl -s &amp;quot;http://localhost:8080/profile/details/yellowfrog347&amp;quot; --header &amp;quot;Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJncmVlbnJhYmJpdDk0OCIsImV4cCI6MTQ2ODE0MDg1MiwiaXNzIjoiaW4uc2RxYWxpLmp3dCJ9.t9pqrOmYfaVkzuAQgo4D4VbN2PibQuHPuPA6RKYU-keTzbFAX58l77hQTc4Cq28HpjFOeiDvNpNEgilNHFOfVAAAAAA&amp;quot; | jq .
-{
-  &amp;quot;error&amp;quot;: &amp;quot;JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.&amp;quot;
-}
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;In the next blog post, the fifth is this series, we will move on to building the front end with Angular JS and managing authentication from the front end. The source code for this example for the progress made from part 1 through part 4 is available on &lt;a href=&#34;https://github.com/sdqali/jwt-demo/tree/verify_tokens&#34;&gt;GitHub&lt;/a&gt;.&lt;/p&gt;</description>
     </item>
     
   </channel>
