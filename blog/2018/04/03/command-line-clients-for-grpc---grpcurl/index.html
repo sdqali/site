@@ -1,7 +1,6 @@
 <!DOCTYPE html5>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us" prefix="og: http://ogp.me/ns#">
   <head>
-	<meta name="generator" content="Hugo 0.37.1" />
 
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -15,7 +14,7 @@
     
     
 
-    <title>{code that works} by Sadique Ali</title>
+    <title>Command line clients for gRPC - grpcurl - {code that works} by Sadique Ali</title>
 
     
     
@@ -23,7 +22,26 @@
 
 </head>
 
+  <meta name="description" content="We are in the middle of considering replacing JSON over HTTP with gRPC for communication between our internal services. One of my concerns about this was how we would be able to debug and poke around things in a world where we will no longer be able to use cURL. I have been looking at cURL like command line utilities we can use to replace most of the capabilities, if not all of cURL. So far, I have looked at grpcurl, grpc_cli and polyglot .In these blog posts, we will try and compare these tools.
+" />
+  <meta content="grpc, grpcurl, polyglot" name="keywords">
+
+  
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@sdqali">
+  <meta name="twitter:creator" content="@sdqali">
+  <meta name="twitter:title" content="Command line clients for gRPC - grpcurl">
+  <meta name="twitter:description" content="We are in the middle of considering replacing JSON over HTTP with gRPC for communication between our internal services. One of my concerns about this was how we would be able to debug and poke around things in a world where we will no longer be able to use cURL. I have been looking at cURL like command line utilities we can use to replace most of the capabilities, if not all of cURL. So far, I have looked at grpcurl, grpc_cli and polyglot .In these blog posts, we will try and compare these tools.
+">
+  <meta name="twitter:image" content="https://sdqali.in/">
+
+  <meta property="og:title" content="Command line clients for gRPC - grpcurl" />
+  <meta property="og:description" content="We are in the middle of considering replacing JSON over HTTP with gRPC for communication between our internal services. One of my concerns about this was how we would be able to debug and poke around things in a world where we will no longer be able to use cURL. I have been looking at cURL like command line utilities we can use to replace most of the capabilities, if not all of cURL. So far, I have looked at grpcurl, grpc_cli and polyglot .In these blog posts, we will try and compare these tools.
+" itemprop="description"/>
+  <meta property="og:url" content="https://sdqali.in/blog/2018/04/03/command-line-clients-for-grpc---grpcurl/" />
+  <meta property="og:image" content="https://sdqali.in/" />
   <body>
+
     <nav class="navbar navbar-default navbar-custom navbar-fixed-top"
      id="site-navigation" itemscope="itemscope" itemtype="http://schema.org/SiteNavigationElement">
   <div class="container-fluid">
@@ -58,6 +76,7 @@
 
 
 
+
     
     
     <header class="intro-header" id="header"
@@ -65,164 +84,1722 @@
       <div class="container">
         <div class="row">
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-            <div class="site-heading">
-              <h1> {code that works}</h1>
-              <hr class="small">
-              <span class="subheading">by Sadique Ali</span>
+            <div class="post-heading for-post">
+              <h1> Command line clients for gRPC - grpcurl</h1>
+              <span class="meta">Tue, Apr 3, 2018</span>
+              <div class="tags">
+                <span class="fa fa-tags" aria-hidden="true"></span>
+                
+                 <a href="/tags/grpc">grpc</a>
+                
+                ,  <a href="/tags/grpcurl">grpcurl</a>
+                
+                ,  <a href="/tags/polyglot">polyglot</a>
+                
+              </div>
             </div>
           </div>
         </div>
       </div>
     </header>
 
+
     
-    <div class="container" id="main-page"
+    <article>
+      <div class="container" id="main-page"
          itemprop="mainContentOfPage"
          itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
-      <div class="row">
-        <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-          
-          <div class="post-preview">
-            <a href='https://sdqali.in/blog/2018/04/03/command-line-clients-for-grpc---grpcurl/'>
-              <h2 class="post-title">
-                Command line clients for gRPC - grpcurl
-              </h2>
-              <h3 class="post-meta">Posted on Tue, Apr 3, 2018</h3>
-            </a>
-            <p class="post-subtitle">
-              <p>We are in the middle of considering replacing JSON over HTTP with gRPC for communication between our internal services. One of my concerns about this was how we would be able to debug and poke around things in a world where we will no longer be able to use cURL. I have been looking at cURL like command line utilities we can use to replace most of the capabilities, if not all of cURL. So far, I have looked at <a href="https://github.com/fullstorydev/grpcurl">grpcurl</a>, <a href="https://github.com/grpc/grpc/blob/master/doc/command_line_tool.md">grpc_cli</a> and <a href="https://github.com/grpc-ecosystem/polyglot">polyglot</a> .In these blog posts, we will try and compare these tools.
+        <div class="row">
+          <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <p>We are in the middle of considering replacing JSON over HTTP with gRPC for communication between our internal services. One of my concerns about this was how we would be able to debug and poke around things in a world where we will no longer be able to use cURL. I have been looking at cURL like command line utilities we can use to replace most of the capabilities, if not all of cURL. So far, I have looked at <a href="https://github.com/fullstorydev/grpcurl">grpcurl</a>, <a href="https://github.com/grpc/grpc/blob/master/doc/command_line_tool.md">grpc_cli</a> and <a href="https://github.com/grpc-ecosystem/polyglot">polyglot</a> .In these blog posts, we will try and compare these tools.
 </p>
-            </p>
-          </div>
-          
-          <div class="post-preview">
-            <a href='https://sdqali.in/blog/2018/03/22/a-jackson-and-freebuilder-quirk/'>
-              <h2 class="post-title">
-                A Jackson and FreeBuilder quirk
-              </h2>
-              <h3 class="post-meta">Posted on Thu, Mar 22, 2018</h3>
-            </a>
-            <p class="post-subtitle">
-              <p>Jackson is a great tool to have in your tool set if you deal with JSON or XML. It facilitates easy serialization and de-serialization to and from Java classes with a convenient annotation based interface. With the same set of annotations, we can achieve both XML and JSON serialization and de-serialization. With Jackson&rsquo;s <code>data-format-xml</code> it is even possible to give the same Class a different JSON and XML representation.
-</p>
-            </p>
-          </div>
-          
-          <div class="post-preview">
-            <a href='https://sdqali.in/blog/2018/03/21/nethttp-and-the-simplest-of-explanations/'>
-              <h2 class="post-title">
-                Net::HTTP and the simplest of explanations
-              </h2>
-              <h3 class="post-meta">Posted on Wed, Mar 21, 2018</h3>
-            </a>
-            <p class="post-subtitle">
-              This blog post exists purely to remind myself that Ruby&rsquo;s Net::HTTP expects a host and a port as parameters when creating a new connection and not a url string.
-This is a story about how many layers of abstractions and indirections one works through on a daily basis as a developer and the effort required to dive through these layers, all the while ignoring the simplest of explanations of why things may have gone wrong in the first place.
-            </p>
-          </div>
-          
-          <div class="post-preview">
-            <a href='https://sdqali.in/blog/2017/09/25/python-url-manipulation-revisited/'>
-              <h2 class="post-title">
-                Python URL manipulation revisited
-              </h2>
-              <h3 class="post-meta">Posted on Mon, Sep 25, 2017</h3>
-            </a>
-            <p class="post-subtitle">
-              My last blog post about publishing standalone files to Nexus repositories prompted me to revisit URL manipulation in Python. When I did this the last time, I used Python stand library&rsquo;s urlparse and it did the job. This time around, I needed to do a different kind of manipulation. Given a URL, I had to set credentials on it.
-I started at urlparse and soon realized that Python3 moved this module to urllib.
-            </p>
-          </div>
-          
-          <div class="post-preview">
-            <a href='https://sdqali.in/blog/2017/08/17/uploading-a-standalone-artifact-to-nexus-3/'>
-              <h2 class="post-title">
-                Uploading a standalone artifact to Nexus 3
-              </h2>
-              <h3 class="post-meta">Posted on Thu, Aug 17, 2017</h3>
-            </a>
-            <p class="post-subtitle">
-              This is one of those &ldquo;I had to figure out how to do this today, so the next time I google this, I have a place to look&rdquo; blog posts. Today, I had to upload a zip file as a build artifact to our Nexus 3 repository. The zip file had been generated by custom shell scripts that did not have a Maven, Ivy or Gradle projects to wrap them.
-            </p>
-          </div>
-          
-          <div class="post-preview">
-            <a href='https://sdqali.in/blog/2016/11/29/implementing-feature-toggles-for-a-spring-boot-application---part-4/'>
-              <h2 class="post-title">
-                Implementing feature toggles for a Spring Boot application - Part 4
-              </h2>
-              <h3 class="post-meta">Posted on Tue, Nov 29, 2016</h3>
-            </a>
-            <p class="post-subtitle">
-              <p>In the fourth part of this <a href="/series/feature-toggles/">series</a> about implementing <a href="/blog/2016/11/21/implementing-feature-toggles-for-a-spring-boot-application---part-1/">feature toggles</a> for a Spring Boot application, we will take a look at how our implementation so far introduced a dependency on the application being restarted for changes to take place.</p>
 
-<p></p>
-            </p>
-          </div>
-          
-          <div class="post-preview">
-            <a href='https://sdqali.in/blog/2016/11/28/implementing-feature-toggles-for-a-spring-boot-application---part-3/'>
-              <h2 class="post-title">
-                Implementing feature toggles for a Spring Boot application - Part 3
-              </h2>
-              <h3 class="post-meta">Posted on Mon, Nov 28, 2016</h3>
-            </a>
-            <p class="post-subtitle">
-              <p>In the third part of this <a href="/series/feature-toggles/">series</a> about implementing feature toggles for a Spring Boot application, we will take a look at exposing the state of feature flags as a Spring Boot management end point for monitoring and testing purposes.</p>
+<p>In this example, we will be running the example implementations provided by the <a href="https://github.com/grpc/grpc-java/tree/master/examples">grpc-java</a> project and using the command line tools against the services from these examples. We will also be running these services without enabling reflection.</p>
 
-<p></p>
-            </p>
-          </div>
-          
-          <div class="post-preview">
-            <a href='https://sdqali.in/blog/2016/11/26/implementing-feature-toggles-for-a-spring-boot-application---part-2/'>
-              <h2 class="post-title">
-                Implementing feature toggles for a Spring Boot application - Part 2
-              </h2>
-              <h3 class="post-meta">Posted on Sat, Nov 26, 2016</h3>
-            </a>
-            <p class="post-subtitle">
-              <p>In the second part of this [series](&ldquo;/series/feature-toggles/&rdquo;) about implementing feature toggles for a Spring Boot application, we will look at exposing the features to the Angular front-end so that features can be toggled in UI components.</p>
+<h2 id="grpcurl">grpcurl</h2>
 
-<p></p>
-            </p>
-          </div>
-          
-          <div class="post-preview">
-            <a href='https://sdqali.in/blog/2016/11/21/implementing-feature-toggles-for-a-spring-boot-application---part-1/'>
-              <h2 class="post-title">
-                Implementing feature toggles for a Spring Boot application - Part 1
-              </h2>
-              <h3 class="post-meta">Posted on Mon, Nov 21, 2016</h3>
-            </a>
-            <p class="post-subtitle">
-              <p>In one of our recent projects at work, we implemented feature toggles for a Spring MVC / Angular JS code base and this <a href="/series/feature-toggles">series of blog posts</a> discusses our motivations and requirements, the approach we took and what we learned from it.
+<p>One of the things that immediately struck me when I started looking at grpcurl was how neat it&rsquo;s command line interface was, especially in comparison with that of polyglot. grpcurl is written in Go and expects you to provide <code>protoset</code> files that contain service descriptors exported from the <code>proto</code> files of the service.</p>
+
+<p>For example, for the <code>hello-world</code> service from the examples, the <code>protoset</code> files can be generated using:</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">&gt; <span style="color:#366">pwd</span>
+grpc-java/examples/src/main/proto
+&gt; protoc --proto_path<span style="color:#555">=</span>./ <span style="color:#c30;font-weight:bold">\
+</span><span style="color:#c30;font-weight:bold"></span>    --descriptor_set_out<span style="color:#555">=</span>helloworld.protoset <span style="color:#c30;font-weight:bold">\
+</span><span style="color:#c30;font-weight:bold"></span>    --include_imports <span style="color:#c30;font-weight:bold">\
+</span><span style="color:#c30;font-weight:bold"></span>    ./helloworld.proto</code></pre></div>
+<p>This will produce a <code>protoset</code> file named <code>helloworld.protoset</code>. Using this, we can now list the services available:</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">&gt; grpcurl -protoset ./helloworld.protoset list
+helloworld.Greeter</code></pre></div>
+<p>We can also list all the methods available in a service:</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">&gt; grpcurl -protoset ./helloworld.protoset list helloworld.Greeter
+SayHello</code></pre></div>
+<p>There is also a describe command that produces description of a service:</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">&gt; grpcurl -protoset ./helloworld.protoset describe helloworld.Greeter
+helloworld.Greeter is a service:
+<span style="color:#555">{</span>
+  <span style="color:#c30">&#34;name&#34;</span>: <span style="color:#c30">&#34;Greeter&#34;</span>,
+  <span style="color:#c30">&#34;method&#34;</span>: <span style="color:#555">[</span>
+    <span style="color:#555">{</span>
+      <span style="color:#c30">&#34;name&#34;</span>: <span style="color:#c30">&#34;SayHello&#34;</span>,
+      <span style="color:#c30">&#34;inputType&#34;</span>: <span style="color:#c30">&#34;.helloworld.HelloRequest&#34;</span>,
+      <span style="color:#c30">&#34;outputType&#34;</span>: <span style="color:#c30">&#34;.helloworld.HelloReply&#34;</span>,
+      <span style="color:#c30">&#34;options&#34;</span>: <span style="color:#555">{</span>
+
+      <span style="color:#555">}</span>
+    <span style="color:#555">}</span>
+  <span style="color:#555">]</span>,
+  <span style="color:#c30">&#34;options&#34;</span>: <span style="color:#555">{</span>
+
+  <span style="color:#555">}</span>
+<span style="color:#555">}</span></code></pre></div>
+<p>Now we can execute the method on this service running on a server by specifying the address and the path to the method:</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">&gt; grpcurl -plaintext -protoset ./helloworld.protoset -d <span style="color:#c30">&#39;{&#34;name&#34;:&#34;World&#34;}&#39;</span> localhost:50051 helloworld.Greeter/SayHello
+<span style="color:#555">{</span>
+  <span style="color:#c30">&#34;message&#34;</span>: <span style="color:#c30">&#34;Hello World&#34;</span>
+<span style="color:#555">}</span></code></pre></div>
+<p>It can also read the JSON data to pass to the server from STDIN, by setting the value of <code>-d</code> to <code>@</code>:</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">&gt; <span style="color:#366">echo</span> <span style="color:#c30">&#39;{&#34;name&#34;: &#34;World&#34;}&#39;</span> | grpcurl -plaintext -protoset ./helloworld.protoset -d @ localhost:50051 helloworld.Greeter/SayHello
+<span style="color:#555">{</span>
+  <span style="color:#c30">&#34;message&#34;</span>: <span style="color:#c30">&#34;Hello World&#34;</span>
+<span style="color:#555">}</span></code></pre></div>
+<p>In both these examples, we passed the <code>-plaintext</code> switch because our server is not running with TLS.</p>
+
+<p>If we were to <a href="https://github.com/grpc/grpc-java/blob/master/documentation/server-reflection-tutorial.md">turn on reflection</a>, we will no longer need to depend on the <code>protoset</code> file.</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">&gt; <span style="color:#366">echo</span> <span style="color:#c30">&#39;{&#34;name&#34;: &#34;World&#34;}&#39;</span> | grpcurl -plaintext -d @ localhost:50051 helloworld.Greeter/SayHello
+<span style="color:#555">{</span>
+  <span style="color:#c30">&#34;message&#34;</span>: <span style="color:#c30">&#34;Hello World&#34;</span>
+<span style="color:#555">}</span></code></pre></div>
+<p>Overall, I like what the creator of grpcurl have done. The only thing I dont like is the fact that when reflection is turned off, we have to generate <code>protoset</code> files. It would have been great if it could just look at the existing <code>proto</code> files, which is what <code>polyglot</code> does. We will look at polyglot in the next blog post.</p>
+            <p class="comments">
+  If you have questions or comments about this blog post, you can get in touch with me on Twitter <a href="https://twitter.com/sdqali">@sdqali</a>.
 </p>
-            </p>
+
           </div>
-          
-          <div class="post-preview">
-            <a href='https://sdqali.in/blog/2016/11/11/setting-up-a-secure-etcd-cluster-behind-a-proxy/'>
-              <h2 class="post-title">
-                Setting up a secure etcd cluster behind a proxy
-              </h2>
-              <h3 class="post-meta">Posted on Fri, Nov 11, 2016</h3>
-            </a>
-            <p class="post-subtitle">
-              <p>This is a blog post that explains how to set up a highly available etcd cluster behind a proxy and securing the communication between a client and the proxy, between the proxy and the individual member in the cluster and between members in the cluster.
-</p>
-            </p>
+          <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <h3>If you liked this post, you'll also like...</h3>
+                <ul class="related-posts">
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                </ul>
           </div>
-          
-          
-          <ul class="pager">
-            <li class="next">
-              <a href="/blog/">Older Posts &rarr;</a>
-            </li>
-          </ul>
         </div>
       </div>
-    </div>
+    </article>
+
+    <hr>
 
     
 <footer id="footer" itemscope="itemscope" itemtype="http://schema.org/WPFooter">
