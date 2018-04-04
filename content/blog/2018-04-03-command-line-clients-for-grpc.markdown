@@ -3,6 +3,8 @@ title: Command line clients for gRPC - 1
 date: 2018-04-03T22:40:08-07:00
 tags:
   - grpc
+  - grpcurl
+  - polyglot
 ---
 We are in the middle of considering replacing JSON over HTTP with gRPC for communication between our internal services. One of my concerns about this was how we would be able to debug and poke around things in a world where we will no longer be able to use cURL. I have been looking at cURL like command line utilities we can use to replace most of the capabilities, if not all of cURL. So far, I have looked at [grpcurl](https://github.com/fullstorydev/grpcurl), [grpc_cli](https://github.com/grpc/grpc/blob/master/doc/command_line_tool.md) and [polyglot](https://github.com/grpc-ecosystem/polyglot) .In these blog posts, we will try and compare these tools.
 <!--more-->
