@@ -1,5 +1,5 @@
 ---
-title: Command line clients for gRPC - 1
+title: Command line clients for gRPC - grpcurl
 date: 2018-04-03T22:40:08-07:00
 tags:
   - grpc
