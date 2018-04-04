@@ -1,7 +1,6 @@
 ---
 title: Command line clients for gRPC - 1
 date: 2018-04-03T22:40:08-07:00
-draft: true
 tags:
   - grpc
 ---
