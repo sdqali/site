@@ -5,8 +5,96 @@
     <link>https://sdqali.in/?utm_source=site&amp;utm_medium=feed</link>
     <description>Recent content in {code that works} on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
-    <lastBuildDate>Tue, 03 Apr 2018 22:40:08 -0700</lastBuildDate>
+    <lastBuildDate>Thu, 05 Apr 2018 22:45:08 -0700</lastBuildDate>
     <atom:link href="/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Command line clients for gRPC - polyglot</title>
+      <link>https://sdqali.in/blog/2018/04/05/command-line-clients-for-grpc---polyglot/?utm_source=site&amp;utm_medium=feed</link>
+      <pubDate>Thu, 05 Apr 2018 22:45:08 -0700</pubDate>
+      
+      <guid>https://sdqali.in/blog/2018/04/05/command-line-clients-for-grpc---polyglot/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;Polyglot was the second gRPC client that I looked at. One of the things that I liked about it is the fact that it does not need users to generate &lt;code&gt;protoset&lt;/code&gt; files. It generates the protoset files in flight every time it runs. This, combined with the fact that it is written in Java does have a disadvantage - every time the client makes a call, it has to fire up a JVM, generate protosets and make the request.&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;
+
+&lt;p&gt;You run polyglot by using the distributed polyglot jar. To list all the services available on an endpoint, polyglot can be executed as:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&amp;gt; java -jar ~/Downloads/polyglot.jar --command&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;list_services &lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;\
+&lt;/span&gt;&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;&lt;/span&gt;  --proto_discovery_root&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#033&#34;&gt;$PROTO_DISCOVERY_ROOT&lt;/span&gt; &lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;\
+&lt;/span&gt;&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;&lt;/span&gt;  --deadline_ms&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;3000&lt;/span&gt;
+&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;main&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; INFO me.dinowernli.grpc.polyglot.Main - Polyglot version: &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;.6.0
+&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;main&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; INFO me.dinowernli.grpc.polyglot.Main - Loaded configuration:
+
+manualflowcontrol.StreamingGreeter -&amp;gt; /Users/sdqali/src/grpc/grpc-java/examples/src/proto/hello_streaming.proto
+manualflowcontrol.StreamingGreeter/SayHelloStreaming
+
+routeguide.RouteGuide -&amp;gt; /Users/sdqali/src/grpc/grpc-java/examples/src/proto/route_guide.proto
+routeguide.RouteGuide/GetFeature
+routeguide.RouteGuide/ListFeatures
+routeguide.RouteGuide/RecordRoute
+routeguide.RouteGuide/RouteChat
+
+helloworld.Greeter -&amp;gt; /Users/sdqali/src/grpc/grpc-java/examples/src/proto/helloworld.proto
+helloworld.Greeter/SayHello&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The command &lt;code&gt;call&lt;/code&gt; can be issued to execute a particular service method:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#366&#34;&gt;echo&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;{&amp;#39;name&amp;#39;: &amp;#39;World&amp;#39;}&amp;#34;&lt;/span&gt; | java -jar ~/Downloads/polyglot.jar --command&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;call &lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;\
+&lt;/span&gt;&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;&lt;/span&gt;  --full_method&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;helloworld.Greeter/SayHello &lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;\
+&lt;/span&gt;&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;&lt;/span&gt;  --endpoint&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;localhost:50051 &lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;\
+&lt;/span&gt;&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;&lt;/span&gt;  --proto_discovery_root&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#033&#34;&gt;$PROTO_DISCOVERY_ROOT&lt;/span&gt; &lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;\
+&lt;/span&gt;&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;&lt;/span&gt;  --deadline_ms&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;3000&lt;/span&gt;
+&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;main&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; INFO me.dinowernli.grpc.polyglot.Main - Polyglot version: &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;.6.0
+&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;main&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; INFO me.dinowernli.grpc.polyglot.Main - Loaded configuration:
+&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;main&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; INFO me.dinowernli.grpc.polyglot.command.ServiceCall - Creating channel to: localhost:50051
+&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;main&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; INFO me.dinowernli.grpc.polyglot.command.ServiceCall - Using proto descriptors obtained from protoc
+&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;main&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; INFO me.dinowernli.grpc.polyglot.command.ServiceCall - Creating dynamic grpc client
+&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;main&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; INFO me.dinowernli.grpc.polyglot.command.ServiceCall - Making rpc with &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt; request&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;s&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; to endpoint &lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;localhost:50051&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;
+&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;main&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; INFO me.dinowernli.grpc.polyglot.grpc.DynamicGrpcClient - Making unary call
+&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;grpc-default-executor-0&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; INFO me.dinowernli.grpc.polyglot.io.LoggingStatsWriter - Got response message
+&lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
+&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;message&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Hello World&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
+
+&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;grpc-default-executor-0&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; INFO me.dinowernli.grpc.polyglot.io.LoggingStatsWriter - Completed rpc with &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt; response&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;s&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Notice how we are passing path to proto files and polyglot executes &lt;code&gt;protoc&lt;/code&gt; on them to get protosets.
+With reflection turned ON, we no longer need to provide a path to the proto files.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;color:#366&#34;&gt;echo&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;{&amp;#39;name&amp;#39;: &amp;#39;World&amp;#39;}&amp;#34;&lt;/span&gt; | java -jar ~/Downloads/polyglot.jar --command&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;call &lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;\
+&lt;/span&gt;&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;&lt;/span&gt;  --full_method&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;helloworld.Greeter/SayHello &lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;\
+&lt;/span&gt;&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;&lt;/span&gt;  --endpoint&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;localhost:50051 &lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;\
+&lt;/span&gt;&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;&lt;/span&gt;  --deadline_ms&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;3000&lt;/span&gt; &lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;\
+&lt;/span&gt;&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;&lt;/span&gt;  --use_reflection&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#366&#34;&gt;true&lt;/span&gt;
+&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;main&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; INFO me.dinowernli.grpc.polyglot.Main - Polyglot version: &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;.6.0
+&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;main&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; INFO me.dinowernli.grpc.polyglot.Main - Loaded configuration:
+&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;main&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; INFO me.dinowernli.grpc.polyglot.command.ServiceCall - Creating channel to: localhost:50051
+&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;main&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; INFO me.dinowernli.grpc.polyglot.command.ServiceCall - Using proto descriptors fetched by reflection
+&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;main&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; INFO me.dinowernli.grpc.polyglot.command.ServiceCall - Creating dynamic grpc client
+&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;main&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; INFO me.dinowernli.grpc.polyglot.command.ServiceCall - Making rpc with &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt; request&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;s&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; to endpoint &lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;localhost:50051&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;
+&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;main&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; INFO me.dinowernli.grpc.polyglot.grpc.DynamicGrpcClient - Making unary call
+&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;grpc-default-executor-0&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; INFO me.dinowernli.grpc.polyglot.io.LoggingStatsWriter - Got response message
+&lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
+&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;message&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Hello World&amp;#34;&lt;/span&gt;
+&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;That is nice, except that reflection does not work for listing services.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;java -jar ~/Downloads/polyglot.jar --command&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;list_services &lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;\
+&lt;/span&gt;&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;&lt;/span&gt;  --endpoint&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;localhost:50051 &lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;\
+&lt;/span&gt;&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;&lt;/span&gt;  --deadline_ms&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;3000&lt;/span&gt; &lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;\
+&lt;/span&gt;&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;&lt;/span&gt;  --use_reflection&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#366&#34;&gt;true&lt;/span&gt;
+&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;main&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; INFO me.dinowernli.grpc.polyglot.Main - Polyglot version: &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;.6.0
+&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;main&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; INFO me.dinowernli.grpc.polyglot.Main - Loaded configuration:
+&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;main&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; WARN me.dinowernli.grpc.polyglot.Main - Caught top-level exception during &lt;span style=&#34;color:#366&#34;&gt;command&lt;/span&gt; execution
+java.lang.IllegalArgumentException: A proto discovery root is required &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;for&lt;/span&gt; proto analysis
+  at com.google.common.base.Preconditions.checkArgument&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;Preconditions.java:122&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
+  at me.dinowernli.grpc.polyglot.protobuf.ProtocInvoker.forConfig&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;ProtocInvoker.java:36&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
+  at me.dinowernli.grpc.polyglot.Main.getFileDescriptorSet&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;Main.java:93&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
+  at me.dinowernli.grpc.polyglot.Main.main&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;Main.java:62&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
+Exception in thread &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;main&amp;#34;&lt;/span&gt; java.lang.RuntimeException: java.lang.IllegalArgumentException: A proto discovery root is required &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;for&lt;/span&gt; proto analysis
+  at me.dinowernli.grpc.polyglot.Main.main&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;Main.java:86&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
+Caused by: java.lang.IllegalArgumentException: A proto discovery root is required &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;for&lt;/span&gt; proto analysis
+  at com.google.common.base.Preconditions.checkArgument&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;Preconditions.java:122&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
+  at me.dinowernli.grpc.polyglot.protobuf.ProtocInvoker.forConfig&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;ProtocInvoker.java:36&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
+  at me.dinowernli.grpc.polyglot.Main.getFileDescriptorSet&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;Main.java:93&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
+  at me.dinowernli.grpc.polyglot.Main.main&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;Main.java:62&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This was unexpected, as adding this capability to Polyglot should not be too diffcult, considering that they already support reflection for executing services. This is something that I am interested in implementing.&lt;/p&gt;</description>
+    </item>
     
     <item>
       <title>Command line clients for gRPC - grpcurl</title>
@@ -2069,221 +2157,6 @@ $ curl -s -X GET &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;http://localhos
  &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:3&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;/div&gt;</description>
-    </item>
-    
-    <item>
-      <title>JWT authentication with Spring Web - Part 5</title>
-      <link>https://sdqali.in/blog/2016/07/13/jwt-authentication-with-spring-web---part-5/?utm_source=site&amp;utm_medium=feed</link>
-      <pubDate>Wed, 13 Jul 2016 23:05:53 -0700</pubDate>
-      
-      <guid>https://sdqali.in/blog/2016/07/13/jwt-authentication-with-spring-web---part-5/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>&lt;p&gt;In parts 1 through 4 of this series, we built a Spring API that can issue a JWT when a user successfully authenticates and verify the JWT presented by the client for subsequent requests. In this blog post - the last in the series, we will build a simple Angular JS application with authentication that uses this API as the backend.
-
-These are the blog posts in this series:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://sdqali.in/blog/2016/07/02/jwt-authentication-with-spring-web---part-1/&#34;&gt;Part 1&lt;/a&gt; - Discussion of JWT and implementation&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://sdqali.in/blog/2016/07/03/jwt-authentication-with-spring-web---part-2/&#34;&gt;Part 2&lt;/a&gt; - A Spring User Profiles API&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://sdqali.in/blog/2016/07/05/jwt-authentication-with-spring-web---part-3/&#34;&gt;Part 3&lt;/a&gt; - Issuing a token from the server&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://sdqali.in/blog/2016/07/07/jwt-authentication-with-spring-web---part-4/&#34;&gt;Part 4&lt;/a&gt; - Verifying the token sent back by the client&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://sdqali.in/blog/2016/07/13/jwt-authentication-with-spring-web---part-5/&#34;&gt;Part 5&lt;/a&gt; - Securing the front end&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;We will use the following Angular plugins - &lt;code&gt;angular-resource&lt;/code&gt; for interacting with our APIs, &lt;code&gt;ngstorage&lt;/code&gt; to access the localStorage to store the JWT and &lt;code&gt;angular-ui-router&lt;/code&gt; to handle routing and managing UI views.&lt;/p&gt;
-
-&lt;p&gt;For this example, our UI components are under the &lt;code&gt;src/main/resources/static&lt;/code&gt; directory. We will be loading our dependencies using bower by adding a &lt;code&gt;.bowerrc&lt;/code&gt; file at the root of our project.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;{
-  &lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;#34;directory&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;src/main/resources/static/bower_components&amp;#34;&lt;/span&gt;,
-  &lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;#34;json&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;bower.json&amp;#34;&lt;/span&gt;
-}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;We will specify the dependencies we need in our &lt;code&gt;bower.json&lt;/code&gt;:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;{
-  &lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;#34;name&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;jwt&amp;#34;&lt;/span&gt;,
-  &lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;#34;dependencies&amp;#34;&lt;/span&gt;: {
-    &lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;#34;angular&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;~1.3.0&amp;#34;&lt;/span&gt;,
-    &lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;#34;angular-resource&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;~1.3.0&amp;#34;&lt;/span&gt;,
-    &lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;#34;bootstrap-css-only&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;~3.2.0&amp;#34;&lt;/span&gt;,
-    &lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;#34;ngstorage&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;0.3.10&amp;#34;&lt;/span&gt;,
-    &lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;#34;angular-ui-router&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;1.0.0-beta.1&amp;#34;&lt;/span&gt;
-  }
-}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;The dependencies can be installed using &lt;code&gt;bower install&lt;/code&gt;. Once we have the dependencies, we can start by configuring Spring Security to allow access to the UI components:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;        String&lt;span style=&#34;color:#555&#34;&gt;[]&lt;/span&gt; patterns &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;new&lt;/span&gt; String&lt;span style=&#34;color:#555&#34;&gt;[]&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-            &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/login&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt;
-            &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/bower_components/**/*&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt;
-            &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/app/**/*&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt;
-            &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/index.html&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt;
-            &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/home.html&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt;
-            &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/signin.html&amp;#34;&lt;/span&gt;
-        &lt;span style=&#34;color:#555&#34;&gt;};&lt;/span&gt;
-        http&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;authorizeRequests&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt;
-                &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;antMatchers&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;patterns&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
-                &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;permitAll&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt;
-        &lt;span style=&#34;color:#555&#34;&gt;//&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;...&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;We will start by creating our UI template &lt;code&gt;index.html&lt;/code&gt;:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span style=&#34;color:#099&#34;&gt;&amp;lt;!DOCTYPE html&amp;gt;&lt;/span&gt;
-&amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;html&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;lang&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;en&amp;#34;&lt;/span&gt;&amp;gt;
-  &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;head&lt;/span&gt;&amp;gt;
-    &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;link&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;rel&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;stylesheet&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;href&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;./bower_components/bootstrap-css-only/css/bootstrap.min.css&amp;#34;&lt;/span&gt; /&amp;gt;
-  &amp;lt;/&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;head&lt;/span&gt;&amp;gt;
-  &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;body&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;ng-app&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;jwtDemo&amp;#34;&lt;/span&gt;&amp;gt;
-    &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;div&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;container&amp;#34;&lt;/span&gt;&amp;gt;
-      &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;ui-view&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;ui-view&lt;/span&gt;&amp;gt;
-    &amp;lt;/&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;div&lt;/span&gt;&amp;gt;
-    &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;script&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;text/javascript&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;src&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;./bower_components/angular/angular.min.js&amp;#34;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
-    &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;script&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;text/javascript&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;src&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;./bower_components/angular-resource/angular-resource.min.js&amp;#34;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
-    &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;script&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;text/javascript&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;src&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;./bower_components/ngstorage/ngStorage.min.js&amp;#34;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
-    &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;script&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;text/javascript&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;src&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;./bower_components/angular-ui-router/release/angular-ui-router.min.js&amp;#34;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
-    &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;script&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;text/javascript&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;src&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;./app/app.js&amp;#34;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
-    &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;script&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;text/javascript&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;src&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;./app/controllers.js&amp;#34;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
-    &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;script&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;text/javascript&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;src&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;./app/services.js&amp;#34;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
-  &amp;lt;/&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;body&lt;/span&gt;&amp;gt;
-&amp;lt;/&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;html&lt;/span&gt;&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;For this example, we will have one Angular service in &lt;code&gt;app/services.js&lt;/code&gt; that performs login:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;(&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;function&lt;/span&gt;(angular) {
-  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;var&lt;/span&gt; LoginFactory &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;function&lt;/span&gt;($resource) {
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; $resource(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;/login&amp;#39;&lt;/span&gt;, {}, {
-      login&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; {
-        method&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;POST&amp;#39;&lt;/span&gt;
-      }
-    });
-  };
-
-  LoginFactory.$inject &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;$resource&amp;#39;&lt;/span&gt;];
-  angular.module(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;jwtDemo.services&amp;#39;&lt;/span&gt;).factory(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;Login&amp;#39;&lt;/span&gt;, LoginFactory);
-}(angular));
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;We will need two controllers in &lt;code&gt;app/controller.js&lt;/code&gt; - one for the login page to manage login and one for the profile page:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;(&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;function&lt;/span&gt;(angular) {
-  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;var&lt;/span&gt; LoginController &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;function&lt;/span&gt;($scope, $localStorage, $http, $location, Login) {
-    $scope.login &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;function&lt;/span&gt;(username, password) {
-      &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;new&lt;/span&gt; Login({username&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; username, password&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; password})
-          .$login(&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;function&lt;/span&gt; (profile, headers) {
-            $localStorage.user &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; profile;
-            $localStorage.token &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; headers().token;
-            $http.defaults.headers.common.Authorization &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;Bearer &amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; headers().token;
-            $location.path(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/&amp;#34;&lt;/span&gt;);
-          }, &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;function&lt;/span&gt; (error) {
-            console.log(error);
-          });
-    };
-
-    $scope.logout &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;function&lt;/span&gt; () {
-      &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;delete&lt;/span&gt; $localStorage.user;
-      &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;delete&lt;/span&gt; $localStorage.token;
-      $http.defaults.headers.common &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; {};
-    }
-
-    $scope.logout();
-  };
-
-  LoginController.$inject &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;$scope&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;$localStorage&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;$http&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;$location&amp;#39;&lt;/span&gt;,&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;Login&amp;#39;&lt;/span&gt;];
-  angular.module(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;jwtDemo.controllers&amp;#34;&lt;/span&gt;).controller(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;LoginController&amp;#34;&lt;/span&gt;, LoginController);
-
-
-  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;var&lt;/span&gt; ProfileController &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;function&lt;/span&gt; ($scope, $localStorage) {
-    $scope.profile &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; $localStorage.user;
-  };
-  ProfileController.inject &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;$scope&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;$localStorage&amp;#39;&lt;/span&gt;];
-  angular.module(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;jwtDemo.controllers&amp;#34;&lt;/span&gt;).controller(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;ProfileController&amp;#34;&lt;/span&gt;, ProfileController);
-}(angular));
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;The &lt;code&gt;LoginController&lt;/code&gt; has two methods - login and logout. The login method uses the &lt;code&gt;LoginService&lt;/code&gt; to make a request and saves the JWT and user profile returned up on successful login. It also sets the &lt;code&gt;Authorization&lt;/code&gt; header default to the JWT returned so that every subsequent request uses it to authenticate. The user is then navigated to the home page. Logout is performed by removing the JWT and profile from local storage and clearing the header defaults.&lt;/p&gt;
-
-&lt;p&gt;The next step is to create &lt;code&gt;app/app.js&lt;/code&gt; to wire up the Angular application together:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;(&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;function&lt;/span&gt;(angular) {
-  angular.module(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;jwtDemo.controllers&amp;#34;&lt;/span&gt;, []);
-  angular.module(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;jwtDemo.services&amp;#34;&lt;/span&gt;, []);
-  angular.module(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;jwtDemo&amp;#34;&lt;/span&gt;, [&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;ui.router&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;ngResource&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;ngStorage&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;jwtDemo.controllers&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;jwtDemo.services&amp;#34;&lt;/span&gt;])
-      .config(&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;function&lt;/span&gt; ($stateProvider, $urlRouterProvider) {
-        $urlRouterProvider.otherwise(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/&amp;#34;&lt;/span&gt;);
-
-        $stateProvider
-            .state(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;home&amp;#39;&lt;/span&gt;, {
-              url&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;/&amp;#39;&lt;/span&gt;,
-              templateUrl&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;home.html&amp;#39;&lt;/span&gt;,
-              controller&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;ProfileController&amp;#39;&lt;/span&gt;
-            })
-            .state(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;signin&amp;#39;&lt;/span&gt;, {
-              url&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;/signin&amp;#39;&lt;/span&gt;,
-              templateUrl&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;signin.html&amp;#39;&lt;/span&gt;,
-              controller&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;LoginController&amp;#39;&lt;/span&gt;
-            })
-            .state(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;signout&amp;#39;&lt;/span&gt;, {
-              url&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;/signout&amp;#39;&lt;/span&gt;,
-              templateUrl&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;signin.html&amp;#39;&lt;/span&gt;,
-              controller&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;LoginController&amp;#39;&lt;/span&gt;
-            });
-      })
-      .run(&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;function&lt;/span&gt; ($localStorage, $http, $location, $rootScope) {
-        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; ($localStorage.user) {
-          $http.defaults.headers.common.Authorization &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;Bearer &amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; $localStorage.token;
-        }
-
-        $rootScope.$on(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;$locationChangeStart&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;function&lt;/span&gt; (event, next, current) {
-          &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; ($location.path() &lt;span style=&#34;color:#555&#34;&gt;!==&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/signin&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;!&lt;/span&gt;$localStorage.user) {
-            $location.path(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;/signin&amp;#39;&lt;/span&gt;);
-          } &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;else&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; ($location.path() &lt;span style=&#34;color:#555&#34;&gt;===&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/signin&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; $localStorage.user) {
-            $location.path(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;/&amp;#39;&lt;/span&gt;);
-          }
-        });
-      });
-}(angular));
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;We start by wiring together our services and controllers to the main module. We use the state provider to map front end URLs to templates. The home page will use the &lt;code&gt;home.html&lt;/code&gt; template and the sign in and sign out URLs will use the &lt;code&gt;sigin.html&lt;/code&gt; template.&lt;/p&gt;
-
-&lt;p&gt;It also configures a listener that observes for URL changes made by the user and redirects them to the sign in page, unless they are already authenticated. If there is already a token in local storage when the application loads, that signifies that the user has already logged in a different tab and the authorization header default is set.&lt;/p&gt;
-
-&lt;p&gt;The two views we have are simple - &lt;code&gt;signin.html&lt;/code&gt; has a sign form:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;div&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;row&amp;#34;&lt;/span&gt;&amp;gt;
-  &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;div&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;col-md-3&amp;#39;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;div&lt;/span&gt;&amp;gt;
-  &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;div&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;col-md-6&amp;#34;&lt;/span&gt;&amp;gt;
-    &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;div&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;login-box well&amp;#34;&lt;/span&gt;&amp;gt;
-      &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;form&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;role&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;form&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;ng-submit&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;login(username, password)&amp;#34;&lt;/span&gt;&amp;gt;
-        &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;legend&lt;/span&gt;&amp;gt;Sign In&amp;lt;/&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;legend&lt;/span&gt;&amp;gt;
-        &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;div&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;form-group&amp;#34;&lt;/span&gt;&amp;gt;
-          &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;label&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;for&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;username-email&amp;#34;&lt;/span&gt;&amp;gt;Username&amp;lt;/&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;label&lt;/span&gt;&amp;gt;
-          &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;ng-model&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;username&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;id&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;username-email&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;placeholder&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Username&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;text&amp;#34;&lt;/span&gt;
-                 &lt;span style=&#34;color:#309&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;form-control&amp;#34;&lt;/span&gt; /&amp;gt;
-        &amp;lt;/&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;div&lt;/span&gt;&amp;gt;
-        &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;div&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;form-group&amp;#34;&lt;/span&gt;&amp;gt;
-          &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;label&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;for&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;password&amp;#34;&lt;/span&gt;&amp;gt;Password&amp;lt;/&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;label&lt;/span&gt;&amp;gt;
-          &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;ng-model&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;password&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;id&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;password&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;placeholder&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Password&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;password&amp;#34;&lt;/span&gt;
-                 &lt;span style=&#34;color:#309&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;form-control&amp;#34;&lt;/span&gt; /&amp;gt;
-        &amp;lt;/&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;div&lt;/span&gt;&amp;gt;
-        &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;div&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;form-group&amp;#34;&lt;/span&gt;&amp;gt;
-          &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;input&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;type&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;submit&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;btn btn-default btn-login-submit btn-block m-t-md&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;value&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Login&amp;#34;&lt;/span&gt; /&amp;gt;
-        &amp;lt;/&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;div&lt;/span&gt;&amp;gt;
-      &amp;lt;/&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;form&lt;/span&gt;&amp;gt;
-    &amp;lt;/&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;div&lt;/span&gt;&amp;gt;
-  &amp;lt;/&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;div&lt;/span&gt;&amp;gt;
-  &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;div&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;col-md-3&amp;#39;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;div&lt;/span&gt;&amp;gt;
-&amp;lt;/&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;div&lt;/span&gt;&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;The view for home page - &lt;code&gt;home.html&lt;/code&gt; renders a user profile:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;div&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;row&amp;#34;&lt;/span&gt;&amp;gt;
-  &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;h1&lt;/span&gt;&amp;gt;Welcome, {{profile.name.first}}&amp;lt;/&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;h1&lt;/span&gt;&amp;gt;
-  &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;div&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;col-lg-3 col-sm-6&amp;#34;&lt;/span&gt;&amp;gt;
-    &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;div&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;card hovercard&amp;#34;&lt;/span&gt;&amp;gt;
-      &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;div&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;cardheader&amp;#34;&lt;/span&gt;&amp;gt;
-      &amp;lt;/&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;div&lt;/span&gt;&amp;gt;
-      &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;div&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;avatar&amp;#34;&lt;/span&gt;&amp;gt;
-        &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;img&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;alt&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;src&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;{{profile.thumbnail}}&amp;#34;&lt;/span&gt;&amp;gt;
-      &amp;lt;/&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;div&lt;/span&gt;&amp;gt;
-      &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;div&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;info&amp;#34;&lt;/span&gt;&amp;gt;
-        &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;div&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;title&amp;#34;&lt;/span&gt;&amp;gt;
-          {{profile.username}}
-        &amp;lt;/&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;div&lt;/span&gt;&amp;gt;
-        &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;div&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;desc&amp;#34;&lt;/span&gt;&amp;gt;{{profile.name.first}} {{profile.name.last}}&amp;lt;/&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;div&lt;/span&gt;&amp;gt;
-      &amp;lt;/&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;div&lt;/span&gt;&amp;gt;
-      &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;div&lt;/span&gt;&amp;gt;
-        &amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;a&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;href&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/#/signout&amp;#34;&lt;/span&gt;&amp;gt;Sign Out&amp;lt;/&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;a&lt;/span&gt;&amp;gt;
-      &amp;lt;/&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;div&lt;/span&gt;&amp;gt;
-    &amp;lt;/&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;div&lt;/span&gt;&amp;gt;
-  &amp;lt;/&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;div&lt;/span&gt;&amp;gt;
-&amp;lt;/&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;div&lt;/span&gt;&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;It also has a link for signing out. With this code in place, we can start our Spring application and sign in from the browser.&lt;/p&gt;
-
-&lt;p&gt;This is the last of this series of blog posts on JWT and Spring. We built an API capable of authenticating with JWTs and a front end capable of authenticating against this API. The code for the complete example is available on &lt;a href=&#34;https://github.com/sdqali/jwt-demo&#34;&gt;GitHub&lt;/a&gt;.&lt;/p&gt;</description>
     </item>
     
   </channel>
