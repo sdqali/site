@@ -97,4 +97,4 @@ Caused by: java.lang.IllegalArgumentException: A proto discovery root is require
   at me.dinowernli.grpc.polyglot.Main.getFileDescriptorSet(Main.java:93)
   at me.dinowernli.grpc.polyglot.Main.main(Main.java:62)
 ```
-This was unexpected, as adding this capability to Polyglot should not be too diffcult, considering that they already support reflection for executing services.
+This was unexpected, as adding this capability to Polyglot should not be too diffcult, considering that they already support reflection for executing services. This is something that I am interested in implementing.
