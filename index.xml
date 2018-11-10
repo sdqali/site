@@ -5,8 +5,20 @@
     <link>https://sdqali.in/?utm_source=site&amp;utm_medium=feed</link>
     <description>Recent content in {code that works} on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
-    <lastBuildDate>Sat, 09 Jun 2018 11:55:23 -0700</lastBuildDate>
+    <lastBuildDate>Fri, 09 Nov 2018 18:12:47 -0800</lastBuildDate>
     <atom:link href="/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>My talk at GraphQL Summit 2018</title>
+      <link>https://sdqali.in/blog/2018/11/09/my-talk-at-graphql-summit-2018/?utm_source=site&amp;utm_medium=feed</link>
+      <pubDate>Fri, 09 Nov 2018 18:12:47 -0800</pubDate>
+      
+      <guid>https://sdqali.in/blog/2018/11/09/my-talk-at-graphql-summit-2018/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;I had the opportunity to give a talk at &lt;a href=&#34;https://summit.graphql.com/&#34;&gt;GraphQL Summit 2018&lt;/a&gt; about the experience of introducing GraphQL for our Payments API at Braintree. It was well received, as far as I could tell - I received a lot of nice feedback and had great conversations with members of the community.&lt;/p&gt;
+
+&lt;p&gt;The slides are available here on &lt;a href=&#34;https://speakerdeck.com/sdqali/graphql-for-a-payments-api&#34;&gt;SpeakerDeck&lt;/a&gt;. I will update this post with links to the video of my talk when it becomes available.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Formatting Java Instant for resolutions</title>
@@ -1406,115 +1418,6 @@ hello-world   1         1         1            1           4m
 
 &lt;p&gt;That is it. We have deployed our hello world application using Kubernetes.&lt;/p&gt;
 </description>
-    </item>
-    
-    <item>
-      <title>Handling Deserialization errors in Spring Redis Sessions</title>
-      <link>https://sdqali.in/blog/2016/11/02/handling-deserialization-errors-in-spring-redis-sessions/?utm_source=site&amp;utm_medium=feed</link>
-      <pubDate>Wed, 02 Nov 2016 13:10:33 -0700</pubDate>
-      
-      <guid>https://sdqali.in/blog/2016/11/02/handling-deserialization-errors-in-spring-redis-sessions/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>&lt;p&gt;One of the challenges of using storing spring sessions in Redis is that the objects that gets stored as part of a session often undergoes changes as the application evolves and these changes cause de-serialization exceptions to be thrown after a deployment when a session created before the deployment is presented to the application. This blog post discusses a method to work around this issue.&lt;/p&gt;
-
-&lt;p&gt;&lt;/p&gt;
-
-&lt;h2 id=&#34;the-issue&#34;&gt;The issue&lt;/h2&gt;
-
-&lt;p&gt;Consider an application that uses a custom authentication service to validate credentials presented by a client. To achieve this, we will wire up a custom authentication provider which creates an object &lt;code&gt;Customer&lt;/code&gt; as the authenticated user in session.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;Customer&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;extends&lt;/span&gt; User &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;Customer&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;String name&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;super&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;name&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; Collections&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;singletonList&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;new&lt;/span&gt; SimpleGrantedAuthority&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;USER&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)));&lt;/span&gt;
-  &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;Things work great, but after a while the team decides to store the logged in user&amp;rsquo;s email address in the session. To achieve this, we change the &lt;code&gt;Customer&lt;/code&gt; type to:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;Customer&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;extends&lt;/span&gt; User &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;private&lt;/span&gt; String email&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-
-  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;Customer&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;String name&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; String email&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;super&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;name&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; Collections&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;singletonList&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;new&lt;/span&gt; SimpleGrantedAuthority&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;USER&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)));&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;this&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;email&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; email&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-  &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; String &lt;span style=&#34;color:#c0f&#34;&gt;getEmail&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; email&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-  &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;setEmail&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;String email&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;this&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;email&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; email&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-  &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;When this code is deployed and a user tries to access a protected resource by presenting a session created before the deployment, an exception is thrown.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;org.springframework.data.redis.serializer.SerializationException: Cannot deserialize; nested exception is org.springframework.core.serializer.support.SerializationFailedException: Failed to deserialize payload. Is the byte array a result of corresponding serialization for DefaultDeserializer?; nested exception is java.io.InvalidClassException: in.sdqali.spring.vo.Customer; local class incompatible: stream classdesc serialVersionUID = 5161850915957547690, local class serialVersionUID = 1045726772100761661
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This happens because the serialized object in the session and the current structure of the session differ.&lt;/p&gt;
-
-&lt;h2 id=&#34;solutions&#34;&gt;Solutions&lt;/h2&gt;
-
-&lt;p&gt;This issue was raised on the Spring Session issue tracker &lt;sup class=&#34;footnote-ref&#34; id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; and there were a lot of work-arounds discussed. Of the work arounds, wrapping the session repository offers the least disruption to the end user.
-This approach ensures that every time a de-serialization error is thrown while trying to read an object from the session, that object is deleted, preventing subsequent errors.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;SafeDeserializationRepository&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;S &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;extends&lt;/span&gt; ExpiringSession&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;implements&lt;/span&gt; SessionRepository&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;S&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;final&lt;/span&gt; SessionRepository&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;S&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt; delegate&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;final&lt;/span&gt; RedisTemplate&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;Object&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; Object&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt; redisTemplate&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-
-  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;static&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;final&lt;/span&gt; String BOUNDED_HASH_KEY_PREFIX &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;spring:session:sessions:&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;static&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;final&lt;/span&gt; Logger logger &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; getLogger&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;SafeDeserializationRepository&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
-
-  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;SafeDeserializationRepository&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;SessionRepository&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;S&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt; delegate&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt;
-                                       RedisTemplate&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;Object&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; Object&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt; redisTemplate&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;this&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;delegate&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; delegate&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;this&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;redisTemplate&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; redisTemplate&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-  &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-  &lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;
-  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; S &lt;span style=&#34;color:#c0f&#34;&gt;createSession&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; delegate&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;createSession&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;();&lt;/span&gt;
-  &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-  &lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;
-  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;save&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;S session&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-    delegate&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;save&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;session&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
-  &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-  &lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;
-  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; S &lt;span style=&#34;color:#c0f&#34;&gt;getSession&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;String id&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;try&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-      &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; delegate&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;getSession&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;id&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;catch&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;SerializationException e&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-      logger&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;info&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Deleting non-deserializable session with key {}&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; id&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
-      redisTemplate&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;delete&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;BOUNDED_HASH_KEY_PREFIX &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; id&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
-      &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;null&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-  &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-  &lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;
-  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;delete&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;String id&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-    delegate&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;delete&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;id&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
-  &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;However, it is not easy to wire up this repository in the configuration. Since Spring Redis Session is auto configured, the only way to override beans for Redis Session is to extend &lt;code&gt;RedisHttpSessionConfiguration&lt;/code&gt; and specify beans. Ideally, we want to override the method &lt;code&gt;RedisHttpSessionConfiguration#sessionRepository&lt;/code&gt;. This would mean that &lt;code&gt;SafeDeserializationRepository&lt;/code&gt; inherits from &lt;code&gt;RedisOperationsSessionRepository&lt;/code&gt;. That does not sound too complicated till you realize that &lt;code&gt;RedisOperationsSessionRepository#getSession(java.lang.String)&lt;/code&gt; returns &lt;code&gt;RedisSession&lt;/code&gt; which is a final class declared inside &lt;code&gt;RedisOperationsSessionRepository&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;On closer look, the repository is hooked in to &lt;code&gt;SessionRepositoryFilter&lt;/code&gt; and it is indeed possible to override the &lt;code&gt;SpringHttpSessionConfiguration#springSessionRepositoryFilter&lt;/code&gt; method to create a new filter that takes our &lt;code&gt;SafeDeserializationRepository&lt;/code&gt;.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#99f&#34;&gt;@Configuration&lt;/span&gt;
-&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;RedisSessionConfig&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;extends&lt;/span&gt; RedisHttpSessionConfiguration &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-  &lt;span style=&#34;color:#99f&#34;&gt;@Autowired&lt;/span&gt;
-  RedisTemplate&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;Object&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; Object&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt; redisTemplate&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-
-  &lt;span style=&#34;color:#99f&#34;&gt;@Bean&lt;/span&gt;
-  &lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;
-  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;S &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;extends&lt;/span&gt; ExpiringSession&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt; SessionRepositoryFilter&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;?&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;extends&lt;/span&gt; ExpiringSession&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;springSessionRepositoryFilter&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;SessionRepository&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;S&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt; sessionRepository&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;super&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;springSessionRepositoryFilter&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;new&lt;/span&gt; SafeDeserializationRepository&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&amp;gt;(&lt;/span&gt;sessionRepository&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; redisTemplate&lt;span style=&#34;color:#555&#34;&gt;));&lt;/span&gt;
-  &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class=&#34;footnotes&#34;&gt;
-
-&lt;hr /&gt;
-
-&lt;ol&gt;
-&lt;li id=&#34;fn:1&#34;&gt;&lt;a href=&#34;https://github.com/spring-projects/spring-session/issues/280&#34;&gt;SerializationFailedException after re-deploying with changed session object #280&lt;/a&gt;.
- &lt;a class=&#34;footnote-return&#34; href=&#34;#fnref:1&#34;&gt;&lt;sup&gt;[return]&lt;/sup&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/div&gt;</description>
     </item>
     
   </channel>
