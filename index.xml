@@ -5,8 +5,37 @@
     <link>https://sdqali.in/?utm_source=site&amp;utm_medium=feed</link>
     <description>Recent content in {code that works} on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
-    <lastBuildDate>Fri, 09 Nov 2018 18:12:47 -0800</lastBuildDate>
+    <lastBuildDate>Sat, 23 Mar 2019 11:14:06 -0700</lastBuildDate>
     <atom:link href="/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Importing the SASUSER datasets in SAS Studio</title>
+      <link>https://sdqali.in/blog/2019/03/23/importing-the-sasuser-datasets-in-sas-studio/?utm_source=site&amp;utm_medium=feed</link>
+      <pubDate>Sat, 23 Mar 2019 11:14:06 -0700</pubDate>
+      
+      <guid>https://sdqali.in/blog/2019/03/23/importing-the-sasuser-datasets-in-sas-studio/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;I have been playing around with SAS for the last two weeks. I started with a SAS University Edition running on a VirtualBox instance on my MacBook, but soon realized that it was way more convenient to use a SAS OnDemand account. Having made the switch, I realized that all learning materials made references to and used examples with datsets from a library named &lt;code&gt;SASUSER&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;It was not clear how to get these datasets and use them in SAS Studio. After a bunch of searches, I found &lt;a href=&#34;https://communities.sas.com/t5/SAS-Certification/How-to-get-SASUSER-library-s-data-sets/m-p/306631/highlight/true#M124&#34;&gt;this page&lt;/a&gt; that pointed at data set up scripts for these datasets. The URL it pointed to had of course been repurposed and now redirected to a marketing page. After going back through multiple versions of the page on Internet Archive, I finally managed to find a &lt;a href=&#34;https://web.archive.org/web/20151005165134/http://support.sas.com:80/publishing/cert/basecertguide3.html&#34;&gt;snapshot&lt;/a&gt; that linked to a set up file that worked.&lt;/p&gt;
+
+&lt;p&gt;Here are the steps to use the setup script:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Download the &lt;a href=&#34;https://support.sas.com/content/dam/SAS/support/en/books/data/sampledata.txt&#34;&gt;script&lt;/a&gt;. Depending on the version of the material you are using, you may want to grab an &lt;a href=&#34;https://web.archive.org/web/20150921023746/http://support.sas.com/publishing/cert/sampdata.txt&#34;&gt;older snapshot&lt;/a&gt; from the Internet Archive.&lt;/li&gt;
+&lt;li&gt;Rename the file so that it&amp;rsquo;s extension is changed to &lt;code&gt;.sas&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Create a directory under your home directory in SAS Studio, for example &lt;code&gt;sasuser&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Upload the sample data script from step 1 to this folder, using the web interface.&lt;/li&gt;
+&lt;li&gt;Create a new SAS source file named &lt;code&gt;libname.sas&lt;/code&gt; with the following content:&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-sas&#34; data-lang=&#34;sas&#34;&gt;libname sasuser &amp;#34;~/sasuser&amp;#34;;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;Execute this script.&lt;/li&gt;
+&lt;li&gt;Now execute the sample data script.&lt;/li&gt;
+&lt;li&gt;It should create all the datsets you need in the library named &lt;code&gt;sasuser&lt;/code&gt;. You can verify this using the following script:&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-sas&#34; data-lang=&#34;sas&#34;&gt;proc contents data=sasuser._all_ nods;
+run;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description>
+    </item>
     
     <item>
       <title>My talk at GraphQL Summit 2018</title>
@@ -1225,190 +1254,6 @@ member 772c76fe731a3914 is healthy: got healthy result from https://localhost:13
 member aa3bff8d4d84db66 is healthy: got healthy result from https://localhost:1279
 cluster is healthy&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;This set up gives us a secure etcd cluster with a secure proxy in front of it. Communications between client and proxy, proxy and nodes and among nodes are all secured.&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>A very basic introduction to deploying a Java application using Kubernetes</title>
-      <link>https://sdqali.in/blog/2016/11/04/a-very-basic-introduction-to-deploying-a-java-application-using-kubernetes/?utm_source=site&amp;utm_medium=feed</link>
-      <pubDate>Fri, 04 Nov 2016 22:34:53 -0700</pubDate>
-      
-      <guid>https://sdqali.in/blog/2016/11/04/a-very-basic-introduction-to-deploying-a-java-application-using-kubernetes/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>
-
-&lt;p&gt;I have been playing around with Kubernetes and Docker lately. To borrow the description of Kubernetes from their website,&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;&amp;ldquo;Kubernetes is an open-source system for automating deployment, scaling, and management of containerized applications.&amp;rdquo;&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;One of the first things I did was to try and see what it would take to go from an application to deploying it. I started with a simple Java application and had to set up the development environment. These are my notes from this process. This assumes that you have docker installed on your development environment.&lt;/p&gt;
-
-&lt;h2 id=&#34;install-minikube&#34;&gt;Install minikube&lt;/h2&gt;
-
-&lt;p&gt;&lt;a href=&#34;https://github.com/kubernetes/minikube&#34;&gt;Minikube&lt;/a&gt; is a tool that makes it easy to run Kubernetes for local development. To run minikube, you need to have a virtualizer installed - in my case I already had VirtualBox installed. Instructions for installing minikube is available &lt;a href=&#34;https://github.com/kubernetes/minikube/releases&#34;&gt;here&lt;/a&gt;. In my case, this is what I did:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;gt; curl -Lo minikube https://storage.googleapis.com/minikube/releases/v0.12.2/minikube-darwin-amd64
-&amp;gt; chmod +x minikube
-&amp;gt; sudo mv minikube /usr/local/bin/
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;install-kubectl&#34;&gt;Install kubectl&lt;/h2&gt;
-
-&lt;p&gt;&lt;a href=&#34;http://kubernetes.io/docs/user-guide/kubectl-overview/&#34;&gt;Kubectl&lt;/a&gt; is a command line application that executes commands against Kubernets clusters. Instructions for installing kubectl are available &lt;a href=&#34;http://kubernetes.io/docs/getting-started-guides/minikube/#install-kubectl&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;gt; curl -Lo kubectl http://storage.googleapis.com/kubernetes-release/release/v1.3.0/bin/darwin/amd64/kubectl
-&amp;gt; chmod +x kubectl
-&amp;gt; sudo mv kubectl /usr/local/bin/
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;set-up-a-docker-repository&#34;&gt;Set up a Docker repository&lt;/h2&gt;
-
-&lt;p&gt;Kubernetes pulls container images from publicly available registries. But because we are building an application that we will not be publishing to public docker registries, we need to create a local registry. There is a great write up on how to set up a local docker registry at &lt;a href=&#34;http://thenewstack.io/tutorial-configuring-ultimate-development-environment-kubernetes/&#34;&gt;Newstack&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h2 id=&#34;start-minikube-with-the-registry&#34;&gt;Start minikube with the registry&lt;/h2&gt;
-
-&lt;p&gt;Now that we have a local docker registry, we can go ahead and tell minikube to consume images from this registry. However, if you have started a minikube cluster previously, the registry override will not be available to it unless it is deleted.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;gt; docker-machine ip registry
-192.168.99.100
-&amp;gt; minikube stop
-&amp;gt; minikube delete
-&amp;gt; minikube start --vm-driver=&amp;quot;virtualbox&amp;quot; --insecure-registry=192.168.99.100:80
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;create-a-container-image-for-the-application&#34;&gt;Create a container image for the application&lt;/h2&gt;
-
-&lt;p&gt;The application in this case is a simple Spring Boot application that has exactly one controller.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#99f&#34;&gt;@RestController&lt;/span&gt;
-&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;HelloController&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-  &lt;span style=&#34;color:#99f&#34;&gt;@RequestMapping&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/hello&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
-  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; Map &lt;span style=&#34;color:#c0f&#34;&gt;hello&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; singletonMap&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;message&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;hello&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
-  &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;In order to create a docker container from this application, we will use the &lt;a href=&#34;https://github.com/spotify/docker-maven-plugin&#34;&gt;Maven Docker Plugin&lt;/a&gt;. We will need to set a prefix for our docker image. This can be done with this maven property:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;lt;docker.image.prefix&amp;gt;sadiqueio&amp;lt;/docker.image.prefix&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Th plugin expects a &lt;code&gt;Dockerfile&lt;/code&gt; to be present in the &lt;code&gt;src/main/docker&lt;/code&gt; directory. Our &lt;code&gt;Dockerfile&lt;/code&gt; will look like this:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;FROM frolvlad/alpine-oraclejdk8:slim
-ADD hello-world-0.0.1-SNAPSHOT.jar app.jar
-RUN sh -c &#39;touch /app.jar&#39;
-ENTRYPOINT [&amp;quot;java&amp;quot;,&amp;quot;-jar&amp;quot;,&amp;quot;/app.jar&amp;quot;]
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;With this in place, we can generate a docker image. We need to ensure that we are looking at the dev docker host.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;gt; eval $(docker-machine env dev)
-&amp;gt; mvn package docker:build
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;tag-and-push-the-image-to-local-registry&#34;&gt;Tag and push the image to local registry&lt;/h2&gt;
-
-&lt;p&gt;The generated image &lt;code&gt;sadiqueio/hello-world&lt;/code&gt; need to be published to the local registry we created.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;gt; docker tag sadiqueio/hello-world 192.168.99.100:80/hello-world
-&amp;gt; docker push 192.168.99.100:80/hello-world
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;define-and-create-a-service&#34;&gt;Define and create a service&lt;/h2&gt;
-
-&lt;p&gt;We will define a Kubernetes service object for this application &lt;code&gt;hello-world-service.yaml&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;apiVersion: v1
-kind: Service
-metadata:
-  name: hello-world
-  labels:
-    app: hello-world
-    tier: backend
-spec:
-  type: NodePort
-  ports:
-    # the port that this service should serve on
-  - port: 8080
-  selector:
-    app: hello-world
-    tier: backend
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The service can be created using:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;gt; kubectl create -f hello-world-service.yaml
-You have exposed your service on an external port on all nodes in your
-cluster.  If you want to expose this service to the external internet, you may
-need to set up firewall rules for the service port(s) (tcp:30194) to serve traffic.
-
-See http://releases.k8s.io/release-1.3/docs/user-guide/services-firewalls.md for more details.
-service &amp;quot;hello-world&amp;quot; created
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Make a note of the port assigned to this service. We will use this port later to access our application.&lt;/p&gt;
-
-&lt;h2 id=&#34;define-and-create-a-deployment&#34;&gt;Define and create a deployment&lt;/h2&gt;
-
-&lt;p&gt;The next step is to define and create a deployment for our application. This is where we specify the image we previously created and published to the registry.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;apiVersion: extensions/v1beta1
-kind: Deployment
-metadata:
-  name: hello-world
-spec:
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        app: hello-world
-        tier: backend
-    spec:
-      containers:
-      - name: hello-world
-        image: 192.168.99.100:80/hello-world
-        resources:
-          requests:
-            cpu: 100m
-            memory: 100Mi
-        env:
-        - name: GET_HOSTS_FROM
-          value: dns
-        ports:
-        - containerPort: 8080
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;gt; kubectl create -f hello-world-deployment.yaml
-deployment &amp;quot;hello-world&amp;quot; created
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;ensure-that-the-deployment-is-successful&#34;&gt;Ensure that the deployment is successful&lt;/h2&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;gt; kubectl get services
-NAME          CLUSTER-IP   EXTERNAL-IP   PORT(S)    AGE
-hello-world   10.0.0.252   &amp;lt;none&amp;gt;        8080/TCP   4m
-&amp;gt; kubectl get deployments
-NAME          DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
-hello-world   1         1         1            1           4m
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;access-the-service&#34;&gt;Access the service&lt;/h2&gt;
-
-&lt;p&gt;We already know the port assigned to our service. Because we specified &lt;code&gt;type: NodePort&lt;/code&gt;, the IP address we need to use is that of the Kubernetes cluster. This IP address can be found using the minikube command.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;gt; minikube ip
-192.168.99.102
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now that we have both pieces of information, we can test that our application is up.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;gt; curl  -s http://192.168.99.102:30194/hello | jq .
-{
-  &amp;quot;message&amp;quot;: &amp;quot;hello&amp;quot;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;That is it. We have deployed our hello world application using Kubernetes.&lt;/p&gt;
-</description>
     </item>
     
   </channel>
