@@ -1,7 +1,6 @@
 ---
 title: Importing the SASUSER datasets in SAS Studio
 date: 2019-03-23T11:14:06-07:00
-draft: true
 tags:
 - sas
 - development
