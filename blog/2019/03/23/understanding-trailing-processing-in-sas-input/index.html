@@ -14,7 +14,7 @@
     
     
 
-    <title>Command line clients for gRPC - grpcurl - {code that works} by Sadique Ali</title>
+    <title>Understanding trailing @ processing in SAS input - {code that works} by Sadique Ali</title>
 
     
     
@@ -22,26 +22,26 @@
 
 </head>
 
-  <meta name="description" content="We are in the middle of considering replacing JSON over HTTP with gRPC for communication between our internal services. One of my concerns about this was how we would be able to debug and poke around things in a world where we will no longer be able to use cURL. I have been looking at cURL like command line utilities we can use to replace most of the capabilities, if not all of cURL. So far, I have looked at grpcurl, grpc_cli and polyglot .In these blog posts, we will try and compare these tools.
-" />
+  <meta name="description" content="One of the first things I noticed when I started poking around in SAS code is that the input statement is very powerful, flexible and hence sometimes hard to understand. It can read pretty much anything in to a dataset as long as you tell it what to do.
+The use of trailing @s to take control of how SAS advances the input pointer is a powerful technique to read from input files where the data is laid out in non-standard formats." />
   
-    <meta content="grpc, grpcurl, polyglot" name="keywords">
+    <meta content="SAS, development" name="keywords">
   
 
   
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@sdqali">
   <meta name="twitter:creator" content="@sdqali">
-  <meta name="twitter:title" content="Command line clients for gRPC - grpcurl">
-  <meta name="twitter:description" content="We are in the middle of considering replacing JSON over HTTP with gRPC for communication between our internal services. One of my concerns about this was how we would be able to debug and poke around things in a world where we will no longer be able to use cURL. I have been looking at cURL like command line utilities we can use to replace most of the capabilities, if not all of cURL. So far, I have looked at grpcurl, grpc_cli and polyglot .In these blog posts, we will try and compare these tools.
-">
-  <meta name="twitter:image" content="https://sdqali.in/images/grpc.png">
+  <meta name="twitter:title" content="Understanding trailing @ processing in SAS input">
+  <meta name="twitter:description" content="One of the first things I noticed when I started poking around in SAS code is that the input statement is very powerful, flexible and hence sometimes hard to understand. It can read pretty much anything in to a dataset as long as you tell it what to do.
+The use of trailing @s to take control of how SAS advances the input pointer is a powerful technique to read from input files where the data is laid out in non-standard formats.">
+  <meta name="twitter:image" content="https://sdqali.in/">
 
-  <meta property="og:title" content="Command line clients for gRPC - grpcurl" />
-  <meta property="og:description" content="We are in the middle of considering replacing JSON over HTTP with gRPC for communication between our internal services. One of my concerns about this was how we would be able to debug and poke around things in a world where we will no longer be able to use cURL. I have been looking at cURL like command line utilities we can use to replace most of the capabilities, if not all of cURL. So far, I have looked at grpcurl, grpc_cli and polyglot .In these blog posts, we will try and compare these tools.
-" itemprop="description"/>
-  <meta property="og:url" content="https://sdqali.in/blog/2018/04/03/command-line-clients-for-grpc---grpcurl/" />
-  <meta property="og:image" content="https://sdqali.in/images/grpc.png" />
+  <meta property="og:title" content="Understanding trailing @ processing in SAS input" />
+  <meta property="og:description" content="One of the first things I noticed when I started poking around in SAS code is that the input statement is very powerful, flexible and hence sometimes hard to understand. It can read pretty much anything in to a dataset as long as you tell it what to do.
+The use of trailing @s to take control of how SAS advances the input pointer is a powerful technique to read from input files where the data is laid out in non-standard formats." itemprop="description"/>
+  <meta property="og:url" content="https://sdqali.in/blog/2019/03/23/understanding-trailing-processing-in-sas-input/" />
+  <meta property="og:image" content="https://sdqali.in/" />
   <body>
 
     <nav class="navbar navbar-default navbar-custom navbar-fixed-top"
@@ -86,16 +86,14 @@
         <div class="row">
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
             <div class="post-heading for-post">
-              <h1> Command line clients for gRPC - grpcurl</h1>
-              <span class="meta">Tue, Apr 3, 2018</span>
+              <h1> Understanding trailing @ processing in SAS input</h1>
+              <span class="meta">Sat, Mar 23, 2019</span>
               <div class="tags">
                 <span class="fa fa-tags" aria-hidden="true"></span>
                 
-                 <a href="/tags/grpc">grpc</a>
+                 <a href="/tags/sas">SAS</a>
                 
-                ,  <a href="/tags/grpcurl">grpcurl</a>
-                
-                ,  <a href="/tags/polyglot">polyglot</a>
+                ,  <a href="/tags/development">development</a>
                 
               </div>
             </div>
@@ -112,65 +110,166 @@
          itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div class="row">
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-            <p>We are in the middle of considering replacing JSON over HTTP with gRPC for communication between our internal services. One of my concerns about this was how we would be able to debug and poke around things in a world where we will no longer be able to use cURL. I have been looking at cURL like command line utilities we can use to replace most of the capabilities, if not all of cURL. So far, I have looked at <a href="https://github.com/fullstorydev/grpcurl">grpcurl</a>, <a href="https://github.com/grpc/grpc/blob/master/doc/command_line_tool.md">grpc_cli</a> and <a href="https://github.com/grpc-ecosystem/polyglot">polyglot</a> .In these blog posts, we will try and compare these tools.
-</p>
+            <p>One of the first things I noticed when I started poking around in SAS code is that the <code>input</code> statement is very powerful, flexible and hence sometimes hard to understand. It can read pretty much anything in to a dataset as long as you tell it what to do.</p>
 
-<p>In this example, we will be running the example implementations provided by the <a href="https://github.com/grpc/grpc-java/tree/master/examples">grpc-java</a> project and using the command line tools against the services from these examples. We will also be running these services without enabling reflection.</p>
+<p>The use of trailing <code>@</code>s to take control of how SAS advances the input pointer is a powerful technique to read from input files where the data is laid out in non-standard formats. In this blog post, we will try to understand how trailing <code>@</code> processing works with the help of some <code>infile</code> statement options and the <code>putlog</code> statement to write to the SAS log.</p>
 
-<h2 id="grpcurl">grpcurl</h2>
+<p>Let&rsquo;s take this example from the excellent paper <em>The Input Statement: Where It&rsquo;s @</em> <sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup> - given an put file where the first variable has to be read beginning from a particular column in the input line based on the value of the second variable.</p>
 
-<p>One of the things that immediately struck me when I started looking at grpcurl was how neat it&rsquo;s command line interface was, especially in comparison with that of polyglot. grpcurl is written in Go and expects you to provide <code>protoset</code> files that contain service descriptors exported from the <code>proto</code> files of the service.</p>
+<pre><code>Age  Type
+23   1
+  44 2
+</code></pre>
 
-<p>For example, for the <code>hello-world</code> service from the examples, the <code>protoset</code> files can be generated using:</p>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">&gt; <span style="color:#366">pwd</span>
-grpc-java/examples/src/main/proto
-&gt; protoc --proto_path<span style="color:#555">=</span>./ <span style="color:#c30;font-weight:bold">\
-</span><span style="color:#c30;font-weight:bold"></span>    --descriptor_set_out<span style="color:#555">=</span>helloworld.protoset <span style="color:#c30;font-weight:bold">\
-</span><span style="color:#c30;font-weight:bold"></span>    --include_imports <span style="color:#c30;font-weight:bold">\
-</span><span style="color:#c30;font-weight:bold"></span>    ./helloworld.proto</code></pre></div>
-<p>This will produce a <code>protoset</code> file named <code>helloworld.protoset</code>. Using this, we can now list the services available:</p>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">&gt; grpcurl -protoset ./helloworld.protoset list
-helloworld.Greeter</code></pre></div>
-<p>We can also list all the methods available in a service:</p>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">&gt; grpcurl -protoset ./helloworld.protoset list helloworld.Greeter
-SayHello</code></pre></div>
-<p>There is also a describe command that produces description of a service:</p>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">&gt; grpcurl -protoset ./helloworld.protoset describe helloworld.Greeter
-helloworld.Greeter is a service:
-<span style="color:#555">{</span>
-  <span style="color:#c30">&#34;name&#34;</span>: <span style="color:#c30">&#34;Greeter&#34;</span>,
-  <span style="color:#c30">&#34;method&#34;</span>: <span style="color:#555">[</span>
-    <span style="color:#555">{</span>
-      <span style="color:#c30">&#34;name&#34;</span>: <span style="color:#c30">&#34;SayHello&#34;</span>,
-      <span style="color:#c30">&#34;inputType&#34;</span>: <span style="color:#c30">&#34;.helloworld.HelloRequest&#34;</span>,
-      <span style="color:#c30">&#34;outputType&#34;</span>: <span style="color:#c30">&#34;.helloworld.HelloReply&#34;</span>,
-      <span style="color:#c30">&#34;options&#34;</span>: <span style="color:#555">{</span>
+<p>A first pass at trying to do this will result in code like this:</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sas" data-lang="sas">data ages;
+  input @6 type $1.;
 
-      <span style="color:#555">}</span>
-    <span style="color:#555">}</span>
-  <span style="color:#555">]</span>,
-  <span style="color:#c30">&#34;options&#34;</span>: <span style="color:#555">{</span>
+  if type=&#39;1&#39; then
+    input @1 age 2.;
+  else if type=&#39;2&#39; then
+    input @3 age 2.;
+  drop type;
+  datalines;
+23   1
+  44 2
+;
+run;
 
-  <span style="color:#555">}</span>
-<span style="color:#555">}</span></code></pre></div>
-<p>Now we can execute the method on this service running on a server by specifying the address and the path to the method:</p>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">&gt; grpcurl -plaintext -protoset ./helloworld.protoset -d <span style="color:#c30">&#39;{&#34;name&#34;:&#34;World&#34;}&#39;</span> localhost:50051 helloworld.Greeter/SayHello
-<span style="color:#555">{</span>
-  <span style="color:#c30">&#34;message&#34;</span>: <span style="color:#c30">&#34;Hello World&#34;</span>
-<span style="color:#555">}</span></code></pre></div>
-<p>It can also read the JSON data to pass to the server from STDIN, by setting the value of <code>-d</code> to <code>@</code>:</p>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">&gt; <span style="color:#366">echo</span> <span style="color:#c30">&#39;{&#34;name&#34;: &#34;World&#34;}&#39;</span> | grpcurl -plaintext -protoset ./helloworld.protoset -d @ localhost:50051 helloworld.Greeter/SayHello
-<span style="color:#555">{</span>
-  <span style="color:#c30">&#34;message&#34;</span>: <span style="color:#c30">&#34;Hello World&#34;</span>
-<span style="color:#555">}</span></code></pre></div>
-<p>In both these examples, we passed the <code>-plaintext</code> switch because our server is not running with TLS.</p>
+proc print data=ages;
+  title &#34;Age read without trailing @&#34;;
+run;</code></pre></div>
+<p>The result we get is not what we expect.</p>
 
-<p>If we were to <a href="https://github.com/grpc/grpc-java/blob/master/documentation/server-reflection-tutorial.md">turn on reflection</a>, we will no longer need to depend on the <code>protoset</code> file.</p>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">&gt; <span style="color:#366">echo</span> <span style="color:#c30">&#39;{&#34;name&#34;: &#34;World&#34;}&#39;</span> | grpcurl -plaintext -d @ localhost:50051 helloworld.Greeter/SayHello
-<span style="color:#555">{</span>
-  <span style="color:#c30">&#34;message&#34;</span>: <span style="color:#c30">&#34;Hello World&#34;</span>
-<span style="color:#555">}</span></code></pre></div>
-<p>Overall, I like what the creator of grpcurl have done. The only thing I dont like is the fact that when reflection is turned off, we have to generate <code>protoset</code> files. It would have been great if it could just look at the existing <code>proto</code> files, which is what <code>polyglot</code> does. We will look at polyglot in the next blog post.</p>
+<pre><code>| Obs | Age |
+|-----|-----|
+| 1   | .   |
+</code></pre>
+
+<p>We can understand how SAS read this input using the <code>line=</code> and <code>column=</code> options of the <code>infile</code> statement. While the code in the above listing does not explicitly use <code>infile</code> to point at the <code>datalines</code>, this can be done when we want to use <code>infile</code>&rsquo;s options with <code>datalines</code>.</p>
+
+<p>This is a good time to remind us what the <code>line=</code> and <code>column=</code> options of <code>infile</code> does. From the <a href="https://documentation.sas.com/?docsetId=lestmtsref&amp;docsetTarget=n1rill4udj0tfun1fvce3j401plo.htm&amp;docsetVersion=9.4&amp;locale=en">documentation</a>:</p>
+
+<blockquote>
+<p>LINE=variable</p>
+
+<p>specifies a variable that SAS sets to the line location of the input pointer in the input buffer. As with automatic variables, the LINE= variable is not written to the data set.</p>
+
+<p>COLUMN=variable</p>
+
+<p>names a variable that SAS uses to assign the current column location of the input pointer. As with automatic variables, the COLUMN= variable is not written to the data set.</p>
+</blockquote>
+
+<p>We can modify our code to set these options and then print the value of all variables including these options using the <code>_all_</code> variable that prints the <em>Program Data Vector (PDV)</em>.</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sas" data-lang="sas">data ages;
+  infile datalines line=line column=col;
+
+  input @6 type $1.;
+  putlog &#34;After reading type, before reading age: &#34; _all_ ;
+
+  if type=&#39;1&#39; then
+    input @1 age 2.;
+  else if type=&#39;2&#39; then
+    input @3 age 2.;
+  putlog &#34;After reading age: &#34; _all_ ;
+  putlog &#34;&#34;;
+
+  drop type;
+  datalines;
+23   1
+  44 2
+;
+run;</code></pre></div>
+<p>When the code runs, the following can be seen in the SAS logs:</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sas" data-lang="sas"> After reading type, before reading age: line=1 col=7 type=1 age=. _ERROR_=0 _N_=1
+ After reading age: line=2 col=3 type=1 age=. _ERROR_=0 _N_=1
+ &#34;</code></pre></div>
+<p>After <code>type</code> is read, we can see that the pointer is at line <code>1</code> and column <code>7</code>, which makes sense considering that the code instructs SAS to go to column <code>6</code> and read <code>1</code> character. But then we notice that when <code>age</code> is read, the pointer has moved to <code>2</code> and column <code>3</code> as instructed in the first branch of the <code>if else</code> condition. Since there is nothing at column <code>1-2</code> of line <code>2</code> in the input, a missing value is stored in <code>age</code>.</p>
+
+<p>What we want is some way to tell <code>input</code> to ot move the pointer after the first input statement. This is where the single trailing <code>@</code> comes in. It intructs <code>input</code> to stay on the same line for the next <code>input</code> statement in the <code>data</code> step. The above listing modified to use trailing <code>@</code> is as follows:</p>
+
+<pre><code>data trailing;
+  infile datalines line=line column=col;
+
+  input @6 type $1. @;
+  putlog &quot;After reading type, before reading age: &quot; _all_ ;
+
+  if type='1' then
+    input @1 age 2.;
+  else if type='2' then
+    input @3 age 2.;
+  putlog &quot;After reading age: &quot; _all_ ;
+  putlog &quot;&quot;;
+
+  drop type;
+  datalines;
+23   1
+  44 2
+;
+run;
+</code></pre>
+
+<p>The following log lines are written:</p>
+
+<pre><code> After reading type, before reading age: line=1 col=7 type=1 age=. _ERROR_=0 _N_=1
+ After reading age: line=1 col=3 type=1 age=23 _ERROR_=0 _N_=1
+ &quot;
+ After reading type, before reading age: line=1 col=7 type=2 age=. _ERROR_=0 _N_=2
+ After reading age: line=1 col=5 type=2 age=44 _ERROR_=0 _N_=2
+ &quot;
+</code></pre>
+
+<p>The log shows that <code>input</code> stayed on line <code>1</code> even after reading the <code>type</code> variable.</p>
+
+<p>The new dataset has the expected values:</p>
+
+<pre><code>| Obs | Age |
+|-----|-----|
+| 1   | 23  |
+| 2   | 44  |
+</code></pre>
+
+<p>Here is another example that you often run in to on the internet when discussing trailing <code>@</code>:</p>
+
+<pre><code>data  colors;
+  infile datalines line=linenum column=col;
+  input @1 Var1 $ @8 Var2 $ @;
+  putlog &quot;After reading Var1 and Var2: &quot; _all_;
+
+  input @1 Var3 $ @8 Var4 $ ;
+  putlog &quot;After reading Var3 and Var4: &quot; _all_;
+  putlog &quot;&quot;;
+
+  datalines;
+RED    ORANGE  YELLOW  GREEN
+BLUE   INDIGO  PURPLE  VIOLET
+CYAN   WHITE   FUCSIA  BLACK
+GRAY   BROWN   PINK    MAGENTA
+;
+run;
+</code></pre>
+
+<p>This results in the following dataset:</p>
+
+<pre><code>|Obs  | Var1 | Var2   | Var3 | Var4   |
+|-----|------|--------|------|--------|
+| 1   | RED  | ORANGE | RED  | ORANGE |
+| 2   | BLUE | INDIGO | BLUE | INDIGO |
+| 3   | CYAN | WHITE  | CYAN | WHITE  |
+| 4   | GRAY | BROWN  | GRAY | BROWN  |
+</code></pre>
+
+<p>Because of the trailing <code>@</code> in the first <code>input</code> statement, the values of <code>Var1</code> and <code>Var3</code> for all the observations are the same, as both are read from column <code>1</code>. Similarly <code>Var2</code> and <code>Var4</code> are the same as they are read from column <code>8</code>.</p>
+<div class="footnotes">
+
+<hr />
+
+<ol>
+<li id="fn:1">The Input Statement: Where It&rsquo;s @. Paper 253-29, SUGI 29 Proceedings.
+ <a class="footnote-return" href="#fnref:1"><sup>[return]</sup></a></li>
+</ol>
+</div>
+
             <p class="comments">
   If you have questions or comments about this blog post, you can get in touch with me on Twitter <a href="https://twitter.com/sdqali">@sdqali</a>.
 </p>
@@ -189,6 +288,7 @@ helloworld.Greeter is a service:
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2019/03/23/importing-the-sasuser-datasets-in-sas-studio/?utm_source=site&amp;utm_medium=related">Importing the SASUSER datasets in SAS Studio</a></li>
                     
                     
                     
@@ -197,7 +297,6 @@ helloworld.Greeter is a service:
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2018/04/05/command-line-clients-for-grpc---polyglot/?utm_source=site&amp;utm_medium=related">Command line clients for gRPC - polyglot</a></li>
                     
                     
                     
@@ -231,26 +330,31 @@ helloworld.Greeter is a service:
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2016/11/29/implementing-feature-toggles-for-a-spring-boot-application-part-4/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 4</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2016/11/28/implementing-feature-toggles-for-a-spring-boot-application-part-3/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 3</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2016/11/26/implementing-feature-toggles-for-a-spring-boot-application-part-2/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 2</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2016/11/21/implementing-feature-toggles-for-a-spring-boot-application-part-1/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 1</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2016/11/11/setting-up-a-secure-etcd-cluster-behind-a-proxy/?utm_source=site&amp;utm_medium=related">Setting up a secure etcd cluster behind a proxy</a></li>
                     
                     
                     
@@ -260,56 +364,67 @@ helloworld.Greeter is a service:
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2016/11/02/handling-deserialization-errors-in-spring-redis-sessions/?utm_source=site&amp;utm_medium=related">Handling Deserialization errors in Spring Redis Sessions</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2016/07/20/csrf-protection-with-spring-security-and-angular-js/?utm_source=site&amp;utm_medium=related">CSRF Protection with Spring Security and Angular JS</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2016/07/16/controlling-redis-auto-configuration-for-spring-boot-session/?utm_source=site&amp;utm_medium=related">Controlling Redis auto-configuration for Spring Boot Session</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2016/07/13/jwt-authentication-with-spring-web-part-5/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 5</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2016/07/07/jwt-authentication-with-spring-web-part-4/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 4</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2016/07/05/jwt-authentication-with-spring-web-part-3/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 3</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2016/07/03/jwt-authentication-with-spring-web-part-2/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 2</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2016/07/02/jwt-authentication-with-spring-web-part-1/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 1</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2016/06/30/json-logging-for-spring-applications/?utm_source=site&amp;utm_medium=related">JSON logging for Spring applications</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2016/06/28/injecting-dependencies-into-a-spring-configuration/?utm_source=site&amp;utm_medium=related">Injecting dependencies into a Spring @Configuration</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2016/06/08/filtering-responses-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Filtering responses in Spring MVC</a></li>
                     
                     
                     
@@ -319,76 +434,91 @@ helloworld.Greeter is a service:
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2016/04/24/deprecating-domain-events-in-axon/?utm_source=site&amp;utm_medium=related">Deprecating domain events in Axon</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2016/04/19/programmable-exit-codes-for-spring-command-line-applications-2/?utm_source=site&amp;utm_medium=related">Programmable exit codes for spring command line applications - 2</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2016/04/17/programmable-exit-codes-for-spring-command-line-applications/?utm_source=site&amp;utm_medium=related">Programmable exit codes for Spring command line applications</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2016/01/29/using-custom-arguments-in-spring-mvc-controllers/?utm_source=site&amp;utm_medium=related">Using custom arguments in Spring MVC controllers</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2015/12/16/authentication-for-apache-camel-http-components/?utm_source=site&amp;utm_medium=related">Authentication for Apache Camel HTTP components</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2015/12/14/thoughts-on-open-graph-tags/?utm_source=site&amp;utm_medium=related">Thoughts on Open Graph tags</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2015/12/11/integration-testing-spring-command-line-applications/?utm_source=site&amp;utm_medium=related">Integration testing Spring command line applications</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2015/12/10/integration-testing-challenges-for-non-web-spring-applications/?utm_source=site&amp;utm_medium=related">Integration testing challenges for non-web Spring applications</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2015/12/07/how-thinking-of-documentation-as-legislation-helped-me-become-a-better-programmer/?utm_source=site&amp;utm_medium=related">How thinking of Documentation as Legislation helped me become a better programmer</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2015/12/06/implementing-custom-annotations-for-spring-mvc/?utm_source=site&amp;utm_medium=related">Implementing custom annotations for Spring MVC</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2015/12/04/validating-requestparams-and-pathvariables-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Validating RequestParams and PathVariables in Spring MVC</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2015/11/24/testing-async-responses-using-mockmvc/?utm_source=site&amp;utm_medium=related">Testing async responses using MockMvc</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2015/06/09/running-multiple-applications-in-the-same-tomcat-installation/?utm_source=site&amp;utm_medium=related">Running multiple applications in the same Tomcat installation</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2015/05/21/making-sense-of-cloud-foundry-security-group-declarations/?utm_source=site&amp;utm_medium=related">Making sense of Cloud Foundry security group declarations</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2015/05/20/configuring-cloud-foundry-java-memory-parameters/?utm_source=site&amp;utm_medium=related">Configuring Cloud Foundry Java Memory Parameters</a></li>
                     
                     
                     
@@ -406,11 +536,13 @@ helloworld.Greeter is a service:
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2014/03/20/clojure-dojo-levenshtein-edit-distance/?utm_source=site&amp;utm_medium=related">Clojure Dojo - Levenshtein edit distance</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2014/02/17/a-simple-jmeter-test-with-login/?utm_source=site&amp;utm_medium=related">A simple JMeter test with login</a></li>
                     
                     
                     
@@ -432,16 +564,19 @@ helloworld.Greeter is a service:
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2013/10/13/implementing-rate-limiting-in-rails-part-2/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 2</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2013/10/12/implementing-rate-limiting-in-rails-part-1/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 1</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2013/10/07/python-hack-dynamically-override-an-objects-attribute/?utm_source=site&amp;utm_medium=related">Python Hack - Dynamically override an object&#39;s attribute</a></li>
                     
                     
                     
@@ -479,11 +614,13 @@ helloworld.Greeter is a service:
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2013/09/12/managing-gemsets-in-rbenv/?utm_source=site&amp;utm_medium=related">Managing Gemsets in Rbenv</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2013/09/08/looking-up-compiler-params-used-to-compile-a-ruby-version/?utm_source=site&amp;utm_medium=related">Looking up Compiler params used to compile a Ruby version</a></li>
                     
                     
                     
@@ -501,6 +638,7 @@ helloworld.Greeter is a service:
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2013/08/15/pythons-bool-type/?utm_source=site&amp;utm_medium=related">Python&#39;s bool type</a></li>
                     
                     
                     
@@ -530,6 +668,7 @@ helloworld.Greeter is a service:
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2013/07/31/validating-json-in-emacs/?utm_source=site&amp;utm_medium=related">Validating JSON in Emacs</a></li>
                     
                     
                     
@@ -547,31 +686,37 @@ helloworld.Greeter is a service:
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2013/04/29/emacs-hack-viewing-git-logs-while-composing-commit-messages/?utm_source=site&amp;utm_medium=related">Emacs hack: Viewing Git logs while composing commit messages</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2013/04/14/configure-gits-comment-character/?utm_source=site&amp;utm_medium=related">Configure Git&#39;s comment character</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2013/04/11/my-experience-working-remotely/?utm_source=site&amp;utm_medium=related">My experience working remotely</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2013/04/05/javascript-clipboard-access-and-hidden-flash-widgets/?utm_source=site&amp;utm_medium=related">JavaScript, clipboard access and hidden flash widgets</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2013/01/22/reducing-emacs-startup-time-while-committing/?utm_source=site&amp;utm_medium=related">Reducing Emacs startup time while committing</a></li>
                     
                     
                     
@@ -585,16 +730,19 @@ helloworld.Greeter is a service:
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2012/11/29/my-first-firefox-plugin-getcache-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">My first Firefox plugin: GetCache - View cached version of the current page</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2012/11/28/getcache-a-chrome-plugin-to-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">GetCache - A Chrome plugin to view cached version of the current page</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2012/11/27/on-rest-content-type-google-chrome-and-caching/?utm_source=site&amp;utm_medium=related">On REST, Content-Type, Google Chrome and Caching</a></li>
                     
                     
                     
@@ -636,31 +784,37 @@ helloworld.Greeter is a service:
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2012/07/09/understanding-pythons-with-statement/?utm_source=site&amp;utm_medium=related">Understanding Python&#39;s &#34;with&#34; statement</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2012/07/04/heredocs-in-ruby-and-python/?utm_source=site&amp;utm_medium=related">Heredocs in Ruby and Python</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2012/06/25/micro-journal-simple-git-backed-journal-in-python/?utm_source=site&amp;utm_medium=related">Micro Journal - simple Git-backed journal in Python</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2012/06/24/vodqa-ncr-maintaining-large-test-suites/?utm_source=site&amp;utm_medium=related">VodQA NCR: Maintaining Large Test Suites</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2012/06/06/know-your-tools-dont-shoot-yourself-in-the-foot/?utm_source=site&amp;utm_medium=related">Know Your Tools - Don&#39;t Shoot Yourself in the Foot</a></li>
                     
                     
                     
                     
                     
+                    <li><a class="related" href="https://sdqali.in/blog/2012/06/05/managing-security-certificates-from-the-console-on-windows-mac-os-x-and-linux/?utm_source=site&amp;utm_medium=related">Managing security certificates from the console - on Windows, Mac OS X and Linux</a></li>
                     
                     
                     
@@ -670,6 +824,95 @@ helloworld.Greeter is a service:
                     
                     
                     
+                    
+                    
+                    
+                    
+                    <li><a class="related" href="https://sdqali.in/blog/2012/05/11/indian-and-pakistani-cricketers-who-make-better-debuts/?utm_source=site&amp;utm_medium=related">Indian and Pakistani cricketers - who make better debuts?</a></li>
+                    
+                    
+                    
+                    
+                    
+                    <li><a class="related" href="https://sdqali.in/blog/2012/05/04/fixing-flyspell-for-emacs-in-mac-os-x/?utm_source=site&amp;utm_medium=related">Fixing Flyspell for Emacs in Mac OS X</a></li>
+                    
+                    
+                    
+                    
+                    
+                    <li><a class="related" href="https://sdqali.in/blog/2012/04/29/finding-un-merged-commits-with-git-cherry/?utm_source=site&amp;utm_medium=related">Finding un-merged commits with git cherry</a></li>
+                    
+                    
+                    
+                    
+                    
+                    <li><a class="related" href="https://sdqali.in/blog/2012/02/03/bullet-proof-jenkins-setup/?utm_source=site&amp;utm_medium=related">Bullet proof Jenkins setup</a></li>
+                    
+                    
+                    
+                    
+                    
+                    <li><a class="related" href="https://sdqali.in/blog/2012/01/17/why-your-project-should-have-a-getting-started-guide./?utm_source=site&amp;utm_medium=related">Why your project should have a Getting Started guide.</a></li>
+                    
+                    
+                    
+                    
+                    
+                    <li><a class="related" href="https://sdqali.in/blog/2012/01/16/debugging-c-sharps-httpwebrequest-100-continue-and-nginx/?utm_source=site&amp;utm_medium=related">Debugging: C Sharp&#39;s HttpWebRequest, 100-Continue and nginx</a></li>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    <li><a class="related" href="https://sdqali.in/blog/2011/05/17/wikipedia-page-hopping/?utm_source=site&amp;utm_medium=related">Wikipedia Page Hopping</a></li>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    <li><a class="related" href="https://sdqali.in/blog/2011/03/24/empathy-log-parser/?utm_source=site&amp;utm_medium=related">Empathy Log Parser</a></li>
+                    
+                    
+                    
+                    
+                    
+                    <li><a class="related" href="https://sdqali.in/blog/2011/03/23/binary-signature-art/?utm_source=site&amp;utm_medium=related">Binary Signature Art</a></li>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    <li><a class="related" href="https://sdqali.in/blog/2010/03/16/java-arrays-in-jruby/?utm_source=site&amp;utm_medium=related">Java Arrays in JRuby</a></li>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    <li><a class="related" href="https://sdqali.in/blog/2010/01/09/autorun.py-execute-stuff-on-file-change/?utm_source=site&amp;utm_medium=related">Autorun.py - Execute stuff on file change</a></li>
                     
                     
                     
