@@ -22,9 +22,7 @@
 
 </head>
 
-  <meta name="description" content="This blog post describes how to set up Tomcat to run multiple applications running as separate JVM processes, using the same Tomcat installation. This method utilizes the CATALINA_HOME and CATALINA_BASE environment variables used by Tomcat. I have verified this method against Tomcat versions 8.0.x; other versions should work the same way.
-
-" />
+  <meta name="description" content="This blog post describes how to set up Tomcat to run multiple applications running as separate JVM processes, using the same Tomcat installation. This method utilizes the CATALINA_HOME and CATALINA_BASE environment variables used by Tomcat. I have verified this method against Tomcat versions 8.0.x; other versions should work the same way." />
   
     <meta content="development, tomcat, java" name="keywords">
   
@@ -34,15 +32,11 @@
   <meta name="twitter:site" content="@sdqali">
   <meta name="twitter:creator" content="@sdqali">
   <meta name="twitter:title" content="Running multiple applications in the same Tomcat installation">
-  <meta name="twitter:description" content="This blog post describes how to set up Tomcat to run multiple applications running as separate JVM processes, using the same Tomcat installation. This method utilizes the CATALINA_HOME and CATALINA_BASE environment variables used by Tomcat. I have verified this method against Tomcat versions 8.0.x; other versions should work the same way.
-
-">
+  <meta name="twitter:description" content="This blog post describes how to set up Tomcat to run multiple applications running as separate JVM processes, using the same Tomcat installation. This method utilizes the CATALINA_HOME and CATALINA_BASE environment variables used by Tomcat. I have verified this method against Tomcat versions 8.0.x; other versions should work the same way.">
   <meta name="twitter:image" content="https://sdqali.in/images/1280px-Tomcat-logo.svg.png">
 
   <meta property="og:title" content="Running multiple applications in the same Tomcat installation" />
-  <meta property="og:description" content="This blog post describes how to set up Tomcat to run multiple applications running as separate JVM processes, using the same Tomcat installation. This method utilizes the CATALINA_HOME and CATALINA_BASE environment variables used by Tomcat. I have verified this method against Tomcat versions 8.0.x; other versions should work the same way.
-
-" itemprop="description"/>
+  <meta property="og:description" content="This blog post describes how to set up Tomcat to run multiple applications running as separate JVM processes, using the same Tomcat installation. This method utilizes the CATALINA_HOME and CATALINA_BASE environment variables used by Tomcat. I have verified this method against Tomcat versions 8.0.x; other versions should work the same way." itemprop="description"/>
   <meta property="og:url" content="https://sdqali.in/blog/2015/06/09/running-multiple-applications-in-the-same-tomcat-installation/" />
   <meta property="og:image" content="https://sdqali.in/images/1280px-Tomcat-logo.svg.png" />
   <body>
@@ -117,8 +111,6 @@
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
             <p>This blog post describes how to set up Tomcat to run multiple applications running as separate JVM processes, using the same Tomcat installation. This method utilizes the <code>CATALINA_HOME</code> and <code>CATALINA_BASE</code> environment variables used by Tomcat. I have verified this method against Tomcat versions <code>8.0.x</code>; other versions should work the same way.</p>
 
-<p></p>
-
 <h2 id="a-typical-tomcat-installation">A typical Tomcat installation</h2>
 
 <p>If we explode the Tomcat 8.0.23 <a href="http://mirrors.sonic.net/apache/tomcat/tomcat-8/v8.0.23/bin/apache-tomcat-8.0.23.tar.gz">tarball</a>, we get the following directory structure:</p>
@@ -132,11 +124,11 @@ NOTICE		RUNNING.txt	conf		logs		webapps</code></pre></div>
 <p>Tomcat control scripts - <code>startup.sh</code>, <code>shutdown.sh</code>, <code>catalina.sh</code> uses the environment variables <code>CATALINA_HOME</code> and <code>CATALINA_BASE</code> to locate binaries and configuration files.</p>
 
 <p>From the documentaion inside <code>catalina.sh</code> under <code>apache-tomcat-8.0.23/bin/</code> we can see that:</p>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#09f;font-style:italic">#   CATALINA_HOME   May point at your Catalina &#34;build&#34; directory.
-</span><span style="color:#09f;font-style:italic">#
-</span><span style="color:#09f;font-style:italic">#   CATALINA_BASE   (Optional) Base directory for resolving dynamic portions
-</span><span style="color:#09f;font-style:italic">#                   of a Catalina installation.  If not present, resolves to
-</span><span style="color:#09f;font-style:italic"></span>#                   the same directory that CATALINA_HOME points to.</code></pre></div>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#09f;font-style:italic">#   CATALINA_HOME   May point at your Catalina &#34;build&#34; directory.</span>
+#
+<span style="color:#09f;font-style:italic">#   CATALINA_BASE   (Optional) Base directory for resolving dynamic portions</span>
+<span style="color:#09f;font-style:italic">#                   of a Catalina installation.  If not present, resolves to</span>
+<span style="color:#09f;font-style:italic">#                   the same directory that CATALINA_HOME points to.</span></code></pre></div>
 <p>This allows us to separate the <code>CATALINA_HOME</code> and <code>CATALINA_BASE</code> directories. The Tomcat binaries and scripts need to be inside <code>CATALINA_HOME</code> and our first application can deploy itself to <code>CATALINA_BASE</code>.</p>
 
 <h2 id="separating-catalina-home-and-catalina-base">Separating CATALINA_HOME and CATALINA_BASE</h2>
@@ -196,9 +188,9 @@ Date: Tue, <span style="color:#f60">09</span> Jun <span style="color:#f60">2015<
 <p>At this point, it is useful to create management scripts that abstract away the environment variables and allows for starting up and shutting down applications individually. The <code>start.sh</code> script will be as follows.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#099">#!/usr/bin/env sh
 </span><span style="color:#099"></span>
-<span style="color:#09f;font-style:italic"># start.sh
-</span><span style="color:#09f;font-style:italic"># Script to start a Tomcat application
-</span><span style="color:#09f;font-style:italic"></span>
+<span style="color:#09f;font-style:italic"># start.sh</span>
+<span style="color:#09f;font-style:italic"># Script to start a Tomcat application</span>
+
 show_usage<span style="color:#555">()</span> <span style="color:#555">{</span>
     <span style="color:#366">echo</span> <span style="color:#c30">&#34;Usage: ./start.sh &lt;app-name&gt;&#34;</span>;
     <span style="color:#366">exit</span> <span style="color:#f60">1</span>;
@@ -217,9 +209,9 @@ show_usage<span style="color:#555">()</span> <span style="color:#555">{</span>
 <p>Similarly, the <code>stop.sh</code> script will be:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#099">#!/usr/bin/env sh
 </span><span style="color:#099"></span>
-<span style="color:#09f;font-style:italic"># stop.sh
-</span><span style="color:#09f;font-style:italic"># Script to stop a Tomcat application
-</span><span style="color:#09f;font-style:italic"></span>
+<span style="color:#09f;font-style:italic"># stop.sh</span>
+<span style="color:#09f;font-style:italic"># Script to stop a Tomcat application</span>
+
 show_usage<span style="color:#555">()</span> <span style="color:#555">{</span>
     <span style="color:#366">echo</span> <span style="color:#c30">&#34;Usage: ./stop.sh &lt;app-name&gt;&#34;</span>;
     <span style="color:#366">exit</span> <span style="color:#f60">1</span>;
@@ -327,25 +319,25 @@ $ curl -v http://127.0.0.1:9090
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2016/11/29/implementing-feature-toggles-for-a-spring-boot-application---part-4/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 4</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2016/11/29/implementing-feature-toggles-for-a-spring-boot-application-part-4/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 4</a></li>
                     
                     
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2016/11/28/implementing-feature-toggles-for-a-spring-boot-application---part-3/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 3</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2016/11/28/implementing-feature-toggles-for-a-spring-boot-application-part-3/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 3</a></li>
                     
                     
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2016/11/26/implementing-feature-toggles-for-a-spring-boot-application---part-2/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 2</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2016/11/26/implementing-feature-toggles-for-a-spring-boot-application-part-2/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 2</a></li>
                     
                     
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2016/11/21/implementing-feature-toggles-for-a-spring-boot-application---part-1/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 1</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2016/11/21/implementing-feature-toggles-for-a-spring-boot-application-part-1/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 1</a></li>
                     
                     
                     
@@ -381,31 +373,31 @@ $ curl -v http://127.0.0.1:9090
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2016/07/13/jwt-authentication-with-spring-web---part-5/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 5</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2016/07/13/jwt-authentication-with-spring-web-part-5/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 5</a></li>
                     
                     
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2016/07/07/jwt-authentication-with-spring-web---part-4/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 4</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2016/07/07/jwt-authentication-with-spring-web-part-4/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 4</a></li>
                     
                     
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2016/07/05/jwt-authentication-with-spring-web---part-3/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 3</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2016/07/05/jwt-authentication-with-spring-web-part-3/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 3</a></li>
                     
                     
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2016/07/03/jwt-authentication-with-spring-web---part-2/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 2</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2016/07/03/jwt-authentication-with-spring-web-part-2/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 2</a></li>
                     
                     
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2016/07/02/jwt-authentication-with-spring-web---part-1/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 1</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2016/07/02/jwt-authentication-with-spring-web-part-1/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 1</a></li>
                     
                     
                     
@@ -439,7 +431,7 @@ $ curl -v http://127.0.0.1:9090
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2016/04/19/programmable-exit-codes-for-spring-command-line-applications---2/?utm_source=site&amp;utm_medium=related">Programmable exit codes for spring command line applications - 2</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2016/04/19/programmable-exit-codes-for-spring-command-line-applications-2/?utm_source=site&amp;utm_medium=related">Programmable exit codes for spring command line applications - 2</a></li>
                     
                     
                     
@@ -533,7 +525,7 @@ $ curl -v http://127.0.0.1:9090
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2014/03/20/clojure-dojo---levenshtein-edit-distance/?utm_source=site&amp;utm_medium=related">Clojure Dojo - Levenshtein edit distance</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2014/03/20/clojure-dojo-levenshtein-edit-distance/?utm_source=site&amp;utm_medium=related">Clojure Dojo - Levenshtein edit distance</a></li>
                     
                     
                     
@@ -561,19 +553,19 @@ $ curl -v http://127.0.0.1:9090
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2013/10/13/implementing-rate-limiting-in-rails---part-2/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 2</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2013/10/13/implementing-rate-limiting-in-rails-part-2/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 2</a></li>
                     
                     
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2013/10/12/implementing-rate-limiting-in-rails---part-1/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 1</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2013/10/12/implementing-rate-limiting-in-rails-part-1/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 1</a></li>
                     
                     
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2013/10/07/python-hack---dynamically-override-an-objects-attribute/?utm_source=site&amp;utm_medium=related">Python Hack - Dynamically override an object&#39;s attribute</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2013/10/07/python-hack-dynamically-override-an-objects-attribute/?utm_source=site&amp;utm_medium=related">Python Hack - Dynamically override an object&#39;s attribute</a></li>
                     
                     
                     
@@ -727,13 +719,13 @@ $ curl -v http://127.0.0.1:9090
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2012/11/29/my-first-firefox-plugin-getcache---view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">My first Firefox plugin: GetCache - View cached version of the current page</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2012/11/29/my-first-firefox-plugin-getcache-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">My first Firefox plugin: GetCache - View cached version of the current page</a></li>
                     
                     
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2012/11/28/getcache---a-chrome-plugin-to-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">GetCache - A Chrome plugin to view cached version of the current page</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2012/11/28/getcache-a-chrome-plugin-to-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">GetCache - A Chrome plugin to view cached version of the current page</a></li>
                     
                     
                     
@@ -793,7 +785,7 @@ $ curl -v http://127.0.0.1:9090
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2012/06/25/micro-journal---simple-git-backed-journal-in-python/?utm_source=site&amp;utm_medium=related">Micro Journal - simple Git-backed journal in Python</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2012/06/25/micro-journal-simple-git-backed-journal-in-python/?utm_source=site&amp;utm_medium=related">Micro Journal - simple Git-backed journal in Python</a></li>
                     
                     
                     
@@ -805,19 +797,13 @@ $ curl -v http://127.0.0.1:9090
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2012/06/06/know-your-tools---dont-shoot-yourself-in-the-foot/?utm_source=site&amp;utm_medium=related">Know Your Tools - Don&#39;t Shoot Yourself in the Foot</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2012/06/06/know-your-tools-dont-shoot-yourself-in-the-foot/?utm_source=site&amp;utm_medium=related">Know Your Tools - Don&#39;t Shoot Yourself in the Foot</a></li>
                     
                     
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2012/06/05/managing-security-certificates-from-the-console---on-windows-mac-os-x-and-linux/?utm_source=site&amp;utm_medium=related">Managing security certificates from the console - on Windows, Mac OS X and Linux</a></li>
-                    
-                    
-                    
-                    
-                    
-                    
+                    <li><a class="related" href="https://sdqali.in/blog/2012/06/05/managing-security-certificates-from-the-console-on-windows-mac-os-x-and-linux/?utm_source=site&amp;utm_medium=related">Managing security certificates from the console - on Windows, Mac OS X and Linux</a></li>
                     
                     
                     
@@ -825,7 +811,13 @@ $ curl -v http://127.0.0.1:9090
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2012/05/11/indian-and-pakistani-cricketers---who-make-better-debuts/?utm_source=site&amp;utm_medium=related">Indian and Pakistani cricketers - who make better debuts?</a></li>
+                    
+                    
+                    
+                    
+                    
+                    
+                    <li><a class="related" href="https://sdqali.in/blog/2012/05/11/indian-and-pakistani-cricketers-who-make-better-debuts/?utm_source=site&amp;utm_medium=related">Indian and Pakistani cricketers - who make better debuts?</a></li>
                     
                     
                     
@@ -909,7 +901,7 @@ $ curl -v http://127.0.0.1:9090
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2010/01/09/autorun.py---execute-stuff-on-file-change/?utm_source=site&amp;utm_medium=related">Autorun.py - Execute stuff on file change</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2010/01/09/autorun.py-execute-stuff-on-file-change/?utm_source=site&amp;utm_medium=related">Autorun.py - Execute stuff on file change</a></li>
                     
                     
                     

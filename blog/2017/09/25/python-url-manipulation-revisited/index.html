@@ -113,18 +113,18 @@ I started at urlparse and soon realized that Python3 moved this module to urllib
 <p>I started at <code>urlparse</code> and soon realized that Python3 moved this module to <a href="https://docs.python.org/3/library/urllib.parse.html">urllib.parse</a>. That is not too bad, I thought. After playing around with it, it became clear that <code>urllib.parse</code> can&rsquo;t manipulate credentials in a URL.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">In [<span style="color:#f60">1</span>]: <span style="color:#069;font-weight:bold">from</span> <span style="color:#0cf;font-weight:bold">urllib</span> <span style="color:#069;font-weight:bold">import</span> parse
 
-In [<span style="color:#f60">2</span>]: url <span style="color:#555">=</span> parse<span style="color:#555">.</span>urlparse(<span style="color:#c30"></span><span style="color:#c30">&#39;http://example.com&#39;</span>)
+In [<span style="color:#f60">2</span>]: url <span style="color:#555">=</span> parse<span style="color:#555">.</span>urlparse(<span style="color:#c30">&#39;http://example.com&#39;</span>)
 
 In [<span style="color:#f60">3</span>]: <span style="color:#069;font-weight:bold">print</span>(url)
-ParseResult(scheme<span style="color:#555">=</span><span style="color:#c30"></span><span style="color:#c30">&#39;http&#39;</span>, netloc<span style="color:#555">=</span><span style="color:#c30"></span><span style="color:#c30">&#39;example.com&#39;</span>, path<span style="color:#555">=</span><span style="color:#c30"></span><span style="color:#c30">&#39;&#39;</span>, params<span style="color:#555">=</span><span style="color:#c30"></span><span style="color:#c30">&#39;&#39;</span>, query<span style="color:#555">=</span><span style="color:#c30"></span><span style="color:#c30">&#39;&#39;</span>, fragment<span style="color:#555">=</span><span style="color:#c30"></span><span style="color:#c30">&#39;&#39;</span>)
+ParseResult(scheme<span style="color:#555">=</span><span style="color:#c30">&#39;http&#39;</span>, netloc<span style="color:#555">=</span><span style="color:#c30">&#39;example.com&#39;</span>, path<span style="color:#555">=</span><span style="color:#c30">&#39;&#39;</span>, params<span style="color:#555">=</span><span style="color:#c30">&#39;&#39;</span>, query<span style="color:#555">=</span><span style="color:#c30">&#39;&#39;</span>, fragment<span style="color:#555">=</span><span style="color:#c30">&#39;&#39;</span>)
 
-In [<span style="color:#f60">4</span>]: url<span style="color:#555">.</span>username <span style="color:#555">=</span> <span style="color:#c30"></span><span style="color:#c30">&#34;username&#34;</span>
+In [<span style="color:#f60">4</span>]: url<span style="color:#555">.</span>username <span style="color:#555">=</span> <span style="color:#c30">&#34;username&#34;</span>
 <span style="color:#555">---------------------------------------------------------------------------</span>
 <span style="color:#c00;font-weight:bold">AttributeError</span>                            Traceback (most recent call last)
 <span style="color:#555">&lt;</span>ipython<span style="color:#555">-</span><span style="color:#366">input</span><span style="color:#555">-</span><span style="color:#f60">4</span><span style="color:#555">-</span><span style="color:#f60">60e52</span>fe02603<span style="color:#555">&gt;</span> <span style="color:#000;font-weight:bold">in</span> <span style="color:#555">&lt;</span>module<span style="color:#555">&gt;</span>()
-<span style="color:#555">----&gt;</span> <span style="color:#f60">1</span> url<span style="color:#555">.</span>username <span style="color:#555">=</span> <span style="color:#c30"></span><span style="color:#c30">&#34;username&#34;</span>
+<span style="color:#555">----&gt;</span> <span style="color:#f60">1</span> url<span style="color:#555">.</span>username <span style="color:#555">=</span> <span style="color:#c30">&#34;username&#34;</span>
 
-<span style="color:#c00;font-weight:bold">AttributeError</span>: can<span style="color:#c30"></span><span style="color:#c30">&#39;t set attribute</span><span style="color:#a00;background-color:#faa">
+<span style="color:#c00;font-weight:bold">AttributeError</span>: can<span style="color:#c30">&#39;t set attribute</span><span style="color:#a00;background-color:#faa">
 </span><span style="color:#a00;background-color:#faa">
 </span><span style="color:#a00;background-color:#faa"></span><span style="color:#c30">In [5]: url.password = &#34;password&#34;</span><span style="color:#a00;background-color:#faa">
 </span><span style="color:#a00;background-color:#faa"></span><span style="color:#c30">---------------------------------------------------------------------------</span><span style="color:#a00;background-color:#faa">
@@ -142,17 +142,17 @@ Out[<span style="color:#f60">7</span>]: True</code></pre></div>
 <p>After spending time with various URL manipulation libraries in Python, <a href="https://github.com/gruns/furl">furl</a> was the only library that I found to be capable of this seemingly simple and common enough operation.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">In [<span style="color:#f60">1</span>]: <span style="color:#069;font-weight:bold">from</span> <span style="color:#0cf;font-weight:bold">furl</span> <span style="color:#069;font-weight:bold">import</span> furl
 
-In [<span style="color:#f60">2</span>]: url <span style="color:#555">=</span> furl(<span style="color:#c30"></span><span style="color:#c30">&#39;http://example.com&#39;</span>)
+In [<span style="color:#f60">2</span>]: url <span style="color:#555">=</span> furl(<span style="color:#c30">&#39;http://example.com&#39;</span>)
 
 In [<span style="color:#f60">3</span>]: url
-Out[<span style="color:#f60">3</span>]: furl(<span style="color:#c30"></span><span style="color:#c30">&#39;http://example.com&#39;</span>)
+Out[<span style="color:#f60">3</span>]: furl(<span style="color:#c30">&#39;http://example.com&#39;</span>)
 
-In [<span style="color:#f60">4</span>]: url<span style="color:#555">.</span>password <span style="color:#555">=</span> <span style="color:#c30"></span><span style="color:#c30">&#34;password&#34;</span>
+In [<span style="color:#f60">4</span>]: url<span style="color:#555">.</span>password <span style="color:#555">=</span> <span style="color:#c30">&#34;password&#34;</span>
 
-In [<span style="color:#f60">5</span>]: url<span style="color:#555">.</span>username <span style="color:#555">=</span> <span style="color:#c30"></span><span style="color:#c30">&#34;user&#34;</span>
+In [<span style="color:#f60">5</span>]: url<span style="color:#555">.</span>username <span style="color:#555">=</span> <span style="color:#c30">&#34;user&#34;</span>
 
 In [<span style="color:#f60">6</span>]: url<span style="color:#555">.</span>tostr()
-Out[<span style="color:#f60">6</span>]: <span style="color:#c30"></span><span style="color:#c30">&#39;http://user:password@example.com&#39;</span></code></pre></div>
+Out[<span style="color:#f60">6</span>]: <span style="color:#c30">&#39;http://user:password@example.com&#39;</span></code></pre></div>
             <p class="comments">
   If you have questions or comments about this blog post, you can get in touch with me on Twitter <a href="https://twitter.com/sdqali">@sdqali</a>.
 </p>
@@ -379,7 +379,7 @@ Out[<span style="color:#f60">6</span>]: <span style="color:#c30"></span><span st
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2013/10/07/python-hack---dynamically-override-an-objects-attribute/?utm_source=site&amp;utm_medium=related">Python Hack - Dynamically override an object&#39;s attribute</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2013/10/07/python-hack-dynamically-override-an-objects-attribute/?utm_source=site&amp;utm_medium=related">Python Hack - Dynamically override an object&#39;s attribute</a></li>
                     
                     
                     
@@ -579,7 +579,7 @@ Out[<span style="color:#f60">6</span>]: <span style="color:#c30"></span><span st
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2012/06/25/micro-journal---simple-git-backed-journal-in-python/?utm_source=site&amp;utm_medium=related">Micro Journal - simple Git-backed journal in Python</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2012/06/25/micro-journal-simple-git-backed-journal-in-python/?utm_source=site&amp;utm_medium=related">Micro Journal - simple Git-backed journal in Python</a></li>
                     
                     
                     
@@ -669,7 +669,7 @@ Out[<span style="color:#f60">6</span>]: <span style="color:#c30"></span><span st
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2010/01/09/autorun.py---execute-stuff-on-file-change/?utm_source=site&amp;utm_medium=related">Autorun.py - Execute stuff on file change</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2010/01/09/autorun.py-execute-stuff-on-file-change/?utm_source=site&amp;utm_medium=related">Autorun.py - Execute stuff on file change</a></li>
                     
                     
                     

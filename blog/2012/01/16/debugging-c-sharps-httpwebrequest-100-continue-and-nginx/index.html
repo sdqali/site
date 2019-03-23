@@ -118,7 +118,8 @@ Initial investigation suggested that this could happen if we are making HTTP/1.1
          itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div class="row">
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-            <div class='post'>
+            
+<div class='post'>
 <div dir="ltr" style="text-align: left;" trbidi="on"><div>Recently I spent some time debugging an issue our team was facing around some C# code making a request on one of our servers. The request was throwing a "The server committed a protocol violation. Section=ResponseStatusLine" error.<br /><br /></div><div>Initial investigation suggested that this could happen if we are making HTTP/1.1 requests to a server configured for HTTP/1.0. Our Rails application runs on Mongrel fronted with nginx 0.6.5. We modified the C# code to use HTTP/1.0 and the error went away. The following line does the trick.</div><div><br /></div><div><blockquote class="tr_bq"><span class="Apple-tab-span" style="white-space: pre;"> </span>request.ProtocolVersion = HttpVersion.Version10;</blockquote></div><div><br /></div><div>But wait! This means that somewhere in the chain, a server is configured to use HTTP/1.0. It looked unlikely and further debugging revealed that it was indeed not the case. Further staring at the Rails logs showed that one of the headers that the app expects was not being set, when the request was done using HTTP/1.1 from the code.</div><div><br /></div><div>After some time, we figured <a href="http://stackoverflow.com/questions/2482715/the-server-committed-a-protocol-violation-section-responsestatusline-error">out</a>[1] that the .Net library throws the "server committed ..." error if it is expecting the HTTP 100 (Continue) response in the wrong way. We set the code to not expect the HTTP 100 response from the server using</div><div><br /></div><div><blockquote class="tr_bq">&nbsp; &nbsp; &nbsp; request.ServicePoint.Expect100Continue = false;</blockquote></div><div><br /></div><div>and voila, it worked. The Rails app received all the headers it expected and things worked fine. The code looked like this:<br /><br /></div><div><script src="https://gist.github.com/1623042.js?file=gistfile1.cs"></script></div><div>So what is happening?</div><div><br /></div><div>The HTTP 100 status is supposed to work like this. When a client has to send some data, instead of sending it upfront, it can send some headers along with the "Expect:100-Continue" header. The server responds with a 100 if it is willing to accept the request or send a final status. The spec is <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec8.html#sec8.2.3">here</a>[2].</div><div><br /></div><div>We are using nginx as a proxy. The specification says that the proxy should forward the request if it knows that the next-hop server is HTTP/1.1 compliant. The proxy is supposed to ignore the "Expect:100-Continue" header, if the request came from a client using HTTP/1.0.</div><div><br /></div><div>In our case, the default behavior of the .Net HTTP client library is to set "Expect:100-Continue" header on every request for HTTP/1.1. So the client sends only some headers and waits for the 100 response from nginx. Nginx sees the request, knows that Mongrel supports HTTP/1.1 and just forwards the request. The app sends a 401 because it could not authenticate. The client is expecting a 100 and gets a 401. It thinks the server committed a protocol violation.</div><div><br /></div><div>When we ask the client to use HTTP/1.0, the .Net library does not use the Expect header, sends all the headers and nginx forwards the request to Mongrel. The authentication goes through.</div><div>When we explicitly set the Expect 100 property of the library to false, it sends all the headers at once and the authentication goes through fine.</div><div><br /></div><div>Looks like there is a way to tell .Net not to expect 100 from the server through configuration, by putting this in <app>.exe.conf</app></div><div><br /><br /></div><div><script src="https://gist.github.com/1623007.js?file=gistfile1.xml"></script></div><div>1. http://stackoverflow.com/questions/2482715/the-server-committed-a-protocol-violation-section-responsestatusline-error</div><div>2. http://www.w3.org/Protocols/rfc2616/rfc2616-sec8.html#sec8.2.3</div><div><br /></div></div></div>
 
             <p class="comments">
@@ -171,25 +172,25 @@ Initial investigation suggested that this could happen if we are making HTTP/1.1
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2016/11/29/implementing-feature-toggles-for-a-spring-boot-application---part-4/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 4</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2016/11/29/implementing-feature-toggles-for-a-spring-boot-application-part-4/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 4</a></li>
                     
                     
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2016/11/28/implementing-feature-toggles-for-a-spring-boot-application---part-3/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 3</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2016/11/28/implementing-feature-toggles-for-a-spring-boot-application-part-3/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 3</a></li>
                     
                     
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2016/11/26/implementing-feature-toggles-for-a-spring-boot-application---part-2/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 2</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2016/11/26/implementing-feature-toggles-for-a-spring-boot-application-part-2/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 2</a></li>
                     
                     
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2016/11/21/implementing-feature-toggles-for-a-spring-boot-application---part-1/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 1</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2016/11/21/implementing-feature-toggles-for-a-spring-boot-application-part-1/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 1</a></li>
                     
                     
                     
@@ -223,31 +224,31 @@ Initial investigation suggested that this could happen if we are making HTTP/1.1
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2016/07/13/jwt-authentication-with-spring-web---part-5/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 5</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2016/07/13/jwt-authentication-with-spring-web-part-5/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 5</a></li>
                     
                     
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2016/07/07/jwt-authentication-with-spring-web---part-4/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 4</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2016/07/07/jwt-authentication-with-spring-web-part-4/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 4</a></li>
                     
                     
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2016/07/05/jwt-authentication-with-spring-web---part-3/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 3</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2016/07/05/jwt-authentication-with-spring-web-part-3/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 3</a></li>
                     
                     
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2016/07/03/jwt-authentication-with-spring-web---part-2/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 2</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2016/07/03/jwt-authentication-with-spring-web-part-2/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 2</a></li>
                     
                     
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2016/07/02/jwt-authentication-with-spring-web---part-1/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 1</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2016/07/02/jwt-authentication-with-spring-web-part-1/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 1</a></li>
                     
                     
                     
@@ -281,7 +282,7 @@ Initial investigation suggested that this could happen if we are making HTTP/1.1
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2016/04/19/programmable-exit-codes-for-spring-command-line-applications---2/?utm_source=site&amp;utm_medium=related">Programmable exit codes for spring command line applications - 2</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2016/04/19/programmable-exit-codes-for-spring-command-line-applications-2/?utm_source=site&amp;utm_medium=related">Programmable exit codes for spring command line applications - 2</a></li>
                     
                     
                     
@@ -379,7 +380,7 @@ Initial investigation suggested that this could happen if we are making HTTP/1.1
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2014/03/20/clojure-dojo---levenshtein-edit-distance/?utm_source=site&amp;utm_medium=related">Clojure Dojo - Levenshtein edit distance</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2014/03/20/clojure-dojo-levenshtein-edit-distance/?utm_source=site&amp;utm_medium=related">Clojure Dojo - Levenshtein edit distance</a></li>
                     
                     
                     
@@ -407,19 +408,19 @@ Initial investigation suggested that this could happen if we are making HTTP/1.1
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2013/10/13/implementing-rate-limiting-in-rails---part-2/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 2</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2013/10/13/implementing-rate-limiting-in-rails-part-2/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 2</a></li>
                     
                     
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2013/10/12/implementing-rate-limiting-in-rails---part-1/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 1</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2013/10/12/implementing-rate-limiting-in-rails-part-1/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 1</a></li>
                     
                     
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2013/10/07/python-hack---dynamically-override-an-objects-attribute/?utm_source=site&amp;utm_medium=related">Python Hack - Dynamically override an object&#39;s attribute</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2013/10/07/python-hack-dynamically-override-an-objects-attribute/?utm_source=site&amp;utm_medium=related">Python Hack - Dynamically override an object&#39;s attribute</a></li>
                     
                     
                     
@@ -523,7 +524,7 @@ Initial investigation suggested that this could happen if we are making HTTP/1.1
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2013/08/02/graph-databases-1---modeling/?utm_source=site&amp;utm_medium=related">Graph databases 1 - Modeling</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2013/08/02/graph-databases-1-modeling/?utm_source=site&amp;utm_medium=related">Graph databases 1 - Modeling</a></li>
                     
                     
                     
@@ -591,13 +592,13 @@ Initial investigation suggested that this could happen if we are making HTTP/1.1
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2012/11/29/my-first-firefox-plugin-getcache---view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">My first Firefox plugin: GetCache - View cached version of the current page</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2012/11/29/my-first-firefox-plugin-getcache-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">My first Firefox plugin: GetCache - View cached version of the current page</a></li>
                     
                     
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2012/11/28/getcache---a-chrome-plugin-to-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">GetCache - A Chrome plugin to view cached version of the current page</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2012/11/28/getcache-a-chrome-plugin-to-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">GetCache - A Chrome plugin to view cached version of the current page</a></li>
                     
                     
                     
@@ -637,7 +638,7 @@ Initial investigation suggested that this could happen if we are making HTTP/1.1
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2012/07/21/visualisation---how-european-clubs-dominate-their-leagues/?utm_source=site&amp;utm_medium=related">Visualisation - How European clubs dominate their leagues</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2012/07/21/visualisation-how-european-clubs-dominate-their-leagues/?utm_source=site&amp;utm_medium=related">Visualisation - How European clubs dominate their leagues</a></li>
                     
                     
                     
@@ -663,7 +664,7 @@ Initial investigation suggested that this could happen if we are making HTTP/1.1
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2012/06/25/micro-journal---simple-git-backed-journal-in-python/?utm_source=site&amp;utm_medium=related">Micro Journal - simple Git-backed journal in Python</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2012/06/25/micro-journal-simple-git-backed-journal-in-python/?utm_source=site&amp;utm_medium=related">Micro Journal - simple Git-backed journal in Python</a></li>
                     
                     
                     
@@ -675,19 +676,13 @@ Initial investigation suggested that this could happen if we are making HTTP/1.1
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2012/06/06/know-your-tools---dont-shoot-yourself-in-the-foot/?utm_source=site&amp;utm_medium=related">Know Your Tools - Don&#39;t Shoot Yourself in the Foot</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2012/06/06/know-your-tools-dont-shoot-yourself-in-the-foot/?utm_source=site&amp;utm_medium=related">Know Your Tools - Don&#39;t Shoot Yourself in the Foot</a></li>
                     
                     
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2012/06/05/managing-security-certificates-from-the-console---on-windows-mac-os-x-and-linux/?utm_source=site&amp;utm_medium=related">Managing security certificates from the console - on Windows, Mac OS X and Linux</a></li>
-                    
-                    
-                    
-                    
-                    
-                    
+                    <li><a class="related" href="https://sdqali.in/blog/2012/06/05/managing-security-certificates-from-the-console-on-windows-mac-os-x-and-linux/?utm_source=site&amp;utm_medium=related">Managing security certificates from the console - on Windows, Mac OS X and Linux</a></li>
                     
                     
                     
@@ -695,7 +690,13 @@ Initial investigation suggested that this could happen if we are making HTTP/1.1
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2012/05/11/indian-and-pakistani-cricketers---who-make-better-debuts/?utm_source=site&amp;utm_medium=related">Indian and Pakistani cricketers - who make better debuts?</a></li>
+                    
+                    
+                    
+                    
+                    
+                    
+                    <li><a class="related" href="https://sdqali.in/blog/2012/05/11/indian-and-pakistani-cricketers-who-make-better-debuts/?utm_source=site&amp;utm_medium=related">Indian and Pakistani cricketers - who make better debuts?</a></li>
                     
                     
                     
@@ -777,7 +778,7 @@ Initial investigation suggested that this could happen if we are making HTTP/1.1
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2010/01/09/autorun.py---execute-stuff-on-file-change/?utm_source=site&amp;utm_medium=related">Autorun.py - Execute stuff on file change</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2010/01/09/autorun.py-execute-stuff-on-file-change/?utm_source=site&amp;utm_medium=related">Autorun.py - Execute stuff on file change</a></li>
                     
                     
                     

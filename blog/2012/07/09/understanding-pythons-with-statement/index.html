@@ -38,8 +38,7 @@ finally:
     file.close()
 While this works well, it is unnecessarily verbose. This is where with is useful. The good thing about with apart from the better syntax is that it is very good handling exceptions. The above code would look like this, when using with:
 with open(&#34;/tmp/foo.txt&#34;) as file:
-   data = file.read()
-" />
+   data = file.read()" />
   
     <meta content="python, code, development" name="keywords">
   
@@ -65,8 +64,7 @@ finally:
     file.close()
 While this works well, it is unnecessarily verbose. This is where with is useful. The good thing about with apart from the better syntax is that it is very good handling exceptions. The above code would look like this, when using with:
 with open(&#34;/tmp/foo.txt&#34;) as file:
-   data = file.read()
-">
+   data = file.read()">
   <meta name="twitter:image" content="https://sdqali.in//images/threaded-blue-on-black-cropped.jpg">
 
   <meta property="og:title" content="Understanding Python&#39;s &#34;with&#34; statement" />
@@ -86,8 +84,7 @@ finally:
     file.close()
 While this works well, it is unnecessarily verbose. This is where with is useful. The good thing about with apart from the better syntax is that it is very good handling exceptions. The above code would look like this, when using with:
 with open(&#34;/tmp/foo.txt&#34;) as file:
-   data = file.read()
-" itemprop="description"/>
+   data = file.read()" itemprop="description"/>
   <meta property="og:url" content="https://sdqali.in/blog/2012/07/09/understanding-pythons-with-statement/" />
   <meta property="og:image" content="https://sdqali.in//images/threaded-blue-on-black-cropped.jpg" />
   <body>
@@ -165,20 +162,18 @@ with open(&#34;/tmp/foo.txt&#34;) as file:
 <p>Python&rsquo;s <code>with</code> statement provides a very convenient way of dealing with the situation where you have to do a setup and teardown to make something happen. A very good example for this is the situation where you want to gain a handler to a file, read data from the file and the close the file handler.</p>
 
 <p>Without the <code>with</code> statement, one would write something along the lines of:</p>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#366">file</span> <span style="color:#555">=</span> <span style="color:#366">open</span>(<span style="color:#c30"></span><span style="color:#c30">&#34;/tmp/foo.txt&#34;</span>)
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#366">file</span> <span style="color:#555">=</span> <span style="color:#366">open</span>(<span style="color:#c30">&#34;/tmp/foo.txt&#34;</span>)
 data <span style="color:#555">=</span> <span style="color:#366">file</span><span style="color:#555">.</span>read()
 <span style="color:#366">file</span><span style="color:#555">.</span>close()</code></pre></div>
 <p>There are two annoying things here. First, you end up forgetting to close the file handler. The second is how to handle exceptions that may occur once the file handler has been obtained. One could write something like this to get around this:</p>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#366">file</span> <span style="color:#555">=</span> <span style="color:#366">open</span>(<span style="color:#c30"></span><span style="color:#c30">&#34;/tmp/foo.txt&#34;</span>)
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#366">file</span> <span style="color:#555">=</span> <span style="color:#366">open</span>(<span style="color:#c30">&#34;/tmp/foo.txt&#34;</span>)
 <span style="color:#069;font-weight:bold">try</span>:
     data <span style="color:#555">=</span> <span style="color:#366">file</span><span style="color:#555">.</span>read()
 <span style="color:#069;font-weight:bold">finally</span>:
     <span style="color:#366">file</span><span style="color:#555">.</span>close()</code></pre></div>
 <p>While this works well, it is unnecessarily verbose. This is where <code>with</code> is useful. The good thing about <code>with</code> apart from the better syntax is that it is very good handling exceptions. The above code would look like this, when using <code>with</code>:</p>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#069;font-weight:bold">with</span> <span style="color:#366">open</span>(<span style="color:#c30"></span><span style="color:#c30">&#34;/tmp/foo.txt&#34;</span>) <span style="color:#069;font-weight:bold">as</span> <span style="color:#366">file</span>:
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#069;font-weight:bold">with</span> <span style="color:#366">open</span>(<span style="color:#c30">&#34;/tmp/foo.txt&#34;</span>) <span style="color:#069;font-weight:bold">as</span> <span style="color:#366">file</span>:
    data <span style="color:#555">=</span> <span style="color:#366">file</span><span style="color:#555">.</span>read()</code></pre></div>
-<p></p>
-
 <h2 id="how-does-it-work">How does it work?</h2>
 
 <p>While this might look like magic, the way Python handles <code>with</code> is more clever than magic. The basic idea is that the statement after <code>with</code> has to evaluate an object that responds to an <code>__enter__()</code> as well as an <code>__exit__()</code> function.</p>
@@ -192,11 +187,11 @@ data <span style="color:#555">=</span> <span style="color:#366">file</span><span
 
 <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">Sample</span>:
     <span style="color:#069;font-weight:bold">def</span> __enter__(self):
-        <span style="color:#069;font-weight:bold">print</span> <span style="color:#c30"></span><span style="color:#c30">&#34;In __enter__()&#34;</span>
-        <span style="color:#069;font-weight:bold">return</span> <span style="color:#c30"></span><span style="color:#c30">&#34;Foo&#34;</span>
+        <span style="color:#069;font-weight:bold">print</span> <span style="color:#c30">&#34;In __enter__()&#34;</span>
+        <span style="color:#069;font-weight:bold">return</span> <span style="color:#c30">&#34;Foo&#34;</span>
 
     <span style="color:#069;font-weight:bold">def</span> __exit__(self, <span style="color:#366">type</span>, value, trace):
-        <span style="color:#069;font-weight:bold">print</span> <span style="color:#c30"></span><span style="color:#c30">&#34;In __exit__()&#34;</span>
+        <span style="color:#069;font-weight:bold">print</span> <span style="color:#c30">&#34;In __exit__()&#34;</span>
 
 
 <span style="color:#069;font-weight:bold">def</span> <span style="color:#c0f">get_sample</span>():
@@ -204,7 +199,7 @@ data <span style="color:#555">=</span> <span style="color:#366">file</span><span
 
 
 <span style="color:#069;font-weight:bold">with</span> get_sample() <span style="color:#069;font-weight:bold">as</span> sample:
-    <span style="color:#069;font-weight:bold">print</span> <span style="color:#c30"></span><span style="color:#c30">&#34;sample:&#34;</span>, sample</code></pre></div>
+    <span style="color:#069;font-weight:bold">print</span> <span style="color:#c30">&#34;sample:&#34;</span>, sample</code></pre></div>
 <p>When executed, this will result in:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">bash-3.2$ ./with_example01.py
 In __enter__<span style="color:#555">()</span>
@@ -229,9 +224,9 @@ In __exit__<span style="color:#555">()</span></code></pre></div>
         <span style="color:#069;font-weight:bold">return</span> self
 
     <span style="color:#069;font-weight:bold">def</span> __exit__(self, <span style="color:#366">type</span>, value, trace):
-        <span style="color:#069;font-weight:bold">print</span> <span style="color:#c30"></span><span style="color:#c30">&#34;type:&#34;</span>, <span style="color:#366">type</span>
-        <span style="color:#069;font-weight:bold">print</span> <span style="color:#c30"></span><span style="color:#c30">&#34;value:&#34;</span>, value
-        <span style="color:#069;font-weight:bold">print</span> <span style="color:#c30"></span><span style="color:#c30">&#34;trace:&#34;</span>, trace
+        <span style="color:#069;font-weight:bold">print</span> <span style="color:#c30">&#34;type:&#34;</span>, <span style="color:#366">type</span>
+        <span style="color:#069;font-weight:bold">print</span> <span style="color:#c30">&#34;value:&#34;</span>, value
+        <span style="color:#069;font-weight:bold">print</span> <span style="color:#c30">&#34;trace:&#34;</span>, trace
 
     <span style="color:#069;font-weight:bold">def</span> <span style="color:#c0f">do_something</span>(self):
         bar <span style="color:#555">=</span> <span style="color:#f60">1</span><span style="color:#555">/</span><span style="color:#f60">0</span>
@@ -309,25 +304,25 @@ ZeroDivisionError: integer division or modulo by zero</code></pre></div>
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2016/11/29/implementing-feature-toggles-for-a-spring-boot-application---part-4/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 4</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2016/11/29/implementing-feature-toggles-for-a-spring-boot-application-part-4/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 4</a></li>
                     
                     
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2016/11/28/implementing-feature-toggles-for-a-spring-boot-application---part-3/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 3</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2016/11/28/implementing-feature-toggles-for-a-spring-boot-application-part-3/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 3</a></li>
                     
                     
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2016/11/26/implementing-feature-toggles-for-a-spring-boot-application---part-2/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 2</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2016/11/26/implementing-feature-toggles-for-a-spring-boot-application-part-2/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 2</a></li>
                     
                     
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2016/11/21/implementing-feature-toggles-for-a-spring-boot-application---part-1/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 1</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2016/11/21/implementing-feature-toggles-for-a-spring-boot-application-part-1/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 1</a></li>
                     
                     
                     
@@ -361,31 +356,31 @@ ZeroDivisionError: integer division or modulo by zero</code></pre></div>
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2016/07/13/jwt-authentication-with-spring-web---part-5/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 5</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2016/07/13/jwt-authentication-with-spring-web-part-5/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 5</a></li>
                     
                     
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2016/07/07/jwt-authentication-with-spring-web---part-4/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 4</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2016/07/07/jwt-authentication-with-spring-web-part-4/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 4</a></li>
                     
                     
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2016/07/05/jwt-authentication-with-spring-web---part-3/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 3</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2016/07/05/jwt-authentication-with-spring-web-part-3/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 3</a></li>
                     
                     
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2016/07/03/jwt-authentication-with-spring-web---part-2/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 2</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2016/07/03/jwt-authentication-with-spring-web-part-2/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 2</a></li>
                     
                     
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2016/07/02/jwt-authentication-with-spring-web---part-1/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 1</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2016/07/02/jwt-authentication-with-spring-web-part-1/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 1</a></li>
                     
                     
                     
@@ -419,7 +414,7 @@ ZeroDivisionError: integer division or modulo by zero</code></pre></div>
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2016/04/19/programmable-exit-codes-for-spring-command-line-applications---2/?utm_source=site&amp;utm_medium=related">Programmable exit codes for spring command line applications - 2</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2016/04/19/programmable-exit-codes-for-spring-command-line-applications-2/?utm_source=site&amp;utm_medium=related">Programmable exit codes for spring command line applications - 2</a></li>
                     
                     
                     
@@ -517,7 +512,7 @@ ZeroDivisionError: integer division or modulo by zero</code></pre></div>
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2014/03/20/clojure-dojo---levenshtein-edit-distance/?utm_source=site&amp;utm_medium=related">Clojure Dojo - Levenshtein edit distance</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2014/03/20/clojure-dojo-levenshtein-edit-distance/?utm_source=site&amp;utm_medium=related">Clojure Dojo - Levenshtein edit distance</a></li>
                     
                     
                     
@@ -545,19 +540,19 @@ ZeroDivisionError: integer division or modulo by zero</code></pre></div>
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2013/10/13/implementing-rate-limiting-in-rails---part-2/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 2</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2013/10/13/implementing-rate-limiting-in-rails-part-2/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 2</a></li>
                     
                     
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2013/10/12/implementing-rate-limiting-in-rails---part-1/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 1</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2013/10/12/implementing-rate-limiting-in-rails-part-1/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 1</a></li>
                     
                     
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2013/10/07/python-hack---dynamically-override-an-objects-attribute/?utm_source=site&amp;utm_medium=related">Python Hack - Dynamically override an object&#39;s attribute</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2013/10/07/python-hack-dynamically-override-an-objects-attribute/?utm_source=site&amp;utm_medium=related">Python Hack - Dynamically override an object&#39;s attribute</a></li>
                     
                     
                     
@@ -661,7 +656,7 @@ ZeroDivisionError: integer division or modulo by zero</code></pre></div>
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2013/08/02/graph-databases-1---modeling/?utm_source=site&amp;utm_medium=related">Graph databases 1 - Modeling</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2013/08/02/graph-databases-1-modeling/?utm_source=site&amp;utm_medium=related">Graph databases 1 - Modeling</a></li>
                     
                     
                     
@@ -729,13 +724,13 @@ ZeroDivisionError: integer division or modulo by zero</code></pre></div>
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2012/11/29/my-first-firefox-plugin-getcache---view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">My first Firefox plugin: GetCache - View cached version of the current page</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2012/11/29/my-first-firefox-plugin-getcache-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">My first Firefox plugin: GetCache - View cached version of the current page</a></li>
                     
                     
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2012/11/28/getcache---a-chrome-plugin-to-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">GetCache - A Chrome plugin to view cached version of the current page</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2012/11/28/getcache-a-chrome-plugin-to-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">GetCache - A Chrome plugin to view cached version of the current page</a></li>
                     
                     
                     
@@ -775,7 +770,7 @@ ZeroDivisionError: integer division or modulo by zero</code></pre></div>
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2012/07/21/visualisation---how-european-clubs-dominate-their-leagues/?utm_source=site&amp;utm_medium=related">Visualisation - How European clubs dominate their leagues</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2012/07/21/visualisation-how-european-clubs-dominate-their-leagues/?utm_source=site&amp;utm_medium=related">Visualisation - How European clubs dominate their leagues</a></li>
                     
                     
                     
@@ -799,7 +794,7 @@ ZeroDivisionError: integer division or modulo by zero</code></pre></div>
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2012/06/25/micro-journal---simple-git-backed-journal-in-python/?utm_source=site&amp;utm_medium=related">Micro Journal - simple Git-backed journal in Python</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2012/06/25/micro-journal-simple-git-backed-journal-in-python/?utm_source=site&amp;utm_medium=related">Micro Journal - simple Git-backed journal in Python</a></li>
                     
                     
                     
@@ -811,19 +806,13 @@ ZeroDivisionError: integer division or modulo by zero</code></pre></div>
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2012/06/06/know-your-tools---dont-shoot-yourself-in-the-foot/?utm_source=site&amp;utm_medium=related">Know Your Tools - Don&#39;t Shoot Yourself in the Foot</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2012/06/06/know-your-tools-dont-shoot-yourself-in-the-foot/?utm_source=site&amp;utm_medium=related">Know Your Tools - Don&#39;t Shoot Yourself in the Foot</a></li>
                     
                     
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2012/06/05/managing-security-certificates-from-the-console---on-windows-mac-os-x-and-linux/?utm_source=site&amp;utm_medium=related">Managing security certificates from the console - on Windows, Mac OS X and Linux</a></li>
-                    
-                    
-                    
-                    
-                    
-                    
+                    <li><a class="related" href="https://sdqali.in/blog/2012/06/05/managing-security-certificates-from-the-console-on-windows-mac-os-x-and-linux/?utm_source=site&amp;utm_medium=related">Managing security certificates from the console - on Windows, Mac OS X and Linux</a></li>
                     
                     
                     
@@ -831,7 +820,13 @@ ZeroDivisionError: integer division or modulo by zero</code></pre></div>
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2012/05/11/indian-and-pakistani-cricketers---who-make-better-debuts/?utm_source=site&amp;utm_medium=related">Indian and Pakistani cricketers - who make better debuts?</a></li>
+                    
+                    
+                    
+                    
+                    
+                    
+                    <li><a class="related" href="https://sdqali.in/blog/2012/05/11/indian-and-pakistani-cricketers-who-make-better-debuts/?utm_source=site&amp;utm_medium=related">Indian and Pakistani cricketers - who make better debuts?</a></li>
                     
                     
                     
@@ -915,7 +910,7 @@ ZeroDivisionError: integer division or modulo by zero</code></pre></div>
                     
                     
                     
-                    <li><a class="related" href="https://sdqali.in/blog/2010/01/09/autorun.py---execute-stuff-on-file-change/?utm_source=site&amp;utm_medium=related">Autorun.py - Execute stuff on file change</a></li>
+                    <li><a class="related" href="https://sdqali.in/blog/2010/01/09/autorun.py-execute-stuff-on-file-change/?utm_source=site&amp;utm_medium=related">Autorun.py - Execute stuff on file change</a></li>
                     
                     
                     
