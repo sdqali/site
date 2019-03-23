@@ -140,4 +140,38 @@ The new dataset has the expected values:
 | 2   | 44  |
 ```
 
+Here is another example that you often run in to on the internet when discussing trailing `@`:
+
+```
+data  colors;
+  infile datalines line=linenum column=col;
+  input @1 Var1 $ @8 Var2 $ @;
+  putlog "After reading Var1 and Var2: " _all_;
+
+  input @1 Var3 $ @8 Var4 $ ;
+  putlog "After reading Var3 and Var4: " _all_;
+  putlog "";
+
+  datalines;
+RED    ORANGE  YELLOW  GREEN
+BLUE   INDIGO  PURPLE  VIOLET
+CYAN   WHITE   FUCSIA  BLACK
+GRAY   BROWN   PINK    MAGENTA
+;
+run;
+```
+
+This results in the following dataset:
+
+```
+|Obs  | Var1 | Var2   | Var3 | Var4   |
+|-----|------|--------|------|--------|
+| 1   | RED  | ORANGE | RED  | ORANGE |
+| 2   | BLUE | INDIGO | BLUE | INDIGO |
+| 3   | CYAN | WHITE  | CYAN | WHITE  |
+| 4   | GRAY | BROWN  | GRAY | BROWN  |
+```
+
+Because of the trailing `@` in the first `input` statement, the values of `Var1` and `Var3` for all the observations are the same, as both are read from column `1`. Similarly `Var2` and `Var4` are the same as they are read from column `8`.
+
 [^1]: The Input Statement: Where It's @. Paper 253-29, SUGI 29 Proceedings.
