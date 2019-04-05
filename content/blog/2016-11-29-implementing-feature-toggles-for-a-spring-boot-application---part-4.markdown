@@ -18,15 +18,15 @@ image: "images/feature-toggles.png"
 series:
 - feature-toggles
 ---
-In the fourth part of this [series](/series/feature-toggles/) about implementing [feature toggles](/blog/2016/11/21/implementing-feature-toggles-for-a-spring-boot-application---part-1/) for a Spring Boot application, we will take a look at how our implementation so far introduced a dependency on the application being restarted for changes to take place.
+In the fourth part of this [series](/series/feature-toggles/) about implementing [feature toggles](/blog/2016/11/21/implementing-feature-toggles-for-a-spring-boot-application-part-1/) for a Spring Boot application, we will take a look at how our implementation so far introduced a dependency on the application being restarted for changes to take place.
 
 <!--more-->
 
-In [part 1](/blog/2016/11/21/implementing-feature-toggles-for-a-spring-boot-application---part-1/), we modified the `FeatureToggle` annotation to support toggling beans and decided to use that for toggling features at the controller level. If we had a system capable of providing the feature toggle information to the application without restarts, the change in the state of the controller level toggles will have no effect because the controller is not going to be re-wired for request mapping, unless the application is restarted.
+In [part 1](/blog/2016/11/21/implementing-feature-toggles-for-a-spring-boot-application-part-1/), we modified the `FeatureToggle` annotation to support toggling beans and decided to use that for toggling features at the controller level. If we had a system capable of providing the feature toggle information to the application without restarts, the change in the state of the controller level toggles will have no effect because the controller is not going to be re-wired for request mapping, unless the application is restarted.
 
 This raises the interesting question - Are bean level switches really feature toggles, considering that they can never be altered without application restarts? A better approach would be to consider bean switches as purely configurations and use facades that route commands to either of the beans based on a feature flag. In the example configuration provided, is treating the choice between storing sessions in-memory / Redis an actual feature, considering it does not provide any value to the end-user?
 
-To ensure that we are not tying feature toggling to restarts, we will remove the meta-annotation we introduced to `FeatureToggle` in [part 1](/blog/2016/11/21/implementing-feature-toggles-for-a-spring-boot-application---part-1/).
+To ensure that we are not tying feature toggling to restarts, we will remove the meta-annotation we introduced to `FeatureToggle` in [part 1](/blog/2016/11/21/implementing-feature-toggles-for-a-spring-boot-application-part-1/).
 
 ```java
 @Target({ElementType.TYPE, ElementType.METHOD})

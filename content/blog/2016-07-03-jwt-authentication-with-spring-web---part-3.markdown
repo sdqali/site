@@ -18,16 +18,16 @@ date: 2016-07-05T22:30:53-07:00
 image: "images/spring-security.png"
 title: JWT authentication with Spring Web - Part 3
 ---
-In the [previous blog post](/blog/2016/07/03/jwt-authentication-with-spring-web---part-2/), we built the Spring API that responds with Profile information. Continuing on the path to building authentication with JWT, in this blog post, we will create a login mechanism that issues a JWT when the user presents the correct credentials.
+In the [previous blog post](/blog/2016/07/03/jwt-authentication-with-spring-web-part-2/), we built the Spring API that responds with Profile information. Continuing on the path to building authentication with JWT, in this blog post, we will create a login mechanism that issues a JWT when the user presents the correct credentials.
 
 <!--more-->
 These are the blog posts in this series:
 
-* [Part 1](/blog/2016/07/02/jwt-authentication-with-spring-web---part-1/) - Discussion of JWT and implementation
-* [Part 2](/blog/2016/07/03/jwt-authentication-with-spring-web---part-2/) - A Spring User Profiles API
-* [Part 3](/blog/2016/07/05/jwt-authentication-with-spring-web---part-3/) - Issuing a token from the server
-* [Part 4](/blog/2016/07/07/jwt-authentication-with-spring-web---part-4/) - Verifying the token sent back by the client
-* [Part 5](/blog/2016/07/13/jwt-authentication-with-spring-web---part-5/) - Securing the front end
+* [Part 1](/blog/2016/07/02/jwt-authentication-with-spring-web-part-1/) - Discussion of JWT and implementation
+* [Part 2](/blog/2016/07/03/jwt-authentication-with-spring-web-part-2/) - A Spring User Profiles API
+* [Part 3](/blog/2016/07/05/jwt-authentication-with-spring-web-part-3/) - Issuing a token from the server
+* [Part 4](/blog/2016/07/07/jwt-authentication-with-spring-web-part-4/) - Verifying the token sent back by the client
+* [Part 5](/blog/2016/07/13/jwt-authentication-with-spring-web-part-5/) - Securing the front end
 
 Our fist step is to configure Spring Security to allow access to the login end point we will be building. This can be done as follows:
 
@@ -117,7 +117,7 @@ public class LoginService {
 ```
 Please note that in real applications, you never want to do this. You should be comparing the hashed version of the password presented by the user with the hashed version of the password stored in the database.
 
-The `JwtService` creates a token using the profile information and an expiration date of 2 hours with the `HMASHA256` algorithm. It uses the key provided by `SecretKeyProvider`. For creating the JWT token, we use the excellent jjwt [^1] library we introduced in [part 1](/blog/2016/07/02/jwt-authentication-with-spring-web---part-1/).
+The `JwtService` creates a token using the profile information and an expiration date of 2 hours with the `HMASHA256` algorithm. It uses the key provided by `SecretKeyProvider`. For creating the JWT token, we use the excellent jjwt [^1] library we introduced in [part 1](/blog/2016/07/02/jwt-authentication-with-spring-web-part-1/).
 
 ```java
 @Component

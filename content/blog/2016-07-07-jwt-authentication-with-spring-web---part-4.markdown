@@ -22,11 +22,11 @@ In parts 1 through 3 of this series, we built a Spring API that can issue a JWT 
 <!--more-->
 These are the blog posts in this series:
 
-* [Part 1](/blog/2016/07/02/jwt-authentication-with-spring-web---part-1/) - Discussion of JWT and implementation
-* [Part 2](/blog/2016/07/03/jwt-authentication-with-spring-web---part-2/) - A Spring User Profiles API
-* [Part 3](/blog/2016/07/05/jwt-authentication-with-spring-web---part-3/) - Issuing a token from the server
-* [Part 4](/blog/2016/07/07/jwt-authentication-with-spring-web---part-4/) - Verifying the token sent back by the client
-* [Part 5](/blog/2016/07/13/jwt-authentication-with-spring-web---part-5/) - Securing the front end
+* [Part 1](/blog/2016/07/02/jwt-authentication-with-spring-web-part-1/) - Discussion of JWT and implementation
+* [Part 2](/blog/2016/07/03/jwt-authentication-with-spring-web-part-2/) - A Spring User Profiles API
+* [Part 3](/blog/2016/07/05/jwt-authentication-with-spring-web-part-3/) - Issuing a token from the server
+* [Part 4](/blog/2016/07/07/jwt-authentication-with-spring-web-part-4/) - Verifying the token sent back by the client
+* [Part 5](/blog/2016/07/13/jwt-authentication-with-spring-web-part-5/) - Securing the front end
 
 We will start by configuring Spring security with a filter to capture the JWT passed by the client in the `Authorization` header. We will wire up this filter to go before the `UsernamePasswordAuthenticationFilter` provided by Spring security.
 

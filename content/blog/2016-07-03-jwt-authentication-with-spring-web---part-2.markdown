@@ -18,16 +18,16 @@ date: 2016-07-03T09:22:53-07:00
 image: "images/spring-security.png"
 title: JWT authentication with Spring Web - Part 2
 ---
-In the [previous blog post](/blog/2016/07/02/jwt-authentication-with-spring-web---part-1/) in this series, we looked at the basics of JWT. We will move on to building the Spring API that we will use JWT for authentication in this blog post.
+In the [previous blog post](/blog/2016/07/02/jwt-authentication-with-spring-web-part-1/) in this series, we looked at the basics of JWT. We will move on to building the Spring API that we will use JWT for authentication in this blog post.
 
 <!--more-->
 These are the blog posts in this series:
 
-* [Part 1](/blog/2016/07/02/jwt-authentication-with-spring-web---part-1/) - Discussion of JWT and implementation
-* [Part 2](/blog/2016/07/03/jwt-authentication-with-spring-web---part-2/) - A Spring User Profiles API
-* [Part 3](/blog/2016/07/05/jwt-authentication-with-spring-web---part-3/) - Issuing a token from the server
-* [Part 4](/blog/2016/07/07/jwt-authentication-with-spring-web---part-4/) - Verifying the token sent back by the client
-* [Part 5](/blog/2016/07/13/jwt-authentication-with-spring-web---part-5/) - Securing the front end
+* [Part 1](/blog/2016/07/02/jwt-authentication-with-spring-web-part-1/) - Discussion of JWT and implementation
+* [Part 2](/blog/2016/07/03/jwt-authentication-with-spring-web-part-2/) - A Spring User Profiles API
+* [Part 3](/blog/2016/07/05/jwt-authentication-with-spring-web-part-3/) - Issuing a token from the server
+* [Part 4](/blog/2016/07/07/jwt-authentication-with-spring-web-part-4/) - Verifying the token sent back by the client
+* [Part 5](/blog/2016/07/13/jwt-authentication-with-spring-web-part-5/) - Securing the front end
 
 ## The API
 

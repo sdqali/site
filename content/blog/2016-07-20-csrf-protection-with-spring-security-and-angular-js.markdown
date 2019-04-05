@@ -15,7 +15,7 @@ Cross-Site Request Forgery (CSRF) [^1] is an attack that forces an end user to e
 
 ### Front end
 
-For this example, we will build a simple Spring Boot application with an Angular front end. The front end is based on the application we built for the [series](/blog/2016/07/02/jwt-authentication-with-spring-web---part-1/) on authentication with JWT. The changes are in how the initial authentication is done - we will be using Basic Auth in this example to perform the initial authentication.
+For this example, we will build a simple Spring Boot application with an Angular front end. The front end is based on the application we built for the [series](/blog/2016/07/02/jwt-authentication-with-spring-web-part-1/) on authentication with JWT. The changes are in how the initial authentication is done - we will be using Basic Auth in this example to perform the initial authentication.
 
 This involves changing the `LoginService` to this:
 ```javascript
