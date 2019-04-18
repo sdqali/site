@@ -17,6 +17,8 @@ Tags:
 image: "images/feature-toggles.png"
 series:
 - feature-toggles
+aliases:
+- "/blog/2016/11/26/implementing-feature-toggles-for-a-spring-boot-application---part-2/"
 ---
 In the second part of this [series](/series/feature-toggles/) about implementing feature toggles for a Spring Boot application, we will look at exposing the features to the Angular front-end so that features can be toggled in UI components.
 

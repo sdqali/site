@@ -17,6 +17,8 @@ image: "images/feature-toggles.png"
 series:
 - feature-toggles
 title: Implementing feature toggles for a Spring Boot application - Part 1
+aliases:
+- "/blog/2016/11/21/implementing-feature-toggles-for-a-spring-boot-application---part-1/"
 ---
 In one of our recent projects at work, we implemented feature toggles for a Spring MVC / Angular JS code base and this [series of blog posts](/series/feature-toggles) discusses our motivations and requirements, the approach we took and what we learned from it.
 <!--more-->
