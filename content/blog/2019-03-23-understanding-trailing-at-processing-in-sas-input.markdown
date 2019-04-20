@@ -12,7 +12,7 @@ The use of trailing `@`s to take control of how SAS advances the input pointer i
 
 Let's take this example from the excellent paper _The Input Statement: Where It's @_ [^1] - given an put file where the first variable has to be read beginning from a particular column in the input line based on the value of the second variable.
 
-```
+```sas
 Age  Type
 23   1
   44 2
@@ -42,7 +42,7 @@ run;
 
 The result we get is not what we expect.
 
-```
+```sas
 | Obs | Age |
 |-----|-----|
 | 1   | .   |
@@ -96,7 +96,7 @@ After `type` is read, we can see that the pointer is at line `1` and column `7`,
 
 What we want is some way to tell `input` to ot move the pointer after the first input statement. This is where the single trailing `@` comes in. It intructs `input` to stay on the same line for the next `input` statement in the `data` step. The above listing modified to use trailing `@` is as follows:
 
-```
+```sas
 data trailing;
   infile datalines line=line column=col;
 
@@ -120,7 +120,7 @@ run;
 
 The following log lines are written:
 
-```
+```sas
  After reading type, before reading age: line=1 col=7 type=1 age=. _ERROR_=0 _N_=1
  After reading age: line=1 col=3 type=1 age=23 _ERROR_=0 _N_=1
  "
@@ -133,7 +133,7 @@ The log shows that `input` stayed on line `1` even after reading the `type` vari
 
 The new dataset has the expected values:
 
-```
+```sas
 | Obs | Age |
 |-----|-----|
 | 1   | 23  |
@@ -142,7 +142,7 @@ The new dataset has the expected values:
 
 Here is another example that you often run in to on the internet when discussing trailing `@`:
 
-```
+```sas
 data  colors;
   infile datalines line=linenum column=col;
   input @1 Var1 $ @8 Var2 $ @;
@@ -163,7 +163,7 @@ run;
 
 This results in the following dataset:
 
-```
+```sas
 |Obs  | Var1 | Var2   | Var3 | Var4   |
 |-----|------|--------|------|--------|
 | 1   | RED  | ORANGE | RED  | ORANGE |

@@ -18,12 +18,15 @@ We added a new component and wanted a library used by the specs to use an API pr
 1. Tell the test container, through environment variables the `host` and the `port` of the new component.
 
 So, off we went and configured everything:
-```
+
+```bash
 env.NEWAPP_HOST=http://new-app.local
 env.NEWAPP_PORT=1313
 ```
+
 We ran the tests and boom:
-```
+
+```bash
 SocketError (Failed to open TCP connection to http://new-app.local:1313 (getaddrinfo: nodename nor servname provided, or not known))
 ```
 
@@ -64,7 +67,8 @@ At this point, we are covered in a mix of disappointment and excitement. We are 
 At this point, we ping the Slack channels of the teams involved in building the library we consume. They have not seen this before. Someone suggests that they have had issues with Ruby inside Docker containers. We finally find a GitHub issue for a different project where someone encountered their container setting the `HTTP_PROXY` env variable and that causing `Net::HTTP` to fail. We pore over everything to make sure that there is no proxy set. What now?
 
 What if we attempt to connect to the new app from a Ruby process running on one of the other 10 containers we run?
-```
+
+```bash
 > docker exec -it 51dbf9f75ca8 ruby -e 'require "net/http"; conn = Net::HTTP.new("http://new-app.local", 1313); conn.get("/")'
 Traceback (most recent call last):
 .
@@ -72,8 +76,10 @@ Traceback (most recent call last):
 .
 SocketError (Failed to open TCP connection to http://new-app.local:1313 (getaddrinfo: nodename nor servname provided, or not known))
 ```
+
 That is interesting, isn't it? Is it happening to only our systems? What if we just tried to hit Google?
-```
+
+```bash
 > docker exec -it 51dbf9f75ca8 ruby -e 'require "net/http"; conn = Net::HTTP.new("http://google.com", 80); conn.get("/")'
 Traceback (most recent call last):
 .
@@ -81,8 +87,10 @@ Traceback (most recent call last):
 .
 SocketError (Failed to open TCP connection to http://google.com:80 (getaddrinfo: nodename nor servname provided, or not known))
 ```
+
 What if somehow our orchestration tool or containers created by us are causing it? Let's try a random container from DockerHub:
-```
+
+```bash
 > docker run -it ruby:2.5-slim ruby -e 'require "net/http"; conn = Net::HTTP.new("http://google.com",80); conn.get("/")'
 Traceback (most recent call last):
 .
@@ -90,11 +98,14 @@ Traceback (most recent call last):
 .
 SocketError (Failed to open TCP connection to http://google.com:80 (getaddrinfo: nodename nor servname provided, or not known))
 ```
+
 At this point, light bulbs are beginning to go off. Let's try this on our laptops? Same result. And then it struck us. It says it can't open a TCP connection to a URL with `http` in it.  Of course, it cant. It should be looking for `google.com`, should not it? Yes:
+
 ```irb
 > docker run -it ruby:2.5-slim ruby -e 'require "net/http"; conn = Net::HTTP.new("google.com", 80); res = conn.get("/"); puts res.code'
 301
 ```
+
 And with a lot of excitement and some shame, we realize that the library really meant `host` when it asked for the `NEWAPP_HOST` environment variable.
 
 I don't think there are any big lessons in this story other than that, sometimes the simplest explanation of a problems makes a lot more sense than you would think it does. Also, if you ever use `Net::HTTP.new`, remember that it expects you to provide a `host` as the first param, not a URL.
