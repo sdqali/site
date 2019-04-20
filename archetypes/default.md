@@ -5,4 +5,3 @@ Categories = ["Development"]
 keywords = [""]
 image = ""
 +++
-{{< mailchimp >}}
