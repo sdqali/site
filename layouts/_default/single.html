@@ -49,27 +49,27 @@
     <!-- Post Content -->
     <article>
       <div itemprop="mainContentOfPage"
-         itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
-        <div >
-          <div >
-            {{ .Content }}
-            {{ partial "comments.snippet.html" }}
-          </div>
-          <div >
-            <h3>If you liked this post, you'll also like...</h3>
-                <ul class="related-posts">
-                    {{ $page_link := .Permalink }}
-                    {{ $tags := .Params.tags }}
-                    {{ range .Site.Pages }}
-                    {{ $page := . }}
-                    {{ $has_common_tags := intersect $tags .Params.tags | len | lt 0 }}
-                    {{ if and $has_common_tags (ne $page_link $page.Permalink) }}
-                    <li><a href="{{ (print $page.Permalink "?utm_source=site&utm_medium=related" )}}">{{ $page.Title }}</a></li>
-                    {{ end }}
-                    {{ end }}
-                </ul>
-          </div>
+           itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
+        <div>
+          {{ .Content }}
         </div>
+        <aside>
+          {{ partial "comments.snippet.html" }}
+        </aside>
+        <aside>
+          <h3>If you liked this post, you'll also like...</h3>
+          <ul class="related-posts">
+            {{ $page_link := .Permalink }}
+            {{ $tags := .Params.tags }}
+            {{ range .Site.Pages }}
+            {{ $page := . }}
+            {{ $has_common_tags := intersect $tags .Params.tags | len | lt 0 }}
+            {{ if and $has_common_tags (ne $page_link $page.Permalink) }}
+            <li><a href="{{ (print $page.Permalink "?utm_source=site&utm_medium=related" )}}">{{ $page.Title }}</a></li>
+            {{ end }}
+            {{ end }}
+          </ul>
+        </aside>
       </div>
     </article>
 
