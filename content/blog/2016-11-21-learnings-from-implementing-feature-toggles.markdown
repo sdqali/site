@@ -178,7 +178,7 @@ public @interface FeatureToggle {
   boolean expectedToBeOn() default true;
 }
 ```
-The `FearureCondition` uses the meta annotation attributes provided to it and the environment to decide the state to be returned:
+The `FeatureCondition` uses the meta annotation attributes provided to it and the environment to decide the state to be returned:
 ```java
 public class FeatureCondition implements Condition {
   @Override
