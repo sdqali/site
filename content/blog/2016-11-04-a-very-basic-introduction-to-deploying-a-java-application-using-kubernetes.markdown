@@ -69,7 +69,7 @@ In order to create a docker container from this application, we will use the [Ma
 ```
 <docker.image.prefix>sadiqueio</docker.image.prefix>
 ```
-Th plugin expects a `Dockerfile` to be present in the `src/main/docker` directory. Our `Dockerfile` will look like this:
+This plugin expects a `Dockerfile` to be present in the `src/main/docker` directory. Our `Dockerfile` will look like this:
 ```
 FROM frolvlad/alpine-oraclejdk8:slim
 ADD hello-world-0.0.1-SNAPSHOT.jar app.jar
