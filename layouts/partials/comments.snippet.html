@@ -1,3 +1,32 @@
-<p class="comments">
-  If you have questions or comments about this blog post, you can get in touch with me on Twitter <a href="https://twitter.com/sdqali">@sdqali</a>.
-</p>
+<script>
+var url = "https://github.com/sdqali/hugo/issues/{{ .Params.ghcommentid }}";
+var api_url = "https://api.github.com/repos/sdqali/hugo/issues/{{ .Params.ghcommentid }}/comments";
+
+$(document).ready(function () {
+	$.ajax(api_url, {
+		headers: {Accept: "application/vnd.github.v3.html+json"},
+		dataType: "json",
+		success: function(comments) {
+			var button = "<button type='button' class='gh-comment-button'>Comment on GitHub</button>";
+			$("#gh-comments-list").append("<div class='issues-link'><a href='" + url + "'  target='_blank'>" + button + "</a></div>");
+			$.each(comments, function(i, comment) {
+
+				var date = new Date(comment.created_at);
+
+				var t = "<div class='gh-comment'>";
+				t += "<div class='gh-comment-header'><img src='" + comment.user.avatar_url + "' width='24px'>";
+				t += "<b><a href='" + comment.user.html_url + "'>" + comment.user.login + "</a></b>";
+				t += " posted at ";
+				t += "<em>" + date.toUTCString() + "</em></div>";
+				t += "<div id='gh-comment-hr'></div>";
+				t += comment.body_html;
+				t += "</div>";
+				$("#gh-comments-list").append(t);
+			});
+		},
+		error: function() {
+			$("#gh-comments-list").append("Comments are not open for this post yet.");
+		}
+	});
+});
+</script>
