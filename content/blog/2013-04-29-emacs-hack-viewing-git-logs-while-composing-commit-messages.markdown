@@ -1,8 +1,4 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Emacs hack: Viewing Git logs while composing commit messages"
-date: 2013-04-29
-comments: true
 categories:
 - code
 - development
@@ -10,6 +6,10 @@ categories:
 - emacs
 - git
 - tools
+comments: true
+date: 2013-04-29
+ghcommentid: 61
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - code
 - development
@@ -17,7 +17,9 @@ tags:
 - emacs
 - git
 - tools
+title: 'Emacs hack: Viewing Git logs while composing commit messages'
 ---
+
 I use Emacs as my editor to compose Git commit messages. I almost never commit from the terminal with `git commit -m`. This approach has two advantages: I get a chance to verify what is being committed and get to compose the message using a proper editor complete with spell checking provided by *flyspell mode*. One thing I wish I had access to while composing commit messages is the git log. This is useful to refer to work items and encourages one to use a consistent style in the messages. This was easier in the terminal as one could do something like `git log -n 3` and then commit with the `-m` flag.
 
 I decided to fix this today and some tinkering later came up with a hack tp do this.

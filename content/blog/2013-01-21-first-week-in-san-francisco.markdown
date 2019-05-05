@@ -1,13 +1,15 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "First week in San Francisco"
-date: 2013-01-21
-comments: true
 categories:
 - life
+comments: true
+date: 2013-01-21
+ghcommentid: 55
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - life
+title: First week in San Francisco
 ---
+
 I moved to San Francisco last week and is just getting acquainted with
 the city. This blog
 post is a summary of my first impressions of SF to share with a lot of friends whom I have not been able to keep in touch and who have been wondering what I am up to.

@@ -1,22 +1,23 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Finding un-merged commits with git cherry"
-date: 2012-04-29
-comments: true
+aliases:
+- /2012/04/finding-un-merged-commits-with-git.html
 categories:
 - code
 - git
 - scm
 - story-branching
 - development
+comments: true
+date: 2012-04-29
+ghcommentid: 31
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - code
 - git
 - scm
 - story-branching
 - development
-aliases:
-- "/2012/04/finding-un-merged-commits-with-git.html"
+title: Finding un-merged commits with git cherry
 ---
 
 In a project that I was a part of in the recent past, we used Story Branching. While it afforded us flexibility in pulling and pushing stories in and out of releases, it has given us some scares in the past. Somebody makes commits against a story, but the commit does not get merged to the correct release branch where it is supposed to go or gets merged to another release. The solution was to hunt down the commits that are missing or have creeped in.

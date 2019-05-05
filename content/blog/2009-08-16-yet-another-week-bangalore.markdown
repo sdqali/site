@@ -1,17 +1,19 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: Yet another week in Bangalore
-date: 2009-08-16
-comments: true
 categories:
 - life
 - reflections
 - football
+comments: true
+date: 2009-08-16
+ghcommentid: 14
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - life
 - reflections
 - football
+title: Yet another week in Bangalore
 ---
+
 Yet another week of my Bangalore life has unfolded. It was tougher, and better than the first two weeks.
 
 I learned lots of new stuff, stuff that would greatly help me in my profession. I made friends with new people. But most important of all, I got some feedback on some of the things I do in life. It was kind of very scary, to be honest. But then I realized that the feedback will let me improve. I am trying hard to use the feedback in the most positive way possible.

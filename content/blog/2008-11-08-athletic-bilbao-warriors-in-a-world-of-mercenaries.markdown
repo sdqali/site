@@ -1,16 +1,17 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Athletic Bilbao - Warriors in a world of Mercenaries"
-date: 2008-11-08
-comments: true
 categories:
 - football
 - athletic
 - bilbao
+comments: true
+date: 2008-11-08
+ghcommentid: 8
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - football
 - athletic
 - bilbao
+title: Athletic Bilbao - Warriors in a world of Mercenaries
 ---
 
 Modern day football has become a professional game of the highest order, where money speaks loudest, player loyalty is as rare as silverware for ManCity, and big clubs poach youngsters from clubs with smaller financial muscle, with trick or crook.

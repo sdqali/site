@@ -1,8 +1,6 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Managing security certificates from the console - on Windows, Mac OS X and Linux"
-date: 2012-06-05
-comments: true
+aliases:
+- /blog/2012/06/05/managing-security-certificates-from-the-console-windows-mac-linux/
 categories:
 - code
 - ssl
@@ -13,6 +11,10 @@ categories:
 - linux
 - development
 - firefox
+comments: true
+date: 2012-06-05
+ghcommentid: 36
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - code
 - ssl
@@ -23,8 +25,8 @@ tags:
 - linux
 - development
 - firefox
-aliases:
-- /blog/2012/06/05/managing-security-certificates-from-the-console-windows-mac-linux/
+title: Managing security certificates from the console - on Windows, Mac OS X and
+  Linux
 ---
 
 For me the last two weeks or so have involved a lot of wrestling with SSL certificates. One of the things that took some time to figure out was how to piggy-back on the tools provided by different Operating Systems to manage certificates. We did not want to rewrite [NSS](https://www.mozilla.org/projects/security/pki/nss/ "NSS"). Luckily for us, all the major OSes provide tools to manage certificates from the command line.

@@ -1,25 +1,27 @@
 ---
-title: Implementing feature toggles for a Spring Boot application - Part 4
-date: 2016-11-29T22:50:42-07:00
 Categories:
 - development
 - code
 - feature-toggles
 - java
 - spring
-Description: ""
+Description: ''
 Tags:
 - development
 - code
 - feature-toggles
 - java
 - spring
-image: "images/feature-toggles.png"
+aliases:
+- /blog/2016/11/29/implementing-feature-toggles-for-a-spring-boot-application---part-4/
+date: 2016-11-30 05:50:42
+ghcommentid: 130
+image: images/feature-toggles.png
 series:
 - feature-toggles
-aliases:
-- "/blog/2016/11/29/implementing-feature-toggles-for-a-spring-boot-application---part-4/"
+title: Implementing feature toggles for a Spring Boot application - Part 4
 ---
+
 In the fourth part of this [series](/series/feature-toggles/) about implementing [feature toggles](/blog/2016/11/21/implementing-feature-toggles-for-a-spring-boot-application-part-1/) for a Spring Boot application, we will take a look at how our implementation so far introduced a dependency on the application being restarted for changes to take place.
 
 <!--more-->

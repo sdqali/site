@@ -1,8 +1,9 @@
 ---
-title: Python URL manipulation revisited
-date: 2017-09-25T21:22:39-07:00
+date: 2017-09-26 04:22:39
+ghcommentid: 132
 tags:
 - python
+title: Python URL manipulation revisited
 ---
 
 My [last blog post](/blog/2017/08/17/uploading-a-standalone-artifact-to-nexus-3/) about publishing standalone files to Nexus repositories prompted me to revisit URL manipulation in Python. When I did this [the last time](/blog/2013/09/26/decomposing-urls-in-python/), I used Python stand library's `urlparse` and it did the job. This time around, I needed to do a different kind of manipulation. Given a URL, I had to set credentials on it. 

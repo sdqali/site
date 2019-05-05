@@ -1,16 +1,17 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "When URL shortening results in longer URLs"
-date: 2013-08-11
-comments: true
 categories:
 - technology
 - internet
 - twitter
+comments: true
+date: 2013-08-11
+ghcommentid: 71
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - technology
 - internet
 - twitter
+title: When URL shortening results in longer URLs
 ---
 
 I have previously [written](/blog/2012/07/17/social-networks-and-url-shorteners/) about [how social networks](/blog/2012/08/23/dear-content-creator-your-url-shortener-is-pointless/) use URL shortening as a way of obscuring and swallowing information about sharing of content on their platform. In Twitter's case, this means that all URLs are automatically 'shortened' with their _t.co_ domain. All their official clients take this shortening into account when you create a Tweet so as to avoid a round trip across the network to figure out if the tweet is short enough. But what happens if you are posting a URL that does not require any shortening? Something interesting happens.

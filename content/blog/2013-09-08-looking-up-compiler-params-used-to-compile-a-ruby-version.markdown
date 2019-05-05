@@ -1,17 +1,19 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Looking up Compiler params used to compile a Ruby version"
-date: 2013-09-08
-comments: true
 categories:
 - code
 - development
 - ruby
+comments: true
+date: 2013-09-08
+ghcommentid: 76
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - code
 - development
 - ruby
+title: Looking up Compiler params used to compile a Ruby version
 ---
+
 Today [Kashyap](https://twitter.com/kgrz) asked how one can identify the compiler parameters passed when compiling a Ruby version. I was curious how to achieve this and like any confused developer started searching for and looking in the Ruby documentation. Searching for **compiler parameters in ruby** did not yield any interesting results and the group of constants with the `RUBY_` prefix [^1] loaded in Ruby did not include anything related to compiler flags. Then I came across this blog post [^2] by [Jan Lelis](https://twitter.com/happycode) and I was curious what else `RbConfig::CONFIG` contains. This hash contains all the compiler flags used to compile the current Ruby VM.
 
 This code snippet prints the hash.

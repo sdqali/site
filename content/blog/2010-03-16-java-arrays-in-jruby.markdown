@@ -1,21 +1,23 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: Java Arrays in JRuby
-date: 2010-03-16
-comments: true
 categories:
 - code
 - jruby
 - ruby
 - java
 - development
+comments: true
+date: 2010-03-16
+ghcommentid: 20
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - code
 - jruby
 - ruby
 - java
 - development
+title: Java Arrays in JRuby
 ---
+
 Recently my team encountered a frustrating thing while working with a Java library in JRuby. It took us long to figure out what was going wrong. This is an attempt to write down what was happening.
 
 You are in Ruby world, a world of weak typing, no type casting and pure bliss in coding. You forget that some languages care about the type of elements in an Array. And you end up spending a lot of time figuring out why you are staring at a stupid looking exception.

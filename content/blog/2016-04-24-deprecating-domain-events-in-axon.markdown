@@ -2,15 +2,17 @@
 Categories:
 - development
 - java
-Description: ""
+Description: ''
 Tags:
 - development
 - java
 - axon
-date: 2016-04-24T18:35:43-05:00
+date: 2016-04-24 23:35:43
+ghcommentid: 112
+image: images/axon.png
 title: Deprecating domain events in Axon
-image: "images/axon.png"
 ---
+
 Recently at work, we had to deprecate a domain event. This event used to represent an error scenario. However, the business had since decided that this is no longer a valid error scenario. Removing the Java class is not straight forward - since there are events of this type stored in the event store, every time the aggregate associated with this event is loaded, Axon will throw errors trying to de-serialize them.
 
 <!--more-->

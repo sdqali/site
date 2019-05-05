@@ -1,17 +1,19 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Bangalore Journal"
-date: 2009-08-08
-comments: true
 categories:
 - life
 - reflections
 - football
+comments: true
+date: 2009-08-08
+ghcommentid: 13
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - life
 - reflections
 - football
+title: Bangalore Journal
 ---
+
 This is my 13th day in Bangalore. And the first week of my training at ToughtWorks has gone by. I learned lots of stuff, talked to some great people and made friends with some of them. I still have not overcome the difficulties of adapting to life in the City. May be I will soon, or I never will.
 
 I had planned to post everyday about my experiences in TWU. But I did not have much time. The sessions last till 5:00 pm, and then I will be very tired to do much. I am really missing football. I had hoped to play with my friend Aneesh on last Sunday, but we were not allowed to play as one old guy who turned up decided that only regulars could play there. Sigh !!

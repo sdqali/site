@@ -1,11 +1,13 @@
 ---
-title: Command line clients for gRPC - polyglot
-date: 2018-04-05T22:45:08-07:00
+date: 2018-04-06 05:45:08
+ghcommentid: 136
 tags:
-  - grpc
-  - grpcurl
-  - polyglot
+- grpc
+- grpcurl
+- polyglot
+title: Command line clients for gRPC - polyglot
 ---
+
 Polyglot was the second gRPC client that I looked at. One of the things that I liked about it is the fact that it does not need users to generate `protoset` files. It generates the protoset files in flight every time it runs. This, combined with the fact that it is written in Java does have a disadvantage - every time the client makes a call, it has to fire up a JVM, generate protosets and make the request.
 
 <!--more-->

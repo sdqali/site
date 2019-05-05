@@ -4,16 +4,21 @@ Categories:
 - spring
 - java
 - redis
-Description: "This blog post describes how to control the auto-configuration of Redis in a Spring Boot application using Spring Session, thereby making it possible to use the default in-memory session store in environments where Redis is not present. This is useful in Continuous Integration environments and development environments."
+Description: This blog post describes how to control the auto-configuration of Redis
+  in a Spring Boot application using Spring Session, thereby making it possible to
+  use the default in-memory session store in environments where Redis is not present.
+  This is useful in Continuous Integration environments and development environments.
 Tags:
 - development
 - spring
 - java
 - redis
-date: 2016-07-16T15:42:05-07:00
-image: "/images/redis-spring-boot.png"
+date: 2016-07-16 22:42:05
+ghcommentid: 122
+image: /images/redis-spring-boot.png
 title: Controlling Redis auto-configuration for Spring Boot Session
 ---
+
 If you have been using Spring Boot, chances are that you are using the Spring Session library to handle sessions. Spring Session has the ability to persist the sessions to various data stores, including Redis. The default behaviors of Spring Boot when combined with Spring Session is to start using Redis as the session store the moment `spring-session-data-redis` is detected in the class path, thereby making it hard to conditionally turn Redis support ON and OFF. This blog post explores why this is the default behavior and presents a solution to control this behavior.
 <!--more-->
 ### The application

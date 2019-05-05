@@ -1,10 +1,11 @@
 ---
-title: Uploading a standalone artifact to Nexus 3
-date: 2017-08-17T21:00:43-07:00
+date: 2017-08-18 04:00:43
+ghcommentid: 131
 tags:
 - maven
 - java
 - nexus
+title: Uploading a standalone artifact to Nexus 3
 ---
 
 This is one of those "I had to figure out how to do this today, so the next time I google this, I have a place to look" blog posts.

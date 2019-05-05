@@ -1,19 +1,21 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Social Networks and their URL Shorteners"
-date: 2012-07-17
-comments: true
 categories:
 - social-network
 - twitter
 - internet
 - google+
+comments: true
+date: 2012-07-17
+ghcommentid: 43
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - social-network
 - twitter
 - internet
 - google+
+title: Social Networks and their URL Shorteners
 ---
+
 I have been noticing lately that much of the traffic that my blog
 receives comes from Twitter's **t.co** domain or Google+'s
 **plus.url.google.com** domain. I don't receive much traffic and I don't

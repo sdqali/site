@@ -1,14 +1,15 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "A brief History of Times New Roman"
-date: 2013-08-21
-comments: true
 categories:
 - type
 - technology
+comments: true
+date: 2013-08-21
+ghcommentid: 74
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - type
 - technology
+title: A brief History of Times New Roman
 ---
 
 Mathew Butterick's Practical Typography [^1] features a section dedicated to the History of Times New Roman [^2]. It is an interesting read.

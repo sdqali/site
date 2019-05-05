@@ -3,16 +3,18 @@ Categories:
 - development
 - java
 - spring
-Description: ""
+Description: ''
 Tags:
 - development
 - java
 - spring
 - logstash
-date: 2016-06-30T19:43:07-04:00
-image: "images/spring-by-pivotal.png"
+date: 2016-06-30 23:43:07
+ghcommentid: 116
+image: images/spring-by-pivotal.png
 title: JSON logging for Spring applications
 ---
+
 <meta content="logstash spring boot example" name="keywords">
 If you have an application that writes logs, there are many reasons to make it write the log in JSON format. It makes it easier to search and analyze them when using tools such as the ELK Stack [^1]. JSON formatted logs make it easier to look at them when looking at how the app is behaving in real time using tools like jq [^2]. This blog post documents how to format logs as JSON in a Spring application.
 

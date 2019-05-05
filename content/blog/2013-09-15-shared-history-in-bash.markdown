@@ -1,16 +1,17 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Shared history in Bash"
-date: 2013-09-15
-comments: true
 categories:
 - code
 - bash
 - tools
+comments: true
+date: 2013-09-15
+ghcommentid: 78
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - code
 - bash
 - tools
+title: Shared history in Bash
 ---
 
 One of the features that I miss most in Bash is the shared history between terminals that Zsh supports. I was hunting down a solution for this and came across this Stack Overflow answer [^1] by user *lesmana*. This code snippet does the trick:

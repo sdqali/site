@@ -1,19 +1,21 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "D3.js Workshop"
-date: 2012-08-01
-comments: true
 categories:
 - talk
 - code
 - d3.js
 - visualisation
+comments: true
+date: 2012-08-01
+ghcommentid: 45
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - talk
 - code
 - d3.js
 - visualisation
+title: D3.js Workshop
 ---
+
 I did a [d3.js](http://d3js.org) workshop at ThoughtWorks Bangalore yesterday (31st
 July, 2012). I split the workshop in to two parts. The first was a basic
 introduction to d3.js - SVG, Scaling, Axes etc. The second part

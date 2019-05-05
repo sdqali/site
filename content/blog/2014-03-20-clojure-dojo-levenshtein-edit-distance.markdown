@@ -1,19 +1,21 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Clojure Dojo - Levenshtein edit distance"
-date: 2014-03-20
-comments: true
 categories:
 - code
 - clojure
 - algorithms
 - development
+comments: true
+date: 2014-03-20
+ghcommentid: 94
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - code
 - clojure
 - algorithms
 - development
+title: Clojure Dojo - Levenshtein edit distance
 ---
+
 I have been playing around with Clojure and after familiarising myself with the core, I decided to start writing little programs that forces me to choose the right idioms. I am starting off with Levenshtein edit distance of two strings.
 
 ### Levenshtein edit distance

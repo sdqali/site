@@ -1,23 +1,25 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Visualisation - How European clubs dominate their leagues"
-date: 2012-07-21
-comments: true
+aliases:
+- /blog/2012/07/21/visualization-how-european-clubs-dominate-their-leagues
 categories:
 - football
 - visualisation
 - data
 - d3.js
 - code
+comments: true
+date: 2012-07-21
+ghcommentid: 44
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - football
 - visualisation
 - data
 - d3.js
 - code
-aliases:
-- "/blog/2012/07/21/visualization-how-european-clubs-dominate-their-leagues"
+title: Visualisation - How European clubs dominate their leagues
 ---
+
 *Click [here](/visualizations/league_champions/index.html) to see the visualisation.*
 
 This is a visualization showing how various European football clubs have

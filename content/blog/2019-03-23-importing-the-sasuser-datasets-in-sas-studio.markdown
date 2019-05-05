@@ -1,9 +1,10 @@
 ---
-title: Importing the SASUSER datasets in SAS Studio
-date: 2019-03-23T11:14:06-07:00
+date: 2019-03-23 18:14:06
+ghcommentid: 140
 tags:
 - sas
 - development
+title: Importing the SASUSER datasets in SAS Studio
 ---
 
 I have been playing around with SAS for the last two weeks. I started with a SAS University Edition running on a VirtualBox instance on my MacBook, but soon realized that it was way more convenient to use a SAS OnDemand account. Having made the switch, I realized that all learning materials made references to and used examples with datsets from a library named `SASUSER`.

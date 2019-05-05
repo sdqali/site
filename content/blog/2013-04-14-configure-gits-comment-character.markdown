@@ -1,21 +1,23 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Configure Git's comment character"
-date: 2013-04-14
-comments: true
 categories:
 - code
 - development
 - tools
 - git
 - emacs
+comments: true
+date: 2013-04-14
+ghcommentid: 60
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - code
 - development
 - tools
 - git
 - emacs
+title: Configure Git's comment character
 ---
+
 TL;DR -
 Use the `core.commentchar` configuration to change the character Git uses to mark comment lines in commit messages.
 

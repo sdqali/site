@@ -1,15 +1,17 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Decomposing URLs in Python"
-date: 2013-09-26
-comments: true
 categories:
 - python
 - code
+comments: true
+date: 2013-09-26
+ghcommentid: 80
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - python
 - code
+title: Decomposing URLs in Python
 ---
+
 Python's `urlparse` module breaks down URLs in to components. It supports all the URL schemes specified in RFC 3986 [^1].
 
 ```bash

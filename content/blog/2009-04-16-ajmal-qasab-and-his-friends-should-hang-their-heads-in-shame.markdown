@@ -1,15 +1,17 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Ajmal Qasab and his friends should hang their heads in shame"
-date: 2009-04-16
-comments: true
 categories:
 - life
 - reflections
+comments: true
+date: 2009-04-16
+ghcommentid: 12
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - life
 - reflections
+title: Ajmal Qasab and his friends should hang their heads in shame
 ---
+
 Yesterday, I happened to watch the show 'The Buck Stops Here' presented by Barkha Dutt on NDTV 24 X 7.
 
 The trial of Ajmal Qasab, the lone terrorist captured during the Nov.27 attack on Mumbai and fellow defendants had begun in Mumbai and the court relieved Anjali Waghmare, the lawyer appointed by the court to defend Qasab, because of what it saw as a conflict of interest. Anjali Waghmare is the wife of a policeman. Qasab asked for a Pakistani lawyer to represent him.

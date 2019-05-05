@@ -1,20 +1,21 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "GetCache - A Chrome plugin to view cached version of the current page"
-date: 2012-11-28
-comments: true
 categories:
 - code
 - development
 - chrome
 - plugin
 - javascript
+comments: true
+date: 2012-11-28
+ghcommentid: 52
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - code
 - development
 - chrome
 - plugin
 - javascript
+title: GetCache - A Chrome plugin to view cached version of the current page
 ---
 
 >Download the plugin

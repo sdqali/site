@@ -1,19 +1,21 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "On Halal Burgers"
-date: 2013-09-17
-comments: true
 categories:
 - food
 - burger
 - halal
 - life
+comments: true
+date: 2013-09-17
+ghcommentid: 79
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - food
 - burger
 - halal
 - life
+title: On Halal Burgers
 ---
+
 "What would you like to have today?" The lady at the counter cheerfully asks. I smile back at her, take another cursory glance at the menu and with a sigh say "I will take the Teriyaki Salmon Sandwich, please!". I take another look at all the menu and can't help notice how sad I am. The assortment of meat preparations bundled between two pieces of bread that could have been mine is long and diverse. I suck my teeth and promise myself that I will be paying the butcher a visit in the evening.
 
 On those days when I fail to pack lunch to work, I find myself repeating this ritual, save for the substitution of Tuna—or Red Snapper if I am lucky—for the Salmon. The restaurant may change, and sometimes wraps smile at me instead of sandwiches, but the pain at having to let go of that goodness of beef or chicken remains the same.

@@ -1,19 +1,20 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Curse of the Community Shield?"
-date: 2012-08-15
-comments: true
 categories:
 - football
 - data
 - visualisation
 - d3.js
+comments: true
+date: 2012-08-15
+ghcommentid: 47
+image: /images/threaded-blue-on-black-cropped.jpg
+keywords: null
 tags:
 - football
 - data
 - visualisation
 - d3.js
-keywords:
+title: Curse of the Community Shield?
 ---
 
 Click on the image to see the visualisation:

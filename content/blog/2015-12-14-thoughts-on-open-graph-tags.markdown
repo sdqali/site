@@ -2,14 +2,16 @@
 Categories:
 - development
 - golang
-Description: ""
+Description: ''
 Tags:
 - development
 - golang
-date: 2015-12-14T21:47:06-05:00
+date: 2015-12-15 02:47:06
+ghcommentid: 107
+image: images/ogp.png
 title: Thoughts on Open Graph tags
-image: "images/ogp.png"
 ---
+
 The Open Graph protocol was designed by Facebook to help content creators generate a richer preview of links to their content when they get posted in to Facebook. It was originally proposed as a simple mark up that can be adopted in platforms beyond Facebook. The Open Graph Protocol Design Decisions presentation [^1] does a very good job of enumerating the motivation and design decisions made for Open Graph. I have lately been reading and experimenting with these tags and I notice a fair bit of differences when it comes to how these tags are used by different platforms.
 
 <!--more-->

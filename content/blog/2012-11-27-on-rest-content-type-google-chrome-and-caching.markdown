@@ -1,8 +1,4 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "On REST, Content-Type, Google Chrome and Caching"
-date: 2012-11-27
-comments: true
 categories:
 - code
 - development
@@ -11,6 +7,10 @@ categories:
 - chrome
 - caching
 - content-type
+comments: true
+date: 2012-11-27
+ghcommentid: 51
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - code
 - development
@@ -19,7 +19,9 @@ tags:
 - chrome
 - caching
 - content-type
+title: On REST, Content-Type, Google Chrome and Caching
 ---
+
 Representational State Transfer (REST) is a style of software
 architecture for distributed systems that has replaced technologies like
 [SOAP](http://en.wikipedia.org/wiki/SOAP) as the predominant Web service

@@ -1,15 +1,17 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "A rainy distraction"
-date: 2013-11-21
-comments: true
 categories:
 - life
 - rain
+comments: true
+date: 2013-11-21
+ghcommentid: 90
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - life
 - rain
+title: A rainy distraction
 ---
+
 Far away, the Sutro TV tower was hardly visible in the haze of rain.
 
 "So, this is what you were talking about in the morning? I thought it was the other calculation. You are right!". You suddenly feel happy and detect the smugness creeping to your face. I was right, I told you so, you want to say. But you don't. "Not today! The smugness will have to die."

@@ -1,14 +1,14 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Validating JSON in Emacs"
-date: 2013-07-31
-comments: true
 categories:
 - code
 - json
 - emacs
 - tools
 - development
+comments: true
+date: 2013-07-31
+ghcommentid: 65
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - code
 - json
@@ -16,7 +16,9 @@ tags:
 - tools
 - development
 - validation
+title: Validating JSON in Emacs
 ---
+
 <meta content="validate" name="keywords">
 At work, I have to deal with Amazon CloudFormation [^1] templates a fair bit. These templates are JSON files. More and more members of our team are moving away from TextMate to Emacs which makes me really happy. We would like to validate these CloudFormation templates in Emacs. Today we set this up and I hope this turns out to be of help to some one else trying to do the same.
 

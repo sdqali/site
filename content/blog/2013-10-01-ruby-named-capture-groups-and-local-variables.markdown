@@ -1,17 +1,19 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Ruby, Named Capture Groups and Local Variables"
-date: 2013-10-01
-comments: true
 categories:
 - ruby
 - code
 - regexp
+comments: true
+date: 2013-10-01
+ghcommentid: 84
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - ruby
 - code
 - regexp
+title: Ruby, Named Capture Groups and Local Variables
 ---
+
 Ruby's regular expressions support [named capture groups](/blog/2013/09/29/named-capture-groups-in-regular-expressions/), since 1.9. However, there is a weird behaviour while using named capture groups with the `Regexp#=~` method. When named capture groups are used with `=~`, the captured values are placed in local variables with the same name as the capture group. The following example demonstrates this:
 
 ```ruby

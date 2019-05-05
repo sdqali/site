@@ -1,18 +1,19 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Know Your Tools - Don't Shoot Yourself in the Foot"
-date: 2012-06-06
-comments: true
 categories:
 - code
 - development
 - ruby
 - rake
+comments: true
+date: 2012-06-06
+ghcommentid: 37
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - code
 - development
 - ruby
 - rake
+title: Know Your Tools - Don't Shoot Yourself in the Foot
 ---
 
 Imagine this - Your build is taking forever. You put in a lot of effort and restructure it. Things improve a lot, but it is far from where you would like it to be. You try hard to identify things that could improve the build time, but fail. You blame the platforms you use, you blame Ruby and you even blame the relative position of the Moon to Venus. Slowly you learn to accept the slow build as a part of your life. Months later a new developer joins the team and proves that there is a bug in the build scripts that causes certain tasks to be run twice.

@@ -2,7 +2,7 @@
 Categories:
 - etcd
 - development
-Description: ""
+Description: ''
 Tags:
 - etcd
 - cluster
@@ -11,8 +11,9 @@ Tags:
 - proxy
 - secure
 - development
-date: 2016-11-11T13:07:32-08:00
-image: "images/etcd2-0.png"
+date: 2016-11-11 21:07:32
+ghcommentid: 126
+image: images/etcd2-0.png
 keywords:
 - etcd
 - cluster
@@ -22,6 +23,7 @@ keywords:
 - secure
 title: Setting up a secure etcd cluster behind a proxy
 ---
+
 This is a blog post that explains how to set up a highly available etcd cluster behind a proxy and securing the communication between a client and the proxy, between the proxy and the individual member in the cluster and between members in the cluster.
 <!--more-->
 

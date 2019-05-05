@@ -2,16 +2,18 @@
 Categories:
 - development
 - java
-Description: ""
+Description: ''
 Tags:
 - development
 - spring
 - mockmvc
 - java
-date: 2015-11-24T05:45:06-05:00
+date: 2015-11-24 10:45:06
+ghcommentid: 101
+image: images/spring-by-pivotal.png
 title: Testing async responses using MockMvc
-image: "images/spring-by-pivotal.png"
 ---
+
 There are times when a Spring MVC end point performs asynchronous operations. Testing these end points using MockMvc can be tricky because of the asynchronous nature in which the result of the operation is eventually returned. This blog post describes how to write tests in such scenarios.
 
 <!--more-->

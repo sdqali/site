@@ -1,20 +1,21 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "My first Firefox plugin: GetCache - View cached version of the current page"
-date: 2012-11-29
-comments: true
 categories:
 - code
 - development
 - chrome
 - plugin
 - javascript
+comments: true
+date: 2012-11-29
+ghcommentid: 53
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - code
 - development
 - chrome
 - plugin
 - javascript
+title: 'My first Firefox plugin: GetCache - View cached version of the current page'
 ---
 
 I released my [first Firefox plugin](https://addons.mozilla.org/en-US/firefox/addon/getcache-ff/) today. It

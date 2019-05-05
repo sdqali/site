@@ -1,8 +1,6 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Bullet proof Jenkins setup"
-date: 2012-02-03
-comments: true
+aliases:
+- /2012/02/bullet-proof-jenkins-setup.html
 categories:
 - jenkins
 - ci
@@ -11,6 +9,10 @@ categories:
 - learn
 - code
 - development
+comments: true
+date: 2012-02-03
+ghcommentid: 30
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - jenkins
 - ci
@@ -19,8 +21,7 @@ tags:
 - learn
 - code
 - development
-aliases:
-- "/2012/02/bullet-proof-jenkins-setup.html"
+title: Bullet proof Jenkins setup
 ---
 
 In this post, I will describe how a neat setup and some discipline will ensure a Jenkins that can be rolled back and recreated very easily - a bullet proof Jenkins setup.  I have been working on configuring our Jenkins instance. This was the first time I had played around with Jenkins. I am fairly comfortable with <a href="http://www.thoughtworks-studios.com/go-agile-release-management" target="_blank">Go</a> from ThoughtWorks Studios. All of my past teams used Go as their tool for continuous delivery.

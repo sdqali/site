@@ -2,14 +2,16 @@
 Categories:
 - development
 - java
-Description: ""
+Description: ''
 Tags:
 - development
 - java
-date: 2015-12-11T15:57:30-05:00
+date: 2015-12-11 20:57:30
+ghcommentid: 106
+image: images/spring-by-pivotal.png
 title: Integration testing Spring command line applications
-image: "images/spring-by-pivotal.png"
 ---
+
 In the [last blog post](/blog/2015/12/10/integration-testing-challenges-for-non-web-spring-applications/), I wrote about the challenges of writing an integration test for a Spring command line application. One of the solutions for this issue discussed in the blog post was to use the `@IntegrationTest` annotations to inject Java system properties and use that to run the application instead of the normal command line arguments. This blog post describes how to perform this.
 <!--more-->
 The first step is to rewrite our test to use the `@IntegrationTest` annotations. This will result in a test that looks as follows:

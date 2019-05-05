@@ -1,15 +1,17 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: Saying Good Bye is tough
-date: 2010-05-10
-comments: true
 categories:
 - life
 - reflections
+comments: true
+date: 2010-05-10
+ghcommentid: 21
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - life
 - reflections
+title: Saying Good Bye is tough
 ---
+
 *Njaan Varaam, Assalamu Alaikum* (I will be back, Peace Be Upon You). I felt myself choking as those words escaped my mouth. And as I reached the gate and took my first step out, I heard my mother say *Wa Alaikum Assalaam* (Peace Be Upon You, too). And then I felt the straps of the laptop bag sink into my shoulders, and it felt so heavy. It should not be. It still had the same stuff as it did when I set on my journey home on the Friday evening. In fact, it should feel lighter, as I had moved some stuff into another bag, which I was holding in my right hand. Sigh! I knew why I choked and the bag felt heavier.
 
 I had been performing this almost teary-eyed, choking Good Bye scene endless number of times, ever since I was 12. The first, if I remember correctly, was when I set on my journey to be part of the residential school which would end up as my world for the subsequent seven years. I remember being sad, and being happy and excited with anticipation at living at the school. My good bye was not drenched in tears, nor were I choking.

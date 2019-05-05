@@ -1,8 +1,4 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "XConf 6 - Data, My Heart!"
-date: 2012-07-16
-comments: true
 categories:
 - talk
 - visualisation
@@ -10,6 +6,10 @@ categories:
 - javascript
 - data
 - deck.js
+comments: true
+date: 2012-07-16
+ghcommentid: 42
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - talk
 - visualisation
@@ -17,6 +17,7 @@ tags:
 - javascript
 - data
 - deck.js
+title: XConf 6 - Data, My Heart!
 ---
 
 Last Saturday,  Srijayanth Sridhar ([@craftybones](https://twitter.com/craftybones)) and I gave a talk at XConf, ThoughtWorks India's internal conference series.

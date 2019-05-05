@@ -1,8 +1,4 @@
 ---
-image: "/images/threaded-blue-on-black-cropped.jpg"
-title: "VodQA NCR: Maintaining Large Test Suites"
-date: 2012-06-24
-comments: true
 Categories:
 - development
 - code
@@ -11,6 +7,10 @@ Categories:
 - automation
 - twist
 - cucumber
+comments: true
+date: 2012-06-24
+ghcommentid: 38
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - development
 - code
@@ -19,7 +19,9 @@ tags:
 - automation
 - twist
 - cucumber
+title: 'VodQA NCR: Maintaining Large Test Suites'
 ---
+
 [Srijayanth Sridhar](https://twitter.com/craftybones) and I did a talk yesterday at [vodQA NCR](http://www.thoughtworks.com/events/the-testing-spirit).
 
 The talk was about what makes maintenance of large test suites a pain and the

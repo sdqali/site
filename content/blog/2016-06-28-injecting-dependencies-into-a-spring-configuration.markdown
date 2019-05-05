@@ -2,13 +2,14 @@
 Categories:
 - development
 - java
-Description: ""
+Description: ''
 Tags:
 - development
 - java
-date: 2016-06-28T23:17:51-04:00
+date: 2016-06-29 03:17:51
+ghcommentid: 115
+image: images/spring-by-pivotal.png
 title: Injecting dependencies into a Spring @Configuration
-image: "images/spring-by-pivotal.png"
 ---
 
 This is one of those blog posts about things I wish I had known before I spent a lot of time figuring out when something was not working as expected. Recently, we have been trying to extend a `WebMvcConfigurerAdapter` to wire up an HTTP request interceptor. And things did not work as we expected it to and we learned that our understanding of how Spring behaved under this situation was wrong. This is a write up to refer back to if and when we encounter this issue again.

@@ -1,10 +1,12 @@
 ---
-title: Formatting Java Instant for resolutions
-date: 2018-06-09T11:55:23-07:00
+date: 2018-06-09 18:55:23
+ghcommentid: 138
 tags:
-  - java
-  - time
+- java
+- time
+title: Formatting Java Instant for resolutions
 ---
+
 I have had to look up how to format Java's Instant with a given resolution - for example in microseconds or nanoseconds. After fiddling with various formatters, I was happy to finally get this right.
 <!--more-->
 

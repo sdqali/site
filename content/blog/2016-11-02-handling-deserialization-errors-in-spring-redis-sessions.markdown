@@ -4,16 +4,18 @@ Categories:
 - java
 - spring
 - redis
-Description: ""
+Description: ''
 Tags:
 - development
 - java
 - spring
 - redis
-date: 2016-11-02T13:10:33-07:00
-image: "img/redis-spring-boot.png"
+date: 2016-11-02 20:10:33
+ghcommentid: 124
+image: img/redis-spring-boot.png
 title: Handling Deserialization errors in Spring Redis Sessions
 ---
+
 One of the challenges of using storing spring sessions in Redis is that the objects that gets stored as part of a session often undergoes changes as the application evolves and these changes cause de-serialization exceptions to be thrown after a deployment when a session created before the deployment is presented to the application. This blog post discusses a method to work around this issue.
 
 <!--more-->

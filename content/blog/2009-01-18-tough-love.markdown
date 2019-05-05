@@ -1,15 +1,17 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Tough Love"
-date: 2009-01-18
-comments: true
 categories:
 - life
 - reflections
+comments: true
+date: 2009-01-18
+ghcommentid: 9
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - life
 - reflections
+title: Tough Love
 ---
+
 I am about to finish my college within five months. As almost everyone at this juncture of life would have done, I am already beginning to look back at it. And nothing resurfaces from my memory like that of how it all began.
 
 I still remember those days after I had finished school, when I had not decided what I wanted to do. Of course, I wanted to study, but higher education did not look a feasible prospect. There were talks in the family about how costly college education was. And worse still, the discussions were being led by my father's elder brother who was my Godfather, and easily the person whose words the family dared not to questions.

@@ -1,17 +1,19 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: Athletic - The European campaign and a Basque special
-date: 2010-02-06
-comments: true
 categories:
 - football
 - athletic
 - bilbao
+comments: true
+date: 2010-02-06
+ghcommentid: 19
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - football
 - athletic
 - bilbao
+title: Athletic - The European campaign and a Basque special
 ---
+
 The last time I wrote about Athletic, they were relinquishing at the bottom of the La Liga table, their record as one among the only three clubs in La Liga to have never got relegated in threat.
 
 More than a year later, things are really looking up at The Catedral. They managed to finish at seventh in the La Liga last season, qualifying for the Europa Liga. They are flying in Europa Liga this season, they are almost on the verge of breaking into the European qualifying positions again, they have one of La Liga's most promising youngsters in Iker Muniain, and in typical Basque tradition, they are going to play in the knockout matches in Europe with 'Euskadi' proudly written in front of their shirts.

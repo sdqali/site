@@ -1,8 +1,6 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Debugging: C Sharp's HttpWebRequest, 100-Continue and nginx"
-date: 2012-01-16
-comments: true
+aliases:
+- /2012/01/debugging-c-httpwebrequest-100-continue.html
 categories:
 - c#
 - code
@@ -10,6 +8,10 @@ categories:
 - nginx
 - rails
 - development
+comments: true
+date: 2012-01-16
+ghcommentid: 28
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - c#
 - code
@@ -17,8 +19,7 @@ tags:
 - nginx
 - rails
 - development
-aliases:
-- "/2012/01/debugging-c-httpwebrequest-100-continue.html"
+title: 'Debugging: C Sharp''s HttpWebRequest, 100-Continue and nginx'
 ---
 
 Recently I spent some time debugging an issue our team was facing around some C# code making a request on one of our servers. The request was throwing a `The server committed a protocol violation. Section=ResponseStatusLine` error.

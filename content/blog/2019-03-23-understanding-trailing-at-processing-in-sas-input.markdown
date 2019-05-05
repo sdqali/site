@@ -1,9 +1,10 @@
 ---
-title: Understanding trailing @ processing in SAS input
-date: 2019-03-23T12:46:08-07:00
+date: 2019-03-23 19:46:08
+ghcommentid: 141
 tags:
 - SAS
 - development
+title: Understanding trailing @ processing in SAS input
 ---
 
 One of the first things I noticed when I started poking around in SAS code is that the `input` statement is very powerful, flexible and hence sometimes hard to understand. It can read pretty much anything in to a dataset as long as you tell it what to do.

@@ -1,17 +1,19 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Python Hack - Dynamically override an object's attribute"
-date: 2013-10-07
-comments: true
 categories:
 - code
 - python
 - development
+comments: true
+date: 2013-10-07
+ghcommentid: 86
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - code
 - python
 - development
+title: Python Hack - Dynamically override an object's attribute
 ---
+
 While working with Locust [^1] recently, we ran into a situation where we had to dynamically override an attribute in a class in the Locust library so as to control what value it got assigned. After a lot of scratching our heads and reading the Python documentation, we came across the `property` function. We were able to use this to hack together a solution that ensures that every time an attribute is read, it returns the result of executing a method.
 
 The following example demonstrates a stripped down version of this hack.

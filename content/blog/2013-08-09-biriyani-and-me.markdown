@@ -1,17 +1,19 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Biriyani and me"
-date: 2013-08-09
-comments: true
 categories:
 - life
 - food
 - biriyani
+comments: true
+date: 2013-08-09
+ghcommentid: 68
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - life
 - food
 - biriyani
+title: Biriyani and me
 ---
+
 I love Biriyani. That is an understatement. I absolutely love Biriyani.
 
 It started when I was very young. In fact, as far back as I can remember, I have loved Biriyani. A lot of people in my family - my father, a paternal uncle and his wife were cooks, and specialists in cooking for special occasions. In Malabar, that meant people employed them to cook at weddings, engagements, _Iftars_[^1], _Parasavathinu Kontu Pokals_ [^2] and _Mudikalachils_ [^3]. They would cook up a storm of Biryani, _Neychor_ [^4], _Porotta_ [^5], _Pathiri_ [^6] and curries of beef, chicken and mutton. Of all these things, the Biriyanis were the best.

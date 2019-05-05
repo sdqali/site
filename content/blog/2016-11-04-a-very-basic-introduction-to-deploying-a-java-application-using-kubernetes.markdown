@@ -3,19 +3,20 @@ Categories:
 - java
 - docker
 - kubernetes
-Description: ""
+Description: ''
+Tags:
+- java
+- docker
+- kubernetes
+date: 2016-11-05 05:34:53
+ghcommentid: 125
+image: img/KubernetesLogo.png
 keywords:
 - java
 - docker
 - kubernetes
 - spring
 - spring boot
-Tags:
-- java
-- docker
-- kubernetes
-date: 2016-11-04T22:34:53-07:00
-image: "img/KubernetesLogo.png"
 title: A very basic introduction to deploying a Java application using Kubernetes
 ---
 

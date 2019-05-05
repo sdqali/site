@@ -3,15 +3,16 @@ Categories:
 - travel
 - football
 - memories
-Description: ""
+Description: ''
 Tags:
 - travel
 - inverness
 - scotland
 - football
-date: 2016-06-05T14:08:27-07:00
+date: 2016-06-05 21:08:27
+ghcommentid: 113
+image: images/inverness.jpg
 title: On Inverness
-image: "images/inverness.jpg"
 ---
 
 Two weeks ago, I was in the Scottish Highlands - soaking in the beauty of the city of Inverness, hiking through the South Loch Ness trail and traveling across the Black Isle. It was a wonderful trip - one that I wish was longer. This was a trip that invoked so many memories in me - among other things, of a man whose voice was part of growing up. A voice that traveled from the BBC Studios in the United Kingdom halfway across the globe and into a radio set in South Malabar.

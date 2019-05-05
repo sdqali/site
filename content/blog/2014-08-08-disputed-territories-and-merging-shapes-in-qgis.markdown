@@ -1,21 +1,23 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Disputed territories and merging shapes and features"
-date: 2014-08-08
-comments: true
 categories:
 - gis
 - maps
 - javascript
 - geojson
 - tools
+comments: true
+date: 2014-08-08
+ghcommentid: 97
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - gis
 - maps
 - javascript
 - geojson
 - tools
+title: Disputed territories and merging shapes and features
 ---
+
 Making a map that shows a disputed territory can be a tricky business. Nation states vigorously contest maps that appear to portray a boundary that challenges what a border looks like. From the Falkland Islands to Kuril Islands; from Western Sahara to Arunachal Pradesh, disputed territories result in omissions, additions and inaccuracies in maps.
 
 I grew up looking at maps in books printed by the Oxford Press, that came with a disclaimer in blue rubber stamped across them that stated how the map was wrong. This was due to the fact that the maps showed only the parts of Kashmir being administered by India, thereby omitting areas under Chinese and Pakistani control. The Criminal Law Amendment Act, 1961 in India makes it punishable with imprisonment up to 6 months to publish a map that excludes all or parts of Kashmir[^1].

@@ -1,17 +1,19 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: Binary Signature Art
-date: 2011-03-23
-comments: true
 categories:
 - code
 - ruby
 - development
+comments: true
+date: 2011-03-23
+ghcommentid: 22
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - code
 - ruby
 - development
+title: Binary Signature Art
 ---
+
 I was reading this very interesting [thread](http://forums.xkcd.com/viewtopic.php?f=7&t=11765) on the xkcd forum when I noticed a post from a user with the following signature in binary:
 
 ```bash

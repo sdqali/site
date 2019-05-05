@@ -1,8 +1,4 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Implementing Rate Limiting in Rails - Part 2"
-date: 2013-10-13
-comments: true
 categories:
 - rails
 - ruby
@@ -10,6 +6,10 @@ categories:
 - code
 - rate-limiting
 - redis
+comments: true
+date: 2013-10-13
+ghcommentid: 88
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - rails
 - ruby
@@ -17,7 +17,9 @@ tags:
 - code
 - rate-limiting
 - redis
+title: Implementing Rate Limiting in Rails - Part 2
 ---
+
 *The first part of this series can be found [here](/blog/2013/10/12/implementing-rate-limiting-in-rails-part-1/)*.
 
 The first part of this series looked at how to implement basic rate limiting in a Rails application. However, as pointed out in the improvements section, the implementation was not complete - it did not provide clients enough information about the rate limiting that is in place and how long they should wait before making further requests once they hit the limit.

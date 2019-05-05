@@ -1,10 +1,12 @@
 ---
-title: Net::HTTP and the simplest of explanations
-date: 2018-03-21T19:44:03-07:00
+date: 2018-03-22 02:44:03
+ghcommentid: 133
 tags:
 - ruby
 - docker
+title: Net::HTTP and the simplest of explanations
 ---
+
 _This blog post exists purely to remind myself that Ruby's `Net::HTTP` expects a `host` and a `port` as parameters when creating a new connection and not a `url` string._
 
 This is a story about how many layers of abstractions and indirections one works through on a daily basis as a developer and the effort required to dive through these layers, all the while ignoring the simplest of explanations of why things may have gone wrong in the first place.
@@ -109,4 +111,3 @@ At this point, light bulbs are beginning to go off. Let's try this on our laptop
 And with a lot of excitement and some shame, we realize that the library really meant `host` when it asked for the `NEWAPP_HOST` environment variable.
 
 I don't think there are any big lessons in this story other than that, sometimes the simplest explanation of a problems makes a lot more sense than you would think it does. Also, if you ever use `Net::HTTP.new`, remember that it expects you to provide a `host` as the first param, not a URL.
-

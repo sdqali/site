@@ -1,17 +1,19 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Fitting an Image in to a Canvas object"
-date: 2013-10-03
-comments: true
 categories:
 - javascript
 - canvas
 - code
+comments: true
+date: 2013-10-03
+ghcommentid: 85
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - javascript
 - canvas
 - code
+title: Fitting an Image in to a Canvas object
 ---
+
 I have been playing around with Canvas objects and images for a side project I am doing. One of the first things I had to figure out for this project was how to fit an image of arbitrary height and width on to a Canvas object of arbitrary, but known dimensions while preserving the aspect ratios of the image. This blog post is an explanation of the solution I came up with for this.
 
 ### The problem

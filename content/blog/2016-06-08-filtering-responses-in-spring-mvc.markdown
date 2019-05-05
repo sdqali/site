@@ -2,14 +2,15 @@
 Categories:
 - development
 - java
-Description: ""
+Description: ''
 Tags:
 - development
 - java
 - spring
-date: 2016-06-08T13:23:16-04:00
+date: 2016-06-08 17:23:16
+ghcommentid: 114
+image: images/spring-by-pivotal.png
 title: Filtering responses in Spring MVC
-image: "images/spring-by-pivotal.png"
 ---
 
 Yesterday my colleague [Imdad](https://twitter.com/imdhmd) asked if there was a mechanism to add filtering to a Spring MVC end point that responded with JSON. We both started looking at it and this blog post explores a way to do it, albeit for a specific type of responses that was relevant to our discussions.

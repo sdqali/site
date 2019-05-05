@@ -1,17 +1,19 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Oh I can build it in..."
-date: 2013-04-08
-comments: true
 categories:
 - code
 - software
 - development
+comments: true
+date: 2013-04-08
+ghcommentid: 58
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - code
 - software
 - development
+title: Oh I can build it in...
 ---
+
 > Oh, is this what you guys have been building for three years? I can build it in a month!
 
 Substitute the two time durations with something appropriate and you end up with how some software developers react after encountering a new project or application. I have seen this happen in multiple situations, where I had more context of how the application in question had evolved which the person making the comment did not have.

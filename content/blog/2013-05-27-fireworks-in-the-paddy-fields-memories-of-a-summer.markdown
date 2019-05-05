@@ -1,15 +1,17 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Fireworks in the paddy fields - memories of a summer"
-date: 2013-05-27
-comments: true
 categories:
 - life
 - malabar
+comments: true
+date: 2013-05-27
+ghcommentid: 62
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - life
 - malabar
+title: Fireworks in the paddy fields - memories of a summer
 ---
+
 Like most people, I like certain songs for their ability to bring back memories of times, places and people from the past that you don't everyday bring out from the cellars of time, wipe away the cobwebs and dust and gaze at. *Kannu Nattu Kaathirunnittum* [^1] from the movie *Kathaavasheshan* [^2] evokes memories of childhood, the daily struggle to survive and the inability to resist the hegemony of those around you who call the shots. But, there are not many songs that does it for me quite like the Malayalam song *Alliyaambal Kadavil* [^3].
 
 <!--more-->

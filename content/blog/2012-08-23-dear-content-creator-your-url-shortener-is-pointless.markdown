@@ -1,18 +1,20 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Dear Content Creator, Your URL Shortener Is Pointless"
-date: 2012-08-23
-comments: true
 categories:
 - social-network
 - twitter
 - internet
+comments: true
+date: 2012-08-23
+ghcommentid: 49
+image: /images/threaded-blue-on-black-cropped.jpg
+keywords: null
 tags:
 - social-network
 - twitter
 - internet
-keywords:
+title: Dear Content Creator, Your URL Shortener Is Pointless
 ---
+
 People love URL shorteners. They are everywhere. You can use one of
 [the giants](http://goo.gl), or use one of the [URL Shortening As A Service](http://bit.ly) options available
 or you can run one on your own.

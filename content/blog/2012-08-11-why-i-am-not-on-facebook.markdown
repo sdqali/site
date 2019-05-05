@@ -1,16 +1,17 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Why I am not on Facebook"
-date: 2012-08-11
-comments: true
 categories:
 - facebook
 - social-network
 - internet
+comments: true
+date: 2012-08-11
+ghcommentid: 46
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - facebook
 - social-network
 - internet
+title: Why I am not on Facebook
 ---
 
 Yesterday a colleague of mine asked me if I was on Facebook. He

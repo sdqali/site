@@ -1,16 +1,17 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Banyan Tree: Football and Politics"
-date: 2011-12-05
-comments: true
+aliases:
+- /2011/12/talk-on-football-and-politics.html
 categories:
 - talk
 - football
+comments: true
+date: 2011-12-05
+ghcommentid: 27
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - talk
 - football
-aliases:
-- "/2011/12/talk-on-football-and-politics.html"
+title: 'Banyan Tree: Football and Politics'
 ---
 
 I recently did a talk on football and the politics behind it, as part of the Banyan Tree talk series at ThoughtWorks. The slides from the talk can be found <a href="http://speakerdeck.com/u/sdqali/p/football-as-a-lense">here</a> on Speakerdeck.<br /><br /></div>It was great fun for me. I thought I did well.

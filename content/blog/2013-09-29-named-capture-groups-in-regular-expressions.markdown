@@ -1,21 +1,23 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Named Capture Groups in Regular Expressions"
-date: 2013-09-29
-comments: true
 categories:
 - ruby
 - code
 - regexp
 - python
 - javascript
+comments: true
+date: 2013-09-29
+ghcommentid: 81
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - ruby
 - code
 - regexp
 - python
 - javascript
+title: Named Capture Groups in Regular Expressions
 ---
+
 I will admit that I find regular expressions somewhat hard to parse. While the thinking process needed to write a regular expression is iterative and hence results in the correct expression suitable for the situation, once it is written it lacks readability. I have faced that pain of trying to grok a complex regular expression written years ago. So I was pleasantly surprised when I saw [this example](https://news.ycombinator.com/item?id=6463144) from Hacker News user *WestCoastJustin*. I found it very easy to understand because of the names he had assigned to each capture group in the expression.
 
 ## Ruby

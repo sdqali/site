@@ -1,17 +1,19 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: Autorun.py - Execute stuff on file change
-date: 2010-01-09
-comments: true
 categories:
 - code
 - python
 - development
+comments: true
+date: 2010-01-09
+ghcommentid: 17
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - code
 - python
 - development
+title: Autorun.py - Execute stuff on file change
 ---
+
 I really liked ZenTest's Autospec in action. Recently, when I was trying to write some Python stuff, I thought it would be nice if I would have a tool that would just run the unit tests, so that I don't have to switch between console windows. Better still, I could run it from inside my Emacs.
 
 Clearly, monitoring files for changes, shouldn't be big deal. I decided to write the tool myself in Python. the prime intension was to help myself learn Python. Although that didn't quite workout, I managed to come up with a quick and dirty hack to do it. It uses `pyinotify`, which is a Python module for monitoring filesystem changes. Since `pyinotify` depends on the Linux kernel, this would work only on Linux boxes.

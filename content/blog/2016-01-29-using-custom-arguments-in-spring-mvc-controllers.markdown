@@ -2,14 +2,16 @@
 Categories:
 - development
 - java
-Description: ""
+Description: ''
 Tags:
 - development
 - java
-date: 2016-01-29T17:41:49-08:00
+date: 2016-01-30 01:41:49
+ghcommentid: 109
+image: images/spring-by-pivotal.png
 title: Using custom arguments in Spring MVC controllers
-image: "images/spring-by-pivotal.png"
 ---
+
 <meta content="spring, arguments, handlermethodargumentresolver, spring mvc, spring boot" name="keywords">
 Most of the Spring controllers in the real world accept a lot of different types of parameters - Path variables, URL parameters, request headers, request body and sometimes even the entire HTTP Request object. This provides a flexible mechanism to create APIs. Spring is really good at parsing these parameters in to Java types as long as there is an ObjectMapper (like Jackson) configured to take care of the de-serialization.
 

@@ -1,19 +1,21 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Reducing Emacs startup time while committing"
-date: 2013-01-22
-comments: true
 categories:
 - code
 - development
 - emacs
 - mac-osx
+comments: true
+date: 2013-01-22
+ghcommentid: 56
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - code
 - development
 - emacs
 - mac-osx
+title: Reducing Emacs startup time while committing
 ---
+
 I use Emacs as my primary text editor and I use it to edit
 commit messages for Git. I almost never use the `-m`
 option with `git commit`. Since I have a fairly customised Emacs

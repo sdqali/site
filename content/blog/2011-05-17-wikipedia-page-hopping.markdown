@@ -1,18 +1,19 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: Wikipedia Page Hopping
-date: 2011-05-17
-comments: true
 categories:
 - code
 - development
 - ruby
 - wikipedia
+comments: true
+date: 2011-05-17
+ghcommentid: 26
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - code
 - development
 - ruby
 - wikipedia
+title: Wikipedia Page Hopping
 ---
 
 I have realized that like most users of Wikipedia, I do a lot of Wikipedia page-hopping [1]. Wikipedia is sort of addictive that way. You start reading about a piece of Flamenco music and after twenty minutes find yourself staring at the page about [ETA](http://en.wikipedia.org/wiki/ETA), a Basque nationalist organization. So I decided to figure out how I exactly do I get lost in the huge list of interconnected articles. I use Chromium, and it stores its history in a SQLite3 database file. I wrote a small Ruby script that parses the history, splits them to chunks of articles accessed per day, and filter only Wikipedia links from this.

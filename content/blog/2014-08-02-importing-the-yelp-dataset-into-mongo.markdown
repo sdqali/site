@@ -1,24 +1,26 @@
 ---
+aliases:
+- /blog/2014/08/02/importing-the-yelp-dataset-into-mongo/index.html
+categories:
+- mongo
+- code
+- ruby
+- yelp
+- data
+comments: true
+date: 2014-08-02
+ghcommentid: 95
 image:
   feature: /images/threaded-blue-on-black-cropped.jpg
-title: "Importing the Yelp dataset into MongoDB"
-date: 2014-08-02
-comments: true
-aliases:
- - "/blog/2014/08/02/importing-the-yelp-dataset-into-mongo/index.html"
-categories:
- - mongo
- - code
- - ruby
- - yelp
- - data
 tags:
- - mongo
- - code
- - ruby
- - yelp
- - data
+- mongo
+- code
+- ruby
+- yelp
+- data
+title: Importing the Yelp dataset into MongoDB
 ---
+
 Today Yelp announced their dataset challenge [^1]. The dataset they released includes data from 5 cities (Phoenix, Las Vegas, Madison, Waterloo and Edinburgh) and consists of
 
 * 42,153 businesses

@@ -1,18 +1,19 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "When Link titles were for the early adopters"
-date: 2013-08-11
-comments: true
 categories:
 - internet
 - web
 - html
 - accessibility
+comments: true
+date: 2013-08-11
+ghcommentid: 70
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - internet
 - web
 - html
 - accessibility
+title: When Link titles were for the early adopters
 ---
 
 While doing some reading up on the comparative merits of using footnotes and hyperlinks in web pages, I came across an article [^1] from 1998 by Jakob Nielsen [^2] about using the then nascent [^3] _title_ attribute on hyperlinks to inform users as to where clicking on a URL is going to take them. It is a very interesting read and makes passionate if not compelling arguments in favour of using the title attribute to improve the usability of a web page.

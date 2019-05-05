@@ -2,14 +2,16 @@
 Categories:
 - development
 - java
-Description: ""
+Description: ''
 Tags:
 - development
 - java
-date: 2016-04-17T23:36:48-04:00
+date: 2016-04-18 03:36:48
+ghcommentid: 110
+image: images/spring-by-pivotal.png
 title: Programmable exit codes for Spring command line applications
-image: "images/spring-by-pivotal.png"
 ---
+
 Spring's `CommandLineRunner` provides a great mechanism to build command line applications. While this convenience is great, applications that use `CommandLineRunner` require extra effort in some areas like integration testing. Exit codes are such an area - applications that use command line runners always report their exit code as `0` even if there are exceptions thrown. This blog post explains a way to get to programmable exit codes for such applications.
 
 <!--more-->

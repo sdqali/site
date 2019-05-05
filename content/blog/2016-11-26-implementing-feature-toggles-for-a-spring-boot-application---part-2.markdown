@@ -1,25 +1,27 @@
 ---
-title: Implementing feature toggles for a Spring Boot application - Part 2
-date: 2016-11-26T22:48:48-07:00
 Categories:
 - development
 - code
 - feature-toggles
 - java
 - spring
-Description: ""
+Description: ''
 Tags:
 - development
 - code
 - feature-toggles
 - java
 - spring
-image: "images/feature-toggles.png"
+aliases:
+- /blog/2016/11/26/implementing-feature-toggles-for-a-spring-boot-application---part-2/
+date: 2016-11-27 05:48:48
+ghcommentid: 128
+image: images/feature-toggles.png
 series:
 - feature-toggles
-aliases:
-- "/blog/2016/11/26/implementing-feature-toggles-for-a-spring-boot-application---part-2/"
+title: Implementing feature toggles for a Spring Boot application - Part 2
 ---
+
 In the second part of this [series](/series/feature-toggles/) about implementing feature toggles for a Spring Boot application, we will look at exposing the features to the Angular front-end so that features can be toggled in UI components.
 
 <!--more-->

@@ -1,17 +1,19 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "How Browsers Detect If You Are Offline"
-date: 2012-11-22
-comments: true
 categories:
 - code
 - browsers
 - javascript
+comments: true
+date: 2012-11-22
+ghcommentid: 50
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - code
 - browsers
 - javascript
+title: How Browsers Detect If You Are Offline
 ---
+
 When I saw the newly released
 [Heyoffline.js](http://oskarkrawczyk.github.com/heyoffline.js/) library,
 I was curious to see how it figured out if the user was online or

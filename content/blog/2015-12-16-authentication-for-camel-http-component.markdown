@@ -3,16 +3,18 @@ Categories:
 - development
 - java
 - camel
-Description: ""
+Description: ''
 Tags:
 - development
 - camel
 - java
 - spring
-date: 2015-12-16T01:07:01-05:00
+date: 2015-12-16 06:07:01
+ghcommentid: 108
+image: images/apache-camel.png
 title: Authentication for Apache Camel HTTP components
-image: "images/apache-camel.png"
 ---
+
 My team at work has been lately working on a data transformer that pushes information from an external system in to platform. For historical reasons the information is passed to us in the form of flat files. We have been working on a data transformer that reads information from the file and posts it into an HTTP end point.
 Apache Camel [^1] makes a natural choice as the base for implementing such a data transformer. The presence of ready to use components that can read files and post information to HTTP end points and the availability of a nice D.S.L. [^2] makes implementation easy and straightforward. One of the things we had to spend time figuring out was how to ensure that we authenticate correctly against our target HTTP end point. This blog post takes a look at various methods we explored.
 

@@ -1,21 +1,23 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "JavaScript, clipboard access and hidden flash widgets"
-date: 2013-04-05
-comments: true
 categories:
 - code
 - development
 - javascript
 - browser
 - flash
+comments: true
+date: 2013-04-05
+ghcommentid: 57
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - code
 - development
 - javascript
 - browser
 - flash
+title: JavaScript, clipboard access and hidden flash widgets
 ---
+
 Letting users copy text and URLs from a webpage effortlessly is one of those things that sound easy in theory, but is a pain when it comes to implementation. Browsers take great efforts to ensure that web pages are sand boxed in such a way that a web application can not read from or write to the system's clipboard without jumping through hoops. Firefox asks you to change browser configurations to give web applications access to the system clipboard, while Internet Explorer shows a modal dialog to confirm that you really want to allow the application access. This diminishes any user experience gains made by implementing this feature in the first place. Brook Novak has a very good article about JavaScript and the clipboard [here](http://brooknovak.wordpress.com/2009/07/28/accessing-the-system-clipboard-with-javascript/).
 
 The approach taken by a number of popular applications like GitHub and Dropbox is one that Novak describes. Flash objects embedded on a page can access the system clipboard. Till Flash 9, objects could anonymously read from and write data to the clipboard without the user initiating any action. This vulnerability resulted in attacks like [this](http://news.cnet.com/8301-1009_3-10021715-83.html).

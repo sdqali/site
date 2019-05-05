@@ -5,21 +5,23 @@ Categories:
 - spring
 - jwt
 - spring security
-Description: ""
+Description: ''
 Tags:
 - development
 - java
 - spring
 - jwt
 - spring security
+aliases:
+- /blog/2016/07/07/jwt-authentication-with-spring-web---part-4/
+date: 2016-07-08 06:47:53
+ghcommentid: 120
+image: images/jwt.jpg
 series:
 - spring-jwt
-date: 2016-07-07T23:47:53-07:00
-image: "images/jwt.jpg"
 title: JWT authentication with Spring Web - Part 4
-aliases:
-- "/blog/2016/07/07/jwt-authentication-with-spring-web---part-4/"
 ---
+
 In parts 1 through 3 of this series, we built a Spring API that can issue a JWT when a user successfully authenticates. In this blog post, we will add the capability to verify the JWT presented by the client for subsequent requests.
 <!--more-->
 These are the blog posts in this series:

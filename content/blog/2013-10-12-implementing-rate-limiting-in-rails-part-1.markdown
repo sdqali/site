@@ -1,8 +1,4 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Implementing Rate Limiting in Rails - Part 1"
-date: 2013-10-12
-comments: true
 categories:
 - rails
 - ruby
@@ -10,6 +6,10 @@ categories:
 - code
 - rate-limiting
 - redis
+comments: true
+date: 2013-10-12
+ghcommentid: 87
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - rails
 - ruby
@@ -17,7 +17,9 @@ tags:
 - code
 - rate-limiting
 - redis
+title: Implementing Rate Limiting in Rails - Part 1
 ---
+
 *The second part of this series can be found [here](/blog/2013/10/13/implementing-rate-limiting-in-rails-part-2/).*
 
 Rate limiting or throttling is the practice of limiting how frequently legitimate users of a web service can access the service. Rate limiting is often put in place to prevent the hogging of resources by a sub set of the users of the system. Rate limiting works by responding with error messages when a client exceeds their allocated share of requests within a predefined time window. In addition to the error message, the response should also include information as to when rate limit will be reset so that the client can continue accessing the system after the reset.

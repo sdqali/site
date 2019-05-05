@@ -1,8 +1,4 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Indian and Pakistani cricketers - who make better debuts?"
-date: 2012-05-11
-comments: true
 categories:
 - data
 - development
@@ -13,6 +9,10 @@ categories:
 - cricket
 - india
 - pakistan
+comments: true
+date: 2012-05-11
+ghcommentid: 33
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - data
 - development
@@ -23,7 +23,9 @@ tags:
 - cricket
 - india
 - pakistan
+title: Indian and Pakistani cricketers - who make better debuts?
 ---
+
 Recently a friend and I had an argument about who makes better debuts among Indian and Pakistani cricket players. Now, I am not into cricket. But I do watch the odd matches here and there and am generally aware of what is going on in the game. My stand was that Pakistani players make better debuts compared to Indian players, while my friend was adamant that Indian players make better debuts. My friend is more of a cricket guy than I ever was and he asked me what is the basis of my stand. It was just a gut feel for me and I had to leave it as there was no way for me to prove that my gut feel was correct. But I did want to try, though.
 
 I decided to see if I could prove my theory. Luckily, Cricinfo has all this data, although they dont make it easy for you to get it. I wrote some scripts to pull this data and decided to visualise this using the awesome d3 library. In the end, this became more about figuring out d3 than winning the argument, but doing this was fun.

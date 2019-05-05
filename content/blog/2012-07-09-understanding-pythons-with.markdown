@@ -1,19 +1,21 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: Understanding Python's "with" statement
-date: 2012-07-09
-comments: true
+aliases:
+- /blog/2012/07/09/unerstanding-pythons-with/
 categories:
 - python
 - code
 - development
+comments: true
+date: 2012-07-09
+ghcommentid: 41
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - python
 - code
 - development
-aliases:
-- "/blog/2012/07/09/unerstanding-pythons-with/"
+title: Understanding Python's "with" statement
 ---
+
 ## What is it?
 Python's `with` statement provides a very convenient way of dealing with the situation where you have to do a setup and teardown to make something happen. A very good example for this is the situation where you want to gain a handler to a file, read data from the file and the close the file handler.
 

@@ -1,25 +1,27 @@
 ---
-title: Implementing feature toggles for a Spring Boot application - Part 3
-date: 2016-11-28T22:50:39-07:00
 Categories:
 - development
 - code
 - feature-toggles
 - java
 - spring
-Description: ""
+Description: ''
 Tags:
 - development
 - code
 - feature-toggles
 - java
 - spring
-image: "images/feature-toggles.png"
+aliases:
+- /blog/2016/11/28/implementing-feature-toggles-for-a-spring-boot-application---part-3/
+date: 2016-11-29 05:50:39
+ghcommentid: 129
+image: images/feature-toggles.png
 series:
 - feature-toggles
-aliases:
-- "/blog/2016/11/28/implementing-feature-toggles-for-a-spring-boot-application---part-3/"
+title: Implementing feature toggles for a Spring Boot application - Part 3
 ---
+
 In the third part of this [series](/series/feature-toggles/) about implementing feature toggles for a Spring Boot application, we will take a look at exposing the state of feature flags as a Spring Boot management end point for monitoring and testing purposes.
 
 <!--more-->

@@ -1,11 +1,13 @@
 ---
-title: FreeBuilder plugin for IntelliJ
-date: 2018-05-04T22:27:35-07:00
+date: 2018-05-05 05:27:35
+ghcommentid: 137
 tags:
-  - java
-  - freebuilder
-  - intellij
+- java
+- freebuilder
+- intellij
+title: FreeBuilder plugin for IntelliJ
 ---
+
 My work uses [FreeBuilder](http://freebuilder.inferred.org/) extensively to generate the [Builder](https://en.wikipedia.org/wiki/Builder_pattern) pattern for Java classes. In addition to this, we use the generated Builder classes to deserialize the data calsses using Jackson. After a while it became tiresome to type `@FreeBuilder` and `class Builder extends ...` everywhere. So I decided to write and IntelliJ IDEA plugin that does it for me.
 
 <!--more-->

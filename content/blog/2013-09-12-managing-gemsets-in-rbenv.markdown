@@ -1,21 +1,23 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Managing Gemsets in Rbenv"
-date: 2013-09-12
-comments: true
 categories:
 - code
 - development
 - ruby
 - rbenv
 - bundler
+comments: true
+date: 2013-09-12
+ghcommentid: 77
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - development
 - code
 - ruby
 - rbenv
 - bundler
+title: Managing Gemsets in Rbenv
 ---
+
 When I was setting up my new laptop today, I decided to use Rbenv [^1] to manage my Ruby versions. I have typically used RVM [^2] and had never used Rbenv. Rbenv is a Ruby version manager written by [Sam Stephenson](https://github.com/sstephenson/) and deliberately tries to do less and do it well. Instead of overriding Bash commands like RVM does, Rbenv chooses to use wrappers or **shims** around Ruby binaries to choose the Ruby executable to run.
 
 This works well, until you have to manage Gemsets [^3]. Often, one is working on two projects that use the same version of Ruby, but has entirely different chain of dependency on Gems. RVM's gemsets work really well for this use case. I was looking around to see how one would manage gemsets with Rbenv. There are three ways to do it.

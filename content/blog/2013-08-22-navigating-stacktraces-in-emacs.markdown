@@ -1,17 +1,19 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Navigating Stacktraces in Emacs"
-date: 2013-08-22
-comments: true
 categories:
 - code
 - emacs
 - tools
+comments: true
+date: 2013-08-22
+ghcommentid: 75
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - code
 - emacs
 - tools
+title: Navigating Stacktraces in Emacs
 ---
+
 I had to debug an issue today and that meant dealing with Rails stack traces. I got tired of having to constantly switch between reading the trace in the terminal and the code in Emacs to figure out what was going wrong and get more context around it. I felt that there should be an easier way of doing this. A quick search [^1] did not yield anything. But then I remembered Grep mode [^2] and it occurred to me that hijacking Grep mode's navigation feature would let me navigate the stack trace better. This is the solution I came up with.
 
 <!--more-->

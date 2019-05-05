@@ -1,15 +1,17 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "Of Birthdays and Anniversaries"
-date: 2009-01-30
-comments: true
 categories:
 - life
 - reflections
+comments: true
+date: 2009-01-30
+ghcommentid: 10
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - life
 - reflections
+title: Of Birthdays and Anniversaries
 ---
+
 Last week, we celebrated the birthday of one of my friends. There was not much of celebration per se, we just went to his place, talked a lot and had food from a restaurant. The restaurant bill was paid by the three guests, and not the host, but that is another story.
 
 It had been a long since the four of us had come together, and so we talked about all stuff. My friend,the birthday boy, a student of nursing was apparently neck-deep in politics and was planning an agitation against the State governments decision to scrap Entrance Exams for some of the medical courses. Like every time we had a conversation back in school, our discussions turned a bit philosophical and soon we were arguing about the relevance of birthdays, anniversaries and New Years.

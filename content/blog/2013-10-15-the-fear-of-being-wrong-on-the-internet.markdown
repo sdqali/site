@@ -1,13 +1,15 @@
 ---
-image: /images/threaded-blue-on-black-cropped.jpg
-title: "The fear of being wrong on the Internet"
-date: 2013-10-15
-comments: true
 categories:
 - internet
+comments: true
+date: 2013-10-15
+ghcommentid: 89
+image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - internet
+title: The fear of being wrong on the Internet
 ---
+
 All of us have opinions-some strong, some weak; some we care deeply about, some we couldn't care less. We often express those opinions to others and sometimes people agree, sometimes they don't. Debating with others about our opinions helps us crystallise or completely discard them.
 
 I am fairly opinionated about a lot of things and have debates about them with friends and co-workers. Yet when it comes to opinions on the Internet, I shy away. Every single day, I come across issues and incidents about which I have opinions and every time I stare at what somebody else wrote, consider replying and ultimately close the tab after a minute. This happens on almost all the Internet communities I frequent - Twitter, Guardian's Comment is Free, Guardian's Football blogs and Hacker News.
