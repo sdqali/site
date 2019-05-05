@@ -1,5 +1,7 @@
 ---
 date: 2018-05-05 05:27:35
+aliases:
+- /blog/2018/05/04/freebuilder-plugin-for-intellij/
 ghcommentid: 137
 tags:
 - java

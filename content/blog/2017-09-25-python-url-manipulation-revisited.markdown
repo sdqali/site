@@ -1,5 +1,7 @@
 ---
 date: 2017-09-26 04:22:39
+aliases:
+- /blog/2017/09/25/python-url-manipulation-revisited/
 ghcommentid: 132
 tags:
 - python

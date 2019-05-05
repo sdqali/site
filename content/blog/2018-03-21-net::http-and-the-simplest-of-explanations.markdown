@@ -1,5 +1,7 @@
 ---
 date: 2018-03-22 02:44:03
+aliases:
+- /blog/2018/03/21/nethttp-and-the-simplest-of-explanations/
 ghcommentid: 133
 tags:
 - ruby

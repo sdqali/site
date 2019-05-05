@@ -9,6 +9,8 @@ Tags:
 - docker
 - kubernetes
 date: 2016-11-05 05:34:53
+aliases:
+- /blog/2016/11/04/a-very-basic-introduction-to-deploying-a-java-application-using-kubernetes/
 ghcommentid: 125
 image: img/KubernetesLogo.png
 keywords:

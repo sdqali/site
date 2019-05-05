@@ -8,6 +8,8 @@ Tags:
 - java
 - spring
 date: 2015-12-11 02:45:59
+aliases:
+- /blog/2015/12/10/integration-testing-challenges-for-non-web-spring-applications/
 ghcommentid: 105
 image: images/spring-by-pivotal.png
 title: Integration testing challenges for non-web Spring applications

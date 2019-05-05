@@ -5,6 +5,8 @@ Description: ''
 Tags:
 - development
 date: 2015-12-08 01:43:02
+aliases:
+- /blog/2015/12/07/how-thinking-of-documentation-as-legislation-helped-me-become-a-better-programmer/
 ghcommentid: 104
 image: images/document.png
 title: How thinking of Documentation as Legislation helped me become a better programmer

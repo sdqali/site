@@ -5,6 +5,8 @@ Description: ''
 Tags:
 - development
 date: 2016-07-21 01:57:01
+aliases:
+- /blog/2016/07/20/csrf-protection-with-spring-security-and-angular-js/
 ghcommentid: 123
 image: images/angular-spring-boot.png
 title: CSRF Protection with Spring Security and Angular JS

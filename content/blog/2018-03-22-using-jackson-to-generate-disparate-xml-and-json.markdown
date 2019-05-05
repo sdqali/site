@@ -1,5 +1,7 @@
 ---
 date: 2018-03-23 05:21:42
+aliases:
+- /blog/2018/03/22/a-jackson-and-freebuilder-quirk/
 ghcommentid: 134
 tags:
 - jackson

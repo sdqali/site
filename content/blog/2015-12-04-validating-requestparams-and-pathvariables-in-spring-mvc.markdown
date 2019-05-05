@@ -11,6 +11,8 @@ Tags:
 - validation
 - request-parameters
 date: 2015-12-05 06:50:24
+aliases:
+- /blog/2015/12/04/validating-requestparams-and-pathvariables-in-spring-mvc/
 ghcommentid: 102
 image: images/spring-by-pivotal.png
 title: Validating RequestParams and PathVariables in Spring MVC

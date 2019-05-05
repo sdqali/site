@@ -11,6 +11,8 @@ Tags:
 - json
 - devops
 date: 2015-05-22 05:58:41
+aliases:
+- /blog/2015/05/21/making-sense-of-cloud-foundry-security-group-declarations/
 ghcommentid: 99
 title: Making sense of Cloud Foundry security group declarations
 ---

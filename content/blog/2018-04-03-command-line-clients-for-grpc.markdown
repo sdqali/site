@@ -1,5 +1,7 @@
 ---
 date: 2018-04-04 05:40:08
+aliases:
+- /blog/2018/04/03/command-line-clients-for-grpc-grpcurl/
 ghcommentid: 135
 image: images/grpc.png
 tags:

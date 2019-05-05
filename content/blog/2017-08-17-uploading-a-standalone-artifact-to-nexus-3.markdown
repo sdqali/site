@@ -1,5 +1,7 @@
 ---
 date: 2017-08-18 04:00:43
+aliases:
+- /blog/2017/08/17/uploading-a-standalone-artifact-to-nexus-3/
 ghcommentid: 131
 tags:
 - maven
