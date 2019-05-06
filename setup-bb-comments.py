@@ -7,7 +7,7 @@ import json
 import glob
 from requests_html import HTML
 
-issues_url = "https://api.bitbucket.org/2.0/repositories/sdqali/comment-test/issues"
+issues_url = "https://api.bitbucket.org/2.0/repositories/sdqali/sdqali.in-comments/issues"
 entries = []
 username = os.environ['BB_USER']
 password = os.environ['BB_PASSWD']
@@ -30,7 +30,7 @@ for entry in glob.iglob("dist/blog/20**/**/*.html", recursive=True):
 
             payload = {'title': title, 'content': {'raw': f"Comment for [{title}]({permalink})", 'markup': 'markdown'}}
             headers = {'Content-Type': 'application/json'}
-            if post['bbcommentid'] is not None:
+            if post.get('bbcommentid') is not None:
                 continue
 
             resp = requests.post(issues_url, auth=(username, password), data=json.dumps(payload), headers=headers)

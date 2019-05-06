@@ -1,6 +1,7 @@
 ---
 aliases:
 - /2012/04/finding-un-merged-commits-with-git.html
+bbcommentid: 56
 categories:
 - code
 - git

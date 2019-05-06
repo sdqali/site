@@ -1,6 +1,7 @@
 ---
 aliases:
 - /blog/2014/08/02/importing-the-yelp-dataset-into-mongo/index.html
+bbcommentid: 43
 categories:
 - mongo
 - code

@@ -1,7 +1,8 @@
 ---
-date: 2018-04-06 05:45:08
 aliases:
 - /blog/2018/04/05/command-line-clients-for-grpc-polyglot/
+bbcommentid: 103
+date: 2018-04-06 05:45:08
 ghcommentid: 136
 tags:
 - grpc

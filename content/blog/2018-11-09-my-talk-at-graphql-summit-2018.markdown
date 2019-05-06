@@ -1,7 +1,8 @@
 ---
-date: 2018-11-10 02:12:47
 aliases:
 - /blog/2018/11/09/my-talk-at-graphql-summit-2018/
+bbcommentid: 105
+date: 2018-11-10 02:12:47
 ghcommentid: 139
 tags:
 - graphql

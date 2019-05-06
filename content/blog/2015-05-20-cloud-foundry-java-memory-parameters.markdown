@@ -8,9 +8,10 @@ Tags:
 - development
 - cloudfoundry
 - devops
-date: 2015-05-21 02:42:56
 aliases:
 - /blog/2015/05/20/configuring-cloud-foundry-java-memory-parameters/
+bbcommentid: 45
+date: 2015-05-21 02:42:56
 ghcommentid: 98
 title: Configuring Cloud Foundry Java Memory Parameters
 ---

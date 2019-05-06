@@ -1,6 +1,7 @@
 ---
 aliases:
 - /2011/12/talk-on-football-and-politics.html
+bbcommentid: 112
 categories:
 - talk
 - football

@@ -1,6 +1,7 @@
 ---
 aliases:
 - /blog/2012/07/21/visualization-how-european-clubs-dominate-their-leagues
+bbcommentid: 69
 categories:
 - football
 - visualisation

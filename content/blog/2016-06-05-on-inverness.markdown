@@ -9,6 +9,7 @@ Tags:
 - inverness
 - scotland
 - football
+bbcommentid: 131
 date: 2016-06-05 21:08:27
 ghcommentid: 113
 image: images/inverness.jpg

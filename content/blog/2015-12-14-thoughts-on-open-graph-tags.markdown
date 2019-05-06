@@ -6,9 +6,10 @@ Description: ''
 Tags:
 - development
 - golang
-date: 2015-12-15 02:47:06
 aliases:
 - /blog/2015/12/14/thoughts-on-open-graph-tags/
+bbcommentid: 55
+date: 2015-12-15 02:47:06
 ghcommentid: 107
 image: images/ogp.png
 title: Thoughts on Open Graph tags

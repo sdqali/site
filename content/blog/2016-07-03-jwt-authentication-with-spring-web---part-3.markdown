@@ -15,6 +15,7 @@ Tags:
 aliases:
 - /blog/2016/07/05/jwt-authentication-with-spring-web---part-3/
 - /blog/2016/07/05/jwt-authentication-with-spring-web-part-3/
+bbcommentid: 128
 date: 2016-07-06 05:30:53
 ghcommentid: 119
 image: images/spring-security.png

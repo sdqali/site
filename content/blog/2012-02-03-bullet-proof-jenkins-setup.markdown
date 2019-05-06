@@ -1,6 +1,7 @@
 ---
 aliases:
 - /2012/02/bullet-proof-jenkins-setup.html
+bbcommentid: 61
 categories:
 - jenkins
 - ci

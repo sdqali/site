@@ -6,9 +6,10 @@ Description: ''
 Tags:
 - development
 - java
-date: 2016-04-20 02:29:12
 aliases:
 - /blog/2016/04/19/programmable-exit-codes-for-spring-command-line-applications-2/index.html
+bbcommentid: 113
+date: 2016-04-20 02:29:12
 ghcommentid: 111
 image: images/spring-by-pivotal.png
 title: Programmable exit codes for spring command line applications - 2

@@ -6,9 +6,10 @@ Description: ''
 Tags:
 - development
 - java
-date: 2016-01-30 01:41:49
 aliases:
 - /blog/2016/01/29/using-custom-arguments-in-spring-mvc-controllers/
+bbcommentid: 130
+date: 2016-01-30 01:41:49
 ghcommentid: 109
 image: images/spring-by-pivotal.png
 title: Using custom arguments in Spring MVC controllers

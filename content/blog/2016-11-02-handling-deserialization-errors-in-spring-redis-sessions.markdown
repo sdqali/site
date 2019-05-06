@@ -10,6 +10,7 @@ Tags:
 - java
 - spring
 - redis
+bbcommentid: 117
 date: 2016-11-02 20:10:33
 ghcommentid: 124
 image: img/redis-spring-boot.png

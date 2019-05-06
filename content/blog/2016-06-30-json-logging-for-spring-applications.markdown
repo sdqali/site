@@ -9,6 +9,7 @@ Tags:
 - java
 - spring
 - logstash
+bbcommentid: 133
 date: 2016-06-30 23:43:07
 ghcommentid: 116
 image: images/spring-by-pivotal.png

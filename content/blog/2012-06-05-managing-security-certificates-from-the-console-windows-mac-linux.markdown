@@ -1,6 +1,7 @@
 ---
 aliases:
 - /blog/2012/06/05/managing-security-certificates-from-the-console-windows-mac-linux/
+bbcommentid: 78
 categories:
 - code
 - ssl

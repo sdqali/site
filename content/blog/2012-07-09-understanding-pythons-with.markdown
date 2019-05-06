@@ -1,6 +1,7 @@
 ---
 aliases:
 - /blog/2012/07/09/unerstanding-pythons-with/
+bbcommentid: 70
 categories:
 - python
 - code
