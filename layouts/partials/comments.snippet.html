@@ -1,32 +1,102 @@
 <script>
-var url = "https://github.com/sdqali/hugo/issues/{{ .Params.ghcommentid }}";
-var api_url = "https://api.github.com/repos/sdqali/hugo/issues/{{ .Params.ghcommentid }}/comments";
+{{ if isset .Params "ghcommentid" }}
+var ghUrl = "https://github.com/sdqali/hugo/issues/{{ .Params.ghcommentid }}";
+var ghApiUrl = "https://api.github.com/repos/sdqali/hugo/issues/{{ .Params.ghcommentid }}/comments";
+
+var button = "<button type='button' class='gh-comment-button'>Comment on GitHub</button>";
+$("#gh-comments-list").append("<div class='issues-link'><a href='" + ghUrl + "'  target='_blank'>" + button + "</a></div>");
+{{ end }}
+
+{{ if isset .Params "bbcommentid" }}
+var bbUrl = "https://bitbucket.org/sdqali/comment-test/issues/{{ .Params.bbcommentid }}/"
+var bbApiUrl = "https://api.bitbucket.org/2.0/repositories/sdqali/comment-test/issues/{{ .Params.bbcommentid }}/comments";
+
+var button = "<button type='button' class='gh-comment-button'>Comment on BitBucket</button>";
+$("#gh-comments-list").append("<div class='issues-link'><a href='" + bbUrl + "'  target='_blank'>" + button + "</a></div>");
+{{ end }}
+
 
 $(document).ready(function () {
-	$.ajax(api_url, {
-		headers: {Accept: "application/vnd.github.v3.html+json"},
-		dataType: "json",
-		success: function(comments) {
-			var button = "<button type='button' class='gh-comment-button'>Comment on GitHub</button>";
-			$("#gh-comments-list").append("<div class='issues-link'><a href='" + url + "'  target='_blank'>" + button + "</a></div>");
-			$.each(comments, function(i, comment) {
+  var renderComments = function(comments) {
+    comments.sort(function(first, second) {
+      return first.createdAt - second.createdAt;
+    });
 
-				var date = new Date(comment.created_at);
+    $.each(comments, function(i, comment) {
+      var t = "<div class='gh-comment'>";
+      t += "<div class='gh-comment-header'><img src='" + comment.user.avatarUrl + "' width='24px'>";
+      t += "<b><a href='" + comment.user.profileUrl + "'>" + comment.user.username + "</a></b>";
+      t += " posted via "+ comment.channel + " at ";
+      t += "<em>" + comment.createdAt.toUTCString() + "</em></div>";
+      t += "<div id='gh-comment-hr'></div>";
+      t += comment.body;
+      t += "</div>";
+      $("#gh-comments-list").append(t);
+    });
+  };
 
-				var t = "<div class='gh-comment'>";
-				t += "<div class='gh-comment-header'><img src='" + comment.user.avatar_url + "' width='24px'>";
-				t += "<b><a href='" + comment.user.html_url + "'>" + comment.user.login + "</a></b>";
-				t += " posted at ";
-				t += "<em>" + date.toUTCString() + "</em></div>";
-				t += "<div id='gh-comment-hr'></div>";
-				t += comment.body_html;
-				t += "</div>";
-				$("#gh-comments-list").append(t);
-			});
-		},
-		error: function() {
-			$("#gh-comments-list").append("Comments are not open for this post yet.");
-		}
-	});
+  var fetchBbComments = function(existingComments) {
+    if (typeof bbUrl === 'undefined' || bbUrl === null) {
+      renderComments(existingComments)
+      return;
+    }
+
+    $.ajax(bbApiUrl, {
+      headers: {"Content-Type": "application/json"},
+      dataType: "json",
+      success: function(bbComments) {
+        comments = existingComments.concat($.map(bbComments.values, function(comment) {
+          return {
+            createdAt: new Date(comment.created_on),
+            user: {
+              avatarUrl: comment.user.links.avatar.href,
+              profileUrl: comment.user.links.html.href,
+              username: comment.user.username
+            },
+            body: comment.content.html,
+            channel: "BitBucket"
+          };
+        }));
+
+        renderComments(comments)
+      },
+      error: function() {
+        renderComments(existingComments);
+      }
+    });
+  };
+
+  var fetchGhComments = function(callback) {
+    if (typeof ghUrl === 'undefined' || ghUrl === null) {
+      fetchBbComments([]);
+      return;
+    }
+
+    $.ajax(ghApiUrl, {
+      headers: {Accept: "application/vnd.github.v3.html+json"},
+      dataType: "json",
+      success: function(ghComments) {
+        comments = $.map(ghComments, function(comment) {
+          return {
+            createdAt: new Date(comment.created_at),
+            user: {
+              avatarUrl: comment.user.avatar_url,
+              profileUrl: comment.user.html_url,
+              username: comment.user.login
+            },
+            body: comment.body_html,
+            channel: "GitHub"
+          };
+        });
+
+        callback(comments);
+      },
+      error: function() {
+        callback([]);
+      }
+    });
+  };
+
+  fetchGhComments(fetchBbComments);
 });
 </script>
