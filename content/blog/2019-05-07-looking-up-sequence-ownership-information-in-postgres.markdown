@@ -1,7 +1,6 @@
 ---
 title: Looking up Sequence ownership information in Postgres
 date: 2019-05-07T18:04:42-07:00
-draft: true
 ghcommentid: 142
 bbcommentid: 135
 tags:
