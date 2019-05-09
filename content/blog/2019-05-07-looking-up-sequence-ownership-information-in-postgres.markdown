@@ -16,16 +16,17 @@ When I first started looking at this, I ended up at this Stack Overflow [answer]
 We will start by creating a `table` that we will later associate a `sequence` with.
 
 ```sql
-create table users (
-  id bigint not null,
-  name varchar(40) not null
-);
+CREATE TABLE users
+  (
+     id   BIGINT NOT NULL,
+     NAME VARCHAR(40) NOT NULL
+  );
 ```
 
 Next, we will create a sequence that is not going to be owned by any columns - a freehanging sequence.
 
 ```sql
-create sequence freehanging;
+CREATE SEQUENCE freehanging;
 ```
 
 Postgres stores `sequence`s across two different catalogs - [`pg_sequence`](https://www.postgresql.org/docs/current/catalog-pg-sequence.html) and [`pg_class`](https://www.postgresql.org/docs/current/catalog-pg-class.html). Catalog `pg_sequence` contains sequence parameters like `seqstart`, `seqincrement` etc. The rest of the information gets stored in `pg_class` catalog with the `seqlrelid` column in `pg_sequence` pointing to the corresponding `pg_class` entry.
@@ -33,7 +34,10 @@ Postgres stores `sequence`s across two different catalogs - [`pg_sequence`](http
 ```sql
 => \x
 Expanded display is on.
-=> select * from pg_sequence;
+
+=> SELECT *
+FROM   pg_sequence;
+
 -[ RECORD 1 ]+--------------------
 seqrelid     | 41000
 seqtypid     | 20
@@ -43,12 +47,15 @@ seqmax       | 9223372036854775807
 seqmin       | 1
 seqcache     | 1
 seqcycle     | f
+
 ```
 
 That has the information that Postgres can use, but it does not look particularly useful to a human being. Luckily, Postgres provides a `view` named [`pg_sequences`](https://www.postgresql.org/docs/10/view-pg-sequences.html) that shows us more information.
 
 ```sql
-=> select * from pg_sequences;
+=> SELECT *
+FROM   pg_sequences;
+
 -[ RECORD 1 ]-+--------------------
 schemaname    | public
 sequencename  | freehanging
@@ -61,12 +68,16 @@ increment_by  | 1
 cycle         | f
 cache_size    | 1
 last_value    |
+
 ```
 
 We can query `pg_class` with our `seqrelid`:
 
 ```sql
-=> select * from pg_class where relfilenode = 41000;
+=> SELECT *
+FROM   pg_class
+WHERE  relfilenode = 41000;
+
 -[ RECORD 1 ]-------+------------
 relname             | freehanging
 relnamespace        | 2200
@@ -101,19 +112,23 @@ relminmxid          | 0
 relacl              |
 reloptions          |
 relpartbound        |
+
 ```
 
 We can create a second sequence we want to associate with the `users` table.
 
 ```sql
-=> create sequence users_id_seq;
+=> CREATE SEQUENCE users_id_seq;
+
 CREATE SEQUENCE
 ```
 
 This will now show up in our queries.
 
 ```sql
-=> select * from pg_sequence;
+=> SELECT *
+FROM   pg_sequence;
+
 -[ RECORD 1 ]+--------------------
 seqrelid     | 41000
 seqtypid     | 20
@@ -133,7 +148,9 @@ seqmin       | 1
 seqcache     | 1
 seqcycle     | f
 
-=> select * from pg_sequences;
+=> SELECT *
+FROM   pg_sequences;
+
 -[ RECORD 1 ]-+--------------------
 schemaname    | public
 sequencename  | freehanging
@@ -164,9 +181,11 @@ last_value    |
 We can perform a `join` on these catalogs.
 
 ```sql
-=> select seqclass.relname, seqclass.relfilenode
-from pg_class as seqclass
-join pg_sequence as seq on (seq.seqrelid = seqclass.relfilenode);
+=> SELECT seqclass.relname,
+       seqclass.relfilenode
+FROM   pg_class AS seqclass
+       JOIN pg_sequence AS seq
+         ON ( seq.seqrelid = seqclass.relfilenode );
 
 -[ RECORD 1 ]-------------
 relname     | freehanging
@@ -180,7 +199,8 @@ relfilenode | 41002
 We can go ahead and associate the new sequence with the `users` table by specifying `OWNED BY`. By setting `OWNED BY`, we are specifying that if the column is dropped, we want the sequence to be dropped as well.
 
 ```
-=> alter sequence users_id_seq OWNED BY users.id;
+=> ALTER SEQUENCE users_id_seq OWNED BY users.id;
+
 ALTER SEQUENCE
 ```
 
@@ -192,7 +212,11 @@ This association is recorded by Postgres in the [`pg_depend`](https://www.postgr
 
 
 ```sql
-=> select * from pg_depend where objid = 41002 and deptype = 'a';
+=> SELECT *
+FROM   pg_depend
+WHERE  objid = 41002
+       AND deptype = 'a';
+
 -[ RECORD 1 ]------
 classid     | 1259
 objid       | 41002
@@ -207,7 +231,11 @@ deptype     | a
 We can also verify that the `freehanging` sequence has no dependencies of type `a`.
 
 ```sql
-=> select * from pg_depend where objid = 41000 and deptype = 'a';
+=> SELECT *
+FROM   pg_depend
+WHERE  objid = 41000
+       AND deptype = 'a';
+
 (0 rows)
 
 ```
@@ -215,7 +243,10 @@ We can also verify that the `freehanging` sequence has no dependencies of type `
 Now that we have a dependency identified for this relationship, we can verify that the dependency is indeed with the `users` table. For this, we will query using the dependency's `refobjid`.
 
 ```sql
-=> select * from pg_class where relfilenode = 40997;
+=> SELECT *
+FROM   pg_class
+WHERE  relfilenode = 40997;
+
 -[ RECORD 1 ]-------+------
 relname             | users
 relnamespace        | 2200
@@ -258,7 +289,11 @@ We can indeed see that the dependency is on the `users` table.
 What about the column associated with this dependency? Postgres stores information about table columns in [`pg_attribute`](https://www.postgresql.org/docs/current/catalog-pg-attribute.html) catalog. We can verify that the dependency is on the `id` column, by querying `pg_attribute`.
 
 ```sql
-> select * from pg_attribute where attrelid=40997 and attnum = 1;
+=> SELECT *
+FROM   pg_attribute
+WHERE  attrelid = 40997
+       AND attnum = 1;
+
 -[ RECORD 1 ]-+------
 attrelid      | 40997
 attname       | id
@@ -284,6 +319,7 @@ attacl        |
 attoptions    |
 attfdwoptions |
 attmissingval |
+
 ```
 
 We can see that the column corresponding to the dependency is indeed `id`.
@@ -291,16 +327,24 @@ We can see that the column corresponding to the dependency is indeed `id`.
 Our `join` can now be improved to use this information. First, we will add the table name:
 
 ```sql
-=> select seqclass.relname as sequencename, seqclass.relfilenode as sequenceref, dep.refobjid as depobjref, depclass.relname as tablename
-from pg_class as seqclass
-join pg_sequence as seq on (seq.seqrelid = seqclass.relfilenode)
-join pg_depend as dep on (seq.seqrelid = dep.objid)
-join pg_class as depclass on (dep.refobjid = depclass.relfilenode);
+=> SELECT seqclass.relname     AS sequence_name,
+       seqclass.relfilenode AS sequenceref,
+       dep.refobjid         AS depobjref,
+       depclass.relname     AS table_name
+FROM   pg_class AS seqclass
+       JOIN pg_sequence AS seq
+         ON ( seq.seqrelid = seqclass.relfilenode )
+       JOIN pg_depend AS dep
+         ON ( seq.seqrelid = dep.objid )
+       JOIN pg_class AS depclass
+         ON ( dep.refobjid = depclass.relfilenode );
+
 -[ RECORD 1 ]+-------------
-sequencename | users_id_seq
+sequence_name | users_id_seq
 sequenceref  | 41002
 depobjref    | 40997
-tablename    | users
+table_name    | users
+
 ```
 
 We have to join twice on the `pg_class` catalog - once to get the `sequence`'s columns and once to get the `dependency`'s columns. This leaves us with the name of the table and the sequence name.
@@ -308,36 +352,77 @@ We have to join twice on the `pg_class` catalog - once to get the `sequence`'s c
 Finally, we can perform a join on `pg_attribute` to get column information.
 
 ```sql
-=> select seqclass.relname as sequencename, seqclass.relfilenode as sequenceref, dep.refobjid as depobjref, depclass.relname as tablename, attrib.attname as column
-from pg_class as seqclass
-join pg_sequence as seq on (seq.seqrelid = seqclass.relfilenode)
-join pg_depend as dep on (seq.seqrelid = dep.objid)
-join pg_class as depclass on (dep.refobjid = depclass.relfilenode)
-join pg_attribute as attrib on (attrib.attnum = dep.refobjsubid and attrib.attrelid = dep.refobjid);
+=> SELECT seqclass.relname     AS sequence_name,
+       seqclass.relfilenode AS sequenceref,
+       dep.refobjid         AS depobjref,
+       depclass.relname     AS tabl_ename,
+       attrib.attname       AS column_name
+FROM   pg_class AS seqclass
+       JOIN pg_sequence AS seq
+         ON ( seq.seqrelid = seqclass.relfilenode )
+       JOIN pg_depend AS dep
+         ON ( seq.seqrelid = dep.objid )
+       JOIN pg_class AS depclass
+         ON ( dep.refobjid = depclass.relfilenode )
+       JOIN pg_attribute AS attrib
+         ON ( attrib.attnum = dep.refobjsubid
+              AND attrib.attrelid = dep.refobjid );
 
 -[ RECORD 1 ]+-------------
-sequencename | users_id_seq
-sequenceref  | 41002
-depobjref    | 40997
-tablename    | users
-column       | id
+sequence_name | users_id_seq
+sequenceref   | 41002
+depobjref     | 40997
+table_name    | users
+column_name   | id
 
 ```
 
 We can drop `sequenceref` and `depobjref` from the result as it is not of particular interest to us when reporting this.
 
 ```sql
-=> select seqclass.relname as sequencename, depclass.relname as tablename, attrib.attname as column
-from pg_class as seqclass
-join pg_sequence as seq on (seq.seqrelid = seqclass.relfilenode)
-join pg_depend as dep on (seq.seqrelid = dep.objid)
-join pg_class as depclass on (dep.refobjid = depclass.relfilenode)
-join pg_attribute as attrib on (attrib.attnum = dep.refobjsubid and attrib.attrelid = dep.refobjid);
+=> SELECT seqclass.relname AS sequence_name,
+       depclass.relname AS table_name,
+       attrib.attname   AS column_name
+FROM   pg_class AS seqclass
+       JOIN pg_sequence AS seq
+         ON ( seq.seqrelid = seqclass.relfilenode )
+       JOIN pg_depend AS dep
+         ON ( seq.seqrelid = dep.objid )
+       JOIN pg_class AS depclass
+         ON ( dep.refobjid = depclass.relfilenode )
+       JOIN pg_attribute AS attrib
+         ON ( attrib.attnum = dep.refobjsubid
+              AND attrib.attrelid = dep.refobjid );
 
 -[ RECORD 1 ]+-------------
-sequencename | users_id_seq
-tablename    | users
-column       | id
+sequenc_ename | users_id_seq
+table_name    | users
+column_name   | id
+
+```
+
+## Postgres versions before 10
+
+The `pg_sequence` catalog was introduced in Postgres 10. For versions before 10, we need another way to get hold of the sequence's representation in `pg_class` so that we can look up the dependencies. Luckily, `pg_class` has a column `relkind` that holds this informations. For a sequence, this column will be `S`. We can use this in the `join` instead of `pg_sequence`.
+
+```sql
+=> SELECT seqclass.relname AS sequence_name,
+       depclass.relname AS table_name,
+       attrib.attname   as column_name
+FROM   pg_class AS seqclass
+       JOIN pg_depend AS dep
+         ON ( seqclass.relfilenode = dep.objid )
+       JOIN pg_class AS depclass
+         ON ( dep.refobjid = depclass.relfilenode )
+       JOIN pg_attribute AS attrib
+         ON ( attrib.attnum = dep.refobjsubid
+              AND attrib.attrelid = dep.refobjid )
+WHERE  seqclass.relkind = 'S';
+
+-[ RECORD 1 ]-+-------------
+sequence_name | users_id_seq
+table_name    | users
+column_name   | id
 
 ```
 
