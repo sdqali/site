@@ -19,16 +19,20 @@
 &lt;p&gt;When I first started looking at this, I ended up at this Stack Overflow &lt;a href=&#34;https://stackoverflow.com/questions/9900346/how-do-you-view-new-sequence-ownership-information-in-postgres-after-using-alter&#34;&gt;answer&lt;/a&gt; from 2012. While that seemed to work, it is fair to say that I had no idea what it did. So, I set out to understand it and hopefully improve it.&lt;/p&gt;
 
 &lt;p&gt;We will start by creating a &lt;code&gt;table&lt;/code&gt; that we will later associate a &lt;code&gt;sequence&lt;/code&gt; with.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;create&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;table&lt;/span&gt; users (
-  id &lt;span style=&#34;color:#366&#34;&gt;bigint&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;not&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;null&lt;/span&gt;,
-  name &lt;span style=&#34;color:#366&#34;&gt;varchar&lt;/span&gt;(&lt;span style=&#34;color:#f60&#34;&gt;40&lt;/span&gt;) &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;not&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;null&lt;/span&gt;
-);&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;CREATE&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;TABLE&lt;/span&gt; users
+  (
+     id   &lt;span style=&#34;color:#366&#34;&gt;BIGINT&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;NOT&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;NULL&lt;/span&gt;,
+     NAME &lt;span style=&#34;color:#366&#34;&gt;VARCHAR&lt;/span&gt;(&lt;span style=&#34;color:#f60&#34;&gt;40&lt;/span&gt;) &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;NOT&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;NULL&lt;/span&gt;
+  );&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;Next, we will create a sequence that is not going to be owned by any columns - a freehanging sequence.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;create&lt;/span&gt; sequence freehanging;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;CREATE&lt;/span&gt; SEQUENCE freehanging;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;Postgres stores &lt;code&gt;sequence&lt;/code&gt;s across two different catalogs - &lt;a href=&#34;https://www.postgresql.org/docs/current/catalog-pg-sequence.html&#34;&gt;&lt;code&gt;pg_sequence&lt;/code&gt;&lt;/a&gt; and &lt;a href=&#34;https://www.postgresql.org/docs/current/catalog-pg-class.html&#34;&gt;&lt;code&gt;pg_class&lt;/code&gt;&lt;/a&gt;. Catalog &lt;code&gt;pg_sequence&lt;/code&gt; contains sequence parameters like &lt;code&gt;seqstart&lt;/code&gt;, &lt;code&gt;seqincrement&lt;/code&gt; etc. The rest of the information gets stored in &lt;code&gt;pg_class&lt;/code&gt; catalog with the &lt;code&gt;seqlrelid&lt;/code&gt; column in &lt;code&gt;pg_sequence&lt;/code&gt; pointing to the corresponding &lt;code&gt;pg_class&lt;/code&gt; entry.&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#a00;background-color:#faa&#34;&gt;\&lt;/span&gt;x
 Expanded display &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;is&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;on&lt;/span&gt;.
-&lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;select&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;from&lt;/span&gt; pg_sequence;
+
+&lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;SELECT&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt;
+&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;FROM&lt;/span&gt;   pg_sequence;
+
 &lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt;[ RECORD &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt; ]&lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;--------------------
 &lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;seqrelid     &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;41000&lt;/span&gt;
 seqtypid     &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;20&lt;/span&gt;
@@ -39,7 +43,9 @@ seqmin       &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; &lt;span styl
 seqcache     &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;
 seqcycle     &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; f&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;That has the information that Postgres can use, but it does not look particularly useful to a human being. Luckily, Postgres provides a &lt;code&gt;view&lt;/code&gt; named &lt;a href=&#34;https://www.postgresql.org/docs/10/view-pg-sequences.html&#34;&gt;&lt;code&gt;pg_sequences&lt;/code&gt;&lt;/a&gt; that shows us more information.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;select&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;from&lt;/span&gt; pg_sequences;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;SELECT&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt;
+&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;FROM&lt;/span&gt;   pg_sequences;
+
 &lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt;[ RECORD &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt; ]&lt;span style=&#34;color:#555&#34;&gt;-+&lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;--------------------
 &lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;schemaname    &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt;
 sequencename  &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; freehanging
@@ -53,7 +59,10 @@ increment_by  &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; &lt;span sty
 cache_size    &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;
 last_value    &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;We can query &lt;code&gt;pg_class&lt;/code&gt; with our &lt;code&gt;seqrelid&lt;/code&gt;:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;select&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;from&lt;/span&gt; pg_class &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;where&lt;/span&gt; relfilenode &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;41000&lt;/span&gt;;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;SELECT&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt;
+&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;FROM&lt;/span&gt;   pg_class
+&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;WHERE&lt;/span&gt;  relfilenode &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;41000&lt;/span&gt;;
+
 &lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt;[ RECORD &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt; ]&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;-------+------------
 &lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;relname             &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; freehanging
 relnamespace        &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;2200&lt;/span&gt;
@@ -89,10 +98,13 @@ relacl              &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;
 reloptions          &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;
 relpartbound        &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;We can create a second sequence we want to associate with the &lt;code&gt;users&lt;/code&gt; table.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;create&lt;/span&gt; sequence users_id_seq;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;CREATE&lt;/span&gt; SEQUENCE users_id_seq;
+
 &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;CREATE&lt;/span&gt; SEQUENCE&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;This will now show up in our queries.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;select&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;from&lt;/span&gt; pg_sequence;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;SELECT&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt;
+&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;FROM&lt;/span&gt;   pg_sequence;
+
 &lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt;[ RECORD &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt; ]&lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;--------------------
 &lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;seqrelid     &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;41000&lt;/span&gt;
 seqtypid     &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;20&lt;/span&gt;
@@ -112,7 +124,9 @@ seqmin       &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; &lt;span styl
 seqcache     &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;
 seqcycle     &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; f
 
-&lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;select&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;from&lt;/span&gt; pg_sequences;
+&lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;SELECT&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt;
+&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;FROM&lt;/span&gt;   pg_sequences;
+
 &lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt;[ RECORD &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt; ]&lt;span style=&#34;color:#555&#34;&gt;-+&lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;--------------------
 &lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;schemaname    &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt;
 sequencename  &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; freehanging
@@ -138,9 +152,11 @@ increment_by  &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; &lt;span sty
 cache_size    &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;
 last_value    &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;We can perform a &lt;code&gt;join&lt;/code&gt; on these catalogs.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;select&lt;/span&gt; seqclass.relname, seqclass.relfilenode
-&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;from&lt;/span&gt; pg_class &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;as&lt;/span&gt; seqclass
-&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;join&lt;/span&gt; pg_sequence &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;as&lt;/span&gt; seq &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;on&lt;/span&gt; (seq.seqrelid &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; seqclass.relfilenode);
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;SELECT&lt;/span&gt; seqclass.relname,
+       seqclass.relfilenode
+&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;FROM&lt;/span&gt;   pg_class &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AS&lt;/span&gt; seqclass
+       &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;JOIN&lt;/span&gt; pg_sequence &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AS&lt;/span&gt; seq
+         &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;ON&lt;/span&gt; ( seq.seqrelid &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; seqclass.relfilenode );
 
 &lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt;[ RECORD &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt; ]&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;-------------
 &lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;relname     &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; freehanging
@@ -150,7 +166,8 @@ relfilenode &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; &lt;span style
 relfilenode &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;41002&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;We can go ahead and associate the new sequence with the &lt;code&gt;users&lt;/code&gt; table by specifying &lt;code&gt;OWNED BY&lt;/code&gt;. By setting &lt;code&gt;OWNED BY&lt;/code&gt;, we are specifying that if the column is dropped, we want the sequence to be dropped as well.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;=&amp;gt; alter sequence users_id_seq OWNED BY users.id;
+&lt;pre&gt;&lt;code&gt;=&amp;gt; ALTER SEQUENCE users_id_seq OWNED BY users.id;
+
 ALTER SEQUENCE
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -161,7 +178,11 @@ ALTER SEQUENCE
 
 &lt;p&gt;The dependent object can be dropped separately from the referenced object, and should be automatically dropped (regardless of RESTRICT or CASCADE mode) if the referenced object is dropped. Example: a named constraint on a table is made autodependent on the table, so that it will go away if the table is dropped.&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;select&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;from&lt;/span&gt; pg_depend &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;where&lt;/span&gt; objid &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;41002&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;and&lt;/span&gt; deptype &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;a&amp;#39;&lt;/span&gt;;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;SELECT&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt;
+&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;FROM&lt;/span&gt;   pg_depend
+&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;WHERE&lt;/span&gt;  objid &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;41002&lt;/span&gt;
+       &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AND&lt;/span&gt; deptype &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;a&amp;#39;&lt;/span&gt;;
+
 &lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt;[ RECORD &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt; ]&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;------
 &lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;classid     &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;1259&lt;/span&gt;
 objid       &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;41002&lt;/span&gt;
@@ -171,10 +192,17 @@ refobjid    &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; &lt;span style
 refobjsubid &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;
 deptype     &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; a&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;We can also verify that the &lt;code&gt;freehanging&lt;/code&gt; sequence has no dependencies of type &lt;code&gt;a&lt;/code&gt;.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;select&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;from&lt;/span&gt; pg_depend &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;where&lt;/span&gt; objid &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;41000&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;and&lt;/span&gt; deptype &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;a&amp;#39;&lt;/span&gt;;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;SELECT&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt;
+&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;FROM&lt;/span&gt;   pg_depend
+&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;WHERE&lt;/span&gt;  objid &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;41000&lt;/span&gt;
+       &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AND&lt;/span&gt; deptype &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;a&amp;#39;&lt;/span&gt;;
+
 (&lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;rows&lt;/span&gt;)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;Now that we have a dependency identified for this relationship, we can verify that the dependency is indeed with the &lt;code&gt;users&lt;/code&gt; table. For this, we will query using the dependency&amp;rsquo;s &lt;code&gt;refobjid&lt;/code&gt;.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;select&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;from&lt;/span&gt; pg_class &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;where&lt;/span&gt; relfilenode &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;40997&lt;/span&gt;;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;SELECT&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt;
+&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;FROM&lt;/span&gt;   pg_class
+&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;WHERE&lt;/span&gt;  relfilenode &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;40997&lt;/span&gt;;
+
 &lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt;[ RECORD &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt; ]&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;-------+------
 &lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;relname             &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; users
 relnamespace        &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;2200&lt;/span&gt;
@@ -212,7 +240,11 @@ relpartbound        &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;&lt;/co
 &lt;p&gt;We can indeed see that the dependency is on the &lt;code&gt;users&lt;/code&gt; table.&lt;/p&gt;
 
 &lt;p&gt;What about the column associated with this dependency? Postgres stores information about table columns in &lt;a href=&#34;https://www.postgresql.org/docs/current/catalog-pg-attribute.html&#34;&gt;&lt;code&gt;pg_attribute&lt;/code&gt;&lt;/a&gt; catalog. We can verify that the dependency is on the &lt;code&gt;id&lt;/code&gt; column, by querying &lt;code&gt;pg_attribute&lt;/code&gt;.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;select&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;from&lt;/span&gt; pg_attribute &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;where&lt;/span&gt; attrelid&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;40997&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;and&lt;/span&gt; attnum &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;SELECT&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt;
+&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;FROM&lt;/span&gt;   pg_attribute
+&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;WHERE&lt;/span&gt;  attrelid &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;40997&lt;/span&gt;
+       &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AND&lt;/span&gt; attnum &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;;
+
 &lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt;[ RECORD &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt; ]&lt;span style=&#34;color:#555&#34;&gt;-+&lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;------
 &lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;attrelid      &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;40997&lt;/span&gt;
 attname       &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; id
@@ -241,44 +273,87 @@ attmissingval &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;&lt;/code&gt;
 &lt;p&gt;We can see that the column corresponding to the dependency is indeed &lt;code&gt;id&lt;/code&gt;.&lt;/p&gt;
 
 &lt;p&gt;Our &lt;code&gt;join&lt;/code&gt; can now be improved to use this information. First, we will add the table name:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;select&lt;/span&gt; seqclass.relname &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;as&lt;/span&gt; sequencename, seqclass.relfilenode &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;as&lt;/span&gt; sequenceref, dep.refobjid &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;as&lt;/span&gt; depobjref, depclass.relname &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;as&lt;/span&gt; tablename
-&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;from&lt;/span&gt; pg_class &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;as&lt;/span&gt; seqclass
-&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;join&lt;/span&gt; pg_sequence &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;as&lt;/span&gt; seq &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;on&lt;/span&gt; (seq.seqrelid &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; seqclass.relfilenode)
-&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;join&lt;/span&gt; pg_depend &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;as&lt;/span&gt; dep &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;on&lt;/span&gt; (seq.seqrelid &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; dep.objid)
-&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;join&lt;/span&gt; pg_class &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;as&lt;/span&gt; depclass &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;on&lt;/span&gt; (dep.refobjid &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; depclass.relfilenode);
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;SELECT&lt;/span&gt; seqclass.relname     &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AS&lt;/span&gt; sequence_name,
+       seqclass.relfilenode &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AS&lt;/span&gt; sequenceref,
+       dep.refobjid         &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AS&lt;/span&gt; depobjref,
+       depclass.relname     &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AS&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;table_name&lt;/span&gt;
+&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;FROM&lt;/span&gt;   pg_class &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AS&lt;/span&gt; seqclass
+       &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;JOIN&lt;/span&gt; pg_sequence &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AS&lt;/span&gt; seq
+         &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;ON&lt;/span&gt; ( seq.seqrelid &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; seqclass.relfilenode )
+       &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;JOIN&lt;/span&gt; pg_depend &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AS&lt;/span&gt; dep
+         &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;ON&lt;/span&gt; ( seq.seqrelid &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; dep.objid )
+       &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;JOIN&lt;/span&gt; pg_class &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AS&lt;/span&gt; depclass
+         &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;ON&lt;/span&gt; ( dep.refobjid &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; depclass.relfilenode );
+
 &lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt;[ RECORD &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt; ]&lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;-------------
-&lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;sequencename &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; users_id_seq
+&lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;sequence_name &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; users_id_seq
 sequenceref  &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;41002&lt;/span&gt;
 depobjref    &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;40997&lt;/span&gt;
-tablename    &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; users&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;table_name&lt;/span&gt;    &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; users&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;We have to join twice on the &lt;code&gt;pg_class&lt;/code&gt; catalog - once to get the &lt;code&gt;sequence&lt;/code&gt;&amp;rsquo;s columns and once to get the &lt;code&gt;dependency&lt;/code&gt;&amp;rsquo;s columns. This leaves us with the name of the table and the sequence name.&lt;/p&gt;
 
 &lt;p&gt;Finally, we can perform a join on &lt;code&gt;pg_attribute&lt;/code&gt; to get column information.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;select&lt;/span&gt; seqclass.relname &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;as&lt;/span&gt; sequencename, seqclass.relfilenode &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;as&lt;/span&gt; sequenceref, dep.refobjid &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;as&lt;/span&gt; depobjref, depclass.relname &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;as&lt;/span&gt; tablename, attrib.attname &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;as&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;column&lt;/span&gt;
-&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;from&lt;/span&gt; pg_class &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;as&lt;/span&gt; seqclass
-&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;join&lt;/span&gt; pg_sequence &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;as&lt;/span&gt; seq &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;on&lt;/span&gt; (seq.seqrelid &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; seqclass.relfilenode)
-&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;join&lt;/span&gt; pg_depend &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;as&lt;/span&gt; dep &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;on&lt;/span&gt; (seq.seqrelid &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; dep.objid)
-&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;join&lt;/span&gt; pg_class &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;as&lt;/span&gt; depclass &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;on&lt;/span&gt; (dep.refobjid &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; depclass.relfilenode)
-&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;join&lt;/span&gt; pg_attribute &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;as&lt;/span&gt; attrib &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;on&lt;/span&gt; (attrib.attnum &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; dep.refobjsubid &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;and&lt;/span&gt; attrib.attrelid &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; dep.refobjid);
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;SELECT&lt;/span&gt; seqclass.relname     &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AS&lt;/span&gt; sequence_name,
+       seqclass.relfilenode &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AS&lt;/span&gt; sequenceref,
+       dep.refobjid         &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AS&lt;/span&gt; depobjref,
+       depclass.relname     &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AS&lt;/span&gt; tabl_ename,
+       attrib.attname       &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AS&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;column_name&lt;/span&gt;
+&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;FROM&lt;/span&gt;   pg_class &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AS&lt;/span&gt; seqclass
+       &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;JOIN&lt;/span&gt; pg_sequence &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AS&lt;/span&gt; seq
+         &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;ON&lt;/span&gt; ( seq.seqrelid &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; seqclass.relfilenode )
+       &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;JOIN&lt;/span&gt; pg_depend &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AS&lt;/span&gt; dep
+         &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;ON&lt;/span&gt; ( seq.seqrelid &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; dep.objid )
+       &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;JOIN&lt;/span&gt; pg_class &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AS&lt;/span&gt; depclass
+         &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;ON&lt;/span&gt; ( dep.refobjid &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; depclass.relfilenode )
+       &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;JOIN&lt;/span&gt; pg_attribute &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AS&lt;/span&gt; attrib
+         &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;ON&lt;/span&gt; ( attrib.attnum &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; dep.refobjsubid
+              &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AND&lt;/span&gt; attrib.attrelid &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; dep.refobjid );
 
 &lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt;[ RECORD &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt; ]&lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;-------------
-&lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;sequencename &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; users_id_seq
-sequenceref  &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;41002&lt;/span&gt;
-depobjref    &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;40997&lt;/span&gt;
-tablename    &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; users
-&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;column&lt;/span&gt;       &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; id&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;sequence_name &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; users_id_seq
+sequenceref   &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;41002&lt;/span&gt;
+depobjref     &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;40997&lt;/span&gt;
+&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;table_name&lt;/span&gt;    &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; users
+&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;column_name&lt;/span&gt;   &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; id&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;We can drop &lt;code&gt;sequenceref&lt;/code&gt; and &lt;code&gt;depobjref&lt;/code&gt; from the result as it is not of particular interest to us when reporting this.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;select&lt;/span&gt; seqclass.relname &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;as&lt;/span&gt; sequencename, depclass.relname &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;as&lt;/span&gt; tablename, attrib.attname &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;as&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;column&lt;/span&gt;
-&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;from&lt;/span&gt; pg_class &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;as&lt;/span&gt; seqclass
-&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;join&lt;/span&gt; pg_sequence &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;as&lt;/span&gt; seq &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;on&lt;/span&gt; (seq.seqrelid &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; seqclass.relfilenode)
-&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;join&lt;/span&gt; pg_depend &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;as&lt;/span&gt; dep &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;on&lt;/span&gt; (seq.seqrelid &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; dep.objid)
-&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;join&lt;/span&gt; pg_class &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;as&lt;/span&gt; depclass &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;on&lt;/span&gt; (dep.refobjid &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; depclass.relfilenode)
-&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;join&lt;/span&gt; pg_attribute &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;as&lt;/span&gt; attrib &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;on&lt;/span&gt; (attrib.attnum &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; dep.refobjsubid &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;and&lt;/span&gt; attrib.attrelid &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; dep.refobjid);
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;SELECT&lt;/span&gt; seqclass.relname &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AS&lt;/span&gt; sequence_name,
+       depclass.relname &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AS&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;table_name&lt;/span&gt;,
+       attrib.attname   &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AS&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;column_name&lt;/span&gt;
+&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;FROM&lt;/span&gt;   pg_class &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AS&lt;/span&gt; seqclass
+       &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;JOIN&lt;/span&gt; pg_sequence &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AS&lt;/span&gt; seq
+         &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;ON&lt;/span&gt; ( seq.seqrelid &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; seqclass.relfilenode )
+       &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;JOIN&lt;/span&gt; pg_depend &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AS&lt;/span&gt; dep
+         &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;ON&lt;/span&gt; ( seq.seqrelid &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; dep.objid )
+       &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;JOIN&lt;/span&gt; pg_class &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AS&lt;/span&gt; depclass
+         &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;ON&lt;/span&gt; ( dep.refobjid &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; depclass.relfilenode )
+       &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;JOIN&lt;/span&gt; pg_attribute &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AS&lt;/span&gt; attrib
+         &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;ON&lt;/span&gt; ( attrib.attnum &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; dep.refobjsubid
+              &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AND&lt;/span&gt; attrib.attrelid &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; dep.refobjid );
 
 &lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt;[ RECORD &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt; ]&lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;-------------
-&lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;sequencename &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; users_id_seq
-tablename    &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; users
-&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;column&lt;/span&gt;       &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; id&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;sequenc_ename &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; users_id_seq
+&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;table_name&lt;/span&gt;    &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; users
+&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;column_name&lt;/span&gt;   &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; id&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id=&#34;postgres-versions-before-10&#34;&gt;Postgres versions before 10&lt;/h2&gt;
+
+&lt;p&gt;The &lt;code&gt;pg_sequence&lt;/code&gt; catalog was introduced in Postgres 10. For versions before 10, we need another way to get hold of the sequence&amp;rsquo;s representation in &lt;code&gt;pg_class&lt;/code&gt; so that we can look up the dependencies. Luckily, &lt;code&gt;pg_class&lt;/code&gt; has a column &lt;code&gt;relkind&lt;/code&gt; that holds this informations. For a sequence, this column will be &lt;code&gt;S&lt;/code&gt;. We can use this in the &lt;code&gt;join&lt;/code&gt; instead of &lt;code&gt;pg_sequence&lt;/code&gt;.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-sql&#34; data-lang=&#34;sql&#34;&gt;&lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;SELECT&lt;/span&gt; seqclass.relname &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AS&lt;/span&gt; sequence_name,
+       depclass.relname &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AS&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;table_name&lt;/span&gt;,
+       attrib.attname   &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;as&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;column_name&lt;/span&gt;
+&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;FROM&lt;/span&gt;   pg_class &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AS&lt;/span&gt; seqclass
+       &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;JOIN&lt;/span&gt; pg_depend &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AS&lt;/span&gt; dep
+         &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;ON&lt;/span&gt; ( seqclass.relfilenode &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; dep.objid )
+       &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;JOIN&lt;/span&gt; pg_class &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AS&lt;/span&gt; depclass
+         &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;ON&lt;/span&gt; ( dep.refobjid &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; depclass.relfilenode )
+       &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;JOIN&lt;/span&gt; pg_attribute &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AS&lt;/span&gt; attrib
+         &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;ON&lt;/span&gt; ( attrib.attnum &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; dep.refobjsubid
+              &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;AND&lt;/span&gt; attrib.attrelid &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; dep.refobjid )
+&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;WHERE&lt;/span&gt;  seqclass.relkind &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;S&amp;#39;&lt;/span&gt;;
+
+&lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt;[ RECORD &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt; ]&lt;span style=&#34;color:#555&#34;&gt;-+&lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;-------------
+&lt;/span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;sequence_name &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; users_id_seq
+&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;table_name&lt;/span&gt;    &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; users
+&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;column_name&lt;/span&gt;   &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; id&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;This seems like information that should be surfaced by Postgres in an easier to access way. In fact there is a patch from &lt;a href=&#34;https://web.archive.org/web/20190508035646/https://www.postgresql.org/message-id/1228622212.10877.59.camel%40godzilla.local.scalefeather.com&#34;&gt;2008&lt;/a&gt; that would have introduced this capability. When Postgres 10 introduced the &lt;a href=&#34;https://web.archive.org/web/20190508035646/https://www.postgresql.org/message-id/1228622212.10877.59.camel%40godzilla.local.scalefeather.com&#34;&gt;&lt;code&gt;pg_sequences&lt;/code&gt;&lt;/a&gt; catalog, it stopped at surfacing the id of the user who owns the sequence.&lt;/p&gt;</description>
     </item>
     
