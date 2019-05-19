@@ -1,10 +1,13 @@
 ---
-title: Looking up Sequence ownership information in Postgres
+title: Viewing Sequence ownership information in Postgres
 date: 2019-05-07T18:04:42-07:00
 ghcommentid: 142
 bbcommentid: 135
+aliases:
+- /blog/2019/05/07/looking-up-sequence-ownership-information-in-postgres/
 tags:
 - postgres
+- postgresql
 - sql
 ---
 This blog post is an exercise in identifying all the `sequences` in a PostgreSQL database that is associated with a table column via an `OWNED BY` relationship. Figuring out how to do this was harder than it should have been and this journals my understanding of it.
