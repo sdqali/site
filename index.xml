@@ -5,8 +5,83 @@
     <link>https://sdqali.in/?utm_source=site&amp;utm_medium=feed</link>
     <description>Recent content in {code that works} on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
-    <lastBuildDate>Sun, 28 Jul 2019 18:29:49 -0700</lastBuildDate>
+    <lastBuildDate>Fri, 02 Aug 2019 18:19:32 -0700</lastBuildDate>
     <atom:link href="/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Flushing Metrics in Dropwizard Commands</title>
+      <link>https://sdqali.in/blog/2019/08/02/flushing-metrics-in-dropwizard-commands/?utm_source=site&amp;utm_medium=feed</link>
+      <pubDate>Fri, 02 Aug 2019 18:19:32 -0700</pubDate>
+      
+      <guid>https://sdqali.in/blog/2019/08/02/flushing-metrics-in-dropwizard-commands/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;Users of Dropwizard Metrics will be familiar with &lt;code&gt;ScheduledReporter&lt;/code&gt;  - it is a nice pattern that allows metrics reporting to be off loaded to a different thread which periodically sends out the collected metrics instead of making a network call every time a metric is collected. In most use cases, this works great - especially if you are running a server.&lt;/p&gt;
+
+&lt;p&gt;However, the implementation of &lt;code&gt;ScheduledReporter&lt;/code&gt; comes with an interesting quirk - it reports metrics only on the configured schedule, but does not flush the metrics it has collected after the last flush when the reporter is closed.&lt;/p&gt;
+
+&lt;p&gt;Datadog Metrics wires up ScheduledReporters that you configure as Dropwizard Lifecycle managed entities, guaranteeing that when your application shuts down, the reporter is closed.&lt;/p&gt;
+
+&lt;p&gt;This results in metrics collected immediately before an application is shutdown being discarded. This is especially problematic for Dropwizard commands that have varying run times depending on how much data processing it performs.&lt;/p&gt;
+
+&lt;p&gt;Imagine a Dropwizard command that when run downloads a file and processes it. Suppose the usual run time is in minutes, so you have configured your metric reporter&amp;rsquo;s frequency to be &lt;code&gt;1 minute&lt;/code&gt;, which is reasonable for this command. However, consider the situation where the downloaded file contains no data - the command will finish in seconds, thereby discarding any metric it has collected, as it hasn&amp;rsquo;t ran for long enough for the scheduled reporter&amp;rsquo;s executor to kick in.&lt;/p&gt;
+
+&lt;h2 id=&#34;solution&#34;&gt;Solution&lt;/h2&gt;
+
+&lt;p&gt;If you have the ability to override the specific &lt;code&gt;ScheduledReporter&lt;/code&gt; you are using, you could inherit from it and override the &lt;code&gt;#close()&lt;/code&gt; method to call &lt;code&gt;#report&lt;/code&gt; before issuing &lt;code&gt;#stop&lt;/code&gt;. For example, if you were using the &lt;code&gt;ConsoleReporter&lt;/code&gt;, you could override the method and then use a &lt;a href=&#34;https://docs.oracle.com/javase/tutorial/sound/SPI-intro.html&#34;&gt;Service Provider Interface&lt;/a&gt; to provide your new reporter to Datadog Metrics.&lt;/p&gt;
+
+&lt;p&gt;The SPI goes in the file &lt;code&gt;src/main/resources/META-INF/services/io.dropwizard.metrics.ReporterFactory&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;io.sadique.dropwizard.metrics.flush.CustomReporterFactory
+&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;CustomReporterFactory&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;extends&lt;/span&gt; BaseReporterFactory &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
+  &lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;
+  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; ScheduledReporter &lt;span style=&#34;color:#c0f&#34;&gt;build&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;MetricRegistry registry&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
+    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; FlushingReporter&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;forRegistry&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;registry&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
+      &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;build&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;();&lt;/span&gt;
+  &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;If you are using a reporter like &lt;code&gt;DataogReporter&lt;/code&gt;, it is hard to override it as the constructor is marked private. In such situations, we can create a wrapper that provides the overridden behavior:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;FlushOnCloseReporter&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;extends&lt;/span&gt; ScheduledReporter  &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
+  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;final&lt;/span&gt; ScheduledReporter wrapped&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
+
+  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;FlushOnCloseReporter&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;ScheduledReporter wrapped&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; MetricRegistry registry&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; String name&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt;
+                              MetricFilter filter&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; TimeUnit rateUnit&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; TimeUnit durationUnit&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
+    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;super&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;registry&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; name&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; filter&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; rateUnit&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; durationUnit&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
+    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;this&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;wrapped&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; wrapped&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
+  &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
+
+  &lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;
+  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;report&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;SortedMap&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;String&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; Gauge&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt; gauges&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; SortedMap&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;String&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; Counter&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt; counters&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt;
+                     SortedMap&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;String&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; Histogram&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt; histograms&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; SortedMap&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;String&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; Meter&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt; meters&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt;
+                     SortedMap&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;String&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; Timer&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt; timers&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
+    wrapped&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;report&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;gauges&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; counters&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; histograms&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; meters&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; timers&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
+  &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
+
+  &lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;
+  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;start&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;long&lt;/span&gt; period&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; TimeUnit unit&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
+    wrapped&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;start&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;period&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; unit&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
+  &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
+
+  &lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;
+  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;stop&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
+    wrapped&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;report&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;();&lt;/span&gt;
+    wrapped&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;stop&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;();&lt;/span&gt;
+  &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;And the reporter factory can be modified to wrap the &lt;code&gt;DatadogReporter&lt;/code&gt;.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;CustomReporterFactory&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;extends&lt;/span&gt; BaseReporterFactory &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
+  &lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;
+  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; ScheduledReporter &lt;span style=&#34;color:#c0f&#34;&gt;build&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;MetricRegistry registry&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
+    DatadogReporter consoleReporter &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; DatadogReporter&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;forRegistry&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;registry&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
+      &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;filter&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;getFilter&lt;span style=&#34;color:#555&#34;&gt;())&lt;/span&gt;
+      &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;convertDurationsTo&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;getDurationUnit&lt;span style=&#34;color:#555&#34;&gt;())&lt;/span&gt;
+      &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;convertRatesTo&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;getRateUnit&lt;span style=&#34;color:#555&#34;&gt;())&lt;/span&gt;
+      &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;build&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;();&lt;/span&gt;
+    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;new&lt;/span&gt; FlushOnCloseReporter&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;consoleReporter&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; registry&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;flush-on-close(DatadogReporter)&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt;
+      getFilter&lt;span style=&#34;color:#555&#34;&gt;(),&lt;/span&gt; getRateUnit&lt;span style=&#34;color:#555&#34;&gt;(),&lt;/span&gt; getDurationUnit&lt;span style=&#34;color:#555&#34;&gt;());&lt;/span&gt;
+  &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This will ensure that reports are always flushed before the reporter is shutdown by Dropwizard lifecycle.&lt;/p&gt;</description>
+    </item>
     
     <item>
       <title>Managing environment lifecycles for Dropwizard Commands</title>
@@ -1348,94 +1423,6 @@ Today, I had to upload a zip file as a build artifact to our Nexus 3 repository.
 &lt;/span&gt;&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;&lt;/span&gt;    -DgeneratePom&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#366&#34;&gt;true&lt;/span&gt; &lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;\
 &lt;/span&gt;&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;&lt;/span&gt;    -DupdateReleaseInfo&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#366&#34;&gt;true&lt;/span&gt; &lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;\
 &lt;/span&gt;&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;&lt;/span&gt;    -Durl&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;https://&lt;/span&gt;&lt;span style=&#34;color:#a00&#34;&gt;${&lt;/span&gt;&lt;span style=&#34;color:#033&#34;&gt;NEXUS_USERNAME&lt;/span&gt;&lt;span style=&#34;color:#a00&#34;&gt;}&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;:&lt;/span&gt;&lt;span style=&#34;color:#a00&#34;&gt;${&lt;/span&gt;&lt;span style=&#34;color:#033&#34;&gt;NEXUS_PASSWORD&lt;/span&gt;&lt;span style=&#34;color:#a00&#34;&gt;}&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;@&amp;lt;nexus-server&amp;gt;/repository/maven-releases/&amp;#34;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description>
-    </item>
-    
-    <item>
-      <title>Implementing feature toggles for a Spring Boot application - Part 4</title>
-      <link>https://sdqali.in/blog/2016/11/30/implementing-feature-toggles-for-a-spring-boot-application-part-4/?utm_source=site&amp;utm_medium=feed</link>
-      <pubDate>Wed, 30 Nov 2016 05:50:42 +0000</pubDate>
-      
-      <guid>https://sdqali.in/blog/2016/11/30/implementing-feature-toggles-for-a-spring-boot-application-part-4/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>&lt;p&gt;In the fourth part of this &lt;a href=&#34;https://sdqali.in/series/feature-toggles/&#34;&gt;series&lt;/a&gt; about implementing &lt;a href=&#34;https://sdqali.in/blog/2016/11/21/implementing-feature-toggles-for-a-spring-boot-application-part-1/&#34;&gt;feature toggles&lt;/a&gt; for a Spring Boot application, we will take a look at how our implementation so far introduced a dependency on the application being restarted for changes to take place.&lt;/p&gt;
-
-&lt;p&gt;In &lt;a href=&#34;https://sdqali.in/blog/2016/11/21/implementing-feature-toggles-for-a-spring-boot-application-part-1/&#34;&gt;part 1&lt;/a&gt;, we modified the &lt;code&gt;FeatureToggle&lt;/code&gt; annotation to support toggling beans and decided to use that for toggling features at the controller level. If we had a system capable of providing the feature toggle information to the application without restarts, the change in the state of the controller level toggles will have no effect because the controller is not going to be re-wired for request mapping, unless the application is restarted.&lt;/p&gt;
-
-&lt;p&gt;This raises the interesting question - Are bean level switches really feature toggles, considering that they can never be altered without application restarts? A better approach would be to consider bean switches as purely configurations and use facades that route commands to either of the beans based on a feature flag. In the example configuration provided, is treating the choice between storing sessions in-memory / Redis an actual feature, considering it does not provide any value to the end-user?&lt;/p&gt;
-
-&lt;p&gt;To ensure that we are not tying feature toggling to restarts, we will remove the meta-annotation we introduced to &lt;code&gt;FeatureToggle&lt;/code&gt; in &lt;a href=&#34;https://sdqali.in/blog/2016/11/21/implementing-feature-toggles-for-a-spring-boot-application-part-1/&#34;&gt;part 1&lt;/a&gt;.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#99f&#34;&gt;@Target&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;({&lt;/span&gt;ElementType&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;TYPE&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; ElementType&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;METHOD&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;})&lt;/span&gt;
-&lt;span style=&#34;color:#99f&#34;&gt;@Retention&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;RetentionPolicy&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;RUNTIME&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
-&lt;span style=&#34;color:#99f&#34;&gt;@Documented&lt;/span&gt;
-&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#99f&#34;&gt;@interface&lt;/span&gt; FeatureToggle &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-  String &lt;span style=&#34;color:#c0f&#34;&gt;feature&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;();&lt;/span&gt;
-
-  &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;boolean&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;expectedToBeOn&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;default&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;true&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;With this change, we no longer have the ability to toggle off an entire controller. Having to annotate all handler methods in a controller is going to be a painful, error-prone approach. In order to provide the ability to toggle entire controllers, we can modify the &lt;code&gt;FeatureInterceptor&lt;/code&gt; to look for annotations present on the controller class in addition to annotations present on the handler methods.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;FeatureInterceptor&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;implements&lt;/span&gt; HandlerInterceptor &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;final&lt;/span&gt; FeatureRepository featureRepository&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-
-  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;FeatureInterceptor&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;FeatureRepository featureRepository&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;this&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;featureRepository&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; featureRepository&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-  &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-  &lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;
-  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;boolean&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;preHandle&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;HttpServletRequest httpServletRequest&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; HttpServletResponse httpServletResponse&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; Object handler&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;throws&lt;/span&gt; Exception &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-    HandlerMethod handlerMethod &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;HandlerMethod&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; handler&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;handleMethodAnnotation&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;handlerMethod&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt;
-        handleTypeAnnotation&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;handlerMethod&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;getBeanType&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()))&lt;/span&gt;  &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-      &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;true&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-    httpServletResponse&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;setStatus&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;HttpServletResponse&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;SC_NOT_FOUND&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;false&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-  &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;boolean&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;handleTypeAnnotation&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;Class&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;?&amp;gt;&lt;/span&gt; controllerType&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-    FeatureToggle controllerTypeAnnotation &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; controllerType&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;getAnnotation&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;FeatureToggle&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; checkFeatureState&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;controllerTypeAnnotation&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
-  &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;boolean&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;handleMethodAnnotation&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;HandlerMethod handlerMethod&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-    FeatureToggle methodAnnotation &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; handlerMethod&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;getMethodAnnotation&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;FeatureToggle&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;class&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; checkFeatureState&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;methodAnnotation&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
-  &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;boolean&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;checkFeatureState&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;FeatureToggle methodAnnotation&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;methodAnnotation &lt;span style=&#34;color:#555&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;null&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-      &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;true&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;featureRepository&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;isOn&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;methodAnnotation&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;feature&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;())&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;null&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-      &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;true&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;methodAnnotation&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;expectedToBeOn&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;==&lt;/span&gt; featureRepository&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;isOn&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;methodAnnotation&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;feature&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()))&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-      &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;true&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-    &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;false&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;;&lt;/span&gt;
-  &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-  &lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;
-  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;postHandle&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;HttpServletRequest httpServletRequest&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; HttpServletResponse httpServletResponse&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; Object o&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; ModelAndView modelAndView&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;throws&lt;/span&gt; Exception &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-
-  &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-
-  &lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;
-  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;afterCompletion&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;HttpServletRequest httpServletRequest&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; HttpServletResponse httpServletResponse&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; Object o&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; Exception e&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;throws&lt;/span&gt; Exception &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-
-  &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;This will correctly intercept requests routed to handler methods even if the annotation is at the controller level instead of the method level.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;color:#99f&#34;&gt;@RestController&lt;/span&gt;
-&lt;span style=&#34;color:#99f&#34;&gt;@RequestMapping&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/foo&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
-&lt;span style=&#34;color:#99f&#34;&gt;@FeatureToggle&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;feature &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;feature.foo&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
-&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;FooController&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-  &lt;span style=&#34;color:#99f&#34;&gt;@RequestMapping&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
-  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt; Map &lt;span style=&#34;color:#c0f&#34;&gt;hello&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; Collections&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#309&#34;&gt;singletonMap&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;message&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;hello foo!&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;);&lt;/span&gt;
-  &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;Now that we have a feature toggling mechanism in place that no longer depends on application restarts, in the next part, we will look at providing this information to the application from a source that does not require restarts.&lt;/p&gt;</description>
     </item>
     
   </channel>
