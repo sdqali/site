@@ -13,7 +13,7 @@ These are some of the side projects I work on.
 Share With Title is an Android application that makes it easy to share URLs with their titles to any application seamlessly. You can find it on the [Google Play Store](https://play.google.com/store/apps/details?id=in.sdqali.share.withtitle).
 
 ## Gist Blog
-[Gist Blog](http://gb.sdqali.in) lets users share GitHub gists as reader friendly blog posts. This is a pure client side implementation.
+[Gist Blog](http://gb.sadique.io) lets users share GitHub gists as reader friendly blog posts. This is a pure client side implementation.
 
 ## Status Cake Alarm
 [State Cake Alarm](https://github.com/sdqali/status_cake_alarm) sounds an alarm when your website goes down. It uses the [Status Cake](https://www.statuscake.com/) API to check for availability of the site.

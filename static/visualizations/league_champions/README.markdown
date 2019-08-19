@@ -2,7 +2,7 @@ An experiment to visualize how football clubs in Europe have dominated
 their respective national leagues.
 
 To read more about the motivation and to see the visualization in
-action, read this [blog post](http://blog.sdqali.in/blog/2012/07/21/visualization-how-european-clubs-dominate-their-leagues/)
+action, read this [blog post](http://sadique.io/blog/2012/07/21/visualization-how-european-clubs-dominate-their-leagues/)
 
 Data pulled from Wikipedia.
 
