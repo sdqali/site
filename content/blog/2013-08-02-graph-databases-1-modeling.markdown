@@ -151,5 +151,5 @@ I am still making my way through the book. So far it has looked promising and I 
 [^1]: [Graph Databases by Ian Robinson, Jim Webber, and Emil Eifrem (O’Reilly). Copyright 2013 Neo Technology, Inc., 978-1-449-35626-2.](http://graphdatabases.com/)
 [^2]: [Neo Technology](http://www.neotechnology.com/)
 [^3]: [Neo4j](http://www.neo4j.org/)
-[^4]: [The Spiral of Learning](http://blog.sdqali.in/blog/2012/05/30/the-spiral-of-learning/)
+[^4]: [The Spiral of Learning](/blog/2012/05/30/the-spiral-of-learning/)
 [^5]: [What is Cypher?](http://docs.neo4j.org/chunked/stable/cypher-introduction.html)
