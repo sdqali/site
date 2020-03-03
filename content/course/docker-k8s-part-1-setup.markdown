@@ -1,7 +1,6 @@
 ---
 title: "Docker + K8s Workshop - Setup for Part 1"
 date: 2020-03-02T19:53:43-08:00
-draft: true
 ---
 ## 1. Install Docker
 
