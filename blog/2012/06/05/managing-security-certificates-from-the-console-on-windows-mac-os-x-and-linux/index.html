@@ -114,71 +114,51 @@
            itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div>
           <p>For me the last two weeks or so have involved a lot of wrestling with SSL certificates. One of the things that took some time to figure out was how to piggy-back on the tools provided by different Operating Systems to manage certificates. We did not want to rewrite <a href="https://www.mozilla.org/projects/security/pki/nss/" title="NSS">NSS</a>. Luckily for us, all the major OSes provide tools to manage certificates from the command line.</p>
-
 <h2 id="windows">Windows</h2>
-
-<hr />
-
+<hr>
 <p>Windows provides two ways to deal with certificates from the command line - <a href="http://technet.microsoft.com/en-us/library/cc732443%28WS.10%29.aspx" title="Certutil">Certutil</a> and <a href="http://msdn.microsoft.com/en-us/library/e78byta0.aspx" title="certmgr.exe">certmgr.exe</a>. We decided to go with Certutil because it is present out of the box on Windows 7 and Windows Server 2008, while certmgr.exe is part of the .Net runtime. This blog post will deal with Certutil.</p>
-
 <h3 id="adding-a-certificate">Adding a certificate</h3>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">certutil.exe -addstore -user root foo.crt</code></pre></div>
-<p>This will install the <code>foo.crt</code> certificate to the Trusted Root Certification Authorities store for the current user.</p>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">certutil.exe -addstore -user root foo.crt
+</code></pre></div><p>This will install the <code>foo.crt</code> certificate to the Trusted Root Certification Authorities store for the current user.</p>
 <h3 id="view-certificates-in-a-store">View certificates in a store</h3>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">certutil.exe -viewstore -user root</code></pre></div>
-<p>This will list all the certificates in the Trusted Root Certification Authorities store for the current user. One drawback is that it throws up a Window to list as opposed to using STDOUT for output.</p>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">certutil.exe -viewstore -user root
+</code></pre></div><p>This will list all the certificates in the Trusted Root Certification Authorities store for the current user. One drawback is that it throws up a Window to list as opposed to using STDOUT for output.</p>
 <h3 id="list-certificates-in-a-store">List certificates in a store</h3>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">certutil.exe -user -store root</code></pre></div>
-<p>This will list all the certificates in the Trusted Root Certification Authorities store for the current user to STDOUT.</p>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">certutil.exe -user -store root
+</code></pre></div><p>This will list all the certificates in the Trusted Root Certification Authorities store for the current user to STDOUT.</p>
 <p>There are more detailed explanations <a href="http://technet.microsoft.com/en-us/library/cc772898(WS.10).aspx">here</a>.</p>
-
 <h2 id="mac-os-x">Mac OS X</h2>
-
-<hr />
-
+<hr>
 <p>Mac OS X ships the <a href="https://developer.apple.com/library/mac/#documentation/Darwin/Reference/Manpages/man1/security.1.html">security</a> tool to let the user manage certificates and keychains.</p>
-
 <h3 id="adding-a-certificate-1">Adding a certificate</h3>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">security add-certificate foo.crt
-security add-trusted-cert foo.crt</code></pre></div>
-<p>The first line will add <code>foo.crt</code> to the current user&rsquo;s keychain, while the second line ensures that the newly added certificate is trusted. This would mean that the certificate will be trusted for SSL, EAP and Code Signing. To get more fine grained control over what to trust the certificate for, the <code>-p (policy)</code> flag can be used.</p>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">security add-trusted-cert -p ssl foo.crt</code></pre></div>
-<p>This will trust the certificate only for SSL interactions.</p>
-
+security add-trusted-cert foo.crt
+</code></pre></div><p>The first line will add <code>foo.crt</code> to the current user&rsquo;s keychain, while the second line ensures that the newly added certificate is trusted. This would mean that the certificate will be trusted for SSL, EAP and Code Signing. To get more fine grained control over what to trust the certificate for, the <code>-p (policy)</code> flag can be used.</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">security add-trusted-cert -p ssl foo.crt
+</code></pre></div><p>This will trust the certificate only for SSL interactions.</p>
 <h3 id="listing-certificates">Listing certificates</h3>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">security find-certificates -a -e foo@bar.com</code></pre></div>
-<p>This would list all the certificates where e-mail address of the issuer <code>foo@bar.com</code>. Other fields that can be used for matching include <code>-c (name)</code>.</p>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">security find-certificates -a -e foo@bar.com
+</code></pre></div><p>This would list all the certificates where e-mail address of the issuer <code>foo@bar.com</code>. Other fields that can be used for matching include <code>-c (name)</code>.</p>
 <h2 id="linux">Linux</h2>
-
-<hr />
-
-<p>On Linux, the best we could find was <a href="http://www.mozilla.org/projects/security/pki/nss/tools/certutil.html certutil">certutil</a> which is part of Mozilla&rsquo;s NSS project.</p>
-
+<hr>
+<p>On Linux, the best we could find was [certutil](<a href="http://www.mozilla.org/projects/security/pki/nss/tools/certutil.html">http://www.mozilla.org/projects/security/pki/nss/tools/certutil.html</a> certutil) which is part of Mozilla&rsquo;s NSS project.</p>
 <h3 id="adding-a-certificate-2">Adding a certificate</h3>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">certutil -A -d sql:~/.pki/nssdb -t C -n <span style="color:#c30">&#34;Certificate Common Name&#34;</span> -i foo.crt</code></pre></div>
-<p>This will add <code>foo.crt</code> to the certificate database <code>~/.pki/nssdb</code>. This is where applications like Chromium look for certificates.</p>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">certutil -A -d sql:~/.pki/nssdb -t C -n <span style="color:#c30">&#34;Certificate Common Name&#34;</span> -i foo.crt
+</code></pre></div><p>This will add <code>foo.crt</code> to the certificate database <code>~/.pki/nssdb</code>. This is where applications like Chromium look for certificates.</p>
 <h3 id="listing-certificates-1">Listing certificates</h3>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">certutil -L -d sql:~/.pki/nssdb -n <span style="color:#c30">&#34;Certificate Common Name&#34;</span></code></pre></div>
-<p>This will list the certificates in the <code>~/.pki/nssdb</code> with the common name &ldquo;Certificate Common Name&rdquo;.</p>
-
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">certutil -L -d sql:~/.pki/nssdb -n <span style="color:#c30">&#34;Certificate Common Name&#34;</span>
+</code></pre></div><p>This will list the certificates in the <code>~/.pki/nssdb</code> with the common name &ldquo;Certificate Common Name&rdquo;.</p>
 <h2 id="firefox">Firefox</h2>
-
-<hr />
-
-<p>While the above steps work fine for pretty much all applications on the three OSes, Firefox does things in it&rsquo;s own way. Firefox implements <a href="https://www.mozilla.org/projects/security/pki/nss/ NSS">NSS</a> and hence does not look at the certificates the OS knows about. One solution to manage certificates from the command line will be to install certutil and point it at the <code>cert.db</code> certificate database in your Firefox profile directory. Alternatively, one could do the following</p>
-
+<hr>
+<p>While the above steps work fine for pretty much all applications on the three OSes, Firefox does things in it&rsquo;s own way. Firefox implements [NSS](<a href="https://www.mozilla.org/projects/security/pki/nss/">https://www.mozilla.org/projects/security/pki/nss/</a> NSS) and hence does not look at the certificates the OS knows about. One solution to manage certificates from the command line will be to install certutil and point it at the <code>cert.db</code> certificate database in your Firefox profile directory. Alternatively, one could do the following</p>
 <ol>
 <li>Launch Firefox with a blank profile</li>
+</ol>
+<ul>
 <li>Accept the certificates we are interested in.</li>
 <li>Save a copy of the <code>cert8.db</code> file.</li>
 <li>Import this database to the profiles we wish to run Firefox on.</li>
-</ol>
-
+</ul>
 <p>While copying the database is not as clean a solution as using certutil, we decided to go with the second option because there is no guarantee that certutil will be present on the user&rsquo;s box, especially if they are running Windows or Mac OS X. And we had a fairly high control over the Firefox profiles.</p>
         </div>
         <aside id="gh-comments-list">
@@ -309,6 +289,54 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2019/03/23/understanding-trailing-processing-in-sas-input/?utm_source=site&amp;utm_medium=related">Understanding trailing @ processing in SAS input</a></li>
             
             
@@ -357,7 +385,107 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2016/11/30/implementing-feature-toggles-for-a-spring-boot-application-part-4/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 4</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -381,6 +509,34 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2016/11/11/setting-up-a-secure-etcd-cluster-behind-a-proxy/?utm_source=site&amp;utm_medium=related">Setting up a secure etcd cluster behind a proxy</a></li>
             
             
@@ -391,7 +547,27 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2016/11/02/handling-deserialization-errors-in-spring-redis-sessions/?utm_source=site&amp;utm_medium=related">Handling Deserialization errors in Spring Redis Sessions</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -409,7 +585,27 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2016/07/14/jwt-authentication-with-spring-web-part-5/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 5</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -433,6 +629,10 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2016/07/03/jwt-authentication-with-spring-web-part-1/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 1</a></li>
             
             
@@ -445,6 +645,10 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2016/06/29/injecting-dependencies-into-a-spring-configuration/?utm_source=site&amp;utm_medium=related">Injecting dependencies into a Spring @Configuration</a></li>
             
             
@@ -452,6 +656,38 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2016/06/08/filtering-responses-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Filtering responses in Spring MVC</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -491,6 +727,22 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2015/12/15/thoughts-on-open-graph-tags/?utm_source=site&amp;utm_medium=related">Thoughts on Open Graph tags</a></li>
             
             
@@ -521,7 +773,23 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2015/12/05/validating-requestparams-and-pathvariables-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Validating RequestParams and PathVariables in Spring MVC</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -539,7 +807,35 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2015/05/22/making-sense-of-cloud-foundry-security-group-declarations/?utm_source=site&amp;utm_medium=related">Making sense of Cloud Foundry security group declarations</a></li>
+            
+            
+            
+            
             
             
             
@@ -559,7 +855,87 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2014/08/02/importing-the-yelp-dataset-into-mongodb/?utm_source=site&amp;utm_medium=related">Importing the Yelp dataset into MongoDB</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -593,7 +969,95 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/10/13/implementing-rate-limiting-in-rails-part-2/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 2</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -605,7 +1069,19 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/10/07/python-hack-dynamically-override-an-objects-attribute/?utm_source=site&amp;utm_medium=related">Python Hack - Dynamically override an object&#39;s attribute</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -623,7 +1099,39 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/10/01/reading-user-input-in-gradle-scripts/?utm_source=site&amp;utm_medium=related">Reading user input in Gradle scripts</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -651,7 +1159,47 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/09/15/shared-history-in-bash/?utm_source=site&amp;utm_medium=related">Shared history in Bash</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -663,13 +1211,61 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/09/08/looking-up-compiler-params-used-to-compile-a-ruby-version/?utm_source=site&amp;utm_medium=related">Looking up Compiler params used to compile a Ruby version</a></li>
             
             
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/08/22/navigating-stacktraces-in-emacs/?utm_source=site&amp;utm_medium=related">Navigating Stacktraces in Emacs</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -709,7 +1305,91 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/08/02/graph-databases-1-modeling/?utm_source=site&amp;utm_medium=related">Graph databases 1 - Modeling</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -733,7 +1413,23 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/04/29/emacs-hack-viewing-git-logs-while-composing-commit-messages/?utm_source=site&amp;utm_medium=related">Emacs hack: Viewing Git logs while composing commit messages</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -745,7 +1441,31 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/04/11/my-experience-working-remotely/?utm_source=site&amp;utm_medium=related">My experience working remotely</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -757,7 +1477,31 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/04/05/javascript-clipboard-access-and-hidden-flash-widgets/?utm_source=site&amp;utm_medium=related">JavaScript, clipboard access and hidden flash widgets</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -777,7 +1521,31 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/11/29/my-first-firefox-plugin-getcache-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">My first Firefox plugin: GetCache - View cached version of the current page</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -789,7 +1557,39 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/11/27/on-rest-content-type-google-chrome-and-caching/?utm_source=site&amp;utm_medium=related">On REST, Content-Type, Google Chrome and Caching</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -817,7 +1617,47 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/08/01/d3.js-workshop/?utm_source=site&amp;utm_medium=related">D3.js Workshop</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -837,7 +1677,31 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/07/09/understanding-pythons-with-statement/?utm_source=site&amp;utm_medium=related">Understanding Python&#39;s &#34;with&#34; statement</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -850,6 +1714,38 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2012/06/25/micro-journal-simple-git-backed-journal-in-python/?utm_source=site&amp;utm_medium=related">Micro Journal - simple Git-backed journal in Python</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -879,7 +1775,87 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/05/11/indian-and-pakistani-cricketers-who-make-better-debuts/?utm_source=site&amp;utm_medium=related">Indian and Pakistani cricketers - who make better debuts?</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -891,7 +1867,39 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/04/29/finding-un-merged-commits-with-git-cherry/?utm_source=site&amp;utm_medium=related">Finding un-merged commits with git cherry</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -903,7 +1911,47 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/01/17/why-your-project-should-have-a-getting-started-guide./?utm_source=site&amp;utm_medium=related">Why your project should have a Getting Started guide.</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -919,7 +1967,31 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2011/05/17/wikipedia-page-hopping/?utm_source=site&amp;utm_medium=related">Wikipedia Page Hopping</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -963,1123 +2035,31 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2010/01/09/autorun.py-execute-stuff-on-file-change/?utm_source=site&amp;utm_medium=related">Autorun.py - Execute stuff on file change</a></li>
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
             
             
             

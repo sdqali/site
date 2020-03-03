@@ -105,45 +105,37 @@ Initial investigation suggested that this could happen if we are making HTTP/1.1
            itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div>
           <p>Recently I spent some time debugging an issue our team was facing around some C# code making a request on one of our servers. The request was throwing a <code>The server committed a protocol violation. Section=ResponseStatusLine</code> error.</p>
-
 <p>Initial investigation suggested that this could happen if we are making HTTP/1.1 requests to a server configured for HTTP/1.0. Our Rails application runs on Mongrel fronted with nginx 0.6.5. We modified the C# code to use HTTP/1.0 and the error went away. The following line does the trick.</p>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c#" data-lang="c#">request.ProtocolVersion = HttpVersion.Version10;</code></pre></div>
-<p>But wait! This means that somewhere in the chain, a server is configured to use HTTP/1.0. It looked unlikely and further debugging revealed that it was indeed not the case. Further staring at the Rails logs showed that one of the headers that the app expects was not being set, when the request was done using HTTP/1.1 from the code.</p>
-
-<p>After some time, we figured <a href="http://stackoverflow.com/questions/2482715/the-server-committed-a-protocol-violation-section-responsestatusline-error">out</a> that the .Net library throws the <code>server committed ...</code> error if it is expecting the HTTP 100 (Continue) response in the wrong way. We set the code to not expect the HTTP 100 response from the server using</p>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c#" data-lang="c#">request.ServicePoint.Expect100Continue = <span style="color:#069;font-weight:bold">false</span>;</code></pre></div>
-<p>and voila, it worked. The Rails app received all the headers it expected and things worked fine. The code looked like this:</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c#" data-lang="c#">request.ProtocolVersion = HttpVersion.Version10;
+</code></pre></div><p>But wait! This means that somewhere in the chain, a server is configured to use HTTP/1.0. It looked unlikely and further debugging revealed that it was indeed not the case. Further staring at the Rails logs showed that one of the headers that the app expects was not being set, when the request was done using HTTP/1.1 from the code.</p>
+<p>After some time, we figured <!-- raw HTML omitted -->out<!-- raw HTML omitted --> that the .Net library throws the <code>server committed ...</code> error if it is expecting the HTTP 100 (Continue) response in the wrong way. We set the code to not expect the HTTP 100 response from the server using</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c#" data-lang="c#">request.ServicePoint.Expect100Continue = <span style="color:#069;font-weight:bold">false</span>;
+</code></pre></div><p>and voila, it worked. The Rails app received all the headers it expected and things worked fine. The code looked like this:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c#" data-lang="c#"><span style="color:#078;font-weight:bold">var</span> request = (HttpWebRequest) HttpWebRequest.Create(<span style="color:#c30">&#34;https://example.com/foo&#34;</span>);
 request.ServicePoint.Expect100Continue = <span style="color:#069;font-weight:bold">false</span>;
 request.Credentials = <span style="color:#069;font-weight:bold">new</span> NetworkCredential(<span style="color:#c30">&#34;user&#34;</span>, <span style="color:#c30">&#34;password&#34;</span>);
 request.Method = <span style="color:#c30">&#34;PUT&#34;</span>;
 request.ContentType = <span style="color:#c30">&#34;application/x-www-form-urlencoded&#34;</span>;
-<span style="color:#078;font-weight:bold">byte</span><span style="color:#309">[]</span> objByteArray = Encoding.UTF8.GetBytes(<span style="color:#c30">&#34;foo=bar&#34;</span>);
+<span style="color:#078;font-weight:bold">byte</span>[] objByteArray = Encoding.UTF8.GetBytes(<span style="color:#c30">&#34;foo=bar&#34;</span>);
 request.ContentLength = objByteArray.Length;
 <span style="color:#078;font-weight:bold">var</span> dataStream = request.GetRequestStream();
 dataStream.Write(objByteArray, <span style="color:#f60">0</span>, objByteArray.Length);
 dataStream.Close();
 
-<span style="color:#078;font-weight:bold">var</span> response = request.GetResponse();</code></pre></div>
-<p>So what is happening?</p>
-
-<p>The HTTP 100 status is supposed to work like this. When a client has to send some data, instead of sending it upfront, it can send some headers along with the &ldquo;Expect:100-Continue&rdquo; header. The server responds with a 100 if it is willing to accept the request or send a final status. The spec is <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec8.html#sec8.2.3">here</a>.</p>
-
+<span style="color:#078;font-weight:bold">var</span> response = request.GetResponse();
+</code></pre></div><p>So what is happening?</p>
+<p>The HTTP 100 status is supposed to work like this. When a client has to send some data, instead of sending it upfront, it can send some headers along with the &ldquo;Expect:100-Continue&rdquo; header. The server responds with a 100 if it is willing to accept the request or send a final status. The spec is <!-- raw HTML omitted -->here<!-- raw HTML omitted -->.</p>
 <p>We are using nginx as a proxy. The specification says that the proxy should forward the request if it knows that the next-hop server is HTTP/1.1 compliant. The proxy is supposed to ignore the &ldquo;Expect:100-Continue&rdquo; header, if the request came from a client using HTTP/1.0.</p>
-
 <p>In our case, the default behavior of the .Net HTTP client library is to set &ldquo;Expect:100-Continue&rdquo; header on every request for HTTP/1.1. So the client sends only some headers and waits for the 100 response from nginx. Nginx sees the request, knows that Mongrel supports HTTP/1.1 and just forwards the request. The app sends a 401 because it could not authenticate. The client is expecting a 100 and gets a 401. It thinks the server committed a protocol violation.</p>
-
 <p>When we ask the client to use HTTP/1.0, the .Net library does not use the Expect header, sends all the headers and nginx forwards the request to Mongrel. The authentication goes through.</p>
-
 <p>When we explicitly set the Expect 100 property of the library to false, it sends all the headers at once and the authentication goes through fine.</p>
-
-<p>Looks like there is a way to tell .Net not to expect 100 from the server through configuration, by putting this in <app>.exe.conf</app></p>
+<p>Looks like there is a way to tell .Net not to expect 100 from the server through configuration, by putting this in <!-- raw HTML omitted -->.exe.conf<!-- raw HTML omitted --></p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#309;font-weight:bold">&lt;system.net&gt;</span>
   <span style="color:#309;font-weight:bold">&lt;settings&gt;</span>
     <span style="color:#309;font-weight:bold">&lt;servicePointManager</span> <span style="color:#309">expect100Continue=</span><span style="color:#c30">&#34;false&#34;</span><span style="color:#309;font-weight:bold">/&gt;</span>
   <span style="color:#309;font-weight:bold">&lt;/settings&gt;</span>
-<span style="color:#309;font-weight:bold">&lt;/system.net&gt;</span></code></pre></div>
-<ol>
+<span style="color:#309;font-weight:bold">&lt;/system.net&gt;</span>
+</code></pre></div><ol>
 <li><a href="http://stackoverflow.com/questions/2482715/the-server-committed-a-protocol-violation-section-responsestatusline-error">http://stackoverflow.com/questions/2482715/the-server-committed-a-protocol-violation-section-responsestatusline-error</a></li>
 <li><a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec8.html#sec8.2.3">http://www.w3.org/Protocols/rfc2616/rfc2616-sec8.html#sec8.2.3</a></li>
 </ol>
@@ -277,6 +269,54 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2019/03/23/understanding-trailing-processing-in-sas-input/?utm_source=site&amp;utm_medium=related">Understanding trailing @ processing in SAS input</a></li>
             
             
@@ -325,7 +365,107 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2016/11/30/implementing-feature-toggles-for-a-spring-boot-application-part-4/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 4</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -349,6 +489,34 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2016/11/11/setting-up-a-secure-etcd-cluster-behind-a-proxy/?utm_source=site&amp;utm_medium=related">Setting up a secure etcd cluster behind a proxy</a></li>
             
             
@@ -359,7 +527,27 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2016/11/02/handling-deserialization-errors-in-spring-redis-sessions/?utm_source=site&amp;utm_medium=related">Handling Deserialization errors in Spring Redis Sessions</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -377,7 +565,27 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2016/07/14/jwt-authentication-with-spring-web-part-5/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 5</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -401,6 +609,10 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2016/07/03/jwt-authentication-with-spring-web-part-1/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 1</a></li>
             
             
@@ -413,6 +625,10 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2016/06/29/injecting-dependencies-into-a-spring-configuration/?utm_source=site&amp;utm_medium=related">Injecting dependencies into a Spring @Configuration</a></li>
             
             
@@ -420,6 +636,38 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2016/06/08/filtering-responses-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Filtering responses in Spring MVC</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -459,6 +707,22 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2015/12/15/thoughts-on-open-graph-tags/?utm_source=site&amp;utm_medium=related">Thoughts on Open Graph tags</a></li>
             
             
@@ -489,7 +753,23 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2015/12/05/validating-requestparams-and-pathvariables-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Validating RequestParams and PathVariables in Spring MVC</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -507,7 +787,35 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2015/05/22/making-sense-of-cloud-foundry-security-group-declarations/?utm_source=site&amp;utm_medium=related">Making sense of Cloud Foundry security group declarations</a></li>
+            
+            
+            
+            
             
             
             
@@ -527,7 +835,87 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2014/08/02/importing-the-yelp-dataset-into-mongodb/?utm_source=site&amp;utm_medium=related">Importing the Yelp dataset into MongoDB</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -561,7 +949,95 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/10/13/implementing-rate-limiting-in-rails-part-2/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 2</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -573,7 +1049,19 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/10/07/python-hack-dynamically-override-an-objects-attribute/?utm_source=site&amp;utm_medium=related">Python Hack - Dynamically override an object&#39;s attribute</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -591,7 +1079,39 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/10/01/reading-user-input-in-gradle-scripts/?utm_source=site&amp;utm_medium=related">Reading user input in Gradle scripts</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -619,7 +1139,47 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/09/15/shared-history-in-bash/?utm_source=site&amp;utm_medium=related">Shared history in Bash</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -631,13 +1191,61 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/09/08/looking-up-compiler-params-used-to-compile-a-ruby-version/?utm_source=site&amp;utm_medium=related">Looking up Compiler params used to compile a Ruby version</a></li>
             
             
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/08/22/navigating-stacktraces-in-emacs/?utm_source=site&amp;utm_medium=related">Navigating Stacktraces in Emacs</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -677,7 +1285,91 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/08/02/graph-databases-1-modeling/?utm_source=site&amp;utm_medium=related">Graph databases 1 - Modeling</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -701,7 +1393,23 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/04/29/emacs-hack-viewing-git-logs-while-composing-commit-messages/?utm_source=site&amp;utm_medium=related">Emacs hack: Viewing Git logs while composing commit messages</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -713,7 +1421,31 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/04/11/my-experience-working-remotely/?utm_source=site&amp;utm_medium=related">My experience working remotely</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -725,7 +1457,31 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/04/05/javascript-clipboard-access-and-hidden-flash-widgets/?utm_source=site&amp;utm_medium=related">JavaScript, clipboard access and hidden flash widgets</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -745,7 +1501,31 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/11/29/my-first-firefox-plugin-getcache-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">My first Firefox plugin: GetCache - View cached version of the current page</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -757,7 +1537,39 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/11/27/on-rest-content-type-google-chrome-and-caching/?utm_source=site&amp;utm_medium=related">On REST, Content-Type, Google Chrome and Caching</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -785,7 +1597,47 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/08/01/d3.js-workshop/?utm_source=site&amp;utm_medium=related">D3.js Workshop</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -805,7 +1657,31 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/07/09/understanding-pythons-with-statement/?utm_source=site&amp;utm_medium=related">Understanding Python&#39;s &#34;with&#34; statement</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -823,6 +1699,38 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/06/24/vodqa-ncr-maintaining-large-test-suites/?utm_source=site&amp;utm_medium=related">VodQA NCR: Maintaining Large Test Suites</a></li>
             
             
@@ -830,6 +1738,46 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2012/06/06/know-your-tools-dont-shoot-yourself-in-the-foot/?utm_source=site&amp;utm_medium=related">Know Your Tools - Don&#39;t Shoot Yourself in the Foot</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -849,7 +1797,47 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/05/11/indian-and-pakistani-cricketers-who-make-better-debuts/?utm_source=site&amp;utm_medium=related">Indian and Pakistani cricketers - who make better debuts?</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -861,13 +1849,69 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/04/29/finding-un-merged-commits-with-git-cherry/?utm_source=site&amp;utm_medium=related">Finding un-merged commits with git cherry</a></li>
             
             
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/02/03/bullet-proof-jenkins-setup/?utm_source=site&amp;utm_medium=related">Bullet proof Jenkins setup</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -887,7 +1931,47 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2011/05/17/wikipedia-page-hopping/?utm_source=site&amp;utm_medium=related">Wikipedia Page Hopping</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -931,1123 +2015,31 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2010/01/09/autorun.py-execute-stuff-on-file-change/?utm_source=site&amp;utm_medium=related">Autorun.py - Execute stuff on file change</a></li>
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
             
             
             

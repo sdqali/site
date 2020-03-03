@@ -88,14 +88,14 @@
            itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div>
           <p>In this blog post, we will explore how Postgres stores Enum types and how to query for Enum types and their values. Postgres&rsquo; Enum, like their counterparts in many programming languags are data types that allow only a predefined set of values to be assigned to them. An interesting difference is that compared to programming languages, Postgres does allow blanks within the values of Enums.</p>
-
 <p>Postgres Enums are created using the <code>CREATE TYPE</code> statement. The values are ordered in the order in which they are specified in the <code>CREATE</code> statement.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#555">=&gt;</span> <span style="color:#069;font-weight:bold">CREATE</span> <span style="color:#069;font-weight:bold">TYPE</span> weather <span style="color:#069;font-weight:bold">AS</span> ENUM (
   <span style="color:#c30">&#39;sunny&#39;</span>, <span style="color:#c30">&#39;rainy&#39;</span>, <span style="color:#c30">&#39;cloudy&#39;</span>, <span style="color:#c30">&#39;snow&#39;</span>
   );
 
-<span style="color:#069;font-weight:bold">CREATE</span> <span style="color:#069;font-weight:bold">TYPE</span></code></pre></div>
-<p>Postgres stores Enums in the <code>pg_type</code> catalog. This catalog assigns a <code>typcategory</code> to every type and Enums <a href="https://www.postgresql.org/docs/current/catalog-pg-type.html#CATALOG-TYPCATEGORY-TABLE">have category</a> <code>E</code>.</p>
+<span style="color:#069;font-weight:bold">CREATE</span> <span style="color:#069;font-weight:bold">TYPE</span>
+
+</code></pre></div><p>Postgres stores Enums in the <code>pg_type</code> catalog. This catalog assigns a <code>typcategory</code> to every type and Enums <a href="https://www.postgresql.org/docs/current/catalog-pg-type.html#CATALOG-TYPCATEGORY-TABLE">have category</a> <code>E</code>.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#555">=&gt;</span> <span style="color:#069;font-weight:bold">SELECT</span>
   <span style="color:#555">*</span>
   <span style="color:#069;font-weight:bold">FROM</span> pg_type
@@ -131,8 +131,9 @@ typndims       <span style="color:#555">|</span> <span style="color:#f60">0</spa
 typcollation   <span style="color:#555">|</span> <span style="color:#f60">0</span>
 typdefaultbin  <span style="color:#555">|</span>
 typdefault     <span style="color:#555">|</span>
-typacl         <span style="color:#555">|</span></code></pre></div>
-<p>This shows us that the name of the enum is <code>weather</code>. How do we find the possible values of this Enum? Values are stored in the catalog <code>pg_enum</code>.</p>
+typacl         <span style="color:#555">|</span>
+
+</code></pre></div><p>This shows us that the name of the enum is <code>weather</code>. How do we find the possible values of this Enum? Values are stored in the catalog <code>pg_enum</code>.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#555">=&gt;</span> <span style="color:#069;font-weight:bold">SELECT</span>
   <span style="color:#555">*</span>
   <span style="color:#069;font-weight:bold">FROM</span> pg_enum;
@@ -143,8 +144,8 @@ typacl         <span style="color:#555">|</span></code></pre></div>
      <span style="color:#f60">41020</span> <span style="color:#555">|</span>             <span style="color:#f60">2</span> <span style="color:#555">|</span> rainy
      <span style="color:#f60">41020</span> <span style="color:#555">|</span>             <span style="color:#f60">3</span> <span style="color:#555">|</span> cloudy
      <span style="color:#f60">41020</span> <span style="color:#555">|</span>             <span style="color:#f60">4</span> <span style="color:#555">|</span> snow
-(<span style="color:#f60">4</span> <span style="color:#069;font-weight:bold">rows</span>)</code></pre></div>
-<p>It is worth noting that each of the enum values are in separate rows of the catalog, with each row using the same <code>enumtypid</code>. The <code>enumtypid</code> is referring to the <code>oid</code> of the enum entry in <code>pg_type</code> catalog. We can verify that we are indeed looking at the same type. <sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup></p>
+(<span style="color:#f60">4</span> <span style="color:#069;font-weight:bold">rows</span>)
+</code></pre></div><p>It is worth noting that each of the enum values are in separate rows of the catalog, with each row using the same <code>enumtypid</code>. The <code>enumtypid</code> is referring to the <code>oid</code> of the enum entry in <code>pg_type</code> catalog. We can verify that we are indeed looking at the same type. <sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup></p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#555">=&gt;</span> <span style="color:#069;font-weight:bold">SELECT</span>
   <span style="color:#555">*</span>
 <span style="color:#069;font-weight:bold">FROM</span> pg_type
@@ -180,14 +181,14 @@ typndims       <span style="color:#555">|</span> <span style="color:#f60">0</spa
 typcollation   <span style="color:#555">|</span> <span style="color:#f60">0</span>
 typdefaultbin  <span style="color:#555">|</span>
 typdefault     <span style="color:#555">|</span>
-typacl         <span style="color:#555">|</span></code></pre></div>
-<p>We can use the information we have so far to perform a <code>JOIN</code> on these catalogs to get all Enum types. To test that values and types are fetched correctly, lets create another enum.</p>
+typacl         <span style="color:#555">|</span>
+</code></pre></div><p>We can use the information we have so far to perform a <code>JOIN</code> on these catalogs to get all Enum types. To test that values and types are fetched correctly, lets create another enum.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#555">=&gt;</span> <span style="color:#069;font-weight:bold">CREATE</span> <span style="color:#069;font-weight:bold">TYPE</span> transport <span style="color:#069;font-weight:bold">AS</span> ENUM (
   <span style="color:#c30">&#39;bus&#39;</span>, <span style="color:#c30">&#39;tram&#39;</span>, <span style="color:#c30">&#39;rail&#39;</span>, <span style="color:#c30">&#39;ferry&#39;</span>
 );
 
-<span style="color:#069;font-weight:bold">CREATE</span> <span style="color:#069;font-weight:bold">TYPE</span></code></pre></div>
-<p>This enum will create more entries in <code>pg_enum</code>.</p>
+<span style="color:#069;font-weight:bold">CREATE</span> <span style="color:#069;font-weight:bold">TYPE</span>
+</code></pre></div><p>This enum will create more entries in <code>pg_enum</code>.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#555">=&gt;</span> <span style="color:#069;font-weight:bold">SELECT</span>
   <span style="color:#555">*</span>
 <span style="color:#069;font-weight:bold">FROM</span> pg_enum;
@@ -202,8 +203,8 @@ typacl         <span style="color:#555">|</span></code></pre></div>
      <span style="color:#f60">41030</span> <span style="color:#555">|</span>             <span style="color:#f60">2</span> <span style="color:#555">|</span> tram
      <span style="color:#f60">41030</span> <span style="color:#555">|</span>             <span style="color:#f60">3</span> <span style="color:#555">|</span> rail
      <span style="color:#f60">41030</span> <span style="color:#555">|</span>             <span style="color:#f60">4</span> <span style="color:#555">|</span> ferry
-(<span style="color:#f60">8</span> <span style="color:#069;font-weight:bold">rows</span>)</code></pre></div>
-<p>We can now perform the <code>JOIN</code></p>
+(<span style="color:#f60">8</span> <span style="color:#069;font-weight:bold">rows</span>)
+</code></pre></div><p>We can now perform the <code>JOIN</code></p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#555">=&gt;</span> <span style="color:#069;font-weight:bold">SELECT</span>
   <span style="color:#069;font-weight:bold">type</span>.typname,
   enum.enumlabel <span style="color:#069;font-weight:bold">AS</span> value
@@ -223,9 +224,9 @@ typacl         <span style="color:#555">|</span></code></pre></div>
  weather   <span style="color:#555">|</span> rainy
  weather   <span style="color:#555">|</span> sunny
  weather   <span style="color:#555">|</span> snow
-(<span style="color:#f60">8</span> <span style="color:#069;font-weight:bold">rows</span>)</code></pre></div>
-<p>This query needs a <code>GROUP BY</code> due to the fact that there are multiple rows representing a single Enum&rsquo;s values.</p>
+(<span style="color:#f60">8</span> <span style="color:#069;font-weight:bold">rows</span>)
 
+</code></pre></div><p>This query needs a <code>GROUP BY</code> due to the fact that there are multiple rows representing a single Enum&rsquo;s values.</p>
 <p>This result gives us everything we want in most cases. But sometimes we want to get a single row with an Enum and all it&rsquo;s values. This can be accomplished by the use of Postgres&rsquo; <a href="https://www.postgresql.org/docs/9.0/functions-aggregate.html"><code>string_agg</code></a> function.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#555">=&gt;</span> <span style="color:#069;font-weight:bold">SELECT</span>
   <span style="color:#069;font-weight:bold">type</span>.typname <span style="color:#069;font-weight:bold">AS</span> name,
@@ -239,19 +240,19 @@ typacl         <span style="color:#555">|</span></code></pre></div>
 <span style="color:#09f;font-style:italic">-----------+-------------------------
 </span><span style="color:#09f;font-style:italic"></span> transport <span style="color:#555">|</span> bus<span style="color:#555">|</span>tram<span style="color:#555">|</span>rail<span style="color:#555">|</span>ferry
  weather   <span style="color:#555">|</span> sunny<span style="color:#555">|</span>rainy<span style="color:#555">|</span>cloudy<span style="color:#555">|</span>snow
-(<span style="color:#f60">2</span> <span style="color:#069;font-weight:bold">rows</span>)</code></pre></div>
-<p>Our choice of <code>|</code> as the separator is arbitrary, but it is important to remember that Postgres does allow blanks in Enum values and using blank as the separator will lead to unexpected and wrong results. <sup class="footnote-ref" id="fnref:2"><a href="#fn:2">2</a></sup></p>
-<div class="footnotes">
-
-<hr />
-
+(<span style="color:#f60">2</span> <span style="color:#069;font-weight:bold">rows</span>)
+</code></pre></div><p>Our choice of <code>|</code> as the separator is arbitrary, but it is important to remember that Postgres does allow blanks in Enum values and using blank as the separator will lead to unexpected and wrong results. <sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup></p>
+<section class="footnotes" role="doc-endnotes">
+<hr>
 <ol>
-<li id="fn:1">Postgres does not display values of <code>oid</code> columns of catalogs by default. It has to be explicitly queried for.
- <a class="footnote-return" href="#fnref:1"><sup>[return]</sup></a></li>
-<li id="fn:2">Being bit hard by this issue is how I learned about this.
- <a class="footnote-return" href="#fnref:2"><sup>[return]</sup></a></li>
+<li id="fn:1" role="doc-endnote">
+<p>Postgres does not display values of <code>oid</code> columns of catalogs by default. It has to be explicitly queried for. <a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:2" role="doc-endnote">
+<p>Being bit hard by this issue is how I learned about this. <a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
 </ol>
-</div>
+</section>
         </div>
         <aside id="gh-comments-list">
           <script>
@@ -377,47 +378,47 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2019/05/07/viewing-sequence-ownership-information-in-postgres/?utm_source=site&amp;utm_medium=related">Viewing Sequence ownership information in Postgres</a></li>
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
             
             
             

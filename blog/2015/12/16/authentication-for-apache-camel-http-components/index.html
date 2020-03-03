@@ -97,8 +97,7 @@ Apache Camel 1 makes a natural choice as the base for implementing such a data t
            itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div>
           <p>My team at work has been lately working on a data transformer that pushes information from an external system in to platform. For historical reasons the information is passed to us in the form of flat files. We have been working on a data transformer that reads information from the file and posts it into an HTTP end point.
-Apache Camel <sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup> makes a natural choice as the base for implementing such a data transformer. The presence of ready to use components that can read files and post information to HTTP end points and the availability of a nice D.S.L. <sup class="footnote-ref" id="fnref:2"><a href="#fn:2">2</a></sup> makes implementation easy and straightforward. One of the things we had to spend time figuring out was how to ensure that we authenticate correctly against our target HTTP end point. This blog post takes a look at various methods we explored.</p>
-
+Apache Camel <sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> makes a natural choice as the base for implementing such a data transformer. The presence of ready to use components that can read files and post information to HTTP end points and the availability of a nice D.S.L. <sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup> makes implementation easy and straightforward. One of the things we had to spend time figuring out was how to ensure that we authenticate correctly against our target HTTP end point. This blog post takes a look at various methods we explored.</p>
 <p>Camel&rsquo;s HTTP component allows http resources to be added as Camel end points. These end points can be consuming information from routes or producing information which are then passed on to routes. For example, the following route takes information from the <code>direct:start</code> end point, tokenizes it into lines and sends each line into an HTTP url.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">FileToApiRoute</span> <span style="color:#069;font-weight:bold">extends</span> RouteBuilder <span style="color:#555">{</span>
 
@@ -117,8 +116,8 @@ Apache Camel <sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup> 
                 <span style="color:#555">.</span><span style="color:#309">setHeader</span><span style="color:#555">(</span>CONTENT_TYPE<span style="color:#555">,</span> simple<span style="color:#555">(</span>APPLICATION_JSON<span style="color:#555">))</span>
                 <span style="color:#555">.</span><span style="color:#309">to</span><span style="color:#555">(</span>TARGET<span style="color:#555">);</span>
     <span style="color:#555">}</span>
-<span style="color:#555">}</span></code></pre></div>
-<p>Once this route has been registered, it can be used to send data by placing information on the <code>direct:start</code> end point. The following service does it by passing the contents of a file to a <code>ProducerTemplate</code>:</p>
+<span style="color:#555">}</span>
+</code></pre></div><p>Once this route has been registered, it can be used to send data by placing information on the <code>direct:start</code> end point. The following service does it by passing the contents of a file to a <code>ProducerTemplate</code>:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">DataStreamService</span> <span style="color:#555">{</span>
 
     <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">final</span> ProducerTemplate producerTemplate<span style="color:#555">;</span>
@@ -133,11 +132,9 @@ Apache Camel <sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup> 
                 ExchangePattern<span style="color:#555">.</span><span style="color:#309">InOnly</span><span style="color:#555">,</span>
                 <span style="color:#069;font-weight:bold">new</span> File<span style="color:#555">(</span><span style="color:#c30">&#34;src/main/resources/yelp.business.json&#34;</span><span style="color:#555">));</span>
     <span style="color:#555">}</span>
-<span style="color:#555">}</span></code></pre></div>
-<p>Our challenge is to ensure that this continue to work when the HTTP end point in question requires authentication. For the purposes of this blog post, we will be restricting our discussion to Basic Authentication. There are three ways to do this authentication–through Camel authentication query parameters, through the use of the <code>Authorization</code> header and by overriding the <code>HttpConfiguration</code> in the current Camel context.</p>
-
+<span style="color:#555">}</span>
+</code></pre></div><p>Our challenge is to ensure that this continue to work when the HTTP end point in question requires authentication. For the purposes of this blog post, we will be restricting our discussion to Basic Authentication. There are three ways to do this authentication–through Camel authentication query parameters, through the use of the <code>Authorization</code> header and by overriding the <code>HttpConfiguration</code> in the current Camel context.</p>
 <h3 id="camel-authentication-query-parameters">Camel authentication query parameters</h3>
-
 <p>Camel allows consumers to specify authentication parameters in the http end point. For example, three parameters required for Basic Authentication are <code>authMethod</code>, <code>authUsername</code> and <code>authPassword</code>. The route rewritten with these parameters will be as follows:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">static</span> <span style="color:#069;font-weight:bold">final</span> String TARGET_WITH_AUTH <span style="color:#555">=</span> <span style="color:#c30">&#34;http://localhost:8080/ingest&#34;</span> <span style="color:#555">+</span>
             <span style="color:#c30">&#34;?authMethod=Basic&amp;authUsername=test&amp;authPassword=test&#34;</span><span style="color:#555">;</span>
@@ -151,11 +148,9 @@ Apache Camel <sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup> 
                 <span style="color:#555">.</span><span style="color:#309">streaming</span><span style="color:#555">()</span>
                 <span style="color:#555">.</span><span style="color:#309">setHeader</span><span style="color:#555">(</span>CONTENT_TYPE<span style="color:#555">,</span> simple<span style="color:#555">(</span>APPLICATION_JSON<span style="color:#555">))</span>
                 <span style="color:#555">.</span><span style="color:#309">to</span><span style="color:#555">(</span>TARGET_WITH_AUTH<span style="color:#555">);</span>
-    <span style="color:#555">}</span></code></pre></div>
-<p>It is odd to be adding authentication parameters to a URL, but here the URL has multiple purposes–this is a URL to which information is going to be sent to, it also represents a logical end point. These three parameters (and other authentication parameters) get stripped from the HTTP URL before Camel makes the HTTP request. <sup class="footnote-ref" id="fnref:3"><a href="#fn:3">3</a></sup> This still will cause issues in odd cases where the HTTP A.P.I. you are integrating with expects these parameters to be sent.</p>
-
+    <span style="color:#555">}</span>
+</code></pre></div><p>It is odd to be adding authentication parameters to a URL, but here the URL has multiple purposes–this is a URL to which information is going to be sent to, it also represents a logical end point. These three parameters (and other authentication parameters) get stripped from the HTTP URL before Camel makes the HTTP request. <sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup> This still will cause issues in odd cases where the HTTP A.P.I. you are integrating with expects these parameters to be sent.</p>
 <h3 id="setting-authorization-headers">Setting Authorization headers</h3>
-
 <p>Camel allows the addition of headers to messages that it processes and if the message ultimately gets routed to a Camel HTTP end point, these headers get converted to HTTP headers. This allows us to use authentication by setting the <code>Authorization</code> header. This example demonstrates this:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">configure</span><span style="color:#555">()</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
         from<span style="color:#555">(</span><span style="color:#c30">&#34;direct:start&#34;</span><span style="color:#555">)</span>
@@ -166,9 +161,8 @@ Apache Camel <sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup> 
                 <span style="color:#555">.</span><span style="color:#309">setHeader</span><span style="color:#555">(</span>CONTENT_TYPE<span style="color:#555">,</span> simple<span style="color:#555">(</span>APPLICATION_JSON<span style="color:#555">))</span>
                 <span style="color:#555">.</span><span style="color:#309">setHeader</span><span style="color:#555">(</span><span style="color:#c30">&#34;Authorization&#34;</span><span style="color:#555">,</span> simple<span style="color:#555">(</span><span style="color:#c30">&#34;Basic dGVzdDp0ZXN0&#34;</span><span style="color:#555">))</span>
                 <span style="color:#555">.</span><span style="color:#309">to</span><span style="color:#555">(</span>TARGET<span style="color:#555">);</span>
-    <span style="color:#555">}</span></code></pre></div>
-<h3 id="overriding-httpconfiguration">Overriding HttpConfiguration</h3>
-
+    <span style="color:#555">}</span>
+</code></pre></div><h3 id="overriding-httpconfiguration">Overriding HttpConfiguration</h3>
 <p>Camel provides a mechanism to override it‘s Context‘s configuration before the context gets created. In the following example, we get a reference to the <code>HttpComponent</code> and set a new <code>HttpConfiguration</code> with the right authentication. This allows us to separate the authentication configurations from the route definitions. However, if your Camel context is responsible for talking to different HTTP end points with different authentication mechanisms or parameters, this will not solve the issue.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#99f">@Bean</span>
     CamelContextConfiguration <span style="color:#c0f">contextConfiguration</span><span style="color:#555">()</span> <span style="color:#555">{</span>
@@ -184,21 +178,22 @@ Apache Camel <sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup> 
         httpConfiguration<span style="color:#555">.</span><span style="color:#309">setAuthUsername</span><span style="color:#555">(</span>authUsername<span style="color:#555">);</span>
         httpConfiguration<span style="color:#555">.</span><span style="color:#309">setAuthPassword</span><span style="color:#555">(</span>authPassword<span style="color:#555">);</span>
         <span style="color:#069;font-weight:bold">return</span> httpConfiguration<span style="color:#555">;</span>
-    <span style="color:#555">}</span></code></pre></div>
-<p>In the end, the method you choose will depend on the unique constraints of the systems you are integrating with.</p>
-<div class="footnotes">
-
-<hr />
-
+    <span style="color:#555">}</span>
+</code></pre></div><p>In the end, the method you choose will depend on the unique constraints of the systems you are integrating with.</p>
+<section class="footnotes" role="doc-endnotes">
+<hr>
 <ol>
-<li id="fn:1"><a href="https://camel.apache.org/">Apache Camel</a> is a Java integration framework.
- <a class="footnote-return" href="#fnref:1"><sup>[return]</sup></a></li>
-<li id="fn:2">Camel&rsquo;s Domain Specific Language in Java allows integration routes to be defined as fluent specifications.
- <a class="footnote-return" href="#fnref:2"><sup>[return]</sup></a></li>
-<li id="fn:3">Stripping of these parameters is done inside <code>org.apache.camel.component.http.HttpComponent</code>‘s <code>createHttpClientConfigurer</code> <a href="https://github.com/apache/camel/blob/f7f0b18f6924fe0b01f32a25ed1e38e29b1bf8e5/components/camel-http/src/main/java/org/apache/camel/component/http/HttpComponent.java#L66">method</a>.
- <a class="footnote-return" href="#fnref:3"><sup>[return]</sup></a></li>
+<li id="fn:1" role="doc-endnote">
+<p><a href="https://camel.apache.org/">Apache Camel</a> is a Java integration framework. <a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:2" role="doc-endnote">
+<p>Camel&rsquo;s Domain Specific Language in Java allows integration routes to be defined as fluent specifications. <a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:3" role="doc-endnote">
+<p>Stripping of these parameters is done inside <code>org.apache.camel.component.http.HttpComponent</code>‘s <code>createHttpClientConfigurer</code> <a href="https://github.com/apache/camel/blob/f7f0b18f6924fe0b01f32a25ed1e38e29b1bf8e5/components/camel-http/src/main/java/org/apache/camel/component/http/HttpComponent.java#L66">method</a>. <a href="#fnref:3" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
 </ol>
-</div>
+</section>
         </div>
         <aside id="gh-comments-list">
           <script>
@@ -312,13 +307,61 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2019/08/02/flushing-metrics-in-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Flushing Metrics in Dropwizard Commands</a></li>
             
             
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2019/07/28/managing-environment-lifecycles-for-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Managing environment lifecycles for Dropwizard Commands</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -348,13 +391,45 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2018/06/09/formatting-java-instant-for-resolutions/?utm_source=site&amp;utm_medium=related">Formatting Java Instant for resolutions</a></li>
             
             
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2018/05/05/freebuilder-plugin-for-intellij/?utm_source=site&amp;utm_medium=related">FreeBuilder plugin for IntelliJ</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -382,13 +457,81 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2017/08/18/uploading-a-standalone-artifact-to-nexus-3/?utm_source=site&amp;utm_medium=related">Uploading a standalone artifact to Nexus 3</a></li>
             
             
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2016/11/30/implementing-feature-toggles-for-a-spring-boot-application-part-4/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 4</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -412,6 +555,34 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2016/11/11/setting-up-a-secure-etcd-cluster-behind-a-proxy/?utm_source=site&amp;utm_medium=related">Setting up a secure etcd cluster behind a proxy</a></li>
             
             
@@ -424,7 +595,27 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2016/11/02/handling-deserialization-errors-in-spring-redis-sessions/?utm_source=site&amp;utm_medium=related">Handling Deserialization errors in Spring Redis Sessions</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -442,7 +633,27 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2016/07/14/jwt-authentication-with-spring-web-part-5/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 5</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -466,6 +677,10 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2016/07/03/jwt-authentication-with-spring-web-part-1/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 1</a></li>
             
             
@@ -478,6 +693,10 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2016/06/29/injecting-dependencies-into-a-spring-configuration/?utm_source=site&amp;utm_medium=related">Injecting dependencies into a Spring @Configuration</a></li>
             
             
@@ -485,6 +704,38 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2016/06/08/filtering-responses-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Filtering responses in Spring MVC</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -513,6 +764,22 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2016/01/30/using-custom-arguments-in-spring-mvc-controllers/?utm_source=site&amp;utm_medium=related">Using custom arguments in Spring MVC controllers</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -552,7 +819,23 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2015/12/05/validating-requestparams-and-pathvariables-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Validating RequestParams and PathVariables in Spring MVC</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -570,13 +853,121 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2015/05/22/making-sense-of-cloud-foundry-security-group-declarations/?utm_source=site&amp;utm_medium=related">Making sense of Cloud Foundry security group declarations</a></li>
             
             
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2015/05/21/configuring-cloud-foundry-java-memory-parameters/?utm_source=site&amp;utm_medium=related">Configuring Cloud Foundry Java Memory Parameters</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -622,13 +1013,105 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/10/13/implementing-rate-limiting-in-rails-part-2/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 2</a></li>
             
             
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/10/12/implementing-rate-limiting-in-rails-part-1/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 1</a></li>
+            
+            
+            
+            
             
             
             
@@ -672,13 +1155,141 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/09/12/managing-gemsets-in-rbenv/?utm_source=site&amp;utm_medium=related">Managing Gemsets in Rbenv</a></li>
             
             
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/09/08/looking-up-compiler-params-used-to-compile-a-ruby-version/?utm_source=site&amp;utm_medium=related">Looking up Compiler params used to compile a Ruby version</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -726,7 +1337,99 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/07/31/validating-json-in-emacs/?utm_source=site&amp;utm_medium=related">Validating JSON in Emacs</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -750,7 +1453,23 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/04/14/configure-gits-comment-character/?utm_source=site&amp;utm_medium=related">Configure Git&#39;s comment character</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -762,13 +1481,53 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
             
             
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/04/05/javascript-clipboard-access-and-hidden-flash-widgets/?utm_source=site&amp;utm_medium=related">JavaScript, clipboard access and hidden flash widgets</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -788,13 +1547,61 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/11/29/my-first-firefox-plugin-getcache-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">My first Firefox plugin: GetCache - View cached version of the current page</a></li>
             
             
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/11/28/getcache-a-chrome-plugin-to-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">GetCache - A Chrome plugin to view cached version of the current page</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -842,7 +1649,79 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/07/09/understanding-pythons-with-statement/?utm_source=site&amp;utm_medium=related">Understanding Python&#39;s &#34;with&#34; statement</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -860,6 +1739,38 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/06/24/vodqa-ncr-maintaining-large-test-suites/?utm_source=site&amp;utm_medium=related">VodQA NCR: Maintaining Large Test Suites</a></li>
             
             
@@ -867,6 +1778,46 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2012/06/06/know-your-tools-dont-shoot-yourself-in-the-foot/?utm_source=site&amp;utm_medium=related">Know Your Tools - Don&#39;t Shoot Yourself in the Foot</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -886,7 +1837,47 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/05/11/indian-and-pakistani-cricketers-who-make-better-debuts/?utm_source=site&amp;utm_medium=related">Indian and Pakistani cricketers - who make better debuts?</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -898,7 +1889,39 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/04/29/finding-un-merged-commits-with-git-cherry/?utm_source=site&amp;utm_medium=related">Finding un-merged commits with git cherry</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -910,7 +1933,47 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/01/17/why-your-project-should-have-a-getting-started-guide./?utm_source=site&amp;utm_medium=related">Why your project should have a Getting Started guide.</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -926,7 +1989,31 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2011/05/17/wikipedia-page-hopping/?utm_source=site&amp;utm_medium=related">Wikipedia Page Hopping</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -970,1123 +2057,31 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2010/01/09/autorun.py-execute-stuff-on-file-change/?utm_source=site&amp;utm_medium=related">Autorun.py - Execute stuff on file change</a></li>
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
             
             
             

@@ -94,9 +94,7 @@
            itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div>
           <p>If you have been using Spring Boot, chances are that you are using the Spring Session library to handle sessions. Spring Session has the ability to persist the sessions to various data stores, including Redis. The default behaviors of Spring Boot when combined with Spring Session is to start using Redis as the session store the moment <code>spring-session-data-redis</code> is detected in the class path, thereby making it hard to conditionally turn Redis support ON and OFF. This blog post explores why this is the default behavior and presents a solution to control this behavior.</p>
-
 <h3 id="the-application">The application</h3>
-
 <p>The application we will be using to demonstrate this behavior is a Spring Boot 1.3.6 application with a single controller.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@RestController</span>
 <span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span><span style="color:#c30">&#34;/hello&#34;</span><span style="color:#555">)</span>
@@ -107,8 +105,8 @@
   <span style="color:#069;font-weight:bold">public</span> Map<span style="color:#555">&lt;</span>String<span style="color:#555">,</span> String<span style="color:#555">&gt;</span> <span style="color:#c0f">hello</span><span style="color:#555">()</span> <span style="color:#555">{</span>
     <span style="color:#069;font-weight:bold">return</span> Collections<span style="color:#555">.</span><span style="color:#309">singletonMap</span><span style="color:#555">(</span><span style="color:#c30">&#34;message&#34;</span><span style="color:#555">,</span> <span style="color:#c30">&#34;hello&#34;</span><span style="color:#555">);</span>
   <span style="color:#555">}</span>
-<span style="color:#555">}</span></code></pre></div>
-<p>The application also has Spring Security configured to allow authentication for a single user named <code>user</code>.</p>
+<span style="color:#555">}</span>
+</code></pre></div><p>The application also has Spring Security configured to allow authentication for a single user named <code>user</code>.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@EnableWebSecurity</span>
 <span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">SecurityConfig</span> <span style="color:#069;font-weight:bold">extends</span> WebSecurityConfigurerAdapter <span style="color:#555">{</span>
   <span style="color:#99f">@Override</span>
@@ -131,30 +129,28 @@
   <span style="color:#069;font-weight:bold">public</span> HeaderHttpSessionStrategy <span style="color:#c0f">sessionStrategy</span><span style="color:#555">()</span> <span style="color:#555">{</span>
     <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">new</span> HeaderHttpSessionStrategy<span style="color:#555">();</span>
   <span style="color:#555">}</span>
-<span style="color:#555">}</span></code></pre></div>
-<p>This forces clients to authenticate for access to resources under <code>/hello</code> and configures an in memory user <code>user</code> with password <code>password</code>. In this example, we will also be using <code>HeaderHttpSessionStrategy</code> <sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup> to pass the session value between client and server using the <code>x-auth-token</code> header instead of a Cookie.</p>
-
+<span style="color:#555">}</span>
+</code></pre></div><p>This forces clients to authenticate for access to resources under <code>/hello</code> and configures an in memory user <code>user</code> with password <code>password</code>. In this example, we will also be using <code>HeaderHttpSessionStrategy</code> <sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> to pass the session value between client and server using the <code>x-auth-token</code> header instead of a Cookie.</p>
 <h3 id="the-issue">The issue</h3>
-
-<p>This is an issue only when using Spring Boot 1.3 or greater. If we are to follow the instructions provided at the <a href="http://docs.spring.io/spring-session/docs/1.2.1.RELEASE/reference/html5/guides/boot.html">official documentation</a> from Spring Session <sup class="footnote-ref" id="fnref:2"><a href="#fn:2">2</a></sup>, we end up with the following configuration.</p>
+<p>This is an issue only when using Spring Boot 1.3 or greater. If we are to follow the instructions provided at the <a href="http://docs.spring.io/spring-session/docs/1.2.1.RELEASE/reference/html5/guides/boot.html">official documentation</a> from Spring Session <sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup>, we end up with the following configuration.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@EnableRedisHttpSession</span>
 <span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">RedisSessionConfig</span> <span style="color:#555">{</span>
-<span style="color:#555">}</span></code></pre></div>
-<p>With this in place, authentication works as we expect. The application allows the user to obtain a session and authenticates correctly when presented with the session token.</p>
+<span style="color:#555">}</span>
+</code></pre></div><p>With this in place, authentication works as we expect. The application allows the user to obtain a session and authenticates correctly when presented with the session token.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ curl -i -s -X GET <span style="color:#c30">&#34;http://localhost:8080/hello&#34;</span> -uuser:password  | grep <span style="color:#c30">&#34;x-auth-token&#34;</span>
 x-auth-token: c0fbb47d-d19f-44b1-a8d7-44e4837f403d
 $ curl -s -X GET <span style="color:#c30">&#34;http://localhost:8080/hello&#34;</span> --header <span style="color:#c30">&#34;x-auth-token: c0fbb47d-d19f-44b1-a8d7-44e4837f403d&#34;</span> | jq .
 <span style="color:#555">{</span>
   <span style="color:#c30">&#34;message&#34;</span>: <span style="color:#c30">&#34;hello&#34;</span>
-<span style="color:#555">}</span></code></pre></div>
-<p>We can monitor the interactions the application performs with Redis by running Redis monitor:</p>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ redis-cli monitor</code></pre></div>
-<p>This is great. Now, let&rsquo;s attempt to modify our configuration to use Redis only in some environments and use the in-memory session store in others. We start by making <code>RedisSessionConfig</code> conditional on the value of the property <code>use.redis.session.store</code> being <code>true</code>:</p>
+<span style="color:#555">}</span>
+</code></pre></div><p>We can monitor the interactions the application performs with Redis by running Redis monitor:</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ redis-cli monitor
+</code></pre></div><p>This is great. Now, let&rsquo;s attempt to modify our configuration to use Redis only in some environments and use the in-memory session store in others. We start by making <code>RedisSessionConfig</code> conditional on the value of the property <code>use.redis.session.store</code> being <code>true</code>:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@ConditionalOnProperty</span><span style="color:#555">(</span>name <span style="color:#555">=</span> <span style="color:#c30">&#34;use.redis.session.store&#34;</span><span style="color:#555">,</span> havingValue <span style="color:#555">=</span> <span style="color:#c30">&#34;true&#34;</span><span style="color:#555">)</span>
 <span style="color:#99f">@EnableRedisHttpSession</span>
 <span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">RedisSessionConfig</span> <span style="color:#555">{</span>
-<span style="color:#555">}</span></code></pre></div>
-<p>We will create a new configuration that sets up the in-memory session store if <code>use.redis.session.store</code> is false or missing.</p>
+<span style="color:#555">}</span>
+</code></pre></div><p>We will create a new configuration that sets up the in-memory session store if <code>use.redis.session.store</code> is false or missing.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Configuration</span>
 <span style="color:#99f">@EnableSpringHttpSession</span>
 <span style="color:#99f">@ConditionalOnProperty</span><span style="color:#555">(</span>name <span style="color:#555">=</span> <span style="color:#c30">&#34;use.redis.session.store&#34;</span><span style="color:#555">,</span> havingValue <span style="color:#555">=</span> <span style="color:#c30">&#34;false&#34;</span><span style="color:#555">,</span> matchIfMissing <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">true</span><span style="color:#555">)</span>
@@ -163,14 +159,10 @@ $ curl -s -X GET <span style="color:#c30">&#34;http://localhost:8080/hello&#34;<
   <span style="color:#069;font-weight:bold">public</span> SessionRepository <span style="color:#c0f">sessionRepository</span><span style="color:#555">()</span> <span style="color:#555">{</span>
     <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">new</span> MapSessionRepository<span style="color:#555">();</span>
   <span style="color:#555">}</span>
-<span style="color:#555">}</span></code></pre></div>
-<p>Let&rsquo;s set the property to <code>false</code> so that we do not have to depend on Redis in the local environment.</p>
-
+<span style="color:#555">}</span>
+</code></pre></div><p>Let&rsquo;s set the property to <code>false</code> so that we do not have to depend on Redis in the local environment.</p>
 <pre><code>use.redis.session.store=false
-</code></pre>
-
-<p>With this in place, we expect that there are no interactions with Redis server. If we were to start the server, we will get the following error:</p>
-
+</code></pre><p>With this in place, we expect that there are no interactions with Redis server. If we were to start the server, we will get the following error:</p>
 <pre><code>...
 Caused by: java.net.ConnectException: Connection refused
     at java.net.PlainSocketImpl.socketConnect(Native Method) ~[na:1.8.0_45]
@@ -181,21 +173,17 @@ Caused by: java.net.ConnectException: Connection refused
     at java.net.Socket.connect(Socket.java:589) ~[na:1.8.0_45]
     at redis.clients.jedis.Connection.connect(Connection.java:158) ~[jedis-2.7.3.jar:na]
 ...
-</code></pre>
-
-<p>It appears that the application is trying to make connections to Redis, even though we configured it not to. What is going on? It looks like some where along the chain, some configuration with the annotation <code>@EnableSpringHttpSession</code> is being loaded. Why could that happen?</p>
-
+</code></pre><p>It appears that the application is trying to make connections to Redis, even though we configured it not to. What is going on? It looks like some where along the chain, some configuration with the annotation <code>@EnableSpringHttpSession</code> is being loaded. Why could that happen?</p>
 <h3 id="spring-boot-autoconfig">Spring Boot Autoconfig</h3>
-
-<p>Like a lot of Spring Boot applications, we are using the <code>@SpringBootApplication</code> annotation in our application. This is a meta-annotation <sup class="footnote-ref" id="fnref:3"><a href="#fn:3">3</a></sup> that takes the following form:</p>
+<p>Like a lot of Spring Boot applications, we are using the <code>@SpringBootApplication</code> annotation in our application. This is a meta-annotation <sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup> that takes the following form:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Target</span><span style="color:#555">(</span>ElementType<span style="color:#555">.</span><span style="color:#309">TYPE</span><span style="color:#555">)</span>
 <span style="color:#99f">@Retention</span><span style="color:#555">(</span>RetentionPolicy<span style="color:#555">.</span><span style="color:#309">RUNTIME</span><span style="color:#555">)</span>
 <span style="color:#99f">@Documented</span>
 <span style="color:#99f">@Inherited</span>
 <span style="color:#99f">@Configuration</span>
 <span style="color:#99f">@EnableAutoConfiguration</span>
-<span style="color:#99f">@ComponentScan</span></code></pre></div>
-<p>The <code>@EnableAutoConfiguration</code> annotation is interesting because it wires up most of the default configuration that makes Spring Boot great for development. The annotation itself and the supporting mechanism that automatically loads configurations are present in the <code>org.springframework.boot:spring-boot-autoconfigure</code> library. One of these configurations is <code>SessionAutoConfiguration</code> which was introduced in Spring Boot <code>1.3.0</code>. It has the following code in version <code>1.3.6</code>:</p>
+<span style="color:#99f">@ComponentScan</span>
+</code></pre></div><p>The <code>@EnableAutoConfiguration</code> annotation is interesting because it wires up most of the default configuration that makes Spring Boot great for development. The annotation itself and the supporting mechanism that automatically loads configurations are present in the <code>org.springframework.boot:spring-boot-autoconfigure</code> library. One of these configurations is <code>SessionAutoConfiguration</code> which was introduced in Spring Boot <code>1.3.0</code>. It has the following code in version <code>1.3.6</code>:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Configuration</span>
 <span style="color:#99f">@ConditionalOnClass</span><span style="color:#555">(</span>Session<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">)</span>
 <span style="color:#99f">@AutoConfigureAfter</span><span style="color:#555">(</span>RedisAutoConfiguration<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">)</span>
@@ -238,45 +226,45 @@ Caused by: java.net.ConnectException: Connection refused
 
     <span style="color:#555">}</span>
 
-<span style="color:#555">}</span></code></pre></div>
-<p>And this is where things get interesting. We can clearly see that <code>SessionRedisHttpConfiguration</code> is annotated with <code>@EnableRedisHttpSession</code>. This class will be applied by Spring the moment it&rsquo;s parent class <code>SessionAutoConfiguration</code> is applied. The third annotation on the parent class <code>@AutoConfigureAfter(RedisAutoConfiguration.class)</code> instructs Spring to apply this configuration after <code>RedisAutoConfiguration</code>. This configuration has the following:</p>
+<span style="color:#555">}</span>
+</code></pre></div><p>And this is where things get interesting. We can clearly see that <code>SessionRedisHttpConfiguration</code> is annotated with <code>@EnableRedisHttpSession</code>. This class will be applied by Spring the moment it&rsquo;s parent class <code>SessionAutoConfiguration</code> is applied. The third annotation on the parent class <code>@AutoConfigureAfter(RedisAutoConfiguration.class)</code> instructs Spring to apply this configuration after <code>RedisAutoConfiguration</code>. This configuration has the following:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Configuration</span>
 <span style="color:#99f">@ConditionalOnClass</span><span style="color:#555">({</span> JedisConnection<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">,</span> RedisOperations<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">,</span> Jedis<span style="color:#555">.</span><span style="color:#309">class</span> <span style="color:#555">})</span>
 <span style="color:#99f">@EnableConfigurationProperties</span>
 <span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">RedisAutoConfiguration</span> <span style="color:#555">{</span>
 <span style="color:#09f;font-style:italic">// ...
 </span><span style="color:#09f;font-style:italic">// ...
-</span><span style="color:#09f;font-style:italic"></span><span style="color:#555">}</span></code></pre></div>
-<p>This configuration will be applied if and only if the classes <code>JedisConnection</code>, <code>RedisOperations</code> and <code>Jedis</code> are present in the class path and by adding <code>spring-session-data-redis</code> as a dependency, we are causing exactly that to happen.</p>
-
+</span><span style="color:#09f;font-style:italic"></span><span style="color:#555">}</span>
+</code></pre></div><p>This configuration will be applied if and only if the classes <code>JedisConnection</code>, <code>RedisOperations</code> and <code>Jedis</code> are present in the class path and by adding <code>spring-session-data-redis</code> as a dependency, we are causing exactly that to happen.</p>
 <h3 id="a-solution">A solution</h3>
-
 <p>We can prevent this from occurring by configuring our application to not attempt to apply this auto configuration class. This can be done by specifying this class to be excluded from the application.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@SpringBootApplication</span><span style="color:#555">(</span>exclude <span style="color:#555">=</span> <span style="color:#555">{</span>SessionAutoConfiguration<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">})</span>
 <span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">RedisSessionApplication</span> <span style="color:#555">{</span>
     <span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">static</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">main</span><span style="color:#555">(</span>String<span style="color:#555">[]</span> args<span style="color:#555">)</span> <span style="color:#555">{</span>
         SpringApplication<span style="color:#555">.</span><span style="color:#309">run</span><span style="color:#555">(</span>RedisSessionApplication<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">,</span> args<span style="color:#555">);</span>
     <span style="color:#555">}</span>
-<span style="color:#555">}</span></code></pre></div>
-<p>With this is place, if we run the application, it will no longer encounter the connection error previously saw. Authentication works as before, except that it now uses the in-memory session store.</p>
+<span style="color:#555">}</span>
+</code></pre></div><p>With this is place, if we run the application, it will no longer encounter the connection error previously saw. Authentication works as before, except that it now uses the in-memory session store.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ curl -i -s -X GET <span style="color:#c30">&#34;http://localhost:8080/hello&#34;</span> -uuser:password  | grep <span style="color:#c30">&#34;x-auth-token&#34;</span>
 x-auth-token: d0962e39-6423-46b3-b815-8979950e063a
 $ curl -s -X GET <span style="color:#c30">&#34;http://localhost:8080/hello&#34;</span> --header <span style="color:#c30">&#34;x-auth-token: d0962e39-6423-46b3-b815-8979950e063a&#34;</span> | jq .
 <span style="color:#555">{</span>
   <span style="color:#c30">&#34;message&#34;</span>: <span style="color:#c30">&#34;hello&#34;</span>
-<span style="color:#555">}</span></code></pre></div><div class="footnotes">
-
-<hr />
-
+<span style="color:#555">}</span>
+</code></pre></div><section class="footnotes" role="doc-endnotes">
+<hr>
 <ol>
-<li id="fn:1">HeaderHttpSessionStrategy allows the use of a header to transmit the session between client and server. The default header is <code>x-auth-token</code>, but this can be configured. See the documentation <a href="http://docs.spring.io/spring-session/docs/current/api/org/springframework/session/web/http/HeaderHttpSessionStrategy.html">here</a>.
- <a class="footnote-return" href="#fnref:1"><sup>[return]</sup></a></li>
-<li id="fn:2">This example uses the default configurations for Redis connection to localhost on port 6379.
- <a class="footnote-return" href="#fnref:2"><sup>[return]</sup></a></li>
-<li id="fn:3">Meta annotations are annotations that can act up on other annotations by modifying and overriding their attributes. For a discussion on how to implement custom annotations using meta annotations, please refer to <a href="/blog/2015/12/06/implementing-custom-annotations-for-spring-mvc/">this blog post</a>.
- <a class="footnote-return" href="#fnref:3"><sup>[return]</sup></a></li>
+<li id="fn:1" role="doc-endnote">
+<p>HeaderHttpSessionStrategy allows the use of a header to transmit the session between client and server. The default header is <code>x-auth-token</code>, but this can be configured. See the documentation <a href="http://docs.spring.io/spring-session/docs/current/api/org/springframework/session/web/http/HeaderHttpSessionStrategy.html">here</a>. <a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:2" role="doc-endnote">
+<p>This example uses the default configurations for Redis connection to localhost on port 6379. <a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:3" role="doc-endnote">
+<p>Meta annotations are annotations that can act up on other annotations by modifying and overriding their attributes. For a discussion on how to implement custom annotations using meta annotations, please refer to <a href="/blog/2015/12/06/implementing-custom-annotations-for-spring-mvc/">this blog post</a>. <a href="#fnref:3" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
 </ol>
-</div>
+</section>
         </div>
         <aside id="gh-comments-list">
           <script>
@@ -390,13 +378,61 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2019/08/02/flushing-metrics-in-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Flushing Metrics in Dropwizard Commands</a></li>
             
             
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2019/07/28/managing-environment-lifecycles-for-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Managing environment lifecycles for Dropwizard Commands</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -426,13 +462,45 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2018/06/09/formatting-java-instant-for-resolutions/?utm_source=site&amp;utm_medium=related">Formatting Java Instant for resolutions</a></li>
             
             
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2018/05/05/freebuilder-plugin-for-intellij/?utm_source=site&amp;utm_medium=related">FreeBuilder plugin for IntelliJ</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -460,13 +528,81 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2017/08/18/uploading-a-standalone-artifact-to-nexus-3/?utm_source=site&amp;utm_medium=related">Uploading a standalone artifact to Nexus 3</a></li>
             
             
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2016/11/30/implementing-feature-toggles-for-a-spring-boot-application-part-4/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 4</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -490,6 +626,34 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2016/11/11/setting-up-a-secure-etcd-cluster-behind-a-proxy/?utm_source=site&amp;utm_medium=related">Setting up a secure etcd cluster behind a proxy</a></li>
             
             
@@ -502,7 +666,27 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2016/11/02/handling-deserialization-errors-in-spring-redis-sessions/?utm_source=site&amp;utm_medium=related">Handling Deserialization errors in Spring Redis Sessions</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -518,7 +702,27 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2016/07/14/jwt-authentication-with-spring-web-part-5/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 5</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -542,6 +746,10 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2016/07/03/jwt-authentication-with-spring-web-part-1/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 1</a></li>
             
             
@@ -554,6 +762,10 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2016/06/29/injecting-dependencies-into-a-spring-configuration/?utm_source=site&amp;utm_medium=related">Injecting dependencies into a Spring @Configuration</a></li>
             
             
@@ -561,6 +773,38 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2016/06/08/filtering-responses-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Filtering responses in Spring MVC</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -600,6 +844,22 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2015/12/15/thoughts-on-open-graph-tags/?utm_source=site&amp;utm_medium=related">Thoughts on Open Graph tags</a></li>
             
             
@@ -630,7 +890,23 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2015/12/05/validating-requestparams-and-pathvariables-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Validating RequestParams and PathVariables in Spring MVC</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -648,13 +924,121 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2015/05/22/making-sense-of-cloud-foundry-security-group-declarations/?utm_source=site&amp;utm_medium=related">Making sense of Cloud Foundry security group declarations</a></li>
             
             
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2015/05/21/configuring-cloud-foundry-java-memory-parameters/?utm_source=site&amp;utm_medium=related">Configuring Cloud Foundry Java Memory Parameters</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -700,13 +1084,105 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/10/13/implementing-rate-limiting-in-rails-part-2/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 2</a></li>
             
             
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/10/12/implementing-rate-limiting-in-rails-part-1/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 1</a></li>
+            
+            
+            
+            
             
             
             
@@ -750,13 +1226,141 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/09/12/managing-gemsets-in-rbenv/?utm_source=site&amp;utm_medium=related">Managing Gemsets in Rbenv</a></li>
             
             
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/09/08/looking-up-compiler-params-used-to-compile-a-ruby-version/?utm_source=site&amp;utm_medium=related">Looking up Compiler params used to compile a Ruby version</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -804,7 +1408,99 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/07/31/validating-json-in-emacs/?utm_source=site&amp;utm_medium=related">Validating JSON in Emacs</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -828,7 +1524,23 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/04/14/configure-gits-comment-character/?utm_source=site&amp;utm_medium=related">Configure Git&#39;s comment character</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -840,13 +1552,53 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
             
             
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/04/05/javascript-clipboard-access-and-hidden-flash-widgets/?utm_source=site&amp;utm_medium=related">JavaScript, clipboard access and hidden flash widgets</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -866,13 +1618,61 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/11/29/my-first-firefox-plugin-getcache-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">My first Firefox plugin: GetCache - View cached version of the current page</a></li>
             
             
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/11/28/getcache-a-chrome-plugin-to-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">GetCache - A Chrome plugin to view cached version of the current page</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -920,7 +1720,79 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/07/09/understanding-pythons-with-statement/?utm_source=site&amp;utm_medium=related">Understanding Python&#39;s &#34;with&#34; statement</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -938,6 +1810,38 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/06/24/vodqa-ncr-maintaining-large-test-suites/?utm_source=site&amp;utm_medium=related">VodQA NCR: Maintaining Large Test Suites</a></li>
             
             
@@ -945,6 +1849,46 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2012/06/06/know-your-tools-dont-shoot-yourself-in-the-foot/?utm_source=site&amp;utm_medium=related">Know Your Tools - Don&#39;t Shoot Yourself in the Foot</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -964,7 +1908,47 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/05/11/indian-and-pakistani-cricketers-who-make-better-debuts/?utm_source=site&amp;utm_medium=related">Indian and Pakistani cricketers - who make better debuts?</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -976,7 +1960,39 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/04/29/finding-un-merged-commits-with-git-cherry/?utm_source=site&amp;utm_medium=related">Finding un-merged commits with git cherry</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -988,7 +2004,47 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/01/17/why-your-project-should-have-a-getting-started-guide./?utm_source=site&amp;utm_medium=related">Why your project should have a Getting Started guide.</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -1004,7 +2060,31 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2011/05/17/wikipedia-page-hopping/?utm_source=site&amp;utm_medium=related">Wikipedia Page Hopping</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -1048,1123 +2128,31 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2010/01/09/autorun.py-execute-stuff-on-file-change/?utm_source=site&amp;utm_medium=related">Autorun.py - Execute stuff on file change</a></li>
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
             
             
             

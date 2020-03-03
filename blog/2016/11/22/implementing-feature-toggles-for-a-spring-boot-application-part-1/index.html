@@ -98,27 +98,18 @@
            itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div>
           <p>In one of our recent projects at work, we implemented feature toggles for a Spring MVC / Angular JS code base and this <a href="/series/feature-toggles">series of blog posts</a> discusses our motivations and requirements, the approach we took and what we learned from it.</p>
-
 <h2 id="introduction">Introduction</h2>
-
 <p>Feature Toggles are a mechanism to change the behavior of software without having to re-deploy code. Pete Hogdson has a comprehensive <a href="http://martinfowler.com/articles/feature-toggles.html">blog post</a> explaining the complexities of feature toggles.</p>
-
-<p><img src="/images/feature-toggles.svg" alt="Feature toggles" title="Feature toggles" /></p>
-
+<p><img src="/images/feature-toggles.svg" alt="Feature toggles" title="Feature toggles"></p>
 <h2 id="requirements">Requirements</h2>
-
-<p>Our application is a Spring Boot web application that gets deployed in a Tomcat instance. The application is deployed via Chef and chef sets up the appropriate configuration parameters for the application as Tomcat <a href="https://tomcat.apache.org/tomcat-8.0-doc/config/context.html#Environment_Entries">Environment</a> entries. Since feature toggles are ultimately application parameters <sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup>, we started by setting them as Tomcat environment variables. Having considered this, we identified the following requirements:</p>
-
+<p>Our application is a Spring Boot web application that gets deployed in a Tomcat instance. The application is deployed via Chef and chef sets up the appropriate configuration parameters for the application as Tomcat <a href="https://tomcat.apache.org/tomcat-8.0-doc/config/context.html#Environment_Entries">Environment</a> entries. Since feature toggles are ultimately application parameters <sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup>, we started by setting them as Tomcat environment variables. Having considered this, we identified the following requirements:</p>
 <ul>
 <li>The ability to toggle dependency injection. For example, in some environments, we wanted to use Redis to store our sessions, while in some test environments, they were to be stored in memory.</li>
 <li>Ability to toggle entire Spring Controllers or individual controller methods.</li>
 <li>The ability to expose the state of feature toggles to our front end so that Angular JS components can use the feature toggles.</li>
 </ul>
-
 <h2 id="our-initial-approach">Our initial approach</h2>
-
 <h3 id="toggling-dependency-injection">Toggling dependency injection.</h3>
-
 <p>We started by using configuration parameters with the <code>feature</code> prefix to toggle features. With this convention in place, we started using the <code>@ConditionalOnProperty</code> annotation in our configuration classes to toggle the beans that got wired up. For example, to toggle between Redis and in-memory store for sessions, we ended up with the following configuration:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Configuration</span>
 <span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">AppConfig</span> <span style="color:#555">{</span>
@@ -133,10 +124,9 @@
   <span style="color:#069;font-weight:bold">public</span> SessionRepository <span style="color:#c0f">redisSessionRepository</span><span style="color:#555">(</span>RedisConnectionFactory factory<span style="color:#555">)</span> <span style="color:#555">{</span>
     <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">new</span> RedisOperationsSessionRepository<span style="color:#555">(</span>factory<span style="color:#555">);</span>
   <span style="color:#555">}</span>
-<span style="color:#555">}</span></code></pre></div>
-<h3 id="toggling-individual-controller-methods">Toggling individual controller methods</h3>
-
-<p>In order to prevent end points defined by controllers and controller methods that are toggled off from being accessed, we decided to configure a <code>HandlerInterceptor</code> <sup class="footnote-ref" id="fnref:2"><a href="#fn:2">2</a></sup> to intercept requests to these end points.</p>
+<span style="color:#555">}</span>
+</code></pre></div><h3 id="toggling-individual-controller-methods">Toggling individual controller methods</h3>
+<p>In order to prevent end points defined by controllers and controller methods that are toggled off from being accessed, we decided to configure a <code>HandlerInterceptor</code> <sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup> to intercept requests to these end points.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">FeatureInterceptor</span> <span style="color:#069;font-weight:bold">implements</span> HandlerInterceptor <span style="color:#555">{</span>
   <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">final</span> FeatureRepository featureRepository<span style="color:#555">;</span>
 
@@ -173,8 +163,8 @@
   <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">afterCompletion</span><span style="color:#555">(</span>HttpServletRequest httpServletRequest<span style="color:#555">,</span> HttpServletResponse httpServletResponse<span style="color:#555">,</span> Object o<span style="color:#555">,</span> Exception e<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
 
   <span style="color:#555">}</span>
-<span style="color:#555">}</span></code></pre></div>
-<p>This feature interceptor uses the <code>FeatureToggle</code> looks for the annotation, and the looks at a feature repository to see if the state of the feature flag is set to what the annotation expects and if it does not, returns a 404. The annotation has two attributes - <code>isOn</code> and <code>feature</code>.</p>
+<span style="color:#555">}</span>
+</code></pre></div><p>This feature interceptor uses the <code>FeatureToggle</code> looks for the annotation, and the looks at a feature repository to see if the state of the feature flag is set to what the annotation expects and if it does not, returns a 404. The annotation has two attributes - <code>isOn</code> and <code>feature</code>.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Target</span><span style="color:#555">({</span>ElementType<span style="color:#555">.</span><span style="color:#309">TYPE</span><span style="color:#555">,</span> ElementType<span style="color:#555">.</span><span style="color:#309">METHOD</span><span style="color:#555">})</span>
 <span style="color:#99f">@Retention</span><span style="color:#555">(</span>RetentionPolicy<span style="color:#555">.</span><span style="color:#309">RUNTIME</span><span style="color:#555">)</span>
 <span style="color:#99f">@Documented</span>
@@ -182,8 +172,8 @@
   String <span style="color:#c0f">feature</span><span style="color:#555">();</span>
 
   <span style="color:#078;font-weight:bold">boolean</span> <span style="color:#c0f">expectedToBeOn</span><span style="color:#555">()</span> <span style="color:#069;font-weight:bold">default</span> <span style="color:#069;font-weight:bold">true</span><span style="color:#555">;</span>
-<span style="color:#555">}</span></code></pre></div>
-<p>This annotation can be used on a controller method as follows:</p>
+<span style="color:#555">}</span>
+</code></pre></div><p>This annotation can be used on a controller method as follows:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@RestController</span>
 <span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span><span style="color:#c30">&#34;/hello&#34;</span><span style="color:#555">)</span>
 <span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">MessageController</span> <span style="color:#555">{</span>
@@ -192,9 +182,8 @@
   <span style="color:#069;font-weight:bold">public</span> Map <span style="color:#c0f">hello</span><span style="color:#555">()</span> <span style="color:#555">{</span>
     <span style="color:#069;font-weight:bold">return</span> Collections<span style="color:#555">.</span><span style="color:#309">singletonMap</span><span style="color:#555">(</span><span style="color:#c30">&#34;message&#34;</span><span style="color:#555">,</span> <span style="color:#c30">&#34;hello world!&#34;</span><span style="color:#555">);</span>
   <span style="color:#555">}</span>
-<span style="color:#555">}</span></code></pre></div>
-<p>The <code>FeatureRepository</code> has to look at all the properties that are available in the applications environment and filter out the ones that start with <code>feature.</code>.</p>
-
+<span style="color:#555">}</span>
+</code></pre></div><p>The <code>FeatureRepository</code> has to look at all the properties that are available in the applications environment and filter out the ones that start with <code>feature.</code>.</p>
 <p>Collecting all the properties available in an environment is <a href="https://stackoverflow.com/questions/23506471/spring-access-all-environment-properties-as-a-map-or-properties-object">surprisingly complex</a>, owing to the number of ways properties can be injected. Based on the approach discussed in that question, we can create a <code>FeatureRepository</code> as follows:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">FeatureRepository</span> <span style="color:#555">{</span>
   <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">static</span> <span style="color:#069;font-weight:bold">final</span> String FEATURE_PREFIX <span style="color:#555">=</span> <span style="color:#c30">&#34;feature.&#34;</span><span style="color:#555">;</span>
@@ -224,9 +213,8 @@
   <span style="color:#069;font-weight:bold">public</span> Map<span style="color:#555">&lt;</span>String<span style="color:#555">,</span> Boolean<span style="color:#555">&gt;</span> <span style="color:#c0f">allFeatures</span><span style="color:#555">()</span> <span style="color:#555">{</span>
     <span style="color:#069;font-weight:bold">return</span> featureKeys<span style="color:#555">().</span><span style="color:#309">stream</span><span style="color:#555">().</span><span style="color:#309">collect</span><span style="color:#555">(</span>Collectors<span style="color:#555">.</span><span style="color:#309">toMap</span><span style="color:#555">(</span>k <span style="color:#555">-&gt;</span> k<span style="color:#555">,</span> k <span style="color:#555">-&gt;</span> Boolean<span style="color:#555">.</span><span style="color:#309">parseBoolean</span><span style="color:#555">(</span>env<span style="color:#555">.</span><span style="color:#309">getProperty</span><span style="color:#555">(</span>k<span style="color:#555">))));</span>
   <span style="color:#555">}</span>
-<span style="color:#555">}</span></code></pre></div>
-<h3 id="toggling-entire-controllers">Toggling entire controllers</h3>
-
+<span style="color:#555">}</span>
+</code></pre></div><h3 id="toggling-entire-controllers">Toggling entire controllers</h3>
 <p>Since Spring controllers are wired up as beans, the <code>ConditionalOnProperty</code> annotation can be used to toggle on entire controllers.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@RestController</span>
 <span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span><span style="color:#c30">&#34;/foo&#34;</span><span style="color:#555">)</span>
@@ -236,8 +224,8 @@
   <span style="color:#069;font-weight:bold">public</span> Map <span style="color:#c0f">hello</span><span style="color:#555">()</span> <span style="color:#555">{</span>
     <span style="color:#069;font-weight:bold">return</span> Collections<span style="color:#555">.</span><span style="color:#309">singletonMap</span><span style="color:#555">(</span><span style="color:#c30">&#34;message&#34;</span><span style="color:#555">,</span> <span style="color:#c30">&#34;hello foo!&#34;</span><span style="color:#555">);</span>
   <span style="color:#555">}</span>
-<span style="color:#555">}</span></code></pre></div>
-<p>However, now we have two different mechanisms to toggle methods and controllers. It will be nice to consolidate them and doing so will allow us to use the same mechanism for toggling beans. This can be done by annotating <code>FeatureToggle</code> with the <a href="/blog/2015/12/06/implementing-custom-annotations-for-spring-mvc/">meta annotation</a> <code>Conditional</code> that looks up the state of feature toggles using the custom condition <code>FeatureCondition</code>. This will change <code>FeatureToggle</code> to:</p>
+<span style="color:#555">}</span>
+</code></pre></div><p>However, now we have two different mechanisms to toggle methods and controllers. It will be nice to consolidate them and doing so will allow us to use the same mechanism for toggling beans. This can be done by annotating <code>FeatureToggle</code> with the <a href="/blog/2015/12/06/implementing-custom-annotations-for-spring-mvc/">meta annotation</a> <code>Conditional</code> that looks up the state of feature toggles using the custom condition <code>FeatureCondition</code>. This will change <code>FeatureToggle</code> to:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Target</span><span style="color:#555">({</span>ElementType<span style="color:#555">.</span><span style="color:#309">TYPE</span><span style="color:#555">,</span> ElementType<span style="color:#555">.</span><span style="color:#309">METHOD</span><span style="color:#555">})</span>
 <span style="color:#99f">@Retention</span><span style="color:#555">(</span>RetentionPolicy<span style="color:#555">.</span><span style="color:#309">RUNTIME</span><span style="color:#555">)</span>
 <span style="color:#99f">@Documented</span>
@@ -246,8 +234,8 @@
   String <span style="color:#c0f">feature</span><span style="color:#555">();</span>
 
   <span style="color:#078;font-weight:bold">boolean</span> <span style="color:#c0f">expectedToBeOn</span><span style="color:#555">()</span> <span style="color:#069;font-weight:bold">default</span> <span style="color:#069;font-weight:bold">true</span><span style="color:#555">;</span>
-<span style="color:#555">}</span></code></pre></div>
-<p>The <code>FeatureCondition</code> uses the meta annotation attributes provided to it and the environment to decide the state to be returned:</p>
+<span style="color:#555">}</span>
+</code></pre></div><p>The <code>FeatureCondition</code> uses the meta annotation attributes provided to it and the environment to decide the state to be returned:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">FeatureCondition</span> <span style="color:#069;font-weight:bold">implements</span> Condition <span style="color:#555">{</span>
   <span style="color:#99f">@Override</span>
   <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">boolean</span> <span style="color:#c0f">matches</span><span style="color:#555">(</span>ConditionContext conditionContext<span style="color:#555">,</span> AnnotatedTypeMetadata annotatedTypeMetadata<span style="color:#555">)</span> <span style="color:#555">{</span>
@@ -261,8 +249,8 @@
     <span style="color:#555">}</span>
     <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">true</span><span style="color:#555">;</span>
   <span style="color:#555">}</span>
-<span style="color:#555">}</span></code></pre></div>
-<p>Now that we have a unified mechanism to toggle controllers, beans and controller methods, we can use this annotation. The <code>FooController</code> would now look like this:</p>
+<span style="color:#555">}</span>
+</code></pre></div><p>Now that we have a unified mechanism to toggle controllers, beans and controller methods, we can use this annotation. The <code>FooController</code> would now look like this:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@RestController</span>
 <span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span><span style="color:#c30">&#34;/foo&#34;</span><span style="color:#555">)</span>
 <span style="color:#99f">@FeatureToggle</span><span style="color:#555">(</span>feature <span style="color:#555">=</span> <span style="color:#c30">&#34;feature.foo&#34;</span><span style="color:#555">)</span>
@@ -271,8 +259,8 @@
   <span style="color:#069;font-weight:bold">public</span> Map <span style="color:#c0f">hello</span><span style="color:#555">()</span> <span style="color:#555">{</span>
     <span style="color:#069;font-weight:bold">return</span> Collections<span style="color:#555">.</span><span style="color:#309">singletonMap</span><span style="color:#555">(</span><span style="color:#c30">&#34;message&#34;</span><span style="color:#555">,</span> <span style="color:#c30">&#34;hello foo!&#34;</span><span style="color:#555">);</span>
   <span style="color:#555">}</span>
-<span style="color:#555">}</span></code></pre></div>
-<p>And our <code>AppConfig</code> will be like this:</p>
+<span style="color:#555">}</span>
+</code></pre></div><p>And our <code>AppConfig</code> will be like this:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Configuration</span>
 <span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">AppConfig</span> <span style="color:#069;font-weight:bold">extends</span> WebMvcConfigurerAdapter <span style="color:#555">{</span>
   <span style="color:#99f">@Autowired</span>
@@ -295,19 +283,19 @@
     registry<span style="color:#555">.</span><span style="color:#309">addInterceptor</span><span style="color:#555">(</span><span style="color:#069;font-weight:bold">new</span> FeatureInterceptor<span style="color:#555">(</span><span style="color:#069;font-weight:bold">new</span> FeatureRepository<span style="color:#555">(</span>env<span style="color:#555">)));</span>
     <span style="color:#069;font-weight:bold">super</span><span style="color:#555">.</span><span style="color:#309">addInterceptors</span><span style="color:#555">(</span>registry<span style="color:#555">);</span>
   <span style="color:#555">}</span>
-<span style="color:#555">}</span></code></pre></div>
-<p>In the second part of <a href="/series/feature-toggles">this series</a>, we will explore how the feature toggle can be exposed to the front end and how to consume this and use it for toggling features in the Angular components.</p>
-<div class="footnotes">
-
-<hr />
-
+<span style="color:#555">}</span>
+</code></pre></div><p>In the second part of <a href="/series/feature-toggles">this series</a>, we will explore how the feature toggle can be exposed to the front end and how to consume this and use it for toggling features in the Angular components.</p>
+<section class="footnotes" role="doc-endnotes">
+<hr>
 <ol>
-<li id="fn:1">While feature toggles are just like any other application parameter, treating them as such in our stack resulted in errors, which we address later in this series.
- <a class="footnote-return" href="#fnref:1"><sup>[return]</sup></a></li>
-<li id="fn:2">HandlerInterceptor
- <a class="footnote-return" href="#fnref:2"><sup>[return]</sup></a></li>
+<li id="fn:1" role="doc-endnote">
+<p>While feature toggles are just like any other application parameter, treating them as such in our stack resulted in errors, which we address later in this series. <a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:2" role="doc-endnote">
+<p>HandlerInterceptor <a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
 </ol>
-</div>
+</section>
         </div>
         <aside id="gh-comments-list">
           <script>
@@ -421,13 +409,61 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2019/08/02/flushing-metrics-in-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Flushing Metrics in Dropwizard Commands</a></li>
             
             
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2019/07/28/managing-environment-lifecycles-for-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Managing environment lifecycles for Dropwizard Commands</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -457,13 +493,45 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2018/06/09/formatting-java-instant-for-resolutions/?utm_source=site&amp;utm_medium=related">Formatting Java Instant for resolutions</a></li>
             
             
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2018/05/05/freebuilder-plugin-for-intellij/?utm_source=site&amp;utm_medium=related">FreeBuilder plugin for IntelliJ</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -491,13 +559,81 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2017/08/18/uploading-a-standalone-artifact-to-nexus-3/?utm_source=site&amp;utm_medium=related">Uploading a standalone artifact to Nexus 3</a></li>
             
             
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2016/11/30/implementing-feature-toggles-for-a-spring-boot-application-part-4/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 4</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -519,6 +655,34 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2016/11/11/setting-up-a-secure-etcd-cluster-behind-a-proxy/?utm_source=site&amp;utm_medium=related">Setting up a secure etcd cluster behind a proxy</a></li>
             
             
@@ -531,7 +695,27 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2016/11/02/handling-deserialization-errors-in-spring-redis-sessions/?utm_source=site&amp;utm_medium=related">Handling Deserialization errors in Spring Redis Sessions</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -549,7 +733,27 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2016/07/14/jwt-authentication-with-spring-web-part-5/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 5</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -573,6 +777,10 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2016/07/03/jwt-authentication-with-spring-web-part-1/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 1</a></li>
             
             
@@ -585,6 +793,10 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2016/06/29/injecting-dependencies-into-a-spring-configuration/?utm_source=site&amp;utm_medium=related">Injecting dependencies into a Spring @Configuration</a></li>
             
             
@@ -592,6 +804,38 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2016/06/08/filtering-responses-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Filtering responses in Spring MVC</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -631,6 +875,22 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2015/12/15/thoughts-on-open-graph-tags/?utm_source=site&amp;utm_medium=related">Thoughts on Open Graph tags</a></li>
             
             
@@ -661,7 +921,23 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2015/12/05/validating-requestparams-and-pathvariables-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Validating RequestParams and PathVariables in Spring MVC</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -679,7 +955,35 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2015/05/22/making-sense-of-cloud-foundry-security-group-declarations/?utm_source=site&amp;utm_medium=related">Making sense of Cloud Foundry security group declarations</a></li>
+            
+            
+            
+            
             
             
             
@@ -699,7 +1003,87 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2014/08/02/importing-the-yelp-dataset-into-mongodb/?utm_source=site&amp;utm_medium=related">Importing the Yelp dataset into MongoDB</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -733,7 +1117,95 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/10/13/implementing-rate-limiting-in-rails-part-2/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 2</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -745,7 +1217,19 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/10/07/python-hack-dynamically-override-an-objects-attribute/?utm_source=site&amp;utm_medium=related">Python Hack - Dynamically override an object&#39;s attribute</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -763,7 +1247,39 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/10/01/reading-user-input-in-gradle-scripts/?utm_source=site&amp;utm_medium=related">Reading user input in Gradle scripts</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -791,7 +1307,47 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/09/15/shared-history-in-bash/?utm_source=site&amp;utm_medium=related">Shared history in Bash</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -803,13 +1359,61 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/09/08/looking-up-compiler-params-used-to-compile-a-ruby-version/?utm_source=site&amp;utm_medium=related">Looking up Compiler params used to compile a Ruby version</a></li>
             
             
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/08/22/navigating-stacktraces-in-emacs/?utm_source=site&amp;utm_medium=related">Navigating Stacktraces in Emacs</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -849,7 +1453,91 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/08/02/graph-databases-1-modeling/?utm_source=site&amp;utm_medium=related">Graph databases 1 - Modeling</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -873,7 +1561,23 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/04/29/emacs-hack-viewing-git-logs-while-composing-commit-messages/?utm_source=site&amp;utm_medium=related">Emacs hack: Viewing Git logs while composing commit messages</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -885,7 +1589,31 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/04/11/my-experience-working-remotely/?utm_source=site&amp;utm_medium=related">My experience working remotely</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -897,7 +1625,31 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/04/05/javascript-clipboard-access-and-hidden-flash-widgets/?utm_source=site&amp;utm_medium=related">JavaScript, clipboard access and hidden flash widgets</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -917,7 +1669,31 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/11/29/my-first-firefox-plugin-getcache-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">My first Firefox plugin: GetCache - View cached version of the current page</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -929,7 +1705,39 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/11/27/on-rest-content-type-google-chrome-and-caching/?utm_source=site&amp;utm_medium=related">On REST, Content-Type, Google Chrome and Caching</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -957,7 +1765,47 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/08/01/d3.js-workshop/?utm_source=site&amp;utm_medium=related">D3.js Workshop</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -977,7 +1825,31 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/07/09/understanding-pythons-with-statement/?utm_source=site&amp;utm_medium=related">Understanding Python&#39;s &#34;with&#34; statement</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -995,6 +1867,38 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/06/24/vodqa-ncr-maintaining-large-test-suites/?utm_source=site&amp;utm_medium=related">VodQA NCR: Maintaining Large Test Suites</a></li>
             
             
@@ -1002,6 +1906,46 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2012/06/06/know-your-tools-dont-shoot-yourself-in-the-foot/?utm_source=site&amp;utm_medium=related">Know Your Tools - Don&#39;t Shoot Yourself in the Foot</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -1021,7 +1965,47 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/05/11/indian-and-pakistani-cricketers-who-make-better-debuts/?utm_source=site&amp;utm_medium=related">Indian and Pakistani cricketers - who make better debuts?</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -1033,7 +2017,39 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/04/29/finding-un-merged-commits-with-git-cherry/?utm_source=site&amp;utm_medium=related">Finding un-merged commits with git cherry</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -1045,7 +2061,47 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/01/17/why-your-project-should-have-a-getting-started-guide./?utm_source=site&amp;utm_medium=related">Why your project should have a Getting Started guide.</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -1061,7 +2117,31 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2011/05/17/wikipedia-page-hopping/?utm_source=site&amp;utm_medium=related">Wikipedia Page Hopping</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -1105,1123 +2185,31 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2010/01/09/autorun.py-execute-stuff-on-file-change/?utm_source=site&amp;utm_medium=related">Autorun.py - Execute stuff on file change</a></li>
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
             
             
             

@@ -92,18 +92,16 @@
            itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div>
           <p>This blog post is an exercise in identifying all the <code>sequences</code> in a PostgreSQL database that is associated with a table column via an <code>OWNED BY</code> relationship. Figuring out how to do this was harder than it should have been and this journals my understanding of it.</p>
-
 <p>When I first started looking at this, I ended up at this Stack Overflow <a href="https://stackoverflow.com/questions/9900346/how-do-you-view-new-sequence-ownership-information-in-postgres-after-using-alter">answer</a> from 2012. While that seemed to work, it is fair to say that I had no idea what it did. So, I set out to understand it and hopefully improve it.</p>
-
 <p>We will start by creating a <code>table</code> that we will later associate a <code>sequence</code> with.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#069;font-weight:bold">CREATE</span> <span style="color:#069;font-weight:bold">TABLE</span> users
   (
      id   <span style="color:#366">BIGINT</span> <span style="color:#069;font-weight:bold">NOT</span> <span style="color:#069;font-weight:bold">NULL</span>,
      NAME <span style="color:#366">VARCHAR</span>(<span style="color:#f60">40</span>) <span style="color:#069;font-weight:bold">NOT</span> <span style="color:#069;font-weight:bold">NULL</span>
-  );</code></pre></div>
-<p>Next, we will create a sequence that is not going to be owned by any columns - a freehanging sequence.</p>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#069;font-weight:bold">CREATE</span> SEQUENCE freehanging;</code></pre></div>
-<p>Postgres stores <code>sequence</code>s across two different catalogs - <a href="https://www.postgresql.org/docs/current/catalog-pg-sequence.html"><code>pg_sequence</code></a> and <a href="https://www.postgresql.org/docs/current/catalog-pg-class.html"><code>pg_class</code></a>. Catalog <code>pg_sequence</code> contains sequence parameters like <code>seqstart</code>, <code>seqincrement</code> etc. The rest of the information gets stored in <code>pg_class</code> catalog with the <code>seqlrelid</code> column in <code>pg_sequence</code> pointing to the corresponding <code>pg_class</code> entry.</p>
+  );
+</code></pre></div><p>Next, we will create a sequence that is not going to be owned by any columns - a freehanging sequence.</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#069;font-weight:bold">CREATE</span> SEQUENCE freehanging;
+</code></pre></div><p>Postgres stores <code>sequence</code>s across two different catalogs - <a href="https://www.postgresql.org/docs/current/catalog-pg-sequence.html"><code>pg_sequence</code></a> and <a href="https://www.postgresql.org/docs/current/catalog-pg-class.html"><code>pg_class</code></a>. Catalog <code>pg_sequence</code> contains sequence parameters like <code>seqstart</code>, <code>seqincrement</code> etc. The rest of the information gets stored in <code>pg_class</code> catalog with the <code>seqlrelid</code> column in <code>pg_sequence</code> pointing to the corresponding <code>pg_class</code> entry.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#555">=&gt;</span> <span style="color:#a00;background-color:#faa">\</span>x
 Expanded display <span style="color:#069;font-weight:bold">is</span> <span style="color:#069;font-weight:bold">on</span>.
 
@@ -118,8 +116,9 @@ seqincrement <span style="color:#555">|</span> <span style="color:#f60">1</span>
 seqmax       <span style="color:#555">|</span> <span style="color:#f60">9223372036854775807</span>
 seqmin       <span style="color:#555">|</span> <span style="color:#f60">1</span>
 seqcache     <span style="color:#555">|</span> <span style="color:#f60">1</span>
-seqcycle     <span style="color:#555">|</span> f</code></pre></div>
-<p>That has the information that Postgres can use, but it does not look particularly useful to a human being. Luckily, Postgres provides a <code>view</code> named <a href="https://www.postgresql.org/docs/10/view-pg-sequences.html"><code>pg_sequences</code></a> that shows us more information.</p>
+seqcycle     <span style="color:#555">|</span> f
+
+</code></pre></div><p>That has the information that Postgres can use, but it does not look particularly useful to a human being. Luckily, Postgres provides a <code>view</code> named <a href="https://www.postgresql.org/docs/10/view-pg-sequences.html"><code>pg_sequences</code></a> that shows us more information.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#555">=&gt;</span> <span style="color:#069;font-weight:bold">SELECT</span> <span style="color:#555">*</span>
 <span style="color:#069;font-weight:bold">FROM</span>   pg_sequences;
 
@@ -134,8 +133,9 @@ max_value     <span style="color:#555">|</span> <span style="color:#f60">9223372
 increment_by  <span style="color:#555">|</span> <span style="color:#f60">1</span>
 <span style="color:#069;font-weight:bold">cycle</span>         <span style="color:#555">|</span> f
 cache_size    <span style="color:#555">|</span> <span style="color:#f60">1</span>
-last_value    <span style="color:#555">|</span></code></pre></div>
-<p>We can query <code>pg_class</code> with our <code>seqrelid</code>:</p>
+last_value    <span style="color:#555">|</span>
+
+</code></pre></div><p>We can query <code>pg_class</code> with our <code>seqrelid</code>:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#555">=&gt;</span> <span style="color:#069;font-weight:bold">SELECT</span> <span style="color:#555">*</span>
 <span style="color:#069;font-weight:bold">FROM</span>   pg_class
 <span style="color:#069;font-weight:bold">WHERE</span>  relfilenode <span style="color:#555">=</span> <span style="color:#f60">41000</span>;
@@ -173,12 +173,13 @@ relfrozenxid        <span style="color:#555">|</span> <span style="color:#f60">0
 relminmxid          <span style="color:#555">|</span> <span style="color:#f60">0</span>
 relacl              <span style="color:#555">|</span>
 reloptions          <span style="color:#555">|</span>
-relpartbound        <span style="color:#555">|</span></code></pre></div>
-<p>We can create a second sequence we want to associate with the <code>users</code> table.</p>
+relpartbound        <span style="color:#555">|</span>
+
+</code></pre></div><p>We can create a second sequence we want to associate with the <code>users</code> table.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#555">=&gt;</span> <span style="color:#069;font-weight:bold">CREATE</span> SEQUENCE users_id_seq;
 
-<span style="color:#069;font-weight:bold">CREATE</span> SEQUENCE</code></pre></div>
-<p>This will now show up in our queries.</p>
+<span style="color:#069;font-weight:bold">CREATE</span> SEQUENCE
+</code></pre></div><p>This will now show up in our queries.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#555">=&gt;</span> <span style="color:#069;font-weight:bold">SELECT</span> <span style="color:#555">*</span>
 <span style="color:#069;font-weight:bold">FROM</span>   pg_sequence;
 
@@ -227,8 +228,9 @@ max_value     <span style="color:#555">|</span> <span style="color:#f60">9223372
 increment_by  <span style="color:#555">|</span> <span style="color:#f60">1</span>
 <span style="color:#069;font-weight:bold">cycle</span>         <span style="color:#555">|</span> f
 cache_size    <span style="color:#555">|</span> <span style="color:#f60">1</span>
-last_value    <span style="color:#555">|</span></code></pre></div>
-<p>We can perform a <code>join</code> on these catalogs.</p>
+last_value    <span style="color:#555">|</span>
+
+</code></pre></div><p>We can perform a <code>join</code> on these catalogs.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#555">=&gt;</span> <span style="color:#069;font-weight:bold">SELECT</span> seqclass.relname,
        seqclass.relfilenode
 <span style="color:#069;font-weight:bold">FROM</span>   pg_class <span style="color:#069;font-weight:bold">AS</span> seqclass
@@ -240,19 +242,15 @@ last_value    <span style="color:#555">|</span></code></pre></div>
 relfilenode <span style="color:#555">|</span> <span style="color:#f60">41000</span>
 <span style="color:#555">-</span>[ RECORD <span style="color:#f60">2</span> ]<span style="color:#09f;font-style:italic">-------------
 </span><span style="color:#09f;font-style:italic"></span>relname     <span style="color:#555">|</span> users_id_seq
-relfilenode <span style="color:#555">|</span> <span style="color:#f60">41002</span></code></pre></div>
-<p>We can go ahead and associate the new sequence with the <code>users</code> table by specifying <code>OWNED BY</code>. By setting <code>OWNED BY</code>, we are specifying that if the column is dropped, we want the sequence to be dropped as well.</p>
+relfilenode <span style="color:#555">|</span> <span style="color:#f60">41002</span>
 
+</code></pre></div><p>We can go ahead and associate the new sequence with the <code>users</code> table by specifying <code>OWNED BY</code>. By setting <code>OWNED BY</code>, we are specifying that if the column is dropped, we want the sequence to be dropped as well.</p>
 <pre><code>=&gt; ALTER SEQUENCE users_id_seq OWNED BY users.id;
 
 ALTER SEQUENCE
-</code></pre>
-
-<p>This association is recorded by Postgres in the <a href="https://www.postgresql.org/docs/current/catalog-pg-depend.html"><code>pg_depend</code></a> catalog, using an <code>a</code> dependency type.</p>
-
+</code></pre><p>This association is recorded by Postgres in the <a href="https://www.postgresql.org/docs/current/catalog-pg-depend.html"><code>pg_depend</code></a> catalog, using an <code>a</code> dependency type.</p>
 <blockquote>
 <p>DEPENDENCY_AUTO (a)</p>
-
 <p>The dependent object can be dropped separately from the referenced object, and should be automatically dropped (regardless of RESTRICT or CASCADE mode) if the referenced object is dropped. Example: a named constraint on a table is made autodependent on the table, so that it will go away if the table is dropped.</p>
 </blockquote>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#555">=&gt;</span> <span style="color:#069;font-weight:bold">SELECT</span> <span style="color:#555">*</span>
@@ -267,15 +265,17 @@ objsubid    <span style="color:#555">|</span> <span style="color:#f60">0</span>
 refclassid  <span style="color:#555">|</span> <span style="color:#f60">1259</span>
 refobjid    <span style="color:#555">|</span> <span style="color:#f60">40997</span>
 refobjsubid <span style="color:#555">|</span> <span style="color:#f60">1</span>
-deptype     <span style="color:#555">|</span> a</code></pre></div>
-<p>We can also verify that the <code>freehanging</code> sequence has no dependencies of type <code>a</code>.</p>
+deptype     <span style="color:#555">|</span> a
+
+</code></pre></div><p>We can also verify that the <code>freehanging</code> sequence has no dependencies of type <code>a</code>.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#555">=&gt;</span> <span style="color:#069;font-weight:bold">SELECT</span> <span style="color:#555">*</span>
 <span style="color:#069;font-weight:bold">FROM</span>   pg_depend
 <span style="color:#069;font-weight:bold">WHERE</span>  objid <span style="color:#555">=</span> <span style="color:#f60">41000</span>
        <span style="color:#069;font-weight:bold">AND</span> deptype <span style="color:#555">=</span> <span style="color:#c30">&#39;a&#39;</span>;
 
-(<span style="color:#f60">0</span> <span style="color:#069;font-weight:bold">rows</span>)</code></pre></div>
-<p>Now that we have a dependency identified for this relationship, we can verify that the dependency is indeed with the <code>users</code> table. For this, we will query using the dependency&rsquo;s <code>refobjid</code>.</p>
+(<span style="color:#f60">0</span> <span style="color:#069;font-weight:bold">rows</span>)
+
+</code></pre></div><p>Now that we have a dependency identified for this relationship, we can verify that the dependency is indeed with the <code>users</code> table. For this, we will query using the dependency&rsquo;s <code>refobjid</code>.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#555">=&gt;</span> <span style="color:#069;font-weight:bold">SELECT</span> <span style="color:#555">*</span>
 <span style="color:#069;font-weight:bold">FROM</span>   pg_class
 <span style="color:#069;font-weight:bold">WHERE</span>  relfilenode <span style="color:#555">=</span> <span style="color:#f60">40997</span>;
@@ -313,9 +313,9 @@ relfrozenxid        <span style="color:#555">|</span> <span style="color:#f60">5
 relminmxid          <span style="color:#555">|</span> <span style="color:#f60">1</span>
 relacl              <span style="color:#555">|</span>
 reloptions          <span style="color:#555">|</span>
-relpartbound        <span style="color:#555">|</span></code></pre></div>
-<p>We can indeed see that the dependency is on the <code>users</code> table.</p>
+relpartbound        <span style="color:#555">|</span>
 
+</code></pre></div><p>We can indeed see that the dependency is on the <code>users</code> table.</p>
 <p>What about the column associated with this dependency? Postgres stores information about table columns in <a href="https://www.postgresql.org/docs/current/catalog-pg-attribute.html"><code>pg_attribute</code></a> catalog. We can verify that the dependency is on the <code>id</code> column, by querying <code>pg_attribute</code>.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#555">=&gt;</span> <span style="color:#069;font-weight:bold">SELECT</span> <span style="color:#555">*</span>
 <span style="color:#069;font-weight:bold">FROM</span>   pg_attribute
@@ -346,9 +346,9 @@ attcollation  <span style="color:#555">|</span> <span style="color:#f60">0</span
 attacl        <span style="color:#555">|</span>
 attoptions    <span style="color:#555">|</span>
 attfdwoptions <span style="color:#555">|</span>
-attmissingval <span style="color:#555">|</span></code></pre></div>
-<p>We can see that the column corresponding to the dependency is indeed <code>id</code>.</p>
+attmissingval <span style="color:#555">|</span>
 
+</code></pre></div><p>We can see that the column corresponding to the dependency is indeed <code>id</code>.</p>
 <p>Our <code>join</code> can now be improved to use this information. First, we will add the table name:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#555">=&gt;</span> <span style="color:#069;font-weight:bold">SELECT</span> seqclass.relname     <span style="color:#069;font-weight:bold">AS</span> sequence_name,
        seqclass.relfilenode <span style="color:#069;font-weight:bold">AS</span> sequenceref,
@@ -366,9 +366,9 @@ attmissingval <span style="color:#555">|</span></code></pre></div>
 </span><span style="color:#09f;font-style:italic"></span>sequence_name <span style="color:#555">|</span> users_id_seq
 sequenceref  <span style="color:#555">|</span> <span style="color:#f60">41002</span>
 depobjref    <span style="color:#555">|</span> <span style="color:#f60">40997</span>
-<span style="color:#069;font-weight:bold">table_name</span>    <span style="color:#555">|</span> users</code></pre></div>
-<p>We have to join twice on the <code>pg_class</code> catalog - once to get the <code>sequence</code>&rsquo;s columns and once to get the <code>dependency</code>&rsquo;s columns. This leaves us with the name of the table and the sequence name.</p>
+<span style="color:#069;font-weight:bold">table_name</span>    <span style="color:#555">|</span> users
 
+</code></pre></div><p>We have to join twice on the <code>pg_class</code> catalog - once to get the <code>sequence</code>'s columns and once to get the <code>dependency</code>'s columns. This leaves us with the name of the table and the sequence name.</p>
 <p>Finally, we can perform a join on <code>pg_attribute</code> to get column information.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#555">=&gt;</span> <span style="color:#069;font-weight:bold">SELECT</span> seqclass.relname     <span style="color:#069;font-weight:bold">AS</span> sequence_name,
        seqclass.relfilenode <span style="color:#069;font-weight:bold">AS</span> sequenceref,
@@ -391,8 +391,9 @@ depobjref    <span style="color:#555">|</span> <span style="color:#f60">40997</s
 sequenceref   <span style="color:#555">|</span> <span style="color:#f60">41002</span>
 depobjref     <span style="color:#555">|</span> <span style="color:#f60">40997</span>
 <span style="color:#069;font-weight:bold">table_name</span>    <span style="color:#555">|</span> users
-<span style="color:#069;font-weight:bold">column_name</span>   <span style="color:#555">|</span> id</code></pre></div>
-<p>We can drop <code>sequenceref</code> and <code>depobjref</code> from the result as it is not of particular interest to us when reporting this.</p>
+<span style="color:#069;font-weight:bold">column_name</span>   <span style="color:#555">|</span> id
+
+</code></pre></div><p>We can drop <code>sequenceref</code> and <code>depobjref</code> from the result as it is not of particular interest to us when reporting this.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#555">=&gt;</span> <span style="color:#069;font-weight:bold">SELECT</span> seqclass.relname <span style="color:#069;font-weight:bold">AS</span> sequence_name,
        depclass.relname <span style="color:#069;font-weight:bold">AS</span> <span style="color:#069;font-weight:bold">table_name</span>,
        attrib.attname   <span style="color:#069;font-weight:bold">AS</span> <span style="color:#069;font-weight:bold">column_name</span>
@@ -410,9 +411,9 @@ depobjref     <span style="color:#555">|</span> <span style="color:#f60">40997</
 <span style="color:#555">-</span>[ RECORD <span style="color:#f60">1</span> ]<span style="color:#555">+</span><span style="color:#09f;font-style:italic">-------------
 </span><span style="color:#09f;font-style:italic"></span>sequenc_ename <span style="color:#555">|</span> users_id_seq
 <span style="color:#069;font-weight:bold">table_name</span>    <span style="color:#555">|</span> users
-<span style="color:#069;font-weight:bold">column_name</span>   <span style="color:#555">|</span> id</code></pre></div>
-<h2 id="postgres-versions-before-10">Postgres versions before 10</h2>
+<span style="color:#069;font-weight:bold">column_name</span>   <span style="color:#555">|</span> id
 
+</code></pre></div><h2 id="postgres-versions-before-10">Postgres versions before 10</h2>
 <p>The <code>pg_sequence</code> catalog was introduced in Postgres 10. For versions before 10, we need another way to get hold of the sequence&rsquo;s representation in <code>pg_class</code> so that we can look up the dependencies. Luckily, <code>pg_class</code> has a column <code>relkind</code> that holds this informations. For a sequence, this column will be <code>S</code>. We can use this in the <code>join</code> instead of <code>pg_sequence</code>.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#555">=&gt;</span> <span style="color:#069;font-weight:bold">SELECT</span> seqclass.relname <span style="color:#069;font-weight:bold">AS</span> sequence_name,
        depclass.relname <span style="color:#069;font-weight:bold">AS</span> <span style="color:#069;font-weight:bold">table_name</span>,
@@ -430,8 +431,9 @@ depobjref     <span style="color:#555">|</span> <span style="color:#f60">40997</
 <span style="color:#555">-</span>[ RECORD <span style="color:#f60">1</span> ]<span style="color:#555">-+</span><span style="color:#09f;font-style:italic">-------------
 </span><span style="color:#09f;font-style:italic"></span>sequence_name <span style="color:#555">|</span> users_id_seq
 <span style="color:#069;font-weight:bold">table_name</span>    <span style="color:#555">|</span> users
-<span style="color:#069;font-weight:bold">column_name</span>   <span style="color:#555">|</span> id</code></pre></div>
-<p>This seems like information that should be surfaced by Postgres in an easier to access way. In fact there is a patch from <a href="https://web.archive.org/web/20190508035646/https://www.postgresql.org/message-id/1228622212.10877.59.camel%40godzilla.local.scalefeather.com">2008</a> that would have introduced this capability. When Postgres 10 introduced the <a href="https://web.archive.org/web/20190508035646/https://www.postgresql.org/message-id/1228622212.10877.59.camel%40godzilla.local.scalefeather.com"><code>pg_sequences</code></a> catalog, it stopped at surfacing the id of the user who owns the sequence.</p>
+<span style="color:#069;font-weight:bold">column_name</span>   <span style="color:#555">|</span> id
+
+</code></pre></div><p>This seems like information that should be surfaced by Postgres in an easier to access way. In fact there is a patch from <a href="https://web.archive.org/web/20190508035646/https://www.postgresql.org/message-id/1228622212.10877.59.camel%40godzilla.local.scalefeather.com">2008</a> that would have introduced this capability. When Postgres 10 introduced the <a href="https://web.archive.org/web/20190508035646/https://www.postgresql.org/message-id/1228622212.10877.59.camel%40godzilla.local.scalefeather.com"><code>pg_sequences</code></a> catalog, it stopped at surfacing the id of the user who owns the sequence.</p>
         </div>
         <aside id="gh-comments-list">
           <script>
@@ -553,35 +555,35 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2019/05/09/looking-up-enum-types-and-values-in-postgres/?utm_source=site&amp;utm_medium=related">Looking up Enum types and values in Postgres</a></li>
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
             
             
             

@@ -82,13 +82,9 @@
            itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div>
           <p>Both Spring Security and Angular JS provide support for CSRF protection. However, getting these to work together to provide protection from CSRF requires some non-obvious configuration. This blog post explains how to add CSRF protection to an application that uses Spring Security with an Angular JS front end.</p>
-
-<p>Cross-Site Request Forgery (CSRF) <sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup> is an attack that forces an end user to execute unwanted actions on a web application in which they&rsquo;re currently authenticated. This blog post implements the CSRF token part of the protection described by OWASP. The application still needs to have protection to enforce the right Origin for requests.</p>
-
+<p>Cross-Site Request Forgery (CSRF) <sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> is an attack that forces an end user to execute unwanted actions on a web application in which they&rsquo;re currently authenticated. This blog post implements the CSRF token part of the protection described by OWASP. The application still needs to have protection to enforce the right Origin for requests.</p>
 <h3 id="front-end">Front end</h3>
-
 <p>For this example, we will build a simple Spring Boot application with an Angular front end. The front end is based on the application we built for the <a href="/blog/2016/07/02/jwt-authentication-with-spring-web-part-1/">series</a> on authentication with JWT. The changes are in how the initial authentication is done - we will be using Basic Auth in this example to perform the initial authentication.</p>
-
 <p>This involves changing the <code>LoginService</code> to this:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript">(<span style="color:#069;font-weight:bold">function</span>(angular) {
   <span style="color:#069;font-weight:bold">var</span> LoginFactory <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">function</span>($http) {
@@ -118,8 +114,7 @@
 
   HelloFactory.$inject <span style="color:#555">=</span> [<span style="color:#c30">&#39;$resource&#39;</span>];
   angular.module(<span style="color:#c30">&#39;jwtDemo.services&#39;</span>).factory(<span style="color:#c30">&#39;Hello&#39;</span>, HelloFactory);}(angular));
-</code></pre></div>
-<p>And the controllers are changed to use these services.</p>
+</code></pre></div><p>And the controllers are changed to use these services.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript">(<span style="color:#069;font-weight:bold">function</span>(angular) {
   <span style="color:#069;font-weight:bold">var</span> LoginController <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">function</span>($scope, $localStorage, $http, $location, Login) {
     $scope.login <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">function</span>(username, password) {
@@ -158,11 +153,8 @@
   ProfileController.inject <span style="color:#555">=</span> [<span style="color:#c30">&#39;$scope&#39;</span>, <span style="color:#c30">&#39;$localStorage&#39;</span>, <span style="color:#c30">&#39;Hello&#39;</span>];
   angular.module(<span style="color:#c30">&#34;jwtDemo.controllers&#34;</span>).controller(<span style="color:#c30">&#34;ProfileController&#34;</span>, ProfileController);
   }(angular));
-</code></pre></div>
-<p>It can be noted that there are no CSRF specific code in there. We will be relying on Angular&rsquo;s CSRF (or XSRF as Angular refers to it) protection.</p>
-
+</code></pre></div><p>It can be noted that there are no CSRF specific code in there. We will be relying on Angular&rsquo;s CSRF (or XSRF as Angular refers to it) protection.</p>
 <h3 id="the-back-end">The back end</h3>
-
 <p>The main API returns a greeting:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@RestController</span>
 <span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span><span style="color:#c30">&#34;/hello&#34;</span><span style="color:#555">)</span>
@@ -173,8 +165,8 @@
   <span style="color:#069;font-weight:bold">public</span> Map<span style="color:#555">&lt;</span>String<span style="color:#555">,</span> String<span style="color:#555">&gt;</span> <span style="color:#c0f">hello</span><span style="color:#555">()</span> <span style="color:#555">{</span>
     <span style="color:#069;font-weight:bold">return</span> Collections<span style="color:#555">.</span><span style="color:#309">singletonMap</span><span style="color:#555">(</span><span style="color:#c30">&#34;message&#34;</span><span style="color:#555">,</span> <span style="color:#c30">&#34;hello&#34;</span><span style="color:#555">);</span>
   <span style="color:#555">}</span>
-<span style="color:#555">}</span></code></pre></div>
-<p>We also have an end point that clients can authenticate against and it returns the currently authenticated user:</p>
+<span style="color:#555">}</span>
+</code></pre></div><p>We also have an end point that clients can authenticate against and it returns the currently authenticated user:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@RestController</span>
 <span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span><span style="color:#c30">&#34;/login&#34;</span><span style="color:#555">)</span>
 <span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">LoginController</span> <span style="color:#555">{</span>
@@ -184,9 +176,8 @@
   <span style="color:#069;font-weight:bold">public</span> Map<span style="color:#555">&lt;</span>String<span style="color:#555">,</span> Object<span style="color:#555">&gt;</span> <span style="color:#c0f">login</span><span style="color:#555">(</span>Authentication auth<span style="color:#555">)</span> <span style="color:#555">{</span>
     <span style="color:#069;font-weight:bold">return</span> Collections<span style="color:#555">.</span><span style="color:#309">singletonMap</span><span style="color:#555">(</span><span style="color:#c30">&#34;user&#34;</span><span style="color:#555">,</span> auth<span style="color:#555">.</span><span style="color:#309">getName</span><span style="color:#555">());</span>
   <span style="color:#555">}</span>
-<span style="color:#555">}</span></code></pre></div>
-<h3 id="security">Security</h3>
-
+<span style="color:#555">}</span>
+</code></pre></div><h3 id="security">Security</h3>
 <p>In this example, we will be using an in-memory authentication. We will also be using a header based session instead of a Cookie based session by wiring up <code>HeaderHttpSessionStrategy</code>. Sessions are stored in-memory using <code>MapSessionRepository</code>. We also secure all end points except the front end components and the <code>/login</code> end point.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@EnableWebSecurity</span>
 <span style="color:#99f">@Configuration</span>
@@ -233,12 +224,12 @@
   <span style="color:#069;font-weight:bold">public</span> HeaderHttpSessionStrategy <span style="color:#c0f">sessionStrategy</span><span style="color:#555">()</span> <span style="color:#555">{</span>
     <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">new</span> HeaderHttpSessionStrategy<span style="color:#555">();</span>
   <span style="color:#555">}</span>
-<span style="color:#555">}</span></code></pre></div>
-<p>With this in place, access to the end point <code>/hello</code> is not permitted unless authenticated.</p>
+<span style="color:#555">}</span>
+</code></pre></div><p>With this in place, access to the end point <code>/hello</code> is not permitted unless authenticated.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ curl -s -X GET <span style="color:#c30">&#34;http://localhost:8080/hello&#34;</span> | jq .
 <span style="color:#555">{</span>
-  <span style="color:#c30">&#34;timestamp&#34;</span>: <span style="color:#f60">1469068247812</span>,
-  <span style="color:#c30">&#34;status&#34;</span>: <span style="color:#f60">401</span>,
+  <span style="color:#c30">&#34;timestamp&#34;</span>: 1469068247812,
+  <span style="color:#c30">&#34;status&#34;</span>: 401,
   <span style="color:#c30">&#34;error&#34;</span>: <span style="color:#c30">&#34;Unauthorized&#34;</span>,
   <span style="color:#c30">&#34;message&#34;</span>: <span style="color:#c30">&#34;Full authentication is required to access this resource&#34;</span>,
   <span style="color:#c30">&#34;path&#34;</span>: <span style="color:#c30">&#34;/hello&#34;</span>
@@ -257,15 +248,15 @@ $ curl -s -v -X POST <span style="color:#c30">&#34;http://localhost:8080/login&#
 &lt; HTTP/1.1 <span style="color:#f60">200</span> OK
 &lt; Server: Apache-Coyote/1.1
 &lt; X-Content-Type-Options: nosniff
-&lt; X-XSS-Protection: <span style="color:#f60">1</span>; <span style="color:#033">mode</span><span style="color:#555">=</span>block
-&lt; Cache-Control: no-cache, no-store, max-age<span style="color:#555">=</span><span style="color:#f60">0</span>, must-revalidate
+&lt; X-XSS-Protection: 1; <span style="color:#033">mode</span><span style="color:#555">=</span>block
+&lt; Cache-Control: no-cache, no-store, max-age<span style="color:#555">=</span>0, must-revalidate
 &lt; Pragma: no-cache
 &lt; Expires: <span style="color:#f60">0</span>
 &lt; X-Frame-Options: DENY
 &lt; x-auth-token: 4ec4c614-0dc8-4e64-afa6-bd0ac03517b5
 &lt; Content-Type: application/json;<span style="color:#033">charset</span><span style="color:#555">=</span>UTF-8
 &lt; Transfer-Encoding: chunked
-&lt; Date: Thu, <span style="color:#f60">21</span> Jul <span style="color:#f60">2016</span> <span style="color:#f60">02</span>:31:10 GMT
+&lt; Date: Thu, <span style="color:#f60">21</span> Jul <span style="color:#f60">2016</span> 02:31:10 GMT
 &lt;
 <span style="color:#555">{</span> <span style="color:#555">[</span><span style="color:#f60">18</span> bytes data<span style="color:#555">]</span>
 * Connection <span style="color:#09f;font-style:italic">#0 to host localhost left intact</span>
@@ -276,9 +267,8 @@ $ curl -s -v -X POST <span style="color:#c30">&#34;http://localhost:8080/login&#
 $ curl -s -X GET <span style="color:#c30">&#34;http://localhost:8080/hello&#34;</span> -H <span style="color:#c30">&#34;x-auth-token: 4ec4c614-0dc8-4e64-afa6-bd0ac03517b5&#34;</span> | jq .
 <span style="color:#555">{</span>
   <span style="color:#c30">&#34;message&#34;</span>: <span style="color:#c30">&#34;hello&#34;</span>
-<span style="color:#555">}</span></code></pre></div>
-<h3 id="enabling-csrf-protection">Enabling CSRF protection</h3>
-
+<span style="color:#555">}</span>
+</code></pre></div><h3 id="enabling-csrf-protection">Enabling CSRF protection</h3>
 <p>In Spring Security, CSRF protection can be enabled by replacing <code>csrf().disable()</code> with <code>.csrf()</code>.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    http
         <span style="color:#555">.</span><span style="color:#309">authorizeRequests</span><span style="color:#555">()</span>
@@ -289,18 +279,17 @@ $ curl -s -X GET <span style="color:#c30">&#34;http://localhost:8080/hello&#34;<
         <span style="color:#555">.</span><span style="color:#309">and</span><span style="color:#555">()</span>
         <span style="color:#555">.</span><span style="color:#309">csrf</span><span style="color:#555">()</span>
         <span style="color:#555">.</span><span style="color:#309">and</span><span style="color:#555">()</span>
-        <span style="color:#555">.</span><span style="color:#309">httpBasic</span><span style="color:#555">();</span></code></pre></div>
-<p>With this in place however, we notice that all end points, including static assets and the login end point need CSRF protection tokens to access.</p>
+        <span style="color:#555">.</span><span style="color:#309">httpBasic</span><span style="color:#555">();</span>
+</code></pre></div><p>With this in place however, we notice that all end points, including static assets and the login end point need CSRF protection tokens to access.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ curl -s -X POST <span style="color:#c30">&#34;http://localhost:8080/login&#34;</span> -uuser:password | jq .
 <span style="color:#555">{</span>
-  <span style="color:#c30">&#34;timestamp&#34;</span>: <span style="color:#f60">1469068611814</span>,
-  <span style="color:#c30">&#34;status&#34;</span>: <span style="color:#f60">403</span>,
+  <span style="color:#c30">&#34;timestamp&#34;</span>: 1469068611814,
+  <span style="color:#c30">&#34;status&#34;</span>: 403,
   <span style="color:#c30">&#34;error&#34;</span>: <span style="color:#c30">&#34;Forbidden&#34;</span>,
   <span style="color:#c30">&#34;message&#34;</span>: <span style="color:#c30">&#34;Expected CSRF token not found. Has your session expired?&#34;</span>,
   <span style="color:#c30">&#34;path&#34;</span>: <span style="color:#c30">&#34;/login&#34;</span>
-<span style="color:#555">}</span></code></pre></div>
-<h3 id="protecting-urls-selectively">Protecting URLs selectively</h3>
-
+<span style="color:#555">}</span>
+</code></pre></div><h3 id="protecting-urls-selectively">Protecting URLs selectively</h3>
 <p>We want a mechanism to specify a list of URL patterns for which CSRF protection need to be turned OFF. Spring Security provides a <code>requireCsrfProtectionMatcher</code> method. With this, we will add a matcher that returns false when any of the URL patters we have matches the current request&rsquo;s path.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">http
         <span style="color:#555">.</span><span style="color:#309">authorizeRequests</span><span style="color:#555">()</span>
@@ -312,8 +301,8 @@ $ curl -s -X GET <span style="color:#c30">&#34;http://localhost:8080/hello&#34;<
         <span style="color:#555">.</span><span style="color:#309">csrf</span><span style="color:#555">()</span>
         <span style="color:#555">.</span><span style="color:#309">requireCsrfProtectionMatcher</span><span style="color:#555">(</span><span style="color:#069;font-weight:bold">new</span> NoAntPathRequestMatcher<span style="color:#555">(</span>patterns<span style="color:#555">))</span>
         <span style="color:#555">.</span><span style="color:#309">and</span><span style="color:#555">()</span>
-        <span style="color:#555">.</span><span style="color:#309">httpBasic</span><span style="color:#555">();</span></code></pre></div>
-<p>The <code>NoAntPathRequestMatcher</code> can be implemented as a combination of two request matchers provided by Spring - <code>NegatedRequestMatcher</code> and <code>AndRequestMatcher</code>:</p>
+        <span style="color:#555">.</span><span style="color:#309">httpBasic</span><span style="color:#555">();</span>
+</code></pre></div><p>The <code>NoAntPathRequestMatcher</code> can be implemented as a combination of two request matchers provided by Spring - <code>NegatedRequestMatcher</code> and <code>AndRequestMatcher</code>:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">NoAntPathRequestMatcher</span> <span style="color:#069;font-weight:bold">implements</span> RequestMatcher <span style="color:#555">{</span>
   <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">final</span> AndRequestMatcher andRequestMatcher<span style="color:#555">;</span>
 
@@ -330,8 +319,8 @@ $ curl -s -X GET <span style="color:#c30">&#34;http://localhost:8080/hello&#34;<
   <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">boolean</span> <span style="color:#c0f">matches</span><span style="color:#555">(</span>HttpServletRequest request<span style="color:#555">)</span> <span style="color:#555">{</span>
     <span style="color:#069;font-weight:bold">return</span> andRequestMatcher<span style="color:#555">.</span><span style="color:#309">matches</span><span style="color:#555">(</span>request<span style="color:#555">);</span>
   <span style="color:#555">}</span>
-<span style="color:#555">}</span></code></pre></div>
-<p>With this in place, we should be able to authenticate.</p>
+<span style="color:#555">}</span>
+</code></pre></div><p>With this in place, we should be able to authenticate.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ curl -s -v -X POST <span style="color:#c30">&#34;http://localhost:8080/login&#34;</span> -uuser:password | jq .
 *   Trying ::1...
 * Connected to localhost <span style="color:#555">(</span>::1<span style="color:#555">)</span> port <span style="color:#f60">8080</span> <span style="color:#555">(</span><span style="color:#09f;font-style:italic">#0)</span>
@@ -345,25 +334,23 @@ $ curl -s -X GET <span style="color:#c30">&#34;http://localhost:8080/hello&#34;<
 &lt; HTTP/1.1 <span style="color:#f60">200</span> OK
 &lt; Server: Apache-Coyote/1.1
 &lt; X-Content-Type-Options: nosniff
-&lt; X-XSS-Protection: <span style="color:#f60">1</span>; <span style="color:#033">mode</span><span style="color:#555">=</span>block
-&lt; Cache-Control: no-cache, no-store, max-age<span style="color:#555">=</span><span style="color:#f60">0</span>, must-revalidate
+&lt; X-XSS-Protection: 1; <span style="color:#033">mode</span><span style="color:#555">=</span>block
+&lt; Cache-Control: no-cache, no-store, max-age<span style="color:#555">=</span>0, must-revalidate
 &lt; Pragma: no-cache
 &lt; Expires: <span style="color:#f60">0</span>
 &lt; X-Frame-Options: DENY
 &lt; x-auth-token: c5af3ea9-e3f8-4425-a6e8-de35588af0ca
 &lt; Content-Type: application/json;<span style="color:#033">charset</span><span style="color:#555">=</span>UTF-8
 &lt; Transfer-Encoding: chunked
-&lt; Date: Thu, <span style="color:#f60">21</span> Jul <span style="color:#f60">2016</span> <span style="color:#f60">02</span>:44:28 GMT
+&lt; Date: Thu, <span style="color:#f60">21</span> Jul <span style="color:#f60">2016</span> 02:44:28 GMT
 &lt;
 <span style="color:#555">{</span> <span style="color:#555">[</span><span style="color:#f60">18</span> bytes data<span style="color:#555">]</span>
 * Connection <span style="color:#09f;font-style:italic">#0 to host localhost left intact</span>
 <span style="color:#555">{</span>
   <span style="color:#c30">&#34;user&#34;</span>: <span style="color:#c30">&#34;user&#34;</span>
-<span style="color:#555">}</span></code></pre></div>
-<p>But we do not see anything in the response that tells the client what the token allocated to it for the current session is. This is because Spring Security&rsquo;s CSRF protection by default provides enforcement and allocation of tokens, but it does not expose the token granted to the client out of the box.</p>
-
+<span style="color:#555">}</span>
+</code></pre></div><p>But we do not see anything in the response that tells the client what the token allocated to it for the current session is. This is because Spring Security&rsquo;s CSRF protection by default provides enforcement and allocation of tokens, but it does not expose the token granted to the client out of the box.</p>
 <h3 id="granting-csrf-token-to-the-client">Granting CSRF Token to the client</h3>
-
 <p>One way to grant the client the CSRF token allocated to the current session will be to add a filter that sets the token as a Cookie once it is available. For this, we will add a filter immediately after the session is assigned by Spring Security&rsquo;s <code>SessionManagementFilter</code>.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    http
         <span style="color:#555">.</span><span style="color:#309">authorizeRequests</span><span style="color:#555">()</span>
@@ -377,8 +364,8 @@ $ curl -s -X GET <span style="color:#c30">&#34;http://localhost:8080/hello&#34;<
         <span style="color:#555">.</span><span style="color:#309">and</span><span style="color:#555">()</span>
         <span style="color:#555">.</span><span style="color:#309">httpBasic</span><span style="color:#555">()</span>
         <span style="color:#555">.</span><span style="color:#309">and</span><span style="color:#555">()</span>
-        <span style="color:#555">.</span><span style="color:#309">addFilterAfter</span><span style="color:#555">(</span><span style="color:#069;font-weight:bold">new</span> CsrfGrantingFilter<span style="color:#555">(),</span> SessionManagementFilter<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">);</span></code></pre></div>
-<p>The filter is implemented as follows:</p>
+        <span style="color:#555">.</span><span style="color:#309">addFilterAfter</span><span style="color:#555">(</span><span style="color:#069;font-weight:bold">new</span> CsrfGrantingFilter<span style="color:#555">(),</span> SessionManagementFilter<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">);</span>
+</code></pre></div><p>The filter is implemented as follows:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">CsrfGrantingFilter</span> <span style="color:#069;font-weight:bold">implements</span> Filter <span style="color:#555">{</span>
   <span style="color:#99f">@Override</span>
   <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">init</span><span style="color:#555">(</span>FilterConfig filterConfig<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> ServletException <span style="color:#555">{}</span>
@@ -404,16 +391,15 @@ $ curl -s -X GET <span style="color:#c30">&#34;http://localhost:8080/hello&#34;<
 
   <span style="color:#99f">@Override</span>
   <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">destroy</span><span style="color:#555">()</span> <span style="color:#555">{}</span>
-<span style="color:#555">}</span></code></pre></div>
-<p>The filter checks to see if the current request has a CSRF token set on it by Spring Security&rsquo;s <code>CsrfFilter</code> and then sets it as a Cookie on the response, if the current request was made by a client to authenticate.</p>
-
+<span style="color:#555">}</span>
+</code></pre></div><p>The filter checks to see if the current request has a CSRF token set on it by Spring Security&rsquo;s <code>CsrfFilter</code> and then sets it as a Cookie on the response, if the current request was made by a client to authenticate.</p>
 <p>With this filter in place, when we authenticate, we will see the following behavior:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ curl -I -X POST <span style="color:#c30">&#34;http://localhost:8080/login&#34;</span> -uuser:password
 HTTP/1.1 <span style="color:#f60">200</span> OK
 Server: Apache-Coyote/1.1
 X-Content-Type-Options: nosniff
-X-XSS-Protection: <span style="color:#f60">1</span>; <span style="color:#033">mode</span><span style="color:#555">=</span>block
-Cache-Control: no-cache, no-store, max-age<span style="color:#555">=</span><span style="color:#f60">0</span>, must-revalidate
+X-XSS-Protection: 1; <span style="color:#033">mode</span><span style="color:#555">=</span>block
+Cache-Control: no-cache, no-store, max-age<span style="color:#555">=</span>0, must-revalidate
 Pragma: no-cache
 Expires: <span style="color:#f60">0</span>
 X-Frame-Options: DENY
@@ -421,13 +407,10 @@ Set-Cookie: CSRF-TOKEN<span style="color:#555">=</span>628ae2c8-f35b-49a4-acc7-0
 x-auth-token: 9444d058-eccb-471d-bc0d-460fd4c968e8
 Content-Type: application/json;<span style="color:#033">charset</span><span style="color:#555">=</span>UTF-8
 Transfer-Encoding: chunked
-Date: Thu, <span style="color:#f60">21</span> Jul <span style="color:#f60">2016</span> <span style="color:#f60">02</span>:51:19 GMT</code></pre></div>
-<p>We can clearly see that the CSRF token is sent to the client as a Cookie. At this point, we can make changes to our front end to send this token with every subsequent request. However, it is easier to use Angular&rsquo;s support for CSRF tokens.</p>
-
+Date: Thu, <span style="color:#f60">21</span> Jul <span style="color:#f60">2016</span> 02:51:19 GMT
+</code></pre></div><p>We can clearly see that the CSRF token is sent to the client as a Cookie. At this point, we can make changes to our front end to send this token with every subsequent request. However, it is easier to use Angular&rsquo;s support for CSRF tokens.</p>
 <h3 id="customizing-csrf-protection-for-angular">Customizing CSRF protection for Angular</h3>
-
-<p>Angular&rsquo;s CSRF protection <sup class="footnote-ref" id="fnref:2"><a href="#fn:2">2</a></sup> uses the cookie <code>XSRF-TOKEN</code> it expects from server responses and the header <code>X-XSRF-TOKEN</code> which it will send for every subsequent request, once the Cookie is found in a response. We will have to configure Spring Security to use this header and token instead of it&rsquo;s default header <code>X-CSRF-TOKEN</code> and Cookie name <code>CSRF-TOKEN</code>.</p>
-
+<p>Angular&rsquo;s CSRF protection <sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup> uses the cookie <code>XSRF-TOKEN</code> it expects from server responses and the header <code>X-XSRF-TOKEN</code> which it will send for every subsequent request, once the Cookie is found in a response. We will have to configure Spring Security to use this header and token instead of it&rsquo;s default header <code>X-CSRF-TOKEN</code> and Cookie name <code>CSRF-TOKEN</code>.</p>
 <p>The first step is to pass Spring Security a custom <code>CsrfTokenRepository</code>:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    http
         <span style="color:#555">.</span><span style="color:#309">authorizeRequests</span><span style="color:#555">()</span>
@@ -442,14 +425,15 @@ Date: Thu, <span style="color:#f60">21</span> Jul <span style="color:#f60">2016<
         <span style="color:#555">.</span><span style="color:#309">and</span><span style="color:#555">()</span>
         <span style="color:#555">.</span><span style="color:#309">httpBasic</span><span style="color:#555">()</span>
         <span style="color:#555">.</span><span style="color:#309">and</span><span style="color:#555">()</span>
-        <span style="color:#555">.</span><span style="color:#309">addFilterAfter</span><span style="color:#555">(</span><span style="color:#069;font-weight:bold">new</span> CsrfGrantingFilter<span style="color:#555">(),</span> SessionManagementFilter<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">);</span></code></pre></div>
-<p>The <code>CsrfTokenRepository</code> is configured with the right header:</p>
+        <span style="color:#555">.</span><span style="color:#309">addFilterAfter</span><span style="color:#555">(</span><span style="color:#069;font-weight:bold">new</span> CsrfGrantingFilter<span style="color:#555">(),</span> SessionManagementFilter<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">);</span>
+
+</code></pre></div><p>The <code>CsrfTokenRepository</code> is configured with the right header:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">  <span style="color:#069;font-weight:bold">private</span> CsrfTokenRepository <span style="color:#c0f">csrfTokenRepository</span><span style="color:#555">()</span> <span style="color:#555">{</span>
     HttpSessionCsrfTokenRepository repository <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">new</span> HttpSessionCsrfTokenRepository<span style="color:#555">();</span>
     repository<span style="color:#555">.</span><span style="color:#309">setHeaderName</span><span style="color:#555">(</span><span style="color:#c30">&#34;X-XSRF-TOKEN&#34;</span><span style="color:#555">);</span>
     <span style="color:#069;font-weight:bold">return</span> repository<span style="color:#555">;</span>
-  <span style="color:#555">}</span></code></pre></div>
-<p>The next step is to set the Cookie with the right name in the <code>CsrfGrantingFilter</code>:</p>
+  <span style="color:#555">}</span>
+</code></pre></div><p>The next step is to set the Cookie with the right name in the <code>CsrfGrantingFilter</code>:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">CsrfGrantingFilter</span> <span style="color:#069;font-weight:bold">implements</span> Filter <span style="color:#555">{</span>
 
   <span style="color:#99f">@Override</span>
@@ -476,27 +460,24 @@ Date: Thu, <span style="color:#f60">21</span> Jul <span style="color:#f60">2016<
 
   <span style="color:#99f">@Override</span>
   <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">destroy</span><span style="color:#555">()</span> <span style="color:#555">{}</span>
-<span style="color:#555">}</span></code></pre></div>
-<p>With these configurations in place, the front end is able to authenticate and obtain a token Cookie which Angular will pass for every subsequent request.</p>
-
+<span style="color:#555">}</span>
+</code></pre></div><p>With these configurations in place, the front end is able to authenticate and obtain a token Cookie which Angular will pass for every subsequent request.</p>
 <h3 id="configuring-order-of-enforcement">Configuring order of enforcement</h3>
-
 <p>The only drawback to the configurations we have developed so far is that when a client makes a request to a protected end point with out Authentication and CSRF token, it will receive a <code>403 Forbidden</code> instead of a <code>401 Unauthorized</code>.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ curl -I -X GET <span style="color:#c30">&#34;http://localhost:8080/hello&#34;</span>
 HTTP/1.1 <span style="color:#f60">403</span> Forbidden
 Server: Apache-Coyote/1.1
 X-Content-Type-Options: nosniff
-X-XSS-Protection: <span style="color:#f60">1</span>; <span style="color:#033">mode</span><span style="color:#555">=</span>block
-Cache-Control: no-cache, no-store, max-age<span style="color:#555">=</span><span style="color:#f60">0</span>, must-revalidate
+X-XSS-Protection: 1; <span style="color:#033">mode</span><span style="color:#555">=</span>block
+Cache-Control: no-cache, no-store, max-age<span style="color:#555">=</span>0, must-revalidate
 Pragma: no-cache
 Expires: <span style="color:#f60">0</span>
 X-Frame-Options: DENY
 x-auth-token: a0abe09c-94cb-4966-9ee6-a5327f3bd939
 Content-Type: application/json;<span style="color:#033">charset</span><span style="color:#555">=</span>UTF-8
 Transfer-Encoding: chunked
-Date: Thu, <span style="color:#f60">21</span> Jul <span style="color:#f60">2016</span> <span style="color:#f60">03</span>:16:01 GMT</code></pre></div>
-<p>This happens because by default, when CSRF protection is enabled, <code>CsrfFilter</code> appears in the filter chain before <code>FilterSecurityInterceptor</code>. For this example, this is the order:</p>
-
+Date: Thu, <span style="color:#f60">21</span> Jul <span style="color:#f60">2016</span> 03:16:01 GMT
+</code></pre></div><p>This happens because by default, when CSRF protection is enabled, <code>CsrfFilter</code> appears in the filter chain before <code>FilterSecurityInterceptor</code>. For this example, this is the order:</p>
 <pre><code>0 = {WebAsyncManagerIntegrationFilter@7344}
 1 = {SecurityContextPersistenceFilter@7343}
 2 = {HeaderWriterFilter@7342}
@@ -510,9 +491,7 @@ Date: Thu, <span style="color:#f60">21</span> Jul <span style="color:#f60">2016<
 10 = {CsrfGrantingFilter@8978}
 11 = {ExceptionTranslationFilter@9333}
 12 = {FilterSecurityInterceptor@9334}
-</code></pre>
-
-<p>If this is not the behavior desirable for your application, we can disable the default CSRF protection and enable the required filters, enforcing the right order. This is achieved with the following configuration:</p>
+</code></pre><p>If this is not the behavior desirable for your application, we can disable the default CSRF protection and enable the required filters, enforcing the right order. This is achieved with the following configuration:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    http
         <span style="color:#555">.</span><span style="color:#309">authorizeRequests</span><span style="color:#555">()</span>
         <span style="color:#555">.</span><span style="color:#309">antMatchers</span><span style="color:#555">(</span>patterns<span style="color:#555">)</span>
@@ -525,8 +504,9 @@ Date: Thu, <span style="color:#f60">21</span> Jul <span style="color:#f60">2016<
         <span style="color:#555">.</span><span style="color:#309">httpBasic</span><span style="color:#555">()</span>
         <span style="color:#555">.</span><span style="color:#309">and</span><span style="color:#555">()</span>
         <span style="color:#555">.</span><span style="color:#309">addFilterAfter</span><span style="color:#555">(</span>csrfFilter<span style="color:#555">(</span>patterns<span style="color:#555">),</span> FilterSecurityInterceptor<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">)</span>
-        <span style="color:#555">.</span><span style="color:#309">addFilterAfter</span><span style="color:#555">(</span><span style="color:#069;font-weight:bold">new</span> CsrfGrantingFilter<span style="color:#555">(),</span> CsrfFilter<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">);</span></code></pre></div>
-<p>The CSRF filter is built with the right repository and URL matchers:</p>
+        <span style="color:#555">.</span><span style="color:#309">addFilterAfter</span><span style="color:#555">(</span><span style="color:#069;font-weight:bold">new</span> CsrfGrantingFilter<span style="color:#555">(),</span> CsrfFilter<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">);</span>
+
+</code></pre></div><p>The CSRF filter is built with the right repository and URL matchers:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">  <span style="color:#069;font-weight:bold">private</span> Filter <span style="color:#c0f">csrfFilter</span><span style="color:#555">(</span>String<span style="color:#555">[]</span> patterns<span style="color:#555">)</span> <span style="color:#555">{</span>
     CsrfFilter csrfFilter <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">new</span> CsrfFilter<span style="color:#555">(</span>csrfTokenRepository<span style="color:#555">());</span>
     csrfFilter<span style="color:#555">.</span><span style="color:#309">setRequireCsrfProtectionMatcher</span><span style="color:#555">(</span>csrfProtectionMatcher<span style="color:#555">(</span>patterns<span style="color:#555">));</span>
@@ -541,14 +521,14 @@ Date: Thu, <span style="color:#f60">21</span> Jul <span style="color:#f60">2016<
     HttpSessionCsrfTokenRepository repository <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">new</span> HttpSessionCsrfTokenRepository<span style="color:#555">();</span>
     repository<span style="color:#555">.</span><span style="color:#309">setHeaderName</span><span style="color:#555">(</span><span style="color:#c30">&#34;X_XSRF_TOKEN&#34;</span><span style="color:#555">);</span>
     <span style="color:#069;font-weight:bold">return</span> repository<span style="color:#555">;</span>
-  <span style="color:#555">}</span></code></pre></div>
-<p>This will result in the right order of errors:</p>
+  <span style="color:#555">}</span>
+</code></pre></div><p>This will result in the right order of errors:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ curl -I -X GET <span style="color:#c30">&#34;http://localhost:8080/hello&#34;</span>
 HTTP/1.1 <span style="color:#f60">401</span> Unauthorized
 Server: Apache-Coyote/1.1
 X-Content-Type-Options: nosniff
-X-XSS-Protection: <span style="color:#f60">1</span>; <span style="color:#033">mode</span><span style="color:#555">=</span>block
-Cache-Control: no-cache, no-store, max-age<span style="color:#555">=</span><span style="color:#f60">0</span>, must-revalidate
+X-XSS-Protection: 1; <span style="color:#033">mode</span><span style="color:#555">=</span>block
+Cache-Control: no-cache, no-store, max-age<span style="color:#555">=</span>0, must-revalidate
 Pragma: no-cache
 Expires: <span style="color:#f60">0</span>
 X-Frame-Options: DENY
@@ -556,19 +536,20 @@ WWW-Authenticate: Basic <span style="color:#033">realm</span><span style="color:
 x-auth-token: 08a06acd-3398-4fc4-af25-23d3f4155a2b
 Content-Type: application/json;<span style="color:#033">charset</span><span style="color:#555">=</span>UTF-8
 Transfer-Encoding: chunked
-Date: Thu, <span style="color:#f60">21</span> Jul <span style="color:#f60">2016</span> <span style="color:#f60">03</span>:27:58 GMT</code></pre></div>
-<p>This is the end of this blog post. In this example, we built an application with CSRF protection that works well with Angular JS. The code for this blog post is available <a href="https://github.com/sdqali/csrf-demo">on GitHub</a>.</p>
-<div class="footnotes">
+Date: Thu, <span style="color:#f60">21</span> Jul <span style="color:#f60">2016</span> 03:27:58 GMT
 
-<hr />
-
+</code></pre></div><p>This is the end of this blog post. In this example, we built an application with CSRF protection that works well with Angular JS. The code for this blog post is available <a href="https://github.com/sdqali/csrf-demo">on GitHub</a>.</p>
+<section class="footnotes" role="doc-endnotes">
+<hr>
 <ol>
-<li id="fn:1">For a detailed explanation, see Cross-Site Request Forgery (CSRF) <a href="https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)">on OWASP</a>.
- <a class="footnote-return" href="#fnref:1"><sup>[return]</sup></a></li>
-<li id="fn:2">See section <em>Cross Site Request Forgery (XSRF) Protection</em> in <a href="https://docs.angularjs.org/api/ng/service/$http">the official documentation</a>.
- <a class="footnote-return" href="#fnref:2"><sup>[return]</sup></a></li>
+<li id="fn:1" role="doc-endnote">
+<p>For a detailed explanation, see Cross-Site Request Forgery (CSRF) <a href="https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)">on OWASP</a>. <a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:2" role="doc-endnote">
+<p>See section <em>Cross Site Request Forgery (XSRF) Protection</em> in <a href="https://docs.angularjs.org/api/ng/service/$http">the official documentation</a>. <a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
 </ol>
-</div>
+</section>
         </div>
         <aside id="gh-comments-list">
           <script>
@@ -698,6 +679,54 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2019/03/23/understanding-trailing-processing-in-sas-input/?utm_source=site&amp;utm_medium=related">Understanding trailing @ processing in SAS input</a></li>
             
             
@@ -746,7 +775,107 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2016/11/30/implementing-feature-toggles-for-a-spring-boot-application-part-4/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 4</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -770,7 +899,47 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2016/11/11/setting-up-a-secure-etcd-cluster-behind-a-proxy/?utm_source=site&amp;utm_medium=related">Setting up a secure etcd cluster behind a proxy</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -790,13 +959,41 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2016/07/16/controlling-redis-auto-configuration-for-spring-boot-session/?utm_source=site&amp;utm_medium=related">Controlling Redis auto-configuration for Spring Boot Session</a></li>
             
             
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2016/07/14/jwt-authentication-with-spring-web-part-5/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 5</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -820,6 +1017,10 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2016/07/03/jwt-authentication-with-spring-web-part-1/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 1</a></li>
             
             
@@ -832,6 +1033,10 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2016/06/29/injecting-dependencies-into-a-spring-configuration/?utm_source=site&amp;utm_medium=related">Injecting dependencies into a Spring @Configuration</a></li>
             
             
@@ -839,6 +1044,38 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2016/06/08/filtering-responses-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Filtering responses in Spring MVC</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -878,6 +1115,22 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2015/12/15/thoughts-on-open-graph-tags/?utm_source=site&amp;utm_medium=related">Thoughts on Open Graph tags</a></li>
             
             
@@ -908,7 +1161,23 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2015/12/05/validating-requestparams-and-pathvariables-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Validating RequestParams and PathVariables in Spring MVC</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -926,13 +1195,121 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2015/05/22/making-sense-of-cloud-foundry-security-group-declarations/?utm_source=site&amp;utm_medium=related">Making sense of Cloud Foundry security group declarations</a></li>
             
             
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2015/05/21/configuring-cloud-foundry-java-memory-parameters/?utm_source=site&amp;utm_medium=related">Configuring Cloud Foundry Java Memory Parameters</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -978,13 +1355,105 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/10/13/implementing-rate-limiting-in-rails-part-2/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 2</a></li>
             
             
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/10/12/implementing-rate-limiting-in-rails-part-1/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 1</a></li>
+            
+            
+            
+            
             
             
             
@@ -1028,13 +1497,141 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/09/12/managing-gemsets-in-rbenv/?utm_source=site&amp;utm_medium=related">Managing Gemsets in Rbenv</a></li>
             
             
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/09/08/looking-up-compiler-params-used-to-compile-a-ruby-version/?utm_source=site&amp;utm_medium=related">Looking up Compiler params used to compile a Ruby version</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -1082,7 +1679,99 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/07/31/validating-json-in-emacs/?utm_source=site&amp;utm_medium=related">Validating JSON in Emacs</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -1106,7 +1795,23 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/04/14/configure-gits-comment-character/?utm_source=site&amp;utm_medium=related">Configure Git&#39;s comment character</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -1118,13 +1823,53 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
             
             
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2013/04/05/javascript-clipboard-access-and-hidden-flash-widgets/?utm_source=site&amp;utm_medium=related">JavaScript, clipboard access and hidden flash widgets</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -1144,13 +1889,61 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/11/29/my-first-firefox-plugin-getcache-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">My first Firefox plugin: GetCache - View cached version of the current page</a></li>
             
             
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/11/28/getcache-a-chrome-plugin-to-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">GetCache - A Chrome plugin to view cached version of the current page</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -1198,7 +1991,79 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/07/09/understanding-pythons-with-statement/?utm_source=site&amp;utm_medium=related">Understanding Python&#39;s &#34;with&#34; statement</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -1216,6 +2081,38 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/06/24/vodqa-ncr-maintaining-large-test-suites/?utm_source=site&amp;utm_medium=related">VodQA NCR: Maintaining Large Test Suites</a></li>
             
             
@@ -1223,6 +2120,46 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2012/06/06/know-your-tools-dont-shoot-yourself-in-the-foot/?utm_source=site&amp;utm_medium=related">Know Your Tools - Don&#39;t Shoot Yourself in the Foot</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -1242,7 +2179,47 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/05/11/indian-and-pakistani-cricketers-who-make-better-debuts/?utm_source=site&amp;utm_medium=related">Indian and Pakistani cricketers - who make better debuts?</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -1254,7 +2231,39 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/04/29/finding-un-merged-commits-with-git-cherry/?utm_source=site&amp;utm_medium=related">Finding un-merged commits with git cherry</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -1266,7 +2275,47 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2012/01/17/why-your-project-should-have-a-getting-started-guide./?utm_source=site&amp;utm_medium=related">Why your project should have a Getting Started guide.</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -1282,7 +2331,31 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2011/05/17/wikipedia-page-hopping/?utm_source=site&amp;utm_medium=related">Wikipedia Page Hopping</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
@@ -1326,1123 +2399,31 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2010/01/09/autorun.py-execute-stuff-on-file-change/?utm_source=site&amp;utm_medium=related">Autorun.py - Execute stuff on file change</a></li>
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
             
             
             
