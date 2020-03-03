@@ -30,7 +30,9 @@ dissertation,
 REST puts a lot of emphasis on resources, their representations and states. Basically a URL indicates a
 single resource; the HTTP method (GET, POST, PUT, DELETE) indicates what
 action should be performed on that resource; and the ACCEPT header indicates the format that the resource should be presented in.
+
 Chrome and Content-Type
+
 Having seen this, one would assume that if you have a resource, say a
 User on your system and there were two representations of that
 resource - HTML and JSON. Let&rsquo;s assume that the HTML representation does
@@ -56,7 +58,9 @@ dissertation,
 REST puts a lot of emphasis on resources, their representations and states. Basically a URL indicates a
 single resource; the HTTP method (GET, POST, PUT, DELETE) indicates what
 action should be performed on that resource; and the ACCEPT header indicates the format that the resource should be presented in.
+
 Chrome and Content-Type
+
 Having seen this, one would assume that if you have a resource, say a
 User on your system and there were two representations of that
 resource - HTML and JSON. Let&rsquo;s assume that the HTML representation does
@@ -76,7 +80,9 @@ dissertation,
 REST puts a lot of emphasis on resources, their representations and states. Basically a URL indicates a
 single resource; the HTTP method (GET, POST, PUT, DELETE) indicates what
 action should be performed on that resource; and the ACCEPT header indicates the format that the resource should be presented in.
+
 Chrome and Content-Type
+
 Having seen this, one would assume that if you have a resource, say a
 User on your system and there were two representations of that
 resource - HTML and JSON. Let&rsquo;s assume that the HTML representation does
@@ -161,7 +167,9 @@ dissertation</a>,
 REST puts a lot of emphasis on resources, their representations and states. Basically a URL indicates a
 single resource; the HTTP method (GET, POST, PUT, DELETE) indicates what
 action should be performed on that resource; and the ACCEPT header indicates the format that the resource should be presented in.</p>
+
 <h2 id="chrome-and-content-type">Chrome and Content-Type</h2>
+
 <p>Having seen this, one would assume that if you have a resource, say a
 <code>User</code> on your system and there were two representations of that
 resource - HTML and JSON. Let&rsquo;s assume that the HTML representation does
@@ -170,11 +178,14 @@ sounds simple enough, Google Chrome, one of the world&rsquo;s most popular
 browsers
 <a href="https://code.google.com/p/chromium/issues/detail?id=108766">totally breaks this</a>. A
 good example of this weird behaviour can be seen <a href="http://chrome-json-bug.heroku.com/docs">here</a>.</p>
+
 <p>I ran in to this issue while playing around with <a href="http://expressjs.com/">Express JS</a>.
 Now, the interesting thing here is that the Chrome developers seem to
 have closed the issue without providing any convincing answers or
 indicating whether they would fix this.</p>
+
 <h2 id="vary-accept-to-the-rescue">Vary: Accept to the rescue?</h2>
+
 <p>One of the
 <a href="https://code.google.com/p/chromium/issues/detail?id=108766#c6">solutions</a>
 suggested in the bug discussion is to use the <code>Vary: Accept</code>
@@ -188,38 +199,41 @@ be-revalidated. After trying that out and still having to stare at naked
 JSON, I was convinced that telling Chrome to
 re-validate the resource was the only way to get around this issue. This
 leads us to another interesting bug in Chrome.</p>
+
 <h2 id="chrome-ignores-the-no-cache-directive">Chrome ignores the no-cache directive</h2>
+
 <p>Reading the specs lead me to the
 <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.9.4">Cache-Control</a>
 header. According to the specs, &ldquo;If the no-cache directive does not
 specify a field-name, then a cache MUST NOT use the response to satisfy
 a subsequent request without successful revalidation with the origin
-server.&quot;. That is exactly what I wanted.
+server.&ldquo;. That is exactly what I wanted.
 But setting that header did not change anything, I still had naked JSON
 when hitting the back button. This led me to
 <a href="https://code.google.com/p/chromium/issues/detail?id=28035">yet another bug</a>
 on Chrome. Chrome seems to completely ignore the <code>no-cache</code>
 directive. One of the <a href="https://code.google.com/p/chromium/issues/detail?id=28035#c3">suggestions</a> in the discussion was to use the
 <code>no-store</code> directive. That seemed to fix the issue.</p>
+
 <p>But the
 <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.9.2">spec</a>
 says <code>no-store</code> directive should be used to prevent the client from
 caching any sensitive information. What that means is that the client
 will never cache the resource.</p>
+
 <p>The end result is that you would end up with a system with lot of end
 points that are not cache-able because if you make them cache-able, Google
 Chrome will leave your users staring at naked JSON.</p>
+
 <h2 id="possible-solutions">Possible solutions</h2>
+
 <ul>
-<li>
-<p>Use different URLs for different representations. In my case, that
+<li><p>Use different URLs for different representations. In my case, that
 would mean I have <code>/users/sdqali.html</code> and <code>/users/sdqali.json</code> as
-URLs for the same resource. This somewhat violates the REST principle.</p>
-</li>
-<li>
-<p>Do not cache JSON end points at all. While this would work well for my
-small app, this is not an effective solution in the general case.</p>
-</li>
+URLs for the same resource. This somewhat violates the REST principle.</p></li>
+
+<li><p>Do not cache JSON end points at all. While this would work well for my
+small app, this is not an effective solution in the general case.</p></li>
 </ul>
         </div>
         <aside id="gh-comments-list">
@@ -328,6 +342,10 @@ $(document).ready(function () {
         <aside>
           <h3>If you liked this post, you'll also like...</h3>
           <ul class="related-posts">
+            
+            
+            
+            
             
             
             
@@ -960,6 +978,10 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2014/08/02/importing-the-yelp-dataset-into-mongodb/?utm_source=site&amp;utm_medium=related">Importing the Yelp dataset into MongoDB</a></li>
             
             
@@ -1332,14 +1354,6 @@ $(document).ready(function () {
             
             
             
-            
-            
-            
-            
-            
-            
-            
-            
             <li><a href="https://sadique.io/blog/2013/08/15/pythons-bool-type/?utm_source=site&amp;utm_medium=related">Python&#39;s bool type</a></li>
             
             
@@ -1533,6 +1547,14 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             

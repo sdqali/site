@@ -98,57 +98,63 @@
            itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div>
           <p>In the second part of this <a href="/series/feature-toggles/">series</a> about implementing feature toggles for a Spring Boot application, we will look at exposing the features to the Angular front-end so that features can be toggled in UI components.</p>
+
 <h2 id="toggling-at-the-front-end">Toggling at the front end</h2>
+
 <p>We decided to use the <a href="https://github.com/mjt01/angular-feature-flags">angular-feature-flags</a> library to toggle features at the front end because it provided us the three features that we were looking for:</p>
+
 <ul>
 <li>The ability to load the state of feature flags <a href="https://github.com/mjt01/angular-feature-flags#setting-flag-data">from an HTTP end point</a> instead of having to generate JS code through templates.</li>
 <li>The ability to toggle entire html components through the <code>feature-flag</code> attribute directive.</li>
 <li>The ability to expose these features to services and components to make if-else decisions through <code>featureFlagsProvider</code>.</li>
 </ul>
+
 <h2 id="features-end-point">Features end point</h2>
+
 <p>The library expects feature flags to be provided to <code>featureFlagsProvider</code> in the following format:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">[
     { <span style="color:#309;font-weight:bold">&#34;key&#34;</span>: <span style="color:#c30">&#34;...&#34;</span>, <span style="color:#309;font-weight:bold">&#34;active&#34;</span>: <span style="color:#c30">&#34;...&#34;</span>, <span style="color:#309;font-weight:bold">&#34;name&#34;</span>: <span style="color:#c30">&#34;...&#34;</span>, <span style="color:#309;font-weight:bold">&#34;description&#34;</span>: <span style="color:#c30">&#34;...&#34;</span> },
     <span style="color:#a00;background-color:#faa">...</span>
-]
-</code></pre></div><p>The <code>FeatureController</code> will use the <code>FeatureRepository</code> to expose this will look like this:</p>
+]</code></pre></div>
+<p>The <code>FeatureController</code> will use the <code>FeatureRepository</code> to expose this will look like this:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@RestController</span>
-<span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span><span style="color:#c30">&#34;/features&#34;</span><span style="color:#555">)</span>
-<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">FeatureController</span> <span style="color:#555">{</span>
+<span style="color:#99f">@RequestMapping</span>(<span style="color:#c30">&#34;/features&#34;</span>)
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">class</span> FeatureController {
   <span style="color:#99f">@Autowired</span>
-  FeatureRepository featureRepository<span style="color:#555">;</span>
+  FeatureRepository <span style="color:#c0f">featureRepository</span>;
 
-  <span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span><span style="color:#c30">&#34;&#34;</span><span style="color:#555">)</span>
-  <span style="color:#069;font-weight:bold">public</span> List<span style="color:#555">&lt;</span>Map<span style="color:#555">&gt;</span> <span style="color:#c0f">features</span><span style="color:#555">()</span> <span style="color:#555">{</span>
-    <span style="color:#069;font-weight:bold">return</span> featureRepository<span style="color:#555">.</span><span style="color:#309">allFeatures</span><span style="color:#555">()</span>
-        <span style="color:#555">.</span><span style="color:#309">entrySet</span><span style="color:#555">()</span>
-        <span style="color:#555">.</span><span style="color:#309">stream</span><span style="color:#555">()</span>
-        <span style="color:#555">.</span><span style="color:#309">map</span><span style="color:#555">(</span>entry <span style="color:#555">-&gt;</span> <span style="color:#069;font-weight:bold">new</span> HashMap<span style="color:#555">&lt;</span>String<span style="color:#555">,</span> Object<span style="color:#555">&gt;()</span> <span style="color:#555">{</span>
-          <span style="color:#555">{</span>
-            put<span style="color:#555">(</span><span style="color:#c30">&#34;key&#34;</span><span style="color:#555">,</span> entry<span style="color:#555">.</span><span style="color:#309">getKey</span><span style="color:#555">());</span>
-            put<span style="color:#555">(</span><span style="color:#c30">&#34;active&#34;</span><span style="color:#555">,</span> entry<span style="color:#555">.</span><span style="color:#309">getValue</span><span style="color:#555">());</span>
-            put<span style="color:#555">(</span><span style="color:#c30">&#34;name&#34;</span><span style="color:#555">,</span> entry<span style="color:#555">.</span><span style="color:#309">getKey</span><span style="color:#555">());</span>
-            put<span style="color:#555">(</span><span style="color:#c30">&#34;description&#34;</span><span style="color:#555">,</span> entry<span style="color:#555">.</span><span style="color:#309">getKey</span><span style="color:#555">());</span>
-          <span style="color:#555">}</span>
-        <span style="color:#555">})</span>
-        <span style="color:#555">.</span><span style="color:#309">collect</span><span style="color:#555">(</span>Collectors<span style="color:#555">.</span><span style="color:#309">toList</span><span style="color:#555">());</span>
-  <span style="color:#555">}</span>
-<span style="color:#555">}</span>
-</code></pre></div><p>We are using the double brace initialization technique to construct the map representing each feature. Initializing a map given a set of keys and values is still an exercise that requires a bunch of <a href="https://minborgsjavapot.blogspot.com/2014/12/java-8-initializing-maps-in-smartest-way.html">boiler plate</a> code in Java. You can get around this by using the convenient ImmutableMap.of() provided by <a href="https://mvnrepository.com/artifact/com.google.collections/google-collections/1.0">Google Collections</a>.</p>
+  <span style="color:#99f">@RequestMapping</span>(<span style="color:#c30">&#34;&#34;</span>)
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">List</span><span style="color:#555">&lt;</span>Map<span style="color:#555">&gt;</span> <span style="color:#c0f">features</span>() {
+    <span style="color:#069;font-weight:bold">return</span> featureRepository.<span style="color:#309">allFeatures</span>()
+        .<span style="color:#309">entrySet</span>()
+        .<span style="color:#309">stream</span>()
+        .<span style="color:#309">map</span>(entry <span style="color:#555">-&gt;</span> <span style="color:#069;font-weight:bold">new</span> HashMap<span style="color:#555">&lt;</span>String, Object<span style="color:#555">&gt;</span>() {
+          {
+            put(<span style="color:#c30">&#34;key&#34;</span>, entry.<span style="color:#309">getKey</span>());
+            put(<span style="color:#c30">&#34;active&#34;</span>, entry.<span style="color:#309">getValue</span>());
+            put(<span style="color:#c30">&#34;name&#34;</span>, entry.<span style="color:#309">getKey</span>());
+            put(<span style="color:#c30">&#34;description&#34;</span>, entry.<span style="color:#309">getKey</span>());
+          }
+        })
+        .<span style="color:#309">collect</span>(Collectors.<span style="color:#309">toList</span>());
+  }
+}</code></pre></div>
+<p>We are using the double brace initialization technique to construct the map representing each feature. Initializing a map given a set of keys and values is still an exercise that requires a bunch of <a href="https://minborgsjavapot.blogspot.com/2014/12/java-8-initializing-maps-in-smartest-way.html">boiler plate</a> code in Java. You can get around this by using the convenient ImmutableMap.of() provided by <a href="https://mvnrepository.com/artifact/com.google.collections/google-collections/1.0">Google Collections</a>.</p>
+
 <p>It is also important to change our <code>AppConfig</code> to initialize the instance of <code>Featurerepository</code> as a bean.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Configuration</span>
-<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">AppConfig</span> <span style="color:#069;font-weight:bold">extends</span> WebMvcConfigurerAdapter <span style="color:#555">{</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">class</span> AppConfig <span style="color:#c0f">extends</span> WebMvcConfigurerAdapter {
   <span style="color:#99f">@Autowired</span>
-  Environment env<span style="color:#555">;</span>
+  Environment <span style="color:#c0f">env</span>;
 
   <span style="color:#09f;font-style:italic">// ...
 </span><span style="color:#09f;font-style:italic"></span>
   <span style="color:#99f">@Bean</span>
-  <span style="color:#069;font-weight:bold">public</span> FeatureRepository <span style="color:#c0f">featureRepository</span><span style="color:#555">()</span> <span style="color:#555">{</span>
-    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">new</span> FeatureRepository<span style="color:#555">(</span>env<span style="color:#555">);</span>
-  <span style="color:#555">}</span>
-<span style="color:#555">}</span>
-</code></pre></div><p>With this configuration, we can get the feature state from the end point:</p>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">FeatureRepository</span> featureRepository() {
+    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">new</span> FeatureRepository(env);
+  }
+}</code></pre></div>
+<p>With this configuration, we can get the feature state from the end point:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">&gt; curl -s <span style="color:#c30">&#34;http://localhost:8080/features&#34;</span> | jq .
 <span style="color:#555">[</span>
   <span style="color:#555">{</span>
@@ -163,8 +169,9 @@
     <span style="color:#c30">&#34;description&#34;</span>: <span style="color:#c30">&#34;feature.hello&#34;</span>,
     <span style="color:#c30">&#34;key&#34;</span>: <span style="color:#c30">&#34;feature.hello&#34;</span>
   <span style="color:#555">}</span>
-<span style="color:#555">]</span>
-</code></pre></div><p>For our use case, we were comfortable re-using the feature key as the name and description of the feature. You may want to capture these meta data in your application configuration and expose this using Spring Boot’s <a href="http://docs.spring.io/spring-boot/docs/1.1.7.RELEASE/api/org/springframework/boot/context/properties/ConfigurationProperties.html">ConfigurationProperties</a>. You can find an example of how use structured configurations in <a href="https://github.com/sdqali/config-properties">my example project</a>.</p>
+<span style="color:#555">]</span></code></pre></div>
+<p>For our use case, we were comfortable re-using the feature key as the name and description of the feature. You may want to capture these meta data in your application configuration and expose this using Spring Boot’s <a href="http://docs.spring.io/spring-boot/docs/1.1.7.RELEASE/api/org/springframework/boot/context/properties/ConfigurationProperties.html">ConfigurationProperties</a>. You can find an example of how use structured configurations in <a href="https://github.com/sdqali/config-properties">my example project</a>.</p>
+
 <p>In the next part of this <a href="/series/feature-toggles/">series</a>, we will take a look at how to expose the feature information as an <a href="http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-endpoints.html">admin end point</a>.</p>
         </div>
         <aside id="gh-comments-list">
@@ -295,11 +302,15 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2019/08/02/flushing-metrics-in-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Flushing Metrics in Dropwizard Commands</a></li>
-            
-            
-            
-            
             
             
             
@@ -917,6 +928,10 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2014/08/02/importing-the-yelp-dataset-into-mongodb/?utm_source=site&amp;utm_medium=related">Importing the Yelp dataset into MongoDB</a></li>
             
             
@@ -1289,14 +1304,6 @@ $(document).ready(function () {
             
             
             
-            
-            
-            
-            
-            
-            
-            
-            
             <li><a href="https://sadique.io/blog/2013/08/15/pythons-bool-type/?utm_source=site&amp;utm_medium=related">Python&#39;s bool type</a></li>
             
             
@@ -1490,6 +1497,14 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             

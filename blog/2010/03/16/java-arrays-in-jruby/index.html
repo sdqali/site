@@ -101,24 +101,29 @@ You are in Ruby world, a world of weak typing, no type casting and pure bliss in
            itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div>
           <p>Recently my team encountered a frustrating thing while working with a Java library in JRuby. It took us long to figure out what was going wrong. This is an attempt to write down what was happening.</p>
+
 <p>You are in Ruby world, a world of weak typing, no type casting and pure bliss in coding. You forget that some languages care about the type of elements in an Array. And you end up spending a lot of time figuring out why you are staring at a stupid looking exception.</p>
+
 <p>I will be using a dummy example for describing the problem.</p>
+
 <p>The following code snippet tries to compare two arrays in JRuby using Java Arrays&rsquo; equals method. In JRuby world, one would expect this to work. Actually, one should not, but Ruby really gets into you.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ruby" data-lang="ruby"><span style="color:#366">require</span> <span style="color:#c30">&#39;java&#39;</span>
 import <span style="color:#c30">&#39;java.util.Arrays&#39;</span>
 
-<span style="color:#366">puts</span> <span style="color:#c30">&#34;Arrays equal&#34;</span> <span style="color:#069;font-weight:bold">if</span> <span style="color:#360">Arrays</span><span style="color:#555">.</span>equals(<span style="color:#555">[</span><span style="color:#f60">1</span>, <span style="color:#f60">2</span>, <span style="color:#f60">3</span><span style="color:#555">]</span>, <span style="color:#555">[</span><span style="color:#f60">1</span>, <span style="color:#f60">2</span>, <span style="color:#f60">3</span><span style="color:#555">]</span>)
-</code></pre></div><p>Well, it does not. You get an error:</p>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">no equals with arguments matching <span style="color:#555">[</span>class org.jruby.RubyArray, class org.jruby.RubyArray<span style="color:#555">]</span> on object Java::JavaUtil::Arrays <span style="color:#555">(</span>NameError<span style="color:#555">)</span>
-</code></pre></div><p>This error message is informative. In our case, our unit tests threw an error that was very difficult to make any sense of. The reason why this fails is obvious.</p>
+<span style="color:#366">puts</span> <span style="color:#c30">&#34;Arrays equal&#34;</span> <span style="color:#069;font-weight:bold">if</span> <span style="color:#360">Arrays</span><span style="color:#555">.</span>equals(<span style="color:#555">[</span><span style="color:#f60">1</span>, <span style="color:#f60">2</span>, <span style="color:#f60">3</span><span style="color:#555">]</span>, <span style="color:#555">[</span><span style="color:#f60">1</span>, <span style="color:#f60">2</span>, <span style="color:#f60">3</span><span style="color:#555">]</span>)</code></pre></div>
+<p>Well, it does not. You get an error:</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">no equals with arguments matching <span style="color:#555">[</span>class org.jruby.RubyArray, class org.jruby.RubyArray<span style="color:#555">]</span> on object Java::JavaUtil::Arrays <span style="color:#555">(</span>NameError<span style="color:#555">)</span></code></pre></div>
+<p>This error message is informative. In our case, our unit tests threw an error that was very difficult to make any sense of. The reason why this fails is obvious.</p>
+
 <p>Java does care about the Type of things that form an Array. So you need to cast it to the correct type.</p>
+
 <p>Here is the code that actually works:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ruby" data-lang="ruby"><span style="color:#366">require</span> <span style="color:#c30">&#39;java&#39;</span>
 import <span style="color:#c30">&#39;java.util.Arrays&#39;</span>
 
 <span style="color:#366">puts</span> <span style="color:#c30">&#34;Arrays equal&#34;</span> <span style="color:#069;font-weight:bold">if</span> <span style="color:#360">Arrays</span><span style="color:#555">.</span>equals(<span style="color:#555">[</span><span style="color:#f60">1</span>,<span style="color:#f60">2</span>,<span style="color:#f60">3</span><span style="color:#555">].</span>to_java(java<span style="color:#555">.</span>lang<span style="color:#555">.</span>Integer),
-                                     <span style="color:#555">[</span><span style="color:#f60">1</span>,<span style="color:#f60">2</span>,<span style="color:#f60">3</span><span style="color:#555">].</span>to_java(java<span style="color:#555">.</span>lang<span style="color:#555">.</span>Integer))
-</code></pre></div><p>The <code>to_java</code> method casts the elements of the Ruby array into Java array with elements of type specified.</p>
+                                     <span style="color:#555">[</span><span style="color:#f60">1</span>,<span style="color:#f60">2</span>,<span style="color:#f60">3</span><span style="color:#555">].</span>to_java(java<span style="color:#555">.</span>lang<span style="color:#555">.</span>Integer))</code></pre></div>
+<p>The <code>to_java</code> method casts the elements of the Ruby array into Java array with elements of type specified.</p>
 
         </div>
         <aside id="gh-comments-list">
@@ -249,11 +254,15 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2019/08/02/flushing-metrics-in-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Flushing Metrics in Dropwizard Commands</a></li>
-            
-            
-            
-            
             
             
             
@@ -875,6 +884,10 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2014/08/02/importing-the-yelp-dataset-into-mongodb/?utm_source=site&amp;utm_medium=related">Importing the Yelp dataset into MongoDB</a></li>
             
             
@@ -1247,14 +1260,6 @@ $(document).ready(function () {
             
             
             
-            
-            
-            
-            
-            
-            
-            
-            
             <li><a href="https://sadique.io/blog/2013/08/15/pythons-bool-type/?utm_source=site&amp;utm_medium=related">Python&#39;s bool type</a></li>
             
             
@@ -1448,6 +1453,14 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             

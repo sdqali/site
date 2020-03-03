@@ -22,7 +22,8 @@
 
 </head>
 
-  <meta name="description" content="" />
+  <meta name="description" content="
+At work, I have to deal with Amazon CloudFormation 1 templates a fair bit. These templates are JSON files. More and more members of our team are moving away from TextMate to Emacs which makes me really happy. We would like to validate these CloudFormation templates in Emacs. Today we set this up and I hope this turns out to be of help to some one else trying to do the same." />
   
     <meta content="code, json, emacs, tools, development, validation" name="keywords">
   
@@ -32,11 +33,13 @@
   <meta name="twitter:site" content="@sdqali">
   <meta name="twitter:creator" content="@sdqali">
   <meta name="twitter:title" content="Validating JSON in Emacs">
-  <meta name="twitter:description" content="">
+  <meta name="twitter:description" content="
+At work, I have to deal with Amazon CloudFormation 1 templates a fair bit. These templates are JSON files. More and more members of our team are moving away from TextMate to Emacs which makes me really happy. We would like to validate these CloudFormation templates in Emacs. Today we set this up and I hope this turns out to be of help to some one else trying to do the same.">
   <meta name="twitter:image" content="https://sadique.io//images/threaded-blue-on-black-cropped.jpg">
 
   <meta property="og:title" content="Validating JSON in Emacs" />
-  <meta property="og:description" content="" itemprop="description"/>
+  <meta property="og:description" content="
+At work, I have to deal with Amazon CloudFormation 1 templates a fair bit. These templates are JSON files. More and more members of our team are moving away from TextMate to Emacs which makes me really happy. We would like to validate these CloudFormation templates in Emacs. Today we set this up and I hope this turns out to be of help to some one else trying to do the same." itemprop="description"/>
   <meta property="og:url" content="https://sadique.io/blog/2013/07/31/validating-json-in-emacs/" />
   <meta property="og:image" content="https://sadique.io//images/threaded-blue-on-black-cropped.jpg" />
   <meta name="hugo:permalink" content="https://sadique.io/blog/2013/07/31/validating-json-in-emacs/">
@@ -101,34 +104,39 @@
       <div itemprop="mainContentOfPage"
            itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div>
-          <!-- raw HTML omitted -->
+          <p><meta content="validate" name="keywords">
+At work, I have to deal with Amazon CloudFormation <sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup> templates a fair bit. These templates are JSON files. More and more members of our team are moving away from TextMate to Emacs which makes me really happy. We would like to validate these CloudFormation templates in Emacs. Today we set this up and I hope this turns out to be of help to some one else trying to do the same.</p>
+
 <ul>
-<li>Grab jsonlint. It is a command line utility that validates JSON. There seems to be two flavors of jsonlint available. A pure JavaScript implementation <sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> that runs on the Node.js runtime and a native Mac OS X <sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup> version. We use the Node.js version.</li>
-<li>Ensure that your Emacs can find the jsonlint binary. This can be done by adding the following snippet in your Emacs configuration:</li>
-</ul>
+<li>Grab jsonlint. It is a command line utility that validates JSON. There seems to be two flavors of jsonlint available. A pure JavaScript implementation <sup class="footnote-ref" id="fnref:2"><a href="#fn:2">2</a></sup> that runs on the Node.js runtime and a native Mac OS X <sup class="footnote-ref" id="fnref:3"><a href="#fn:3">3</a></sup> version. We use the Node.js version.</li>
+
+<li><p>Ensure that your Emacs can find the jsonlint binary. This can be done by adding the following snippet in your Emacs configuration:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cl" data-lang="cl">(<span style="color:#033">setenv</span> <span style="color:#c30">&#34;PATH&#34;</span> (<span style="color:#033">concat</span> (<span style="color:#033">getenv</span> <span style="color:#c30">&#34;PATH&#34;</span>) <span style="color:#c30">&#34;:/usr/local/share/npm/bin&#34;</span>))
-(<span style="color:#069;font-weight:bold">setq</span> <span style="color:#033">exec-path</span> (<span style="color:#c0f">append</span> <span style="color:#033">exec-path</span> <span style="color:#555">&#39;</span>(<span style="color:#c30">&#34;/usr/local/share/npm/bin&#34;</span>)))
-</code></pre></div><p>Of course, the path you add will depend on where your installation process put the binary.</p>
-<ul>
-<li>Install <code>flymake-json</code> <sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup>, using your Emacs package manager.</li>
-<li>Bind a key to <code>flymake-json-load</code> which is the command to perform jsonlint on the current file. This can be done with the following snippet:</li>
+(<span style="color:#069;font-weight:bold">setq</span> <span style="color:#033">exec-path</span> (<span style="color:#c0f">append</span> <span style="color:#033">exec-path</span> <span style="color:#555">&#39;</span>(<span style="color:#c30">&#34;/usr/local/share/npm/bin&#34;</span>)))</code></pre></div>
+<p>Of course, the path you add will depend on where your installation process put the binary.</p></li>
+
+<li><p>Install <code>flymake-json</code> <sup class="footnote-ref" id="fnref:4"><a href="#fn:4">4</a></sup>, using your Emacs package manager.</p></li>
+
+<li><p>Bind a key to <code>flymake-json-load</code> which is the command to perform jsonlint on the current file. This can be done with the following snippet:</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cl" data-lang="cl">(<span style="color:#033">global-set-key</span> (<span style="color:#033">kbd</span> <span style="color:#c30">&#34;C-c j v&#34;</span>) <span style="color:#fc3">&#39;flymake-json-load</span>)</code></pre></div></li>
 </ul>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cl" data-lang="cl">(<span style="color:#033">global-set-key</span> (<span style="color:#033">kbd</span> <span style="color:#c30">&#34;C-c j v&#34;</span>) <span style="color:#fc3">&#39;flymake-json-load</span>)
-</code></pre></div><p>Enjoy!</p>
-<section class="footnotes" role="doc-endnotes">
-<hr>
+
+<p>Enjoy!</p>
+<div class="footnotes">
+
+<hr />
+
 <ol>
-<li id="fn:1" role="doc-endnote">
-<p><a href="https://github.com/zaach/jsonlint">zaach/jsonlint</a> <a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
-</li>
-<li id="fn:2" role="doc-endnote">
-<p><a href="https://github.com/atomicbird/jsonlint">atomicbird/jsonlint</a> <a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
-</li>
-<li id="fn:3" role="doc-endnote">
-<p><a href="http://marmalade-repo.org/packages/flymake-json">A flymake handler for json using jsonlint</a> <a href="#fnref:3" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
-</li>
+<li id="fn:1"><a href="http://aws.amazon.com/cloudformation/">CloudFormation</a>
+ <a class="footnote-return" href="#fnref:1"><sup>[return]</sup></a></li>
+<li id="fn:2"><a href="https://github.com/zaach/jsonlint">zaach/jsonlint</a>
+ <a class="footnote-return" href="#fnref:2"><sup>[return]</sup></a></li>
+<li id="fn:3"><a href="https://github.com/atomicbird/jsonlint">atomicbird/jsonlint</a>
+ <a class="footnote-return" href="#fnref:3"><sup>[return]</sup></a></li>
+<li id="fn:4"><a href="http://marmalade-repo.org/packages/flymake-json">A flymake handler for json using jsonlint</a>
+ <a class="footnote-return" href="#fnref:4"><sup>[return]</sup></a></li>
 </ol>
-</section>
+</div>
         </div>
         <aside id="gh-comments-list">
           <script>
@@ -236,6 +244,10 @@ $(document).ready(function () {
         <aside>
           <h3>If you liked this post, you'll also like...</h3>
           <ul class="related-posts">
+            
+            
+            
+            
             
             
             
@@ -872,6 +884,10 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2014/08/02/importing-the-yelp-dataset-into-mongodb/?utm_source=site&amp;utm_medium=related">Importing the Yelp dataset into MongoDB</a></li>
             
             
@@ -1244,14 +1260,6 @@ $(document).ready(function () {
             
             
             
-            
-            
-            
-            
-            
-            
-            
-            
             <li><a href="https://sadique.io/blog/2013/08/15/pythons-bool-type/?utm_source=site&amp;utm_medium=related">Python&#39;s bool type</a></li>
             
             
@@ -1443,6 +1451,14 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             

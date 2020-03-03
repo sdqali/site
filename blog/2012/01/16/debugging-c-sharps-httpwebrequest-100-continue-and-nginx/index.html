@@ -105,12 +105,16 @@ Initial investigation suggested that this could happen if we are making HTTP/1.1
            itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div>
           <p>Recently I spent some time debugging an issue our team was facing around some C# code making a request on one of our servers. The request was throwing a <code>The server committed a protocol violation. Section=ResponseStatusLine</code> error.</p>
+
 <p>Initial investigation suggested that this could happen if we are making HTTP/1.1 requests to a server configured for HTTP/1.0. Our Rails application runs on Mongrel fronted with nginx 0.6.5. We modified the C# code to use HTTP/1.0 and the error went away. The following line does the trick.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c#" data-lang="c#">request.ProtocolVersion = HttpVersion.Version10;
-</code></pre></div><p>But wait! This means that somewhere in the chain, a server is configured to use HTTP/1.0. It looked unlikely and further debugging revealed that it was indeed not the case. Further staring at the Rails logs showed that one of the headers that the app expects was not being set, when the request was done using HTTP/1.1 from the code.</p>
-<p>After some time, we figured <!-- raw HTML omitted -->out<!-- raw HTML omitted --> that the .Net library throws the <code>server committed ...</code> error if it is expecting the HTTP 100 (Continue) response in the wrong way. We set the code to not expect the HTTP 100 response from the server using</p>
+</code></pre></div>
+<p>But wait! This means that somewhere in the chain, a server is configured to use HTTP/1.0. It looked unlikely and further debugging revealed that it was indeed not the case. Further staring at the Rails logs showed that one of the headers that the app expects was not being set, when the request was done using HTTP/1.1 from the code.</p>
+
+<p>After some time, we figured <a href="http://stackoverflow.com/questions/2482715/the-server-committed-a-protocol-violation-section-responsestatusline-error">out</a> that the .Net library throws the <code>server committed ...</code> error if it is expecting the HTTP 100 (Continue) response in the wrong way. We set the code to not expect the HTTP 100 response from the server using</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c#" data-lang="c#">request.ServicePoint.Expect100Continue = <span style="color:#069;font-weight:bold">false</span>;
-</code></pre></div><p>and voila, it worked. The Rails app received all the headers it expected and things worked fine. The code looked like this:</p>
+</code></pre></div>
+<p>and voila, it worked. The Rails app received all the headers it expected and things worked fine. The code looked like this:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c#" data-lang="c#"><span style="color:#078;font-weight:bold">var</span> request = (HttpWebRequest) HttpWebRequest.Create(<span style="color:#c30">&#34;https://example.com/foo&#34;</span>);
 request.ServicePoint.Expect100Continue = <span style="color:#069;font-weight:bold">false</span>;
 request.Credentials = <span style="color:#069;font-weight:bold">new</span> NetworkCredential(<span style="color:#c30">&#34;user&#34;</span>, <span style="color:#c30">&#34;password&#34;</span>);
@@ -123,19 +127,26 @@ dataStream.Write(objByteArray, <span style="color:#f60">0</span>, objByteArray.L
 dataStream.Close();
 
 <span style="color:#078;font-weight:bold">var</span> response = request.GetResponse();
-</code></pre></div><p>So what is happening?</p>
-<p>The HTTP 100 status is supposed to work like this. When a client has to send some data, instead of sending it upfront, it can send some headers along with the &ldquo;Expect:100-Continue&rdquo; header. The server responds with a 100 if it is willing to accept the request or send a final status. The spec is <!-- raw HTML omitted -->here<!-- raw HTML omitted -->.</p>
+</code></pre></div>
+<p>So what is happening?</p>
+
+<p>The HTTP 100 status is supposed to work like this. When a client has to send some data, instead of sending it upfront, it can send some headers along with the &ldquo;Expect:100-Continue&rdquo; header. The server responds with a 100 if it is willing to accept the request or send a final status. The spec is <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec8.html#sec8.2.3">here</a>.</p>
+
 <p>We are using nginx as a proxy. The specification says that the proxy should forward the request if it knows that the next-hop server is HTTP/1.1 compliant. The proxy is supposed to ignore the &ldquo;Expect:100-Continue&rdquo; header, if the request came from a client using HTTP/1.0.</p>
+
 <p>In our case, the default behavior of the .Net HTTP client library is to set &ldquo;Expect:100-Continue&rdquo; header on every request for HTTP/1.1. So the client sends only some headers and waits for the 100 response from nginx. Nginx sees the request, knows that Mongrel supports HTTP/1.1 and just forwards the request. The app sends a 401 because it could not authenticate. The client is expecting a 100 and gets a 401. It thinks the server committed a protocol violation.</p>
+
 <p>When we ask the client to use HTTP/1.0, the .Net library does not use the Expect header, sends all the headers and nginx forwards the request to Mongrel. The authentication goes through.</p>
+
 <p>When we explicitly set the Expect 100 property of the library to false, it sends all the headers at once and the authentication goes through fine.</p>
-<p>Looks like there is a way to tell .Net not to expect 100 from the server through configuration, by putting this in <!-- raw HTML omitted -->.exe.conf<!-- raw HTML omitted --></p>
+
+<p>Looks like there is a way to tell .Net not to expect 100 from the server through configuration, by putting this in <app>.exe.conf</app></p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#309;font-weight:bold">&lt;system.net&gt;</span>
   <span style="color:#309;font-weight:bold">&lt;settings&gt;</span>
     <span style="color:#309;font-weight:bold">&lt;servicePointManager</span> <span style="color:#309">expect100Continue=</span><span style="color:#c30">&#34;false&#34;</span><span style="color:#309;font-weight:bold">/&gt;</span>
   <span style="color:#309;font-weight:bold">&lt;/settings&gt;</span>
-<span style="color:#309;font-weight:bold">&lt;/system.net&gt;</span>
-</code></pre></div><ol>
+<span style="color:#309;font-weight:bold">&lt;/system.net&gt;</span></code></pre></div>
+<ol>
 <li><a href="http://stackoverflow.com/questions/2482715/the-server-committed-a-protocol-violation-section-responsestatusline-error">http://stackoverflow.com/questions/2482715/the-server-committed-a-protocol-violation-section-responsestatusline-error</a></li>
 <li><a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec8.html#sec8.2.3">http://www.w3.org/Protocols/rfc2616/rfc2616-sec8.html#sec8.2.3</a></li>
 </ol>
@@ -247,6 +258,10 @@ $(document).ready(function () {
         <aside>
           <h3>If you liked this post, you'll also like...</h3>
           <ul class="related-posts">
+            
+            
+            
+            
             
             
             
@@ -879,6 +894,10 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2014/08/02/importing-the-yelp-dataset-into-mongodb/?utm_source=site&amp;utm_medium=related">Importing the Yelp dataset into MongoDB</a></li>
             
             
@@ -1251,14 +1270,6 @@ $(document).ready(function () {
             
             
             
-            
-            
-            
-            
-            
-            
-            
-            
             <li><a href="https://sadique.io/blog/2013/08/15/pythons-bool-type/?utm_source=site&amp;utm_medium=related">Python&#39;s bool type</a></li>
             
             
@@ -1452,6 +1463,14 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             

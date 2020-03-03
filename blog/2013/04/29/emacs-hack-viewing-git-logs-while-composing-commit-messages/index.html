@@ -102,27 +102,32 @@
            itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div>
           <p>I use Emacs as my editor to compose Git commit messages. I almost never commit from the terminal with <code>git commit -m</code>. This approach has two advantages: I get a chance to verify what is being committed and get to compose the message using a proper editor complete with spell checking provided by <em>flyspell mode</em>. One thing I wish I had access to while composing commit messages is the git log. This is useful to refer to work items and encourages one to use a consistent style in the messages. This was easier in the terminal as one could do something like <code>git log -n 3</code> and then commit with the <code>-m</code> flag.</p>
+
 <p>I decided to fix this today and some tinkering later came up with a hack tp do this.</p>
+
 <ul>
-<li>Git commit messages are stored in the <code>COMMIT_EDITMSG</code> file under <code>.git/</code>. So the first thing to do is to ensure that this file always gets loaded with a custom minor mode. This can be done as follows:</li>
+<li><p>Git commit messages are stored in the <code>COMMIT_EDITMSG</code> file under <code>.git/</code>. So the first thing to do is to ensure that this file always gets loaded with a custom minor mode. This can be done as follows:</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cl" data-lang="cl">(<span style="color:#033">add-to-list</span> <span style="color:#fc3">&#39;auto-mode-alist</span> <span style="color:#555">&#39;</span>(<span style="color:#c30">&#34;\\COMMIT_EDITMSG\\&#39;&#34;</span> <span style="color:#555">.</span> <span style="color:#033">load-magit-log-when-committing-mode</span>))</code></pre></div></li>
 </ul>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cl" data-lang="cl">(<span style="color:#033">add-to-list</span> <span style="color:#fc3">&#39;auto-mode-alist</span> <span style="color:#555">&#39;</span>(<span style="color:#c30">&#34;\\COMMIT_EDITMSG\\&#39;&#34;</span> <span style="color:#555">.</span> <span style="color:#033">load-magit-log-when-committing-mode</span>))
-</code></pre></div><p>The minor mode does not need to do anything. The definition would be like this:</p>
+
+<p>The minor mode does not need to do anything. The definition would be like this:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cl" data-lang="cl">(<span style="color:#033">define-minor-mode</span> <span style="color:#033">load-magit-log-when-committing-mode</span>
-  <span style="color:#c30">&#34;dummy&#34;</span>)
-</code></pre></div><ul>
-<li>Next step is to add a custom hook that gets run after loading the minor mode. This hook calls the function to load git logs. The code for this is:</li>
-</ul>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cl" data-lang="cl">(<span style="color:#033">add-hook</span> <span style="color:#fc3">&#39;load-magit-log-when-committing-mode-hook</span> <span style="color:#fc3">&#39;show-magit-log-hook</span>)
-</code></pre></div><ul>
-<li>The actual function to load git logs. It calls <code>magit-log</code> to load the logs and then opens the original <code>COMMIT_EDITMSG</code> in the other frame.</li>
-</ul>
+  <span style="color:#c30">&#34;dummy&#34;</span>)</code></pre></div>
+<ul>
+<li><p>Next step is to add a custom hook that gets run after loading the minor mode. This hook calls the function to load git logs. The code for this is:</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cl" data-lang="cl">(<span style="color:#033">add-hook</span> <span style="color:#fc3">&#39;load-magit-log-when-committing-mode-hook</span> <span style="color:#fc3">&#39;show-magit-log-hook</span>)</code></pre></div></li>
+
+<li><p>The actual function to load git logs. It calls <code>magit-log</code> to load the logs and then opens the original <code>COMMIT_EDITMSG</code> in the other frame.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cl" data-lang="cl">(<span style="color:#366">defun</span> <span style="color:#033">show-magit-log-hook</span> ()
-  (<span style="color:#033">cd</span> <span style="color:#c30">&#34;..&#34;</span>)
-  (<span style="color:#033">magit-log</span>)
-  (<span style="color:#033">switch-to-buffer-other-window</span> <span style="color:#c30">&#34;COMMIT_EDITMSG&#34;</span>))
-</code></pre></div><p>This is how Emacs looks while committing with this hack in place:</p>
-<p><img src="/images/screenshot_git_commit_log.png" alt="&ldquo;Screenshot showing git commit log&rdquo;" title="Screenshot showing git commit log"></p>
+(<span style="color:#033">cd</span> <span style="color:#c30">&#34;..&#34;</span>)
+(<span style="color:#033">magit-log</span>)
+(<span style="color:#033">switch-to-buffer-other-window</span> <span style="color:#c30">&#34;COMMIT_EDITMSG&#34;</span>))</code></pre></div></li>
+</ul>
+
+<p>This is how Emacs looks while committing with this hack in place:</p>
+
+<p><img src="/images/screenshot_git_commit_log.png" alt="&quot;Screenshot showing git commit log&quot;" title="Screenshot showing git commit log" /></p>
+
 <p>If you want to use this, copy the following snippet to your <code>init.el</code>.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cl" data-lang="cl"><span style="color:#09f;font-style:italic">;; load-magit-log-when-committing-mode</span>
 (<span style="color:#033">define-minor-mode</span> <span style="color:#033">load-magit-log-when-committing-mode</span>
@@ -138,8 +143,7 @@
 (<span style="color:#033">add-hook</span> <span style="color:#fc3">&#39;load-magit-log-when-committing-mode-hook</span> <span style="color:#fc3">&#39;show-magit-log-hook</span>)
 
 <span style="color:#09f;font-style:italic">;; load the mode for commit message</span>
-(<span style="color:#033">add-to-list</span> <span style="color:#fc3">&#39;auto-mode-alist</span> <span style="color:#555">&#39;</span>(<span style="color:#c30">&#34;\\COMMIT_EDITMSG\\&#39;&#34;</span> <span style="color:#555">.</span> <span style="color:#033">load-magit-log-when-committing-mode</span>))
-</code></pre></div>
+(<span style="color:#033">add-to-list</span> <span style="color:#fc3">&#39;auto-mode-alist</span> <span style="color:#555">&#39;</span>(<span style="color:#c30">&#34;\\COMMIT_EDITMSG\\&#39;&#34;</span> <span style="color:#555">.</span> <span style="color:#033">load-magit-log-when-committing-mode</span>))</code></pre></div>
         </div>
         <aside id="gh-comments-list">
           <script>
@@ -247,6 +251,10 @@ $(document).ready(function () {
         <aside>
           <h3>If you liked this post, you'll also like...</h3>
           <ul class="related-posts">
+            
+            
+            
+            
             
             
             
@@ -883,6 +891,10 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2014/08/02/importing-the-yelp-dataset-into-mongodb/?utm_source=site&amp;utm_medium=related">Importing the Yelp dataset into MongoDB</a></li>
             
             
@@ -1255,14 +1267,6 @@ $(document).ready(function () {
             
             
             
-            
-            
-            
-            
-            
-            
-            
-            
             <li><a href="https://sadique.io/blog/2013/08/15/pythons-bool-type/?utm_source=site&amp;utm_medium=related">Python&#39;s bool type</a></li>
             
             
@@ -1454,6 +1458,14 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             

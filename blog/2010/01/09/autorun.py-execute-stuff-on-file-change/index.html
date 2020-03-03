@@ -93,9 +93,13 @@ Clearly, monitoring files for changes, shouldn&rsquo;t be big deal. I decided to
            itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div>
           <p>I really liked ZenTest&rsquo;s Autospec in action. Recently, when I was trying to write some Python stuff, I thought it would be nice if I would have a tool that would just run the unit tests, so that I don&rsquo;t have to switch between console windows. Better still, I could run it from inside my Emacs.</p>
+
 <p>Clearly, monitoring files for changes, shouldn&rsquo;t be big deal. I decided to write the tool myself in Python. the prime intension was to help myself learn Python. Although that didn&rsquo;t quite workout, I managed to come up with a quick and dirty hack to do it. It uses <code>pyinotify</code>, which is a Python module for monitoring filesystem changes. Since <code>pyinotify</code> depends on the Linux kernel, this would work only on Linux boxes.</p>
+
 <p>I named it <code>autorun.py</code>. If you want to run some task, depending on file changes in a directory, you navigate to that directory and start autorunner as:</p>
+
 <p><code>~/src/sdq/ocr$ ./autorun.py &quot;python Test*.py&quot;</code></p>
+
 <p>That would start <code>autorun.py</code> and every time I modify a file in the present directory the command  <code>python Test*.py</code> is executed. In my case, I am using the unittest framework that comes with Python. So everytime, a file is updates, it runs all my unit tests, as seen below:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sadiquea@sadiquea-laptop:~/src/sdq/ocr$ ./autorun.py <span style="color:#c30">&#34;python Test*.py&#34;</span>
 Autorunner in action
@@ -103,11 +107,13 @@ Autorunner in action
 
 ----------------------------------------------------------------------
 
-Ran <span style="color:#f60">13</span> tests in 0.763s
+Ran <span style="color:#f60">13</span> tests in <span style="color:#f60">0</span>.763s
 
-OK
-</code></pre></div><p>If I were working with Ruby and wanted to run all my unit tests when I modify the files, I could start the tool like this: <code>./autorun.py &quot;rake spec&quot;</code></p>
+OK</code></pre></div>
+<p>If I were working with Ruby and wanted to run all my unit tests when I modify the files, I could start the tool like this: <code>./autorun.py &quot;rake spec&quot;</code></p>
+
 <p>I would really like to add the ability to exclude some files/subdirectories from being watched for changes.</p>
+
 <p>Here is the code snippet that does the trick:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#09f;font-style:italic">#!/usr/bin/env python</span>
 
@@ -141,9 +147,7 @@ wdd <span style="color:#555">=</span> watchManager<span style="color:#555">.</sp
             notifier<span style="color:#555">.</span>read_events()
     <span style="color:#069;font-weight:bold">except</span> <span style="color:#c00;font-weight:bold">KeyboardInterrupt</span>:
         notifier<span style="color:#555">.</span>stop()
-        <span style="color:#069;font-weight:bold">break</span>
-
-</code></pre></div>
+        <span style="color:#069;font-weight:bold">break</span></code></pre></div>
         </div>
         <aside id="gh-comments-list">
           <script>
@@ -251,6 +255,10 @@ $(document).ready(function () {
         <aside>
           <h3>If you liked this post, you'll also like...</h3>
           <ul class="related-posts">
+            
+            
+            
+            
             
             
             
@@ -885,6 +893,10 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2014/08/02/importing-the-yelp-dataset-into-mongodb/?utm_source=site&amp;utm_medium=related">Importing the Yelp dataset into MongoDB</a></li>
             
             
@@ -1257,14 +1269,6 @@ $(document).ready(function () {
             
             
             
-            
-            
-            
-            
-            
-            
-            
-            
             <li><a href="https://sadique.io/blog/2013/08/15/pythons-bool-type/?utm_source=site&amp;utm_medium=related">Python&#39;s bool type</a></li>
             
             
@@ -1458,6 +1462,14 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             

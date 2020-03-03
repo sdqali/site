@@ -89,8 +89,12 @@
       <div itemprop="mainContentOfPage"
            itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div>
-          <p>While working with Locust <sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> recently, we ran into a situation where we had to dynamically override an attribute in a class in the Locust library so as to control what value it got assigned. After a lot of scratching our heads and reading the Python documentation, we came across the <code>property</code> function. We were able to use this to hack together a solution that ensures that every time an attribute is read, it returns the result of executing a method.</p>
+          
+
+<p>While working with Locust <sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup> recently, we ran into a situation where we had to dynamically override an attribute in a class in the Locust library so as to control what value it got assigned. After a lot of scratching our heads and reading the Python documentation, we came across the <code>property</code> function. We were able to use this to hack together a solution that ensures that every time an attribute is read, it returns the result of executing a method.</p>
+
 <p>The following example demonstrates a stripped down version of this hack.</p>
+
 <pre><code>import random
 
 class Foo(object):
@@ -109,31 +113,38 @@ Foo.bar = property(lambda self: random.random())
 print(&quot;After override&quot;)
 print(foo.bar)
 print(foo.bar)
-</code></pre><p>This snippet when executed will output the following:</p>
+</code></pre>
+
+<p>This snippet when executed will output the following:</p>
+
 <pre><code>Before override
 0.0373028550804
 0.0373028550804
 After override
 0.603160033663
 0.501455108419
-</code></pre><p>It can be seen that before introducing the override, the value of the <code>bar</code> attribute is set when the class is initialised and as expected, it does not change how many ever times the attribute is read. However, after the override, the attribute is assigned a new value every time it is read.</p>
+</code></pre>
+
+<p>It can be seen that before introducing the override, the value of the <code>bar</code> attribute is set when the class is initialised and as expected, it does not change how many ever times the attribute is read. However, after the override, the attribute is assigned a new value every time it is read.</p>
+
 <h2 id="how-does-this-work">How does this work?</h2>
-<p>The <code>property()</code> <sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup> function returns an attribute for any class. It allows the creation of Ruby&rsquo;s <code>attr_accessor</code> <sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup> style attributes on classes so that one can write <code>instance.attrib</code> to read an attribute value and <code>instance.attrib= </code> to set an attribute value. What line <code>14</code> in the snippet does is to re-define the <code>bar</code> attribute to be a property whose <code>getter</code> is a <code>lambda</code>. Every time the <code>bar</code> attribute is read, the <code>lambda</code> gets executed.</p>
+
+<p>The <code>property()</code> <sup class="footnote-ref" id="fnref:2"><a href="#fn:2">2</a></sup> function returns an attribute for any class. It allows the creation of Ruby&rsquo;s <code>attr_accessor</code> <sup class="footnote-ref" id="fnref:3"><a href="#fn:3">3</a></sup> style attributes on classes so that one can write <code>instance.attrib</code> to read an attribute value and <code>instance.attrib=</code> to set an attribute value. What line <code>14</code> in the snippet does is to re-define the <code>bar</code> attribute to be a property whose <code>getter</code> is a <code>lambda</code>. Every time the <code>bar</code> attribute is read, the <code>lambda</code> gets executed.</p>
+
 <p>A more comprehensive example of this can be found in my <a href="https://github.com/sdqali/python_dojo/blob/master/dynamic_override/dynamic_override.py">Python dojo repository</a> on GitHub.</p>
-<section class="footnotes" role="doc-endnotes">
-<hr>
+<div class="footnotes">
+
+<hr />
+
 <ol>
-<li id="fn:1" role="doc-endnote">
-<p><a href="http://locust.io/">Locust</a> - a modern load testing framework. <a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
-</li>
-<li id="fn:2" role="doc-endnote">
-<p>Python&rsquo;s built-in functions - <a href="http://docs.python.org/2/library/functions.html#property">property</a>. <a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
-</li>
-<li id="fn:3" role="doc-endnote">
-<p>Ruby&rsquo;s <a href="http://www.ruby-doc.org/core-1.9.3/Module.html#method-i-attr_accessor"><code>attr_accessor</code> method</a>. <a href="#fnref:3" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
-</li>
+<li id="fn:1"><a href="http://locust.io/">Locust</a> - a modern load testing framework.
+ <a class="footnote-return" href="#fnref:1"><sup>[return]</sup></a></li>
+<li id="fn:2">Python&rsquo;s built-in functions - <a href="http://docs.python.org/2/library/functions.html#property">property</a>.
+ <a class="footnote-return" href="#fnref:2"><sup>[return]</sup></a></li>
+<li id="fn:3">Ruby&rsquo;s <a href="http://www.ruby-doc.org/core-1.9.3/Module.html#method-i-attr_accessor"><code>attr_accessor</code> method</a>.
+ <a class="footnote-return" href="#fnref:3"><sup>[return]</sup></a></li>
 </ol>
-</section>
+</div>
 
         </div>
         <aside id="gh-comments-list">
@@ -242,6 +253,10 @@ $(document).ready(function () {
         <aside>
           <h3>If you liked this post, you'll also like...</h3>
           <ul class="related-posts">
+            
+            
+            
+            
             
             
             
@@ -876,6 +891,10 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2014/08/02/importing-the-yelp-dataset-into-mongodb/?utm_source=site&amp;utm_medium=related">Importing the Yelp dataset into MongoDB</a></li>
             
             
@@ -1246,14 +1265,6 @@ $(document).ready(function () {
             
             
             
-            
-            
-            
-            
-            
-            
-            
-            
             <li><a href="https://sadique.io/blog/2013/08/15/pythons-bool-type/?utm_source=site&amp;utm_medium=related">Python&#39;s bool type</a></li>
             
             
@@ -1447,6 +1458,14 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             

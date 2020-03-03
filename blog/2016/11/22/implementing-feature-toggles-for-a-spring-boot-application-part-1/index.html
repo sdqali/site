@@ -98,204 +98,216 @@
            itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div>
           <p>In one of our recent projects at work, we implemented feature toggles for a Spring MVC / Angular JS code base and this <a href="/series/feature-toggles">series of blog posts</a> discusses our motivations and requirements, the approach we took and what we learned from it.</p>
+
 <h2 id="introduction">Introduction</h2>
+
 <p>Feature Toggles are a mechanism to change the behavior of software without having to re-deploy code. Pete Hogdson has a comprehensive <a href="http://martinfowler.com/articles/feature-toggles.html">blog post</a> explaining the complexities of feature toggles.</p>
-<p><img src="/images/feature-toggles.svg" alt="Feature toggles" title="Feature toggles"></p>
+
+<p><img src="/images/feature-toggles.svg" alt="Feature toggles" title="Feature toggles" /></p>
+
 <h2 id="requirements">Requirements</h2>
-<p>Our application is a Spring Boot web application that gets deployed in a Tomcat instance. The application is deployed via Chef and chef sets up the appropriate configuration parameters for the application as Tomcat <a href="https://tomcat.apache.org/tomcat-8.0-doc/config/context.html#Environment_Entries">Environment</a> entries. Since feature toggles are ultimately application parameters <sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup>, we started by setting them as Tomcat environment variables. Having considered this, we identified the following requirements:</p>
+
+<p>Our application is a Spring Boot web application that gets deployed in a Tomcat instance. The application is deployed via Chef and chef sets up the appropriate configuration parameters for the application as Tomcat <a href="https://tomcat.apache.org/tomcat-8.0-doc/config/context.html#Environment_Entries">Environment</a> entries. Since feature toggles are ultimately application parameters <sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup>, we started by setting them as Tomcat environment variables. Having considered this, we identified the following requirements:</p>
+
 <ul>
 <li>The ability to toggle dependency injection. For example, in some environments, we wanted to use Redis to store our sessions, while in some test environments, they were to be stored in memory.</li>
 <li>Ability to toggle entire Spring Controllers or individual controller methods.</li>
 <li>The ability to expose the state of feature toggles to our front end so that Angular JS components can use the feature toggles.</li>
 </ul>
+
 <h2 id="our-initial-approach">Our initial approach</h2>
+
 <h3 id="toggling-dependency-injection">Toggling dependency injection.</h3>
+
 <p>We started by using configuration parameters with the <code>feature</code> prefix to toggle features. With this convention in place, we started using the <code>@ConditionalOnProperty</code> annotation in our configuration classes to toggle the beans that got wired up. For example, to toggle between Redis and in-memory store for sessions, we ended up with the following configuration:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Configuration</span>
-<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">AppConfig</span> <span style="color:#555">{</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">class</span> AppConfig {
   <span style="color:#99f">@Bean</span>
-  <span style="color:#99f">@ConditionalOnProperty</span><span style="color:#555">(</span>value <span style="color:#555">=</span> <span style="color:#c30">&#34;feature.redis.session.store&#34;</span><span style="color:#555">,</span> havingValue <span style="color:#555">=</span> <span style="color:#c30">&#34;false&#34;</span><span style="color:#555">)</span>
-  <span style="color:#069;font-weight:bold">public</span> SessionRepository <span style="color:#c0f">mapSessionRepository</span><span style="color:#555">()</span> <span style="color:#555">{</span>
-    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">new</span> MapSessionRepository<span style="color:#555">();</span>
-  <span style="color:#555">}</span>
+  <span style="color:#99f">@ConditionalOnProperty</span>(value <span style="color:#555">=</span> <span style="color:#c30">&#34;feature.redis.session.store&#34;</span>, havingValue <span style="color:#555">=</span> <span style="color:#c30">&#34;false&#34;</span>)
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">SessionRepository</span> mapSessionRepository() {
+    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">new</span> MapSessionRepository();
+  }
 
   <span style="color:#99f">@Bean</span>
-  <span style="color:#99f">@ConditionalOnProperty</span><span style="color:#555">(</span>value <span style="color:#555">=</span> <span style="color:#c30">&#34;feature.redis.session.store&#34;</span><span style="color:#555">,</span> havingValue <span style="color:#555">=</span> <span style="color:#c30">&#34;true&#34;</span><span style="color:#555">)</span>
-  <span style="color:#069;font-weight:bold">public</span> SessionRepository <span style="color:#c0f">redisSessionRepository</span><span style="color:#555">(</span>RedisConnectionFactory factory<span style="color:#555">)</span> <span style="color:#555">{</span>
-    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">new</span> RedisOperationsSessionRepository<span style="color:#555">(</span>factory<span style="color:#555">);</span>
-  <span style="color:#555">}</span>
-<span style="color:#555">}</span>
-</code></pre></div><h3 id="toggling-individual-controller-methods">Toggling individual controller methods</h3>
-<p>In order to prevent end points defined by controllers and controller methods that are toggled off from being accessed, we decided to configure a <code>HandlerInterceptor</code> <sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup> to intercept requests to these end points.</p>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">FeatureInterceptor</span> <span style="color:#069;font-weight:bold">implements</span> HandlerInterceptor <span style="color:#555">{</span>
-  <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">final</span> FeatureRepository featureRepository<span style="color:#555">;</span>
+  <span style="color:#99f">@ConditionalOnProperty</span>(value <span style="color:#555">=</span> <span style="color:#c30">&#34;feature.redis.session.store&#34;</span>, havingValue <span style="color:#555">=</span> <span style="color:#c30">&#34;true&#34;</span>)
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">SessionRepository</span> redisSessionRepository(RedisConnectionFactory <span style="color:#c0f">factory</span>) {
+    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">new</span> RedisOperationsSessionRepository(factory);
+  }
+}</code></pre></div>
+<h3 id="toggling-individual-controller-methods">Toggling individual controller methods</h3>
 
-  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">FeatureInterceptor</span><span style="color:#555">(</span>FeatureRepository featureRepository<span style="color:#555">)</span> <span style="color:#555">{</span>
-    <span style="color:#069;font-weight:bold">this</span><span style="color:#555">.</span><span style="color:#309">featureRepository</span> <span style="color:#555">=</span> featureRepository<span style="color:#555">;</span>
-  <span style="color:#555">}</span>
+<p>In order to prevent end points defined by controllers and controller methods that are toggled off from being accessed, we decided to configure a <code>HandlerInterceptor</code> <sup class="footnote-ref" id="fnref:2"><a href="#fn:2">2</a></sup> to intercept requests to these end points.</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">class</span> FeatureInterceptor <span style="color:#c0f">implements</span> HandlerInterceptor {
+  <span style="color:#069;font-weight:bold">private</span> <span style="color:#c0f">final</span> FeatureRepository <span style="color:#c0f">featureRepository</span>;
 
-  <span style="color:#99f">@Override</span>
-  <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">boolean</span> <span style="color:#c0f">preHandle</span><span style="color:#555">(</span>HttpServletRequest httpServletRequest<span style="color:#555">,</span> HttpServletResponse httpServletResponse<span style="color:#555">,</span> Object handler<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
-    HandlerMethod handlerMethod <span style="color:#555">=</span> <span style="color:#555">(</span>HandlerMethod<span style="color:#555">)</span> handler<span style="color:#555">;</span>
-    FeatureToggle methodAnnotation <span style="color:#555">=</span> handlerMethod<span style="color:#555">.</span><span style="color:#309">getMethodAnnotation</span><span style="color:#555">(</span>FeatureToggle<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">);</span>
-    <span style="color:#069;font-weight:bold">if</span> <span style="color:#555">(</span>methodAnnotation <span style="color:#555">==</span> <span style="color:#069;font-weight:bold">null</span><span style="color:#555">)</span> <span style="color:#555">{</span>
-      <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">true</span><span style="color:#555">;</span>
-    <span style="color:#555">}</span>
-
-    <span style="color:#069;font-weight:bold">if</span><span style="color:#555">(</span>featureRepository<span style="color:#555">.</span><span style="color:#309">isOn</span><span style="color:#555">(</span>methodAnnotation<span style="color:#555">.</span><span style="color:#309">feature</span><span style="color:#555">())</span> <span style="color:#555">==</span> <span style="color:#069;font-weight:bold">null</span><span style="color:#555">)</span> <span style="color:#555">{</span>
-      <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">true</span><span style="color:#555">;</span>
-    <span style="color:#555">}</span>
-
-    <span style="color:#069;font-weight:bold">if</span><span style="color:#555">(</span>methodAnnotation<span style="color:#555">.</span><span style="color:#309">expectedToBeOn</span><span style="color:#555">()</span> <span style="color:#555">==</span> featureRepository<span style="color:#555">.</span><span style="color:#309">isOn</span><span style="color:#555">(</span>methodAnnotation<span style="color:#555">.</span><span style="color:#309">feature</span><span style="color:#555">()))</span> <span style="color:#555">{</span>
-      <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">true</span><span style="color:#555">;</span>
-    <span style="color:#555">}</span>
-
-    httpServletResponse<span style="color:#555">.</span><span style="color:#309">setStatus</span><span style="color:#555">(</span>HttpServletResponse<span style="color:#555">.</span><span style="color:#309">SC_NOT_FOUND</span><span style="color:#555">);</span>
-    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">false</span><span style="color:#555">;</span>
-  <span style="color:#555">}</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">FeatureInterceptor</span>(FeatureRepository <span style="color:#c0f">featureRepository</span>) {
+    <span style="color:#069;font-weight:bold">this</span>.<span style="color:#309">featureRepository</span> <span style="color:#555">=</span> featureRepository;
+  }
 
   <span style="color:#99f">@Override</span>
-  <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">postHandle</span><span style="color:#555">(</span>HttpServletRequest httpServletRequest<span style="color:#555">,</span> HttpServletResponse httpServletResponse<span style="color:#555">,</span> Object o<span style="color:#555">,</span> ModelAndView modelAndView<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">boolean</span> preHandle(HttpServletRequest <span style="color:#c0f">httpServletRequest</span>, HttpServletResponse <span style="color:#c0f">httpServletResponse</span>, Object <span style="color:#c0f">handler</span>) <span style="color:#069;font-weight:bold">throws</span> <span style="color:#c0f">Exception</span> {
+    HandlerMethod <span style="color:#c0f">handlerMethod</span> <span style="color:#555">=</span> (HandlerMethod) handler;
+    FeatureToggle <span style="color:#c0f">methodAnnotation</span> <span style="color:#555">=</span> handlerMethod.<span style="color:#309">getMethodAnnotation</span>(FeatureToggle.<span style="color:#309">class</span>);
+    <span style="color:#069;font-weight:bold">if</span> (methodAnnotation <span style="color:#555">==</span> <span style="color:#069;font-weight:bold">null</span>) {
+      <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">true</span>;
+    }
 
-  <span style="color:#555">}</span>
+    <span style="color:#069;font-weight:bold">if</span>(featureRepository.<span style="color:#309">isOn</span>(methodAnnotation.<span style="color:#309">feature</span>()) <span style="color:#555">==</span> <span style="color:#069;font-weight:bold">null</span>) {
+      <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">true</span>;
+    }
+
+    <span style="color:#069;font-weight:bold">if</span>(methodAnnotation.<span style="color:#309">expectedToBeOn</span>() <span style="color:#555">==</span> featureRepository.<span style="color:#309">isOn</span>(methodAnnotation.<span style="color:#309">feature</span>())) {
+      <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">true</span>;
+    }
+
+    httpServletResponse.<span style="color:#309">setStatus</span>(HttpServletResponse.<span style="color:#309">SC_NOT_FOUND</span>);
+    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">false</span>;
+  }
 
   <span style="color:#99f">@Override</span>
-  <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">afterCompletion</span><span style="color:#555">(</span>HttpServletRequest httpServletRequest<span style="color:#555">,</span> HttpServletResponse httpServletResponse<span style="color:#555">,</span> Object o<span style="color:#555">,</span> Exception e<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">void</span> postHandle(HttpServletRequest <span style="color:#c0f">httpServletRequest</span>, HttpServletResponse <span style="color:#c0f">httpServletResponse</span>, Object <span style="color:#c0f">o</span>, ModelAndView <span style="color:#c0f">modelAndView</span>) <span style="color:#069;font-weight:bold">throws</span> <span style="color:#c0f">Exception</span> {
 
-  <span style="color:#555">}</span>
-<span style="color:#555">}</span>
-</code></pre></div><p>This feature interceptor uses the <code>FeatureToggle</code> looks for the annotation, and the looks at a feature repository to see if the state of the feature flag is set to what the annotation expects and if it does not, returns a 404. The annotation has two attributes - <code>isOn</code> and <code>feature</code>.</p>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Target</span><span style="color:#555">({</span>ElementType<span style="color:#555">.</span><span style="color:#309">TYPE</span><span style="color:#555">,</span> ElementType<span style="color:#555">.</span><span style="color:#309">METHOD</span><span style="color:#555">})</span>
-<span style="color:#99f">@Retention</span><span style="color:#555">(</span>RetentionPolicy<span style="color:#555">.</span><span style="color:#309">RUNTIME</span><span style="color:#555">)</span>
+  }
+
+  <span style="color:#99f">@Override</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">void</span> afterCompletion(HttpServletRequest <span style="color:#c0f">httpServletRequest</span>, HttpServletResponse <span style="color:#c0f">httpServletResponse</span>, Object <span style="color:#c0f">o</span>, Exception <span style="color:#c0f">e</span>) <span style="color:#069;font-weight:bold">throws</span> <span style="color:#c0f">Exception</span> {
+
+  }
+}</code></pre></div>
+<p>This feature interceptor uses the <code>FeatureToggle</code> looks for the annotation, and the looks at a feature repository to see if the state of the feature flag is set to what the annotation expects and if it does not, returns a 404. The annotation has two attributes - <code>isOn</code> and <code>feature</code>.</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Target</span>({ElementType.<span style="color:#309">TYPE</span>, ElementType.<span style="color:#309">METHOD</span>})
+<span style="color:#99f">@Retention</span>(RetentionPolicy.<span style="color:#309">RUNTIME</span>)
 <span style="color:#99f">@Documented</span>
-<span style="color:#069;font-weight:bold">public</span> <span style="color:#99f">@interface</span> FeatureToggle <span style="color:#555">{</span>
-  String <span style="color:#c0f">feature</span><span style="color:#555">();</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#99f">@interface</span> FeatureToggle {
+  String <span style="color:#c0f">feature</span>();
 
-  <span style="color:#078;font-weight:bold">boolean</span> <span style="color:#c0f">expectedToBeOn</span><span style="color:#555">()</span> <span style="color:#069;font-weight:bold">default</span> <span style="color:#069;font-weight:bold">true</span><span style="color:#555">;</span>
-<span style="color:#555">}</span>
-</code></pre></div><p>This annotation can be used on a controller method as follows:</p>
+  <span style="color:#078;font-weight:bold">boolean</span> <span style="color:#c0f">expectedToBeOn</span>() <span style="color:#069;font-weight:bold">default</span> <span style="color:#069;font-weight:bold">true</span>;
+}</code></pre></div>
+<p>This annotation can be used on a controller method as follows:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@RestController</span>
-<span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span><span style="color:#c30">&#34;/hello&#34;</span><span style="color:#555">)</span>
-<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">MessageController</span> <span style="color:#555">{</span>
-  <span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span><span style="color:#c30">&#34;&#34;</span><span style="color:#555">)</span>
-  <span style="color:#99f">@FeatureToggle</span><span style="color:#555">(</span>feature <span style="color:#555">=</span> <span style="color:#c30">&#34;feature.hello&#34;</span><span style="color:#555">)</span>
-  <span style="color:#069;font-weight:bold">public</span> Map <span style="color:#c0f">hello</span><span style="color:#555">()</span> <span style="color:#555">{</span>
-    <span style="color:#069;font-weight:bold">return</span> Collections<span style="color:#555">.</span><span style="color:#309">singletonMap</span><span style="color:#555">(</span><span style="color:#c30">&#34;message&#34;</span><span style="color:#555">,</span> <span style="color:#c30">&#34;hello world!&#34;</span><span style="color:#555">);</span>
-  <span style="color:#555">}</span>
-<span style="color:#555">}</span>
-</code></pre></div><p>The <code>FeatureRepository</code> has to look at all the properties that are available in the applications environment and filter out the ones that start with <code>feature.</code>.</p>
+<span style="color:#99f">@RequestMapping</span>(<span style="color:#c30">&#34;/hello&#34;</span>)
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">class</span> MessageController {
+  <span style="color:#99f">@RequestMapping</span>(<span style="color:#c30">&#34;&#34;</span>)
+  <span style="color:#99f">@FeatureToggle</span>(feature <span style="color:#555">=</span> <span style="color:#c30">&#34;feature.hello&#34;</span>)
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">Map</span> hello() {
+    <span style="color:#069;font-weight:bold">return</span> Collections.<span style="color:#309">singletonMap</span>(<span style="color:#c30">&#34;message&#34;</span>, <span style="color:#c30">&#34;hello world!&#34;</span>);
+  }
+}</code></pre></div>
+<p>The <code>FeatureRepository</code> has to look at all the properties that are available in the applications environment and filter out the ones that start with <code>feature.</code>.</p>
+
 <p>Collecting all the properties available in an environment is <a href="https://stackoverflow.com/questions/23506471/spring-access-all-environment-properties-as-a-map-or-properties-object">surprisingly complex</a>, owing to the number of ways properties can be injected. Based on the approach discussed in that question, we can create a <code>FeatureRepository</code> as follows:</p>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">FeatureRepository</span> <span style="color:#555">{</span>
-  <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">static</span> <span style="color:#069;font-weight:bold">final</span> String FEATURE_PREFIX <span style="color:#555">=</span> <span style="color:#c30">&#34;feature.&#34;</span><span style="color:#555">;</span>
-  <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">final</span> Environment env<span style="color:#555">;</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">class</span> FeatureRepository {
+  <span style="color:#069;font-weight:bold">private</span> <span style="color:#c0f">static</span> <span style="color:#069;font-weight:bold">final</span> <span style="color:#c0f">String</span> FEATURE_PREFIX <span style="color:#555">=</span> <span style="color:#c30">&#34;feature.&#34;</span>;
+  <span style="color:#069;font-weight:bold">private</span> <span style="color:#c0f">final</span> Environment <span style="color:#c0f">env</span>;
 
-  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">FeatureRepository</span><span style="color:#555">(</span>Environment env<span style="color:#555">)</span> <span style="color:#555">{</span>
-    <span style="color:#069;font-weight:bold">this</span><span style="color:#555">.</span><span style="color:#309">env</span> <span style="color:#555">=</span> env<span style="color:#555">;</span>
-  <span style="color:#555">}</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">FeatureRepository</span>(Environment <span style="color:#c0f">env</span>) {
+    <span style="color:#069;font-weight:bold">this</span>.<span style="color:#309">env</span> <span style="color:#555">=</span> env;
+  }
 
-  <span style="color:#069;font-weight:bold">public</span> Set<span style="color:#555">&lt;</span>String<span style="color:#555">&gt;</span> <span style="color:#c0f">featureKeys</span><span style="color:#555">()</span> <span style="color:#555">{</span>
-    Map<span style="color:#555">&lt;</span>String<span style="color:#555">,</span> Object<span style="color:#555">&gt;</span> map <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">new</span> HashMap<span style="color:#555">();</span>
-    <span style="color:#069;font-weight:bold">for</span><span style="color:#555">(</span>Iterator it <span style="color:#555">=</span> <span style="color:#555">((</span>AbstractEnvironment<span style="color:#555">)</span> env<span style="color:#555">).</span><span style="color:#309">getPropertySources</span><span style="color:#555">().</span><span style="color:#309">iterator</span><span style="color:#555">();</span> it<span style="color:#555">.</span><span style="color:#309">hasNext</span><span style="color:#555">();</span> <span style="color:#555">)</span> <span style="color:#555">{</span>
-      PropertySource propertySource <span style="color:#555">=</span> <span style="color:#555">(</span>PropertySource<span style="color:#555">)</span> it<span style="color:#555">.</span><span style="color:#309">next</span><span style="color:#555">();</span>
-      <span style="color:#069;font-weight:bold">if</span> <span style="color:#555">(</span>propertySource <span style="color:#069;font-weight:bold">instanceof</span> MapPropertySource<span style="color:#555">)</span> <span style="color:#555">{</span>
-        map<span style="color:#555">.</span><span style="color:#309">putAll</span><span style="color:#555">(((</span>MapPropertySource<span style="color:#555">)</span> propertySource<span style="color:#555">).</span><span style="color:#309">getSource</span><span style="color:#555">());</span>
-      <span style="color:#555">}</span>
-    <span style="color:#555">}</span>
-    <span style="color:#069;font-weight:bold">return</span> map<span style="color:#555">.</span><span style="color:#309">keySet</span><span style="color:#555">().</span><span style="color:#309">stream</span><span style="color:#555">()</span>
-        <span style="color:#555">.</span><span style="color:#309">filter</span><span style="color:#555">(</span>k <span style="color:#555">-&gt;</span> k<span style="color:#555">.</span><span style="color:#309">startsWith</span><span style="color:#555">(</span>FEATURE_PREFIX<span style="color:#555">))</span>
-        <span style="color:#555">.</span><span style="color:#309">collect</span><span style="color:#555">(</span>Collectors<span style="color:#555">.</span><span style="color:#309">toSet</span><span style="color:#555">());</span>
-  <span style="color:#555">}</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">Set</span><span style="color:#555">&lt;</span>String<span style="color:#555">&gt;</span> <span style="color:#c0f">featureKeys</span>() {
+    Map<span style="color:#555">&lt;</span>String, Object<span style="color:#555">&gt;</span> <span style="color:#c0f">map</span> <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">new</span> HashMap();
+    <span style="color:#069;font-weight:bold">for</span>(Iterator <span style="color:#c0f">it</span> <span style="color:#555">=</span> ((AbstractEnvironment) env).<span style="color:#309">getPropertySources</span>().<span style="color:#309">iterator</span>(); it.<span style="color:#309">hasNext</span>(); ) {
+      PropertySource <span style="color:#c0f">propertySource</span> <span style="color:#555">=</span> (PropertySource) it.<span style="color:#309">next</span>();
+      <span style="color:#069;font-weight:bold">if</span> (propertySource <span style="color:#c0f">instanceof</span> MapPropertySource) {
+        map.<span style="color:#309">putAll</span>(((MapPropertySource) propertySource).<span style="color:#309">getSource</span>());
+      }
+    }
+    <span style="color:#069;font-weight:bold">return</span> map.<span style="color:#309">keySet</span>().<span style="color:#309">stream</span>()
+        .<span style="color:#309">filter</span>(k <span style="color:#555">-&gt;</span> k.<span style="color:#309">startsWith</span>(FEATURE_PREFIX))
+        .<span style="color:#309">collect</span>(Collectors.<span style="color:#309">toSet</span>());
+  }
 
-  <span style="color:#069;font-weight:bold">public</span> Boolean <span style="color:#c0f">isOn</span><span style="color:#555">(</span>String key<span style="color:#555">)</span> <span style="color:#555">{</span>
-    <span style="color:#069;font-weight:bold">return</span> allFeatures<span style="color:#555">().</span><span style="color:#309">get</span><span style="color:#555">(</span>key<span style="color:#555">);</span>
-  <span style="color:#555">}</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">Boolean</span> isOn(String <span style="color:#c0f">key</span>) {
+    <span style="color:#069;font-weight:bold">return</span> allFeatures().<span style="color:#309">get</span>(key);
+  }
 
-  <span style="color:#069;font-weight:bold">public</span> Map<span style="color:#555">&lt;</span>String<span style="color:#555">,</span> Boolean<span style="color:#555">&gt;</span> <span style="color:#c0f">allFeatures</span><span style="color:#555">()</span> <span style="color:#555">{</span>
-    <span style="color:#069;font-weight:bold">return</span> featureKeys<span style="color:#555">().</span><span style="color:#309">stream</span><span style="color:#555">().</span><span style="color:#309">collect</span><span style="color:#555">(</span>Collectors<span style="color:#555">.</span><span style="color:#309">toMap</span><span style="color:#555">(</span>k <span style="color:#555">-&gt;</span> k<span style="color:#555">,</span> k <span style="color:#555">-&gt;</span> Boolean<span style="color:#555">.</span><span style="color:#309">parseBoolean</span><span style="color:#555">(</span>env<span style="color:#555">.</span><span style="color:#309">getProperty</span><span style="color:#555">(</span>k<span style="color:#555">))));</span>
-  <span style="color:#555">}</span>
-<span style="color:#555">}</span>
-</code></pre></div><h3 id="toggling-entire-controllers">Toggling entire controllers</h3>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">Map</span><span style="color:#555">&lt;</span>String, Boolean<span style="color:#555">&gt;</span> <span style="color:#c0f">allFeatures</span>() {
+    <span style="color:#069;font-weight:bold">return</span> featureKeys().<span style="color:#309">stream</span>().<span style="color:#309">collect</span>(Collectors.<span style="color:#309">toMap</span>(k <span style="color:#555">-&gt;</span> k, k <span style="color:#555">-&gt;</span> Boolean.<span style="color:#309">parseBoolean</span>(env.<span style="color:#309">getProperty</span>(k))));
+  }
+}</code></pre></div>
+<h3 id="toggling-entire-controllers">Toggling entire controllers</h3>
+
 <p>Since Spring controllers are wired up as beans, the <code>ConditionalOnProperty</code> annotation can be used to toggle on entire controllers.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@RestController</span>
-<span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span><span style="color:#c30">&#34;/foo&#34;</span><span style="color:#555">)</span>
-<span style="color:#99f">@ConditionalOnProperty</span><span style="color:#555">(</span>value <span style="color:#555">=</span> <span style="color:#c30">&#34;feature.foo&#34;</span><span style="color:#555">,</span> havingValue <span style="color:#555">=</span> <span style="color:#c30">&#34;true&#34;</span><span style="color:#555">)</span>
-<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">FooController</span> <span style="color:#555">{</span>
-  <span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span><span style="color:#c30">&#34;&#34;</span><span style="color:#555">)</span>
-  <span style="color:#069;font-weight:bold">public</span> Map <span style="color:#c0f">hello</span><span style="color:#555">()</span> <span style="color:#555">{</span>
-    <span style="color:#069;font-weight:bold">return</span> Collections<span style="color:#555">.</span><span style="color:#309">singletonMap</span><span style="color:#555">(</span><span style="color:#c30">&#34;message&#34;</span><span style="color:#555">,</span> <span style="color:#c30">&#34;hello foo!&#34;</span><span style="color:#555">);</span>
-  <span style="color:#555">}</span>
-<span style="color:#555">}</span>
-</code></pre></div><p>However, now we have two different mechanisms to toggle methods and controllers. It will be nice to consolidate them and doing so will allow us to use the same mechanism for toggling beans. This can be done by annotating <code>FeatureToggle</code> with the <a href="/blog/2015/12/06/implementing-custom-annotations-for-spring-mvc/">meta annotation</a> <code>Conditional</code> that looks up the state of feature toggles using the custom condition <code>FeatureCondition</code>. This will change <code>FeatureToggle</code> to:</p>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Target</span><span style="color:#555">({</span>ElementType<span style="color:#555">.</span><span style="color:#309">TYPE</span><span style="color:#555">,</span> ElementType<span style="color:#555">.</span><span style="color:#309">METHOD</span><span style="color:#555">})</span>
-<span style="color:#99f">@Retention</span><span style="color:#555">(</span>RetentionPolicy<span style="color:#555">.</span><span style="color:#309">RUNTIME</span><span style="color:#555">)</span>
+<span style="color:#99f">@RequestMapping</span>(<span style="color:#c30">&#34;/foo&#34;</span>)
+<span style="color:#99f">@ConditionalOnProperty</span>(value <span style="color:#555">=</span> <span style="color:#c30">&#34;feature.foo&#34;</span>, havingValue <span style="color:#555">=</span> <span style="color:#c30">&#34;true&#34;</span>)
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">class</span> FooController {
+  <span style="color:#99f">@RequestMapping</span>(<span style="color:#c30">&#34;&#34;</span>)
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">Map</span> hello() {
+    <span style="color:#069;font-weight:bold">return</span> Collections.<span style="color:#309">singletonMap</span>(<span style="color:#c30">&#34;message&#34;</span>, <span style="color:#c30">&#34;hello foo!&#34;</span>);
+  }
+}</code></pre></div>
+<p>However, now we have two different mechanisms to toggle methods and controllers. It will be nice to consolidate them and doing so will allow us to use the same mechanism for toggling beans. This can be done by annotating <code>FeatureToggle</code> with the <a href="/blog/2015/12/06/implementing-custom-annotations-for-spring-mvc/">meta annotation</a> <code>Conditional</code> that looks up the state of feature toggles using the custom condition <code>FeatureCondition</code>. This will change <code>FeatureToggle</code> to:</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Target</span>({ElementType.<span style="color:#309">TYPE</span>, ElementType.<span style="color:#309">METHOD</span>})
+<span style="color:#99f">@Retention</span>(RetentionPolicy.<span style="color:#309">RUNTIME</span>)
 <span style="color:#99f">@Documented</span>
-<span style="color:#99f">@Conditional</span><span style="color:#555">(</span>FeatureCondition<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">)</span>
-<span style="color:#069;font-weight:bold">public</span> <span style="color:#99f">@interface</span> FeatureToggle <span style="color:#555">{</span>
-  String <span style="color:#c0f">feature</span><span style="color:#555">();</span>
+<span style="color:#99f">@Conditional</span>(FeatureCondition.<span style="color:#309">class</span>)
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#99f">@interface</span> FeatureToggle {
+  String <span style="color:#c0f">feature</span>();
 
-  <span style="color:#078;font-weight:bold">boolean</span> <span style="color:#c0f">expectedToBeOn</span><span style="color:#555">()</span> <span style="color:#069;font-weight:bold">default</span> <span style="color:#069;font-weight:bold">true</span><span style="color:#555">;</span>
-<span style="color:#555">}</span>
-</code></pre></div><p>The <code>FeatureCondition</code> uses the meta annotation attributes provided to it and the environment to decide the state to be returned:</p>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">FeatureCondition</span> <span style="color:#069;font-weight:bold">implements</span> Condition <span style="color:#555">{</span>
+  <span style="color:#078;font-weight:bold">boolean</span> <span style="color:#c0f">expectedToBeOn</span>() <span style="color:#069;font-weight:bold">default</span> <span style="color:#069;font-weight:bold">true</span>;
+}</code></pre></div>
+<p>The <code>FeatureCondition</code> uses the meta annotation attributes provided to it and the environment to decide the state to be returned:</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">class</span> FeatureCondition <span style="color:#c0f">implements</span> Condition {
   <span style="color:#99f">@Override</span>
-  <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">boolean</span> <span style="color:#c0f">matches</span><span style="color:#555">(</span>ConditionContext conditionContext<span style="color:#555">,</span> AnnotatedTypeMetadata annotatedTypeMetadata<span style="color:#555">)</span> <span style="color:#555">{</span>
-    <span style="color:#069;font-weight:bold">if</span><span style="color:#555">(</span>annotatedTypeMetadata<span style="color:#555">.</span><span style="color:#309">isAnnotated</span><span style="color:#555">(</span>FeatureToggle<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">.</span><span style="color:#309">getCanonicalName</span><span style="color:#555">()))</span> <span style="color:#555">{</span>
-      Map<span style="color:#555">&lt;</span>String<span style="color:#555">,</span> Object<span style="color:#555">&gt;</span> annotationAttributes <span style="color:#555">=</span> annotatedTypeMetadata
-          <span style="color:#555">.</span><span style="color:#309">getAnnotationAttributes</span><span style="color:#555">(</span>FeatureToggle<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">.</span><span style="color:#309">getCanonicalName</span><span style="color:#555">());</span>
-      String feature <span style="color:#555">=</span> <span style="color:#555">(</span>String<span style="color:#555">)</span> annotationAttributes<span style="color:#555">.</span><span style="color:#309">get</span><span style="color:#555">(</span><span style="color:#c30">&#34;feature&#34;</span><span style="color:#555">);</span>
-      <span style="color:#078;font-weight:bold">boolean</span> expectedToBeOn <span style="color:#555">=</span> Boolean<span style="color:#555">.</span><span style="color:#309">parseBoolean</span><span style="color:#555">(</span>String<span style="color:#555">.</span><span style="color:#309">valueOf</span><span style="color:#555">(</span>annotationAttributes<span style="color:#555">.</span><span style="color:#309">get</span><span style="color:#555">(</span><span style="color:#c30">&#34;expectedToBeOn&#34;</span><span style="color:#555">)));</span>
-      <span style="color:#078;font-weight:bold">boolean</span> isOn <span style="color:#555">=</span> Boolean<span style="color:#555">.</span><span style="color:#309">parseBoolean</span><span style="color:#555">(</span>conditionContext<span style="color:#555">.</span><span style="color:#309">getEnvironment</span><span style="color:#555">().</span><span style="color:#309">getProperty</span><span style="color:#555">(</span>feature<span style="color:#555">));</span>
-      <span style="color:#069;font-weight:bold">return</span> expectedToBeOn <span style="color:#555">==</span> isOn<span style="color:#555">;</span>
-    <span style="color:#555">}</span>
-    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">true</span><span style="color:#555">;</span>
-  <span style="color:#555">}</span>
-<span style="color:#555">}</span>
-</code></pre></div><p>Now that we have a unified mechanism to toggle controllers, beans and controller methods, we can use this annotation. The <code>FooController</code> would now look like this:</p>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">boolean</span> matches(ConditionContext <span style="color:#c0f">conditionContext</span>, AnnotatedTypeMetadata <span style="color:#c0f">annotatedTypeMetadata</span>) {
+    <span style="color:#069;font-weight:bold">if</span>(annotatedTypeMetadata.<span style="color:#309">isAnnotated</span>(FeatureToggle.<span style="color:#309">class</span>.<span style="color:#309">getCanonicalName</span>())) {
+      Map<span style="color:#555">&lt;</span>String, Object<span style="color:#555">&gt;</span> <span style="color:#c0f">annotationAttributes</span> <span style="color:#555">=</span> annotatedTypeMetadata
+          .<span style="color:#309">getAnnotationAttributes</span>(FeatureToggle.<span style="color:#309">class</span>.<span style="color:#309">getCanonicalName</span>());
+      String <span style="color:#c0f">feature</span> <span style="color:#555">=</span> (String) annotationAttributes.<span style="color:#309">get</span>(<span style="color:#c30">&#34;feature&#34;</span>);
+      <span style="color:#078;font-weight:bold">boolean</span> <span style="color:#c0f">expectedToBeOn</span> <span style="color:#555">=</span> Boolean.<span style="color:#309">parseBoolean</span>(String.<span style="color:#309">valueOf</span>(annotationAttributes.<span style="color:#309">get</span>(<span style="color:#c30">&#34;expectedToBeOn&#34;</span>)));
+      <span style="color:#078;font-weight:bold">boolean</span> <span style="color:#c0f">isOn</span> <span style="color:#555">=</span> Boolean.<span style="color:#309">parseBoolean</span>(conditionContext.<span style="color:#309">getEnvironment</span>().<span style="color:#309">getProperty</span>(feature));
+      <span style="color:#069;font-weight:bold">return</span> expectedToBeOn <span style="color:#555">==</span> isOn;
+    }
+    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">true</span>;
+  }
+}</code></pre></div>
+<p>Now that we have a unified mechanism to toggle controllers, beans and controller methods, we can use this annotation. The <code>FooController</code> would now look like this:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@RestController</span>
-<span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span><span style="color:#c30">&#34;/foo&#34;</span><span style="color:#555">)</span>
-<span style="color:#99f">@FeatureToggle</span><span style="color:#555">(</span>feature <span style="color:#555">=</span> <span style="color:#c30">&#34;feature.foo&#34;</span><span style="color:#555">)</span>
-<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">FooController</span> <span style="color:#555">{</span>
-  <span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span><span style="color:#c30">&#34;&#34;</span><span style="color:#555">)</span>
-  <span style="color:#069;font-weight:bold">public</span> Map <span style="color:#c0f">hello</span><span style="color:#555">()</span> <span style="color:#555">{</span>
-    <span style="color:#069;font-weight:bold">return</span> Collections<span style="color:#555">.</span><span style="color:#309">singletonMap</span><span style="color:#555">(</span><span style="color:#c30">&#34;message&#34;</span><span style="color:#555">,</span> <span style="color:#c30">&#34;hello foo!&#34;</span><span style="color:#555">);</span>
-  <span style="color:#555">}</span>
-<span style="color:#555">}</span>
-</code></pre></div><p>And our <code>AppConfig</code> will be like this:</p>
+<span style="color:#99f">@RequestMapping</span>(<span style="color:#c30">&#34;/foo&#34;</span>)
+<span style="color:#99f">@FeatureToggle</span>(feature <span style="color:#555">=</span> <span style="color:#c30">&#34;feature.foo&#34;</span>)
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">class</span> FooController {
+  <span style="color:#99f">@RequestMapping</span>(<span style="color:#c30">&#34;&#34;</span>)
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">Map</span> hello() {
+    <span style="color:#069;font-weight:bold">return</span> Collections.<span style="color:#309">singletonMap</span>(<span style="color:#c30">&#34;message&#34;</span>, <span style="color:#c30">&#34;hello foo!&#34;</span>);
+  }
+}</code></pre></div>
+<p>And our <code>AppConfig</code> will be like this:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Configuration</span>
-<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">AppConfig</span> <span style="color:#069;font-weight:bold">extends</span> WebMvcConfigurerAdapter <span style="color:#555">{</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">class</span> AppConfig <span style="color:#c0f">extends</span> WebMvcConfigurerAdapter {
   <span style="color:#99f">@Autowired</span>
-  Environment env<span style="color:#555">;</span>
+  Environment <span style="color:#c0f">env</span>;
 
   <span style="color:#99f">@Bean</span>
-  <span style="color:#99f">@FeatureToggle</span><span style="color:#555">(</span>feature <span style="color:#555">=</span> <span style="color:#c30">&#34;feature.redis.session.store&#34;</span><span style="color:#555">,</span> expectedToBeOn <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">false</span><span style="color:#555">)</span>
-  <span style="color:#069;font-weight:bold">public</span> SessionRepository <span style="color:#c0f">mapSessionRepository</span><span style="color:#555">()</span> <span style="color:#555">{</span>
-    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">new</span> MapSessionRepository<span style="color:#555">();</span>
-  <span style="color:#555">}</span>
+  <span style="color:#99f">@FeatureToggle</span>(feature <span style="color:#555">=</span> <span style="color:#c30">&#34;feature.redis.session.store&#34;</span>, expectedToBeOn <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">false</span>)
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">SessionRepository</span> mapSessionRepository() {
+    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">new</span> MapSessionRepository();
+  }
 
   <span style="color:#99f">@Bean</span>
-  <span style="color:#99f">@FeatureToggle</span><span style="color:#555">(</span>feature <span style="color:#555">=</span> <span style="color:#c30">&#34;feature.redis.session.store&#34;</span><span style="color:#555">)</span>
-  <span style="color:#069;font-weight:bold">public</span> SessionRepository <span style="color:#c0f">redisSessionRepository</span><span style="color:#555">(</span>RedisConnectionFactory factory<span style="color:#555">)</span> <span style="color:#555">{</span>
-    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">new</span> RedisOperationsSessionRepository<span style="color:#555">(</span>factory<span style="color:#555">);</span>
-  <span style="color:#555">}</span>
+  <span style="color:#99f">@FeatureToggle</span>(feature <span style="color:#555">=</span> <span style="color:#c30">&#34;feature.redis.session.store&#34;</span>)
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">SessionRepository</span> redisSessionRepository(RedisConnectionFactory <span style="color:#c0f">factory</span>) {
+    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">new</span> RedisOperationsSessionRepository(factory);
+  }
 
   <span style="color:#99f">@Override</span>
-  <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">addInterceptors</span><span style="color:#555">(</span>InterceptorRegistry registry<span style="color:#555">)</span> <span style="color:#555">{</span>
-    registry<span style="color:#555">.</span><span style="color:#309">addInterceptor</span><span style="color:#555">(</span><span style="color:#069;font-weight:bold">new</span> FeatureInterceptor<span style="color:#555">(</span><span style="color:#069;font-weight:bold">new</span> FeatureRepository<span style="color:#555">(</span>env<span style="color:#555">)));</span>
-    <span style="color:#069;font-weight:bold">super</span><span style="color:#555">.</span><span style="color:#309">addInterceptors</span><span style="color:#555">(</span>registry<span style="color:#555">);</span>
-  <span style="color:#555">}</span>
-<span style="color:#555">}</span>
-</code></pre></div><p>In the second part of <a href="/series/feature-toggles">this series</a>, we will explore how the feature toggle can be exposed to the front end and how to consume this and use it for toggling features in the Angular components.</p>
-<section class="footnotes" role="doc-endnotes">
-<hr>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">void</span> addInterceptors(InterceptorRegistry <span style="color:#c0f">registry</span>) {
+    registry.<span style="color:#309">addInterceptor</span>(<span style="color:#069;font-weight:bold">new</span> FeatureInterceptor(<span style="color:#069;font-weight:bold">new</span> FeatureRepository(env)));
+    <span style="color:#069;font-weight:bold">super</span>.<span style="color:#309">addInterceptors</span>(registry);
+  }
+}</code></pre></div>
+<p>In the second part of <a href="/series/feature-toggles">this series</a>, we will explore how the feature toggle can be exposed to the front end and how to consume this and use it for toggling features in the Angular components.</p>
+<div class="footnotes">
+
+<hr />
+
 <ol>
-<li id="fn:1" role="doc-endnote">
-<p>While feature toggles are just like any other application parameter, treating them as such in our stack resulted in errors, which we address later in this series. <a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
-</li>
-<li id="fn:2" role="doc-endnote">
-<p>HandlerInterceptor <a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
-</li>
+<li id="fn:1">While feature toggles are just like any other application parameter, treating them as such in our stack resulted in errors, which we address later in this series.
+ <a class="footnote-return" href="#fnref:1"><sup>[return]</sup></a></li>
+<li id="fn:2">HandlerInterceptor
+ <a class="footnote-return" href="#fnref:2"><sup>[return]</sup></a></li>
 </ol>
-</section>
+</div>
         </div>
         <aside id="gh-comments-list">
           <script>
@@ -425,11 +437,15 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2019/08/02/flushing-metrics-in-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Flushing Metrics in Dropwizard Commands</a></li>
-            
-            
-            
-            
             
             
             
@@ -1047,6 +1063,10 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2014/08/02/importing-the-yelp-dataset-into-mongodb/?utm_source=site&amp;utm_medium=related">Importing the Yelp dataset into MongoDB</a></li>
             
             
@@ -1419,14 +1439,6 @@ $(document).ready(function () {
             
             
             
-            
-            
-            
-            
-            
-            
-            
-            
             <li><a href="https://sadique.io/blog/2013/08/15/pythons-bool-type/?utm_source=site&amp;utm_medium=related">Python&#39;s bool type</a></li>
             
             
@@ -1620,6 +1632,14 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             

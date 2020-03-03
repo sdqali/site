@@ -105,7 +105,8 @@ The data is available as files with each line representing a JSON object." itemp
       <div itemprop="mainContentOfPage"
            itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div>
-          <p>Today Yelp announced their dataset challenge <sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup>. The dataset they released includes data from 5 cities (Phoenix, Las Vegas, Madison, Waterloo and Edinburgh) and consists of</p>
+          <p>Today Yelp announced their dataset challenge <sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup>. The dataset they released includes data from 5 cities (Phoenix, Las Vegas, Madison, Waterloo and Edinburgh) and consists of</p>
+
 <ul>
 <li>42,153 businesses</li>
 <li>320,002 business attributes</li>
@@ -115,8 +116,11 @@ The data is available as files with each line representing a JSON object." itemp
 <li>403,210 tips</li>
 <li>1,125,458 reviews</li>
 </ul>
-<p>The data is available for public consumption, although Yelp owns any derivative dataset you create from the original <sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup>.</p>
+
+<p>The data is available for public consumption, although Yelp owns any derivative dataset you create from the original <sup class="footnote-ref" id="fnref:2"><a href="#fn:2">2</a></sup>.</p>
+
 <p>The data is available as files with each line representing a JSON object. Since I am using MongoDB these days to analyze geospatial data, I wanted to convert this into an easy format that I could import into Mongo. Mongo puts a strict constraint on how a location needs to be specified - It expects a location field in a document to be an array in the format <code>[longitude, latitude]</code>.</p>
+
 <p>With this in mind, the first step is to convert and transform the objects into objects that Mongo can make sense of. The following Ruby script does the job:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ruby" data-lang="ruby"><span style="color:#09f;font-style:italic">#!/usr/bin/env ruby</span>
 
@@ -130,13 +134,15 @@ businesses <span style="color:#555">=</span> <span style="color:#360">IO</span><
   }
   b
 <span style="color:#069;font-weight:bold">end</span>
-<span style="color:#360">IO</span><span style="color:#555">.</span>write <span style="color:#c30">&#34;businesses.mongo.json&#34;</span>, businesses<span style="color:#555">.</span>to_json
-</code></pre></div><p>The next step is to import this data into Mongo using the <code>mongoimport</code> tool.</p>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">mongoimport --collection businesses --file businesses.mongo.json --jsonArray
-</code></pre></div><p>We need the <code>--jsonArray</code> parameter because our data is an array.</p>
+<span style="color:#360">IO</span><span style="color:#555">.</span>write <span style="color:#c30">&#34;businesses.mongo.json&#34;</span>, businesses<span style="color:#555">.</span>to_json</code></pre></div>
+<p>The next step is to import this data into Mongo using the <code>mongoimport</code> tool.</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">mongoimport --collection businesses --file businesses.mongo.json --jsonArray</code></pre></div>
+<p>We need the <code>--jsonArray</code> parameter because our data is an array.</p>
+
 <p>Since there are 42153 businesses, it will take some time. On my Macbook Pro, it took around 2 minutes, 10 seconds. Once the import is done, make sure that we have a Geospatial index on the <code>location</code> field.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript">db.businesses.ensureIndex({location<span style="color:#555">:</span> <span style="color:#c30">&#34;2dsphere&#34;</span>})
-</code></pre></div><p>Once the indexing is done, we can use Mongo&rsquo;s Geospatial queries to find interesting things. As an example, here we look up all the restaurants within 1 kilometer distance from downtown Phoenix.</p>
+</code></pre></div>
+<p>Once the indexing is done, we can use Mongo&rsquo;s Geospatial queries to find interesting things. As an example, here we look up all the restaurants within 1 kilometer distance from downtown Phoenix.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript">db.businesses.find({
   location<span style="color:#555">:</span> {
     $near<span style="color:#555">:</span> {
@@ -148,18 +154,19 @@ businesses <span style="color:#555">=</span> <span style="color:#360">IO</span><
     }
   }
 })
-</code></pre></div><p>Happy hacking.</p>
-<section class="footnotes" role="doc-endnotes">
-<hr>
+</code></pre></div>
+<p>Happy hacking.</p>
+<div class="footnotes">
+
+<hr />
+
 <ol>
-<li id="fn:1" role="doc-endnote">
-<p><a href="http://www.yelp.com/dataset_challenge">Yelp Dataset Challenge, 2014</a>. <a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
-</li>
-<li id="fn:2" role="doc-endnote">
-<p>DATASET CHALLENGE ACADEMIC DATASET TERMS OF USE <a href="https://www.yelp.com/html/pdf/Dataset_Challenge_Academic_Dataset_Agreement.pdf">Section 5, Ownership</a>. <a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
-</li>
+<li id="fn:1"><a href="http://www.yelp.com/dataset_challenge">Yelp Dataset Challenge, 2014</a>.
+ <a class="footnote-return" href="#fnref:1"><sup>[return]</sup></a></li>
+<li id="fn:2">DATASET CHALLENGE ACADEMIC DATASET TERMS OF USE <a href="https://www.yelp.com/html/pdf/Dataset_Challenge_Academic_Dataset_Agreement.pdf">Section 5, Ownership</a>.
+ <a class="footnote-return" href="#fnref:2"><sup>[return]</sup></a></li>
 </ol>
-</section>
+</div>
 
         </div>
         <aside id="gh-comments-list">
@@ -410,6 +417,10 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2018/03/22/nethttp-and-the-simplest-of-explanations/?utm_source=site&amp;utm_medium=related">Net::HTTP and the simplest of explanations</a></li>
             
             
@@ -503,6 +514,10 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2016/11/22/implementing-feature-toggles-for-a-spring-boot-application-part-1/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 1</a></li>
+            
+            
+            
+            
             
             
             
@@ -1214,14 +1229,6 @@ $(document).ready(function () {
             
             
             
-            
-            
-            
-            
-            
-            
-            
-            
             <li><a href="https://sadique.io/blog/2013/08/15/pythons-bool-type/?utm_source=site&amp;utm_medium=related">Python&#39;s bool type</a></li>
             
             
@@ -1413,6 +1420,14 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             

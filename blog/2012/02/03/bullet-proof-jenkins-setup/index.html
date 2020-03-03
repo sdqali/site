@@ -23,6 +23,7 @@
 </head>
 
   <meta name="description" content="In this post, I will describe how a neat setup and some discipline will ensure a Jenkins that can be rolled back and recreated very easily - a bullet proof Jenkins setup.  I have been working on configuring our Jenkins instance. This was the first time I had played around with Jenkins. I am fairly comfortable with Go from ThoughtWorks Studios. All of my past teams used Go as their tool for continuous delivery.
+
 One of the things I found very different from Go in Jenkins is the absence of the notion of a Pipeline as the basic entity of build, as proposed in Continuous Delivery. Although there are plugins to make this available in Jenkins, we decided to go with Jenkins&rsquo; model of Jobs." />
   
     <meta content="jenkins, ci, continuous-delivery, best-practices, learn, code, development" name="keywords">
@@ -34,11 +35,13 @@ One of the things I found very different from Go in Jenkins is the absence of th
   <meta name="twitter:creator" content="@sdqali">
   <meta name="twitter:title" content="Bullet proof Jenkins setup">
   <meta name="twitter:description" content="In this post, I will describe how a neat setup and some discipline will ensure a Jenkins that can be rolled back and recreated very easily - a bullet proof Jenkins setup.  I have been working on configuring our Jenkins instance. This was the first time I had played around with Jenkins. I am fairly comfortable with Go from ThoughtWorks Studios. All of my past teams used Go as their tool for continuous delivery.
+
 One of the things I found very different from Go in Jenkins is the absence of the notion of a Pipeline as the basic entity of build, as proposed in Continuous Delivery. Although there are plugins to make this available in Jenkins, we decided to go with Jenkins&rsquo; model of Jobs.">
   <meta name="twitter:image" content="https://sadique.io//images/threaded-blue-on-black-cropped.jpg">
 
   <meta property="og:title" content="Bullet proof Jenkins setup" />
   <meta property="og:description" content="In this post, I will describe how a neat setup and some discipline will ensure a Jenkins that can be rolled back and recreated very easily - a bullet proof Jenkins setup.  I have been working on configuring our Jenkins instance. This was the first time I had played around with Jenkins. I am fairly comfortable with Go from ThoughtWorks Studios. All of my past teams used Go as their tool for continuous delivery.
+
 One of the things I found very different from Go in Jenkins is the absence of the notion of a Pipeline as the basic entity of build, as proposed in Continuous Delivery. Although there are plugins to make this available in Jenkins, we decided to go with Jenkins&rsquo; model of Jobs." itemprop="description"/>
   <meta property="og:url" content="https://sadique.io/blog/2012/02/03/bullet-proof-jenkins-setup/" />
   <meta property="og:image" content="https://sadique.io//images/threaded-blue-on-black-cropped.jpg" />
@@ -108,15 +111,22 @@ One of the things I found very different from Go in Jenkins is the absence of th
       <div itemprop="mainContentOfPage"
            itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div>
-          <p>In this post, I will describe how a neat setup and some discipline will ensure a Jenkins that can be rolled back and recreated very easily - a bullet proof Jenkins setup.  I have been working on configuring our Jenkins instance. This was the first time I had played around with Jenkins. I am fairly comfortable with <!-- raw HTML omitted -->Go<!-- raw HTML omitted --> from ThoughtWorks Studios. All of my past teams used Go as their tool for continuous delivery.</p>
-<p>One of the things I found very different from Go in Jenkins is the absence of the notion of a Pipeline as the basic entity of build, as proposed in <!-- raw HTML omitted -->Continuous Delivery<!-- raw HTML omitted -->. Although there are plugins to make this available in Jenkins, we decided to go with Jenkins&rsquo; model of Jobs.</p>
+          <p>In this post, I will describe how a neat setup and some discipline will ensure a Jenkins that can be rolled back and recreated very easily - a bullet proof Jenkins setup.  I have been working on configuring our Jenkins instance. This was the first time I had played around with Jenkins. I am fairly comfortable with <a href="http://www.thoughtworks-studios.com/go-agile-release-management" target="_blank">Go</a> from ThoughtWorks Studios. All of my past teams used Go as their tool for continuous delivery.</p>
+
+<p>One of the things I found very different from Go in Jenkins is the absence of the notion of a Pipeline as the basic entity of build, as proposed in <a href="http://continuousdelivery.com/" target="_blank">Continuous Delivery</a>. Although there are plugins to make this available in Jenkins, we decided to go with Jenkins&rsquo; model of Jobs.</p>
+
 <p>Another difference I spotted is that when a custom task is defined as part of a Job, Jenkins creates a shell script with all the steps while executing the Job. In Go, each of the steps will have to be defined as a custom command.</p>
+
 <p>We wanted to ensure that our Jenkins configuration is version controlled. While this is a huge win, one of the ways this situation deteriorates is when a large number of changes are made to the configuration over a period of time and these is not checked in. So we decided to take this one step further and ensure that these changes are automatically checked in. There are instructions on how to do this, but we had to do some tweaking to get this working for us.</p>
+
 <p>These are the steps to setup a bullet proof Jenkins setup. This assumes that Jenkins is running on a Linux box.</p>
+
 <ol>
 <li>Create a Git repository in Jenkins&rsquo; base directory - This is generally <code>/var/lib/jenkins</code></li>
 </ol>
+
 <p>2.Create a <code>.gitignore</code> file to exclude Jenkins workspaces. The Jenkins base directory is the home directory for the Jenkins user created to run Jenkins. This means that there will be a number ofLinux user specific files like <code>.ssh/</code> , <code>.gem</code> etc. These files need to be specified in the <code>.gitignore</code> file. A sample <code>.gitignore</code> file is listed below.</p>
+
 <pre><code># The following ignores...
 # Miscellaneous Hudson litter
 *.log
@@ -174,9 +184,10 @@ modules/
 custom_deps/
 slave/workspace/
 slave-slave.log.*
-</code></pre><ol start="3">
-<li>Setup a Jenkins job to check in the changed configuration files every day at midnight. (Or whatever time interval you choose). Add a custom task with the following steps:</li>
-</ol>
+</code></pre>
+
+<ol>
+<li><p>Setup a Jenkins job to check in the changed configuration files every day at midnight. (Or whatever time interval you choose). Add a custom task with the following steps:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#09f;font-style:italic">#/usr/bin/env bash</span>
 <span style="color:#033">JENKINS_HOME</span><span style="color:#555">=</span>/var/lib/jenkins
 <span style="color:#366">cd</span> <span style="color:#033">$JENKINS_HOME</span>
@@ -186,16 +197,20 @@ git add *.xml jobs/*/config.xml users/*/config.xml userContent/*
 <span style="color:#033">CHANGES_TO_BE_COMMITTED</span><span style="color:#555">=</span><span style="color:#069;font-weight:bold">$(</span>git status | grep <span style="color:#c30">&#34;^# Changes to be committed:&#34;</span> | wc -l<span style="color:#069;font-weight:bold">)</span>
 
 <span style="color:#069;font-weight:bold">if</span> <span style="color:#555">[</span> <span style="color:#033">$CHANGES_TO_BE_COMMITTED</span> -eq <span style="color:#f60">0</span> <span style="color:#555">]</span>; <span style="color:#069;font-weight:bold">then</span>
-  <span style="color:#366">echo</span> <span style="color:#c30">&#34;Nothing to commit&#34;</span>
+<span style="color:#366">echo</span> <span style="color:#c30">&#34;Nothing to commit&#34;</span>
 <span style="color:#069;font-weight:bold">else</span>
-  git commit -m <span style="color:#c30">&#34;Automated commit of Jenkins configuration at </span><span style="color:#069;font-weight:bold">$(</span>date<span style="color:#069;font-weight:bold">)</span><span style="color:#c30">&#34;</span>
-  git push origin master
-<span style="color:#069;font-weight:bold">fi</span>
-</code></pre></div><p>While this ensures that the configuration is more or less tracked well, there are times when somebody makes a massive change in the configuration. This is where the most important piece of the bullet proof configuration comes in - team discipline. The team should ensure that big changes are checked in as soon add possible. This can be easily done by triggering the Jenkins job manually, without having to ssh in to the Jenkins box.</p>
+git commit -m <span style="color:#c30">&#34;Automated commit of Jenkins configuration at </span><span style="color:#069;font-weight:bold">$(</span>date<span style="color:#069;font-weight:bold">)</span><span style="color:#c30">&#34;</span>
+git push origin master
+<span style="color:#069;font-weight:bold">fi</span></code></pre></div></li>
+</ol>
+
+<p>While this ensures that the configuration is more or less tracked well, there are times when somebody makes a massive change in the configuration. This is where the most important piece of the bullet proof configuration comes in - team discipline. The team should ensure that big changes are checked in as soon add possible. This can be easily done by triggering the Jenkins job manually, without having to ssh in to the Jenkins box.</p>
+
 <h3 id="credits">Credits:</h3>
+
 <ol>
-<li>The Jenkins community documentation provided a nice <!-- raw HTML omitted -->starting point<!-- raw HTML omitted --> for this.</li>
-<li>The <code>.gitignore</code> file was forked from <!-- raw HTML omitted -->this gist<!-- raw HTML omitted --> by <!-- raw HTML omitted --><!-- raw HTML omitted --><!-- raw HTML omitted -->sit<!-- raw HTML omitted -->. I have added some project specific stuff to it.</li>
+<li>The Jenkins community documentation provided a nice <a href="http://jenkins-ci.org/content/keeping-your-configuration-and-data-subversion" target="_blank">starting point</a> for this.</li>
+<li>The <code>.gitignore</code> file was forked from <a href="https://gist.github.com/780105" target="_blank">this gist</a> by <a href="https://github.com/sit" target="_blank"><span id="goog_1138400375"></span>sit</a>. I have added some project specific stuff to it.</li>
 </ol>
         </div>
         <aside id="gh-comments-list">
@@ -304,6 +319,10 @@ $(document).ready(function () {
         <aside>
           <h3>If you liked this post, you'll also like...</h3>
           <ul class="related-posts">
+            
+            
+            
+            
             
             
             
@@ -936,6 +955,10 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2014/08/02/importing-the-yelp-dataset-into-mongodb/?utm_source=site&amp;utm_medium=related">Importing the Yelp dataset into MongoDB</a></li>
             
             
@@ -1308,14 +1331,6 @@ $(document).ready(function () {
             
             
             
-            
-            
-            
-            
-            
-            
-            
-            
             <li><a href="https://sadique.io/blog/2013/08/15/pythons-bool-type/?utm_source=site&amp;utm_medium=related">Python&#39;s bool type</a></li>
             
             
@@ -1509,6 +1524,14 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             

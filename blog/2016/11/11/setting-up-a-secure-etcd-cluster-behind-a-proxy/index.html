@@ -106,17 +106,27 @@
            itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div>
           <p>This is a blog post that explains how to set up a highly available etcd cluster behind a proxy and securing the communication between a client and the proxy, between the proxy and the individual member in the cluster and between members in the cluster.</p>
+
 <p>CoreOS&rsquo;s etcd is</p>
+
 <blockquote>
 <p>&hellip; a distributed key value store that provides a reliable way to store data across a cluster of machines. It’s open-source and available on GitHub. etcd gracefully handles leader elections during network partitions and will tolerate machine failure, including the leader.</p>
 </blockquote>
+
 <p>It&rsquo;s highly available distributed nature makes it a great choice for storing application configuration. Kubernetes, for example uses etcd to store all it&rsquo;s API objects.</p>
+
 <p>The proxy mode in etcd allows etcd to run as a transparent proxy for a cluster. This makes it possible to expose only the proxy to the clients and abstract away discovery and leader election away from the client. The client needs to know only about the proxy.</p>
+
 <p>Communications to an etcd cluster and between members in a cluster can be secured through a PKI setup. Since an etcd proxy is in effect an etcd node that does not participate in leader election, communication between a client and a proxy can also be secured with similar infrastructure.</p>
+
 <p>In this example, we will set up a cluster of 3 etcd nodes. We will use a key pair for the nodes and proxy to communicate between each other and another key pair for clients to communicate with the proxy.</p>
-<p><img src="/images/etcd-secure-cluster-proxy.svg" alt="Diagram of a Secure Etcd Cluster with Proxy" title="Secure Etcd Cluster with Proxy"></p>
+
+<p><img src="/images/etcd-secure-cluster-proxy.svg" alt="Diagram of a Secure Etcd Cluster with Proxy" title="Secure Etcd Cluster with Proxy" /></p>
+
 <h2 id="generating-keys">Generating Keys</h2>
+
 <p>This section borrows heavily from Kelsey Hightower&rsquo;s <a href="https://github.com/kelseyhightower/kubernetes-the-hard-way">Kubernetes the Hard Way tutorial</a>. For the purposes of this blog post, we are going to assume that we will be running the three nodes and the proxy on a local machine. There will be changes that need to be made to the key configurations if these are deployed elsewhere. The instructions also assume that you are on OS X. Please make the necessary adjustments if you are on Linux.</p>
+
 <h3 id="install-cloudflare-pki-toolkit">Install CloudFlare PKI toolkit</h3>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#09f;font-style:italic"># Install the csffl utility</span>
 wget https://pkg.cfssl.org/R1.2/cfssl_darwin-amd64
@@ -126,8 +136,9 @@ sudo mv cfssl_darwin-amd64 /usr/local/bin/cfssl
 <span style="color:#09f;font-style:italic"># Install cfssljson utility</span>
 wget https://pkg.cfssl.org/R1.2/cfssljson_darwin-amd64
 chmod +x cfssljson_darwin-amd64
-sudo mv cfssljson_darwin-amd64 /usr/local/bin/cfssljson
-</code></pre></div><h3 id="create-ca-key-and-certificate">Create CA key and certificate</h3>
+sudo mv cfssljson_darwin-amd64 /usr/local/bin/cfssljson</code></pre></div>
+<h3 id="create-ca-key-and-certificate">Create CA key and certificate</h3>
+
 <p>The first step will be to create a Certificate Authority configuration.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#366">echo</span> <span style="color:#c30">&#39;{
 </span><span style="color:#c30">  &#34;signing&#34;: {
@@ -145,8 +156,8 @@ sudo mv cfssljson_darwin-amd64 /usr/local/bin/cfssljson
 </span><span style="color:#c30">      }
 </span><span style="color:#c30">    }
 </span><span style="color:#c30">  }
-</span><span style="color:#c30">}&#39;</span> &gt; ca-config.json
-</code></pre></div><p>Here we are specifying two different profiles - one for the node key and one for the proxy key. We will then create a configuration for certificate signing request (CSR) for the CA key and certificate.</p>
+</span><span style="color:#c30">}&#39;</span> &gt; ca-config.json</code></pre></div>
+<p>Here we are specifying two different profiles - one for the node key and one for the proxy key. We will then create a configuration for certificate signing request (CSR) for the CA key and certificate.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#366">echo</span> <span style="color:#c30">&#39;{
 </span><span style="color:#c30">  &#34;CN&#34;: &#34;Etcd&#34;,
 </span><span style="color:#c30">  &#34;key&#34;: {
@@ -162,11 +173,13 @@ sudo mv cfssljson_darwin-amd64 /usr/local/bin/cfssljson
 </span><span style="color:#c30">      &#34;ST&#34;: &#34;California&#34;
 </span><span style="color:#c30">    }
 </span><span style="color:#c30">  ]
-</span><span style="color:#c30">}&#39;</span> &gt; ca-csr.json
-</code></pre></div><p>Finally, we will generate the certificate and key.</p>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">cfssl gencert -initca ca-csr.json | cfssljson -bare ca
-</code></pre></div><p>This will generate the three files: <code>ca-key.pem</code> - private key for the CA, <code>ca.pem</code> - certificate for the CA and <code>ca.csr</code> - certificate signing request for the CA.</p>
+</span><span style="color:#c30">}&#39;</span> &gt; ca-csr.json</code></pre></div>
+<p>Finally, we will generate the certificate and key.</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">cfssl gencert -initca ca-csr.json | cfssljson -bare ca</code></pre></div>
+<p>This will generate the three files: <code>ca-key.pem</code> - private key for the CA, <code>ca.pem</code> - certificate for the CA and <code>ca.csr</code> - certificate signing request for the CA.</p>
+
 <h3 id="create-node-certificate-and-key">Create Node certificate and key</h3>
+
 <p>Once we have the CA certificate and key in place, we can generate the TLS key for securing the communications between nodes and proxy. We will start by creating a configuration for this certificate. Since we are running everything locally, the hosts allowed to authenticate with this certificate include only <code>localhost</code>.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#366">echo</span> <span style="color:#c30">&#39;{
 </span><span style="color:#c30">  &#34;CN&#34;: &#34;etcd-node&#34;,
@@ -188,16 +201,18 @@ sudo mv cfssljson_darwin-amd64 /usr/local/bin/cfssljson
 </span><span style="color:#c30">      &#34;ST&#34;: &#34;California&#34;
 </span><span style="color:#c30">    }
 </span><span style="color:#c30">  ]
-</span><span style="color:#c30">}&#39;</span> &gt; etcd-node-csr.json
-</code></pre></div><p>Now we can generate the node certificate and key</p>
+</span><span style="color:#c30">}&#39;</span> &gt; etcd-node-csr.json</code></pre></div>
+<p>Now we can generate the node certificate and key</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">cfssl gencert <span style="color:#c30;font-weight:bold">\
 </span><span style="color:#c30;font-weight:bold"></span>  -ca<span style="color:#555">=</span>ca.pem <span style="color:#c30;font-weight:bold">\
 </span><span style="color:#c30;font-weight:bold"></span>  -ca-key<span style="color:#555">=</span>ca-key.pem <span style="color:#c30;font-weight:bold">\
 </span><span style="color:#c30;font-weight:bold"></span>  -config<span style="color:#555">=</span>ca-config.json <span style="color:#c30;font-weight:bold">\
 </span><span style="color:#c30;font-weight:bold"></span>  -profile<span style="color:#555">=</span>etcd-node <span style="color:#c30;font-weight:bold">\
-</span><span style="color:#c30;font-weight:bold"></span>  etcd-node-csr.json | cfssljson -bare etcd-node
-</code></pre></div><p>This will create three files: <code>etcd-node.pem</code>- the node certificate, <code>etcd-node-key.pem</code> the key for this certificate and <code>etcd-node.csr</code> - the certificate signing request.</p>
+</span><span style="color:#c30;font-weight:bold"></span>  etcd-node-csr.json | cfssljson -bare etcd-node</code></pre></div>
+<p>This will create three files: <code>etcd-node.pem</code>- the node certificate, <code>etcd-node-key.pem</code> the key for this certificate and <code>etcd-node.csr</code> - the certificate signing request.</p>
+
 <h3 id="create-proxy-certificate-and-key">Create Proxy certificate and key</h3>
+
 <p>We can now generate the TLS key for securing the communications between the client and the proxy. We will start by creating a configuration for this certificate. Since our client and proxy are running locally, the hosts allowed to authenticate with this certificate include only <code>localhost</code>.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#366">echo</span> <span style="color:#c30">&#39;{
 </span><span style="color:#c30">  &#34;CN&#34;: &#34;etcd-proxy&#34;,
@@ -219,16 +234,18 @@ sudo mv cfssljson_darwin-amd64 /usr/local/bin/cfssljson
 </span><span style="color:#c30">      &#34;ST&#34;: &#34;California&#34;
 </span><span style="color:#c30">    }
 </span><span style="color:#c30">  ]
-</span><span style="color:#c30">}&#39;</span> &gt; etcd-proxy-csr.json
-</code></pre></div><p>Now we can generate the proxy certificate and key</p>
+</span><span style="color:#c30">}&#39;</span> &gt; etcd-proxy-csr.json</code></pre></div>
+<p>Now we can generate the proxy certificate and key</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">cfssl gencert <span style="color:#c30;font-weight:bold">\
 </span><span style="color:#c30;font-weight:bold"></span>  -ca<span style="color:#555">=</span>ca.pem <span style="color:#c30;font-weight:bold">\
 </span><span style="color:#c30;font-weight:bold"></span>  -ca-key<span style="color:#555">=</span>ca-key.pem <span style="color:#c30;font-weight:bold">\
 </span><span style="color:#c30;font-weight:bold"></span>  -config<span style="color:#555">=</span>ca-config.json <span style="color:#c30;font-weight:bold">\
 </span><span style="color:#c30;font-weight:bold"></span>  -profile<span style="color:#555">=</span>etcd-proxy <span style="color:#c30;font-weight:bold">\
-</span><span style="color:#c30;font-weight:bold"></span>  etcd-proxy-csr.json | cfssljson -bare etcd-proxy
-</code></pre></div><p>This will create three files: <code>etcd-proxy.pem</code>- the proxy certificate, <code>etcd-proxy-key.pem</code> the key for this certificate and <code>etcd-proxy.csr</code> - the certificate signing request.</p>
+</span><span style="color:#c30;font-weight:bold"></span>  etcd-proxy-csr.json | cfssljson -bare etcd-proxy</code></pre></div>
+<p>This will create three files: <code>etcd-proxy.pem</code>- the proxy certificate, <code>etcd-proxy-key.pem</code> the key for this certificate and <code>etcd-proxy.csr</code> - the certificate signing request.</p>
+
 <h2 id="running-the-nodes-securely">Running the nodes securely</h2>
+
 <p>Now that we have the certificates and keys, we will start the three nodes that form our etcd cluster. We will create three shell scripts that does this for us. In each of these, we will pass the appropriate parameters to etcd so that it uses the node certificate and key.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#09f;font-style:italic">#script for node1</span>
 <span style="color:#366">echo</span> <span style="color:#c30">&#39;#!/usr/bin/env sh
@@ -296,14 +313,15 @@ sudo mv cfssljson_darwin-amd64 /usr/local/bin/cfssljson
 </span><span style="color:#c30">--peer-client-cert-auth=&#39;</span>true<span style="color:#c30">&#39;
 </span><span style="color:#c30">&#39;</span> &gt; start-node3.sh
 
-chmod +x ./start-node1.sh ./start-node2.sh ./start-node3.sh
-</code></pre></div><p>Once these scripts are executed, we have an etcd cluster of three nodes. We can test that this cluster is started correctly with the right security using <code>etcdctl</code> client. For this purpose, we will be using the node certificate and key temporarily. We will also be assuming that we know what the individual nodes are. It is important to note that in our final configuration, the client will not have access to this certificate and key. It will have access only to the proxy key and there is no guarantee that the client knows what the individual nodes are.</p>
+chmod +x ./start-node1.sh ./start-node2.sh ./start-node3.sh</code></pre></div>
+<p>Once these scripts are executed, we have an etcd cluster of three nodes. We can test that this cluster is started correctly with the right security using <code>etcdctl</code> client. For this purpose, we will be using the node certificate and key temporarily. We will also be assuming that we know what the individual nodes are. It is important to note that in our final configuration, the client will not have access to this certificate and key. It will have access only to the proxy key and there is no guarantee that the client knows what the individual nodes are.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ etcdctl --cert-file<span style="color:#555">=</span>./etcd-node.pem  --key-file<span style="color:#555">=</span>./etcd-node-key.pem --ca-file<span style="color:#555">=</span>./ca.pem --endpoints<span style="color:#555">=</span>https://0.0.0.0:1179,https://0.0.0.0:1279,https://0.0.0.0:1379 cluster-health
 member 5a68dbeefb870ed1 is healthy: got healthy result from https://localhost:1179
 member 772c76fe731a3914 is healthy: got healthy result from https://localhost:1379
 member aa3bff8d4d84db66 is healthy: got healthy result from https://localhost:1279
-cluster is healthy
-</code></pre></div><h2 id="configuring-the-secure-proxy">Configuring the secure proxy</h2>
+cluster is healthy</code></pre></div>
+<h2 id="configuring-the-secure-proxy">Configuring the secure proxy</h2>
+
 <p>Once we have the cluster running, we can run the proxy. To secure it, we will tell etcd to use the etcd-node key for communicating with the nodes and to use the etcd-proxy certificate to accept connection from clients.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#366">echo</span> <span style="color:#c30">&#39;#!/usr/bin/env sh
 </span><span style="color:#c30">
@@ -322,14 +340,14 @@ cluster is healthy
 </span><span style="color:#c30">     --data-dir=./nodes/proxy
 </span><span style="color:#c30">&#39;</span> &gt; start-proxy.sh
 
-chmod +x start-proxy.sh
-</code></pre></div><p>Once we have the proxy running with these parameters, we can test that the cluster and the proxy is configured correctly. This time, we will be using only the proxy certificate and the proxy end point.</p>
+chmod +x start-proxy.sh</code></pre></div>
+<p>Once we have the proxy running with these parameters, we can test that the cluster and the proxy is configured correctly. This time, we will be using only the proxy certificate and the proxy end point.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ etcdctl --cert-file<span style="color:#555">=</span>./etcd-proxy.pem  --key-file<span style="color:#555">=</span>./etcd-proxy-key.pem --ca-file<span style="color:#555">=</span>./ca.pem --endpoints<span style="color:#555">=</span>https://0.0.0.0:2379 cluster-health
 member 5a68dbeefb870ed1 is healthy: got healthy result from https://localhost:1179
 member 772c76fe731a3914 is healthy: got healthy result from https://localhost:1379
 member aa3bff8d4d84db66 is healthy: got healthy result from https://localhost:1279
-cluster is healthy
-</code></pre></div><p>This set up gives us a secure etcd cluster with a secure proxy in front of it. Communications between client and proxy, proxy and nodes and among nodes are all secured.</p>
+cluster is healthy</code></pre></div>
+<p>This set up gives us a secure etcd cluster with a secure proxy in front of it. Communications between client and proxy, proxy and nodes and among nodes are all secured.</p>
         </div>
         <aside id="gh-comments-list">
           <script>
@@ -437,6 +455,10 @@ $(document).ready(function () {
         <aside>
           <h3>If you liked this post, you'll also like...</h3>
           <ul class="related-posts">
+            
+            
+            
+            
             
             
             
@@ -1107,6 +1129,10 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2014/03/20/clojure-dojo-levenshtein-edit-distance/?utm_source=site&amp;utm_medium=related">Clojure Dojo - Levenshtein edit distance</a></li>
             
             
@@ -1421,14 +1447,6 @@ $(document).ready(function () {
             
             
             
-            
-            
-            
-            
-            
-            
-            
-            
             <li><a href="https://sadique.io/blog/2013/08/15/pythons-bool-type/?utm_source=site&amp;utm_medium=related">Python&#39;s bool type</a></li>
             
             
@@ -1620,6 +1638,14 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             

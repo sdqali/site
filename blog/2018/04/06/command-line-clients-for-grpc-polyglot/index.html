@@ -92,11 +92,12 @@
            itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div>
           <p>Polyglot was the second gRPC client that I looked at. One of the things that I liked about it is the fact that it does not need users to generate <code>protoset</code> files. It generates the protoset files in flight every time it runs. This, combined with the fact that it is written in Java does have a disadvantage - every time the client makes a call, it has to fire up a JVM, generate protosets and make the request.</p>
+
 <p>You run polyglot by using the distributed polyglot jar. To list all the services available on an endpoint, polyglot can be executed as:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">&gt; java -jar ~/Downloads/polyglot.jar --command<span style="color:#555">=</span>list_services <span style="color:#c30;font-weight:bold">\
 </span><span style="color:#c30;font-weight:bold"></span>  --proto_discovery_root<span style="color:#555">=</span><span style="color:#033">$PROTO_DISCOVERY_ROOT</span> <span style="color:#c30;font-weight:bold">\
 </span><span style="color:#c30;font-weight:bold"></span>  --deadline_ms<span style="color:#555">=</span><span style="color:#f60">3000</span>
-<span style="color:#555">[</span>main<span style="color:#555">]</span> INFO me.dinowernli.grpc.polyglot.Main - Polyglot version: 1.6.0
+<span style="color:#555">[</span>main<span style="color:#555">]</span> INFO me.dinowernli.grpc.polyglot.Main - Polyglot version: <span style="color:#f60">1</span>.6.0
 <span style="color:#555">[</span>main<span style="color:#555">]</span> INFO me.dinowernli.grpc.polyglot.Main - Loaded configuration:
 
 manualflowcontrol.StreamingGreeter -&gt; /Users/sdqali/src/grpc/grpc-java/examples/src/proto/hello_streaming.proto
@@ -109,14 +110,14 @@ routeguide.RouteGuide/RecordRoute
 routeguide.RouteGuide/RouteChat
 
 helloworld.Greeter -&gt; /Users/sdqali/src/grpc/grpc-java/examples/src/proto/helloworld.proto
-helloworld.Greeter/SayHello
-</code></pre></div><p>The command <code>call</code> can be issued to execute a particular service method:</p>
+helloworld.Greeter/SayHello</code></pre></div>
+<p>The command <code>call</code> can be issued to execute a particular service method:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#366">echo</span> <span style="color:#c30">&#34;{&#39;name&#39;: &#39;World&#39;}&#34;</span> | java -jar ~/Downloads/polyglot.jar --command<span style="color:#555">=</span>call <span style="color:#c30;font-weight:bold">\
 </span><span style="color:#c30;font-weight:bold"></span>  --full_method<span style="color:#555">=</span>helloworld.Greeter/SayHello <span style="color:#c30;font-weight:bold">\
 </span><span style="color:#c30;font-weight:bold"></span>  --endpoint<span style="color:#555">=</span>localhost:50051 <span style="color:#c30;font-weight:bold">\
 </span><span style="color:#c30;font-weight:bold"></span>  --proto_discovery_root<span style="color:#555">=</span><span style="color:#033">$PROTO_DISCOVERY_ROOT</span> <span style="color:#c30;font-weight:bold">\
 </span><span style="color:#c30;font-weight:bold"></span>  --deadline_ms<span style="color:#555">=</span><span style="color:#f60">3000</span>
-<span style="color:#555">[</span>main<span style="color:#555">]</span> INFO me.dinowernli.grpc.polyglot.Main - Polyglot version: 1.6.0
+<span style="color:#555">[</span>main<span style="color:#555">]</span> INFO me.dinowernli.grpc.polyglot.Main - Polyglot version: <span style="color:#f60">1</span>.6.0
 <span style="color:#555">[</span>main<span style="color:#555">]</span> INFO me.dinowernli.grpc.polyglot.Main - Loaded configuration:
 <span style="color:#555">[</span>main<span style="color:#555">]</span> INFO me.dinowernli.grpc.polyglot.command.ServiceCall - Creating channel to: localhost:50051
 <span style="color:#555">[</span>main<span style="color:#555">]</span> INFO me.dinowernli.grpc.polyglot.command.ServiceCall - Using proto descriptors obtained from protoc
@@ -128,15 +129,15 @@ helloworld.Greeter/SayHello
 <span style="color:#c30">&#34;message&#34;</span>: <span style="color:#c30">&#34;Hello World&#34;</span>
 <span style="color:#555">}</span>
 
-<span style="color:#555">[</span>grpc-default-executor-0<span style="color:#555">]</span> INFO me.dinowernli.grpc.polyglot.io.LoggingStatsWriter - Completed rpc with <span style="color:#f60">1</span> response<span style="color:#555">(</span>s<span style="color:#555">)</span>
-</code></pre></div><p>Notice how we are passing path to proto files and polyglot executes <code>protoc</code> on them to get protosets.
+<span style="color:#555">[</span>grpc-default-executor-0<span style="color:#555">]</span> INFO me.dinowernli.grpc.polyglot.io.LoggingStatsWriter - Completed rpc with <span style="color:#f60">1</span> response<span style="color:#555">(</span>s<span style="color:#555">)</span></code></pre></div>
+<p>Notice how we are passing path to proto files and polyglot executes <code>protoc</code> on them to get protosets.
 With reflection turned ON, we no longer need to provide a path to the proto files.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#366">echo</span> <span style="color:#c30">&#34;{&#39;name&#39;: &#39;World&#39;}&#34;</span> | java -jar ~/Downloads/polyglot.jar --command<span style="color:#555">=</span>call <span style="color:#c30;font-weight:bold">\
 </span><span style="color:#c30;font-weight:bold"></span>  --full_method<span style="color:#555">=</span>helloworld.Greeter/SayHello <span style="color:#c30;font-weight:bold">\
 </span><span style="color:#c30;font-weight:bold"></span>  --endpoint<span style="color:#555">=</span>localhost:50051 <span style="color:#c30;font-weight:bold">\
 </span><span style="color:#c30;font-weight:bold"></span>  --deadline_ms<span style="color:#555">=</span><span style="color:#f60">3000</span> <span style="color:#c30;font-weight:bold">\
 </span><span style="color:#c30;font-weight:bold"></span>  --use_reflection<span style="color:#555">=</span><span style="color:#366">true</span>
-<span style="color:#555">[</span>main<span style="color:#555">]</span> INFO me.dinowernli.grpc.polyglot.Main - Polyglot version: 1.6.0
+<span style="color:#555">[</span>main<span style="color:#555">]</span> INFO me.dinowernli.grpc.polyglot.Main - Polyglot version: <span style="color:#f60">1</span>.6.0
 <span style="color:#555">[</span>main<span style="color:#555">]</span> INFO me.dinowernli.grpc.polyglot.Main - Loaded configuration:
 <span style="color:#555">[</span>main<span style="color:#555">]</span> INFO me.dinowernli.grpc.polyglot.command.ServiceCall - Creating channel to: localhost:50051
 <span style="color:#555">[</span>main<span style="color:#555">]</span> INFO me.dinowernli.grpc.polyglot.command.ServiceCall - Using proto descriptors fetched by reflection
@@ -146,13 +147,13 @@ With reflection turned ON, we no longer need to provide a path to the proto file
 <span style="color:#555">[</span>grpc-default-executor-0<span style="color:#555">]</span> INFO me.dinowernli.grpc.polyglot.io.LoggingStatsWriter - Got response message
 <span style="color:#555">{</span>
 <span style="color:#c30">&#34;message&#34;</span>: <span style="color:#c30">&#34;Hello World&#34;</span>
-<span style="color:#555">}</span>
-</code></pre></div><p>That is nice, except that reflection does not work for listing services.</p>
+<span style="color:#555">}</span></code></pre></div>
+<p>That is nice, except that reflection does not work for listing services.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">java -jar ~/Downloads/polyglot.jar --command<span style="color:#555">=</span>list_services <span style="color:#c30;font-weight:bold">\
 </span><span style="color:#c30;font-weight:bold"></span>  --endpoint<span style="color:#555">=</span>localhost:50051 <span style="color:#c30;font-weight:bold">\
 </span><span style="color:#c30;font-weight:bold"></span>  --deadline_ms<span style="color:#555">=</span><span style="color:#f60">3000</span> <span style="color:#c30;font-weight:bold">\
 </span><span style="color:#c30;font-weight:bold"></span>  --use_reflection<span style="color:#555">=</span><span style="color:#366">true</span>
-<span style="color:#555">[</span>main<span style="color:#555">]</span> INFO me.dinowernli.grpc.polyglot.Main - Polyglot version: 1.6.0
+<span style="color:#555">[</span>main<span style="color:#555">]</span> INFO me.dinowernli.grpc.polyglot.Main - Polyglot version: <span style="color:#f60">1</span>.6.0
 <span style="color:#555">[</span>main<span style="color:#555">]</span> INFO me.dinowernli.grpc.polyglot.Main - Loaded configuration:
 <span style="color:#555">[</span>main<span style="color:#555">]</span> WARN me.dinowernli.grpc.polyglot.Main - Caught top-level exception during <span style="color:#366">command</span> execution
 java.lang.IllegalArgumentException: A proto discovery root is required <span style="color:#069;font-weight:bold">for</span> proto analysis
@@ -166,8 +167,8 @@ Caused by: java.lang.IllegalArgumentException: A proto discovery root is require
   at com.google.common.base.Preconditions.checkArgument<span style="color:#555">(</span>Preconditions.java:122<span style="color:#555">)</span>
   at me.dinowernli.grpc.polyglot.protobuf.ProtocInvoker.forConfig<span style="color:#555">(</span>ProtocInvoker.java:36<span style="color:#555">)</span>
   at me.dinowernli.grpc.polyglot.Main.getFileDescriptorSet<span style="color:#555">(</span>Main.java:93<span style="color:#555">)</span>
-  at me.dinowernli.grpc.polyglot.Main.main<span style="color:#555">(</span>Main.java:62<span style="color:#555">)</span>
-</code></pre></div><p>This was unexpected, as adding this capability to Polyglot should not be too diffcult, considering that they already support reflection for executing services. This is something that I am interested in implementing.</p>
+  at me.dinowernli.grpc.polyglot.Main.main<span style="color:#555">(</span>Main.java:62<span style="color:#555">)</span></code></pre></div>
+<p>This was unexpected, as adding this capability to Polyglot should not be too diffcult, considering that they already support reflection for executing services. This is something that I am interested in implementing.</p>
         </div>
         <aside id="gh-comments-list">
           <script>
@@ -401,7 +402,15 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2018/04/04/command-line-clients-for-grpc-grpcurl/?utm_source=site&amp;utm_medium=related">Command line clients for gRPC - grpcurl</a></li>
+            
+            
+            
+            
             
             
             

@@ -94,27 +94,34 @@
       <div itemprop="mainContentOfPage"
            itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div>
-          <p>Ruby&rsquo;s regular expressions support <a href="/blog/2013/09/29/named-capture-groups-in-regular-expressions/">named capture groups</a>, since 1.9. However, there is a weird behaviour while using named capture groups with the <code>Regexp#=~</code> method. When named capture groups are used with <code>=~</code>, the captured values are placed in local variables with the same name as the capture group. The following example demonstrates this:</p>
+          
+
+<p>Ruby&rsquo;s regular expressions support <a href="/blog/2013/09/29/named-capture-groups-in-regular-expressions/">named capture groups</a>, since 1.9. However, there is a weird behaviour while using named capture groups with the <code>Regexp#=~</code> method. When named capture groups are used with <code>=~</code>, the captured values are placed in local variables with the same name as the capture group. The following example demonstrates this:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ruby" data-lang="ruby"><span style="color:#09f;font-style:italic">#!/usr/bin/env ruby</span>
 
 month <span style="color:#555">=</span> <span style="color:#c30">&#34;January&#34;</span>
 test_string <span style="color:#555">=</span> <span style="color:#c30">&#34;Today&#39;s date is: 9/28/2013.&#34;</span>
 <span style="color:#3aa">/(?&lt;month&gt;\d{1,2})\/(?&lt;day&gt;\d{1,2})\/(?&lt;year&gt;\d{4})/</span> <span style="color:#555">=~</span> test_string
-<span style="color:#366">puts</span> month<span style="color:#555">.</span>inspect
-</code></pre></div><p>This when executed will print <code>9</code>.</p>
-<p>The official documentation <sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> says:</p>
+<span style="color:#366">puts</span> month<span style="color:#555">.</span>inspect</code></pre></div>
+<p>This when executed will print <code>9</code>.</p>
+
+<p>The official documentation <sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup> says:</p>
+
 <blockquote>
 <p>When named capture groups are used with a literal regexp on the left-hand side of an expression and the =~ operator, the captured text is also assigned to local variables with corresponding names.</p>
 </blockquote>
+
 <p>This local variable assignment does not happen if the regular expression is on the right-hand side of the expression or the regular expression contains a variable interpolation.</p>
+
 <h3 id="regexp-on-right-hand-side">Regexp on right-hand side</h3>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ruby" data-lang="ruby"><span style="color:#09f;font-style:italic">#!/usr/bin/env ruby</span>
 
 month <span style="color:#555">=</span> <span style="color:#c30">&#34;January&#34;</span>
 test_string <span style="color:#555">=</span> <span style="color:#c30">&#34;Today&#39;s date is: 9/28/2013.&#34;</span>
 test_string <span style="color:#555">=~</span> <span style="color:#3aa">/(?&lt;month&gt;\d{1,2})\/(?&lt;day&gt;\d{1,2})\/(?&lt;year&gt;\d{4})/</span>
-<span style="color:#366">puts</span> month<span style="color:#555">.</span>inspect
-</code></pre></div><p>This will print <code>January</code>.</p>
+<span style="color:#366">puts</span> month<span style="color:#555">.</span>inspect</code></pre></div>
+<p>This will print <code>January</code>.</p>
+
 <h3 id="regexp-with-interpolation">Regexp with interpolation</h3>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ruby" data-lang="ruby"><span style="color:#09f;font-style:italic">#!/usr/bin/env ruby</span>
 
@@ -122,18 +129,21 @@ month <span style="color:#555">=</span> <span style="color:#c30">&#34;January&#3
 <span style="color:#360">DAY</span> <span style="color:#555">=</span> <span style="color:#c30">&#34;day&#34;</span>
 test_string <span style="color:#555">=</span> <span style="color:#c30">&#34;Today&#39;s date is: 9/28/2013.&#34;</span>
 <span style="color:#3aa">/(?&lt;month&gt;\d{1,2})\/(?&lt;</span><span style="color:#a00">#{</span><span style="color:#360">DAY</span><span style="color:#a00">}</span><span style="color:#3aa">&gt;\d{1,2})\/(?&lt;year&gt;\d{4})/</span> <span style="color:#555">=~</span> test_string
-<span style="color:#366">puts</span> month<span style="color:#555">.</span>inspect
-</code></pre></div><p>This will print <code>January</code>.</p>
+<span style="color:#366">puts</span> month<span style="color:#555">.</span>inspect</code></pre></div>
+<p>This will print <code>January</code>.</p>
+
 <p>This behaviour is present only for the <code>Regexp#=~</code> method and not for <code>Regexp#match</code>. So it is safer to use the latter without worrying about unintended side effects.</p>
+
 <p>PS: Hat tip to <a href="http://www.nilenso.com/people.html#gja">Tejas</a> for telling me about this quirk.</p>
-<section class="footnotes" role="doc-endnotes">
-<hr>
+<div class="footnotes">
+
+<hr />
+
 <ol>
-<li id="fn:1" role="doc-endnote">
-<p>Ruby docs for <a href="http://www.ruby-doc.org/core-1.9.3/Regexp.html#label-Capturing">Class: Regexp (Ruby 1.9.3)</a>. <a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
-</li>
+<li id="fn:1">Ruby docs for <a href="http://www.ruby-doc.org/core-1.9.3/Regexp.html#label-Capturing">Class: Regexp (Ruby 1.9.3)</a>.
+ <a class="footnote-return" href="#fnref:1"><sup>[return]</sup></a></li>
 </ol>
-</section>
+</div>
 
         </div>
         <aside id="gh-comments-list">
@@ -384,6 +394,10 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2018/03/22/nethttp-and-the-simplest-of-explanations/?utm_source=site&amp;utm_medium=related">Net::HTTP and the simplest of explanations</a></li>
             
             
@@ -477,6 +491,10 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2016/11/22/implementing-feature-toggles-for-a-spring-boot-application-part-1/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 1</a></li>
+            
+            
+            
+            
             
             
             
@@ -1188,14 +1206,6 @@ $(document).ready(function () {
             
             
             
-            
-            
-            
-            
-            
-            
-            
-            
             <li><a href="https://sadique.io/blog/2013/08/15/pythons-bool-type/?utm_source=site&amp;utm_medium=related">Python&#39;s bool type</a></li>
             
             
@@ -1387,6 +1397,14 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             

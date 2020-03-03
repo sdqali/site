@@ -94,96 +94,104 @@
            itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div>
           <p>One of the challenges of using storing spring sessions in Redis is that the objects that gets stored as part of a session often undergoes changes as the application evolves and these changes cause de-serialization exceptions to be thrown after a deployment when a session created before the deployment is presented to the application. This blog post discusses a method to work around this issue.</p>
+
 <h2 id="the-issue">The issue</h2>
+
 <p>Consider an application that uses a custom authentication service to validate credentials presented by a client. To achieve this, we will wire up a custom authentication provider which creates an object <code>Customer</code> as the authenticated user in session.</p>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">Customer</span> <span style="color:#069;font-weight:bold">extends</span> User <span style="color:#555">{</span>
-  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">Customer</span><span style="color:#555">(</span>String name<span style="color:#555">)</span> <span style="color:#555">{</span>
-    <span style="color:#069;font-weight:bold">super</span><span style="color:#555">(</span>name<span style="color:#555">,</span> <span style="color:#c30">&#34;&#34;</span><span style="color:#555">,</span> Collections<span style="color:#555">.</span><span style="color:#309">singletonList</span><span style="color:#555">(</span><span style="color:#069;font-weight:bold">new</span> SimpleGrantedAuthority<span style="color:#555">(</span><span style="color:#c30">&#34;USER&#34;</span><span style="color:#555">)));</span>
-  <span style="color:#555">}</span>
-<span style="color:#555">}</span>
-</code></pre></div><p>Things work great, but after a while the team decides to store the logged in user&rsquo;s email address in the session. To achieve this, we change the <code>Customer</code> type to:</p>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">Customer</span> <span style="color:#069;font-weight:bold">extends</span> User <span style="color:#555">{</span>
-  <span style="color:#069;font-weight:bold">private</span> String email<span style="color:#555">;</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">class</span> Customer <span style="color:#c0f">extends</span> User {
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">Customer</span>(String <span style="color:#c0f">name</span>) {
+    <span style="color:#069;font-weight:bold">super</span>(name, <span style="color:#c30">&#34;&#34;</span>, Collections.<span style="color:#309">singletonList</span>(<span style="color:#069;font-weight:bold">new</span> SimpleGrantedAuthority(<span style="color:#c30">&#34;USER&#34;</span>)));
+  }
+}</code></pre></div>
+<p>Things work great, but after a while the team decides to store the logged in user&rsquo;s email address in the session. To achieve this, we change the <code>Customer</code> type to:</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">class</span> Customer <span style="color:#c0f">extends</span> User {
+  <span style="color:#069;font-weight:bold">private</span> <span style="color:#c0f">String</span> email;
 
-  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">Customer</span><span style="color:#555">(</span>String name<span style="color:#555">,</span> String email<span style="color:#555">)</span> <span style="color:#555">{</span>
-    <span style="color:#069;font-weight:bold">super</span><span style="color:#555">(</span>name<span style="color:#555">,</span> <span style="color:#c30">&#34;&#34;</span><span style="color:#555">,</span> Collections<span style="color:#555">.</span><span style="color:#309">singletonList</span><span style="color:#555">(</span><span style="color:#069;font-weight:bold">new</span> SimpleGrantedAuthority<span style="color:#555">(</span><span style="color:#c30">&#34;USER&#34;</span><span style="color:#555">)));</span>
-    <span style="color:#069;font-weight:bold">this</span><span style="color:#555">.</span><span style="color:#309">email</span> <span style="color:#555">=</span> email<span style="color:#555">;</span>
-  <span style="color:#555">}</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">Customer</span>(String <span style="color:#c0f">name</span>, String <span style="color:#c0f">email</span>) {
+    <span style="color:#069;font-weight:bold">super</span>(name, <span style="color:#c30">&#34;&#34;</span>, Collections.<span style="color:#309">singletonList</span>(<span style="color:#069;font-weight:bold">new</span> SimpleGrantedAuthority(<span style="color:#c30">&#34;USER&#34;</span>)));
+    <span style="color:#069;font-weight:bold">this</span>.<span style="color:#309">email</span> <span style="color:#555">=</span> email;
+  }
 
-  <span style="color:#069;font-weight:bold">public</span> String <span style="color:#c0f">getEmail</span><span style="color:#555">()</span> <span style="color:#555">{</span>
-    <span style="color:#069;font-weight:bold">return</span> email<span style="color:#555">;</span>
-  <span style="color:#555">}</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">String</span> getEmail() {
+    <span style="color:#069;font-weight:bold">return</span> email;
+  }
 
-  <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">setEmail</span><span style="color:#555">(</span>String email<span style="color:#555">)</span> <span style="color:#555">{</span>
-    <span style="color:#069;font-weight:bold">this</span><span style="color:#555">.</span><span style="color:#309">email</span> <span style="color:#555">=</span> email<span style="color:#555">;</span>
-  <span style="color:#555">}</span>
-<span style="color:#555">}</span>
-</code></pre></div><p>When this code is deployed and a user tries to access a protected resource by presenting a session created before the deployment, an exception is thrown.</p>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">void</span> setEmail(String <span style="color:#c0f">email</span>) {
+    <span style="color:#069;font-weight:bold">this</span>.<span style="color:#309">email</span> <span style="color:#555">=</span> email;
+  }
+}</code></pre></div>
+<p>When this code is deployed and a user tries to access a protected resource by presenting a session created before the deployment, an exception is thrown.</p>
+
 <pre><code>org.springframework.data.redis.serializer.SerializationException: Cannot deserialize; nested exception is org.springframework.core.serializer.support.SerializationFailedException: Failed to deserialize payload. Is the byte array a result of corresponding serialization for DefaultDeserializer?; nested exception is java.io.InvalidClassException: in.sdqali.spring.vo.Customer; local class incompatible: stream classdesc serialVersionUID = 5161850915957547690, local class serialVersionUID = 1045726772100761661
-</code></pre><p>This happens because the serialized object in the session and the current structure of the session differ.</p>
+</code></pre>
+
+<p>This happens because the serialized object in the session and the current structure of the session differ.</p>
+
 <h2 id="solutions">Solutions</h2>
-<p>This issue was raised on the Spring Session issue tracker <sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> and there were a lot of work-arounds discussed. Of the work arounds, wrapping the session repository offers the least disruption to the end user.
+
+<p>This issue was raised on the Spring Session issue tracker <sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup> and there were a lot of work-arounds discussed. Of the work arounds, wrapping the session repository offers the least disruption to the end user.
 This approach ensures that every time a de-serialization error is thrown while trying to read an object from the session, that object is deleted, preventing subsequent errors.</p>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">SafeDeserializationRepository</span><span style="color:#555">&lt;</span>S <span style="color:#069;font-weight:bold">extends</span> ExpiringSession<span style="color:#555">&gt;</span> <span style="color:#069;font-weight:bold">implements</span> SessionRepository<span style="color:#555">&lt;</span>S<span style="color:#555">&gt;</span> <span style="color:#555">{</span>
-  <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">final</span> SessionRepository<span style="color:#555">&lt;</span>S<span style="color:#555">&gt;</span> delegate<span style="color:#555">;</span>
-  <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">final</span> RedisTemplate<span style="color:#555">&lt;</span>Object<span style="color:#555">,</span> Object<span style="color:#555">&gt;</span> redisTemplate<span style="color:#555">;</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">class</span> SafeDeserializationRepository<span style="color:#555">&lt;</span>S <span style="color:#c0f">extends</span> ExpiringSession<span style="color:#555">&gt;</span> <span style="color:#c0f">implements</span> SessionRepository<span style="color:#555">&lt;</span>S<span style="color:#555">&gt;</span> {
+  <span style="color:#069;font-weight:bold">private</span> <span style="color:#c0f">final</span> SessionRepository<span style="color:#555">&lt;</span>S<span style="color:#555">&gt;</span> <span style="color:#c0f">delegate</span>;
+  <span style="color:#069;font-weight:bold">private</span> <span style="color:#c0f">final</span> RedisTemplate<span style="color:#555">&lt;</span>Object, Object<span style="color:#555">&gt;</span> <span style="color:#c0f">redisTemplate</span>;
 
-  <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">static</span> <span style="color:#069;font-weight:bold">final</span> String BOUNDED_HASH_KEY_PREFIX <span style="color:#555">=</span> <span style="color:#c30">&#34;spring:session:sessions:&#34;</span><span style="color:#555">;</span>
-  <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">static</span> <span style="color:#069;font-weight:bold">final</span> Logger logger <span style="color:#555">=</span> getLogger<span style="color:#555">(</span>SafeDeserializationRepository<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">);</span>
+  <span style="color:#069;font-weight:bold">private</span> <span style="color:#c0f">static</span> <span style="color:#069;font-weight:bold">final</span> <span style="color:#c0f">String</span> BOUNDED_HASH_KEY_PREFIX <span style="color:#555">=</span> <span style="color:#c30">&#34;spring:session:sessions:&#34;</span>;
+  <span style="color:#069;font-weight:bold">private</span> <span style="color:#c0f">static</span> <span style="color:#069;font-weight:bold">final</span> <span style="color:#c0f">Logger</span> logger <span style="color:#555">=</span> getLogger(SafeDeserializationRepository.<span style="color:#309">class</span>);
 
-  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">SafeDeserializationRepository</span><span style="color:#555">(</span>SessionRepository<span style="color:#555">&lt;</span>S<span style="color:#555">&gt;</span> delegate<span style="color:#555">,</span>
-                                       RedisTemplate<span style="color:#555">&lt;</span>Object<span style="color:#555">,</span> Object<span style="color:#555">&gt;</span> redisTemplate<span style="color:#555">)</span> <span style="color:#555">{</span>
-    <span style="color:#069;font-weight:bold">this</span><span style="color:#555">.</span><span style="color:#309">delegate</span> <span style="color:#555">=</span> delegate<span style="color:#555">;</span>
-    <span style="color:#069;font-weight:bold">this</span><span style="color:#555">.</span><span style="color:#309">redisTemplate</span> <span style="color:#555">=</span> redisTemplate<span style="color:#555">;</span>
-  <span style="color:#555">}</span>
-
-  <span style="color:#99f">@Override</span>
-  <span style="color:#069;font-weight:bold">public</span> S <span style="color:#c0f">createSession</span><span style="color:#555">()</span> <span style="color:#555">{</span>
-    <span style="color:#069;font-weight:bold">return</span> delegate<span style="color:#555">.</span><span style="color:#309">createSession</span><span style="color:#555">();</span>
-  <span style="color:#555">}</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">SafeDeserializationRepository</span>(SessionRepository<span style="color:#555">&lt;</span>S<span style="color:#555">&gt;</span> <span style="color:#c0f">delegate</span>,
+                                       RedisTemplate<span style="color:#555">&lt;</span>Object, Object<span style="color:#555">&gt;</span> <span style="color:#c0f">redisTemplate</span>) {
+    <span style="color:#069;font-weight:bold">this</span>.<span style="color:#309">delegate</span> <span style="color:#555">=</span> delegate;
+    <span style="color:#069;font-weight:bold">this</span>.<span style="color:#309">redisTemplate</span> <span style="color:#555">=</span> redisTemplate;
+  }
 
   <span style="color:#99f">@Override</span>
-  <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">save</span><span style="color:#555">(</span>S session<span style="color:#555">)</span> <span style="color:#555">{</span>
-    delegate<span style="color:#555">.</span><span style="color:#309">save</span><span style="color:#555">(</span>session<span style="color:#555">);</span>
-  <span style="color:#555">}</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">S</span> createSession() {
+    <span style="color:#069;font-weight:bold">return</span> delegate.<span style="color:#309">createSession</span>();
+  }
 
   <span style="color:#99f">@Override</span>
-  <span style="color:#069;font-weight:bold">public</span> S <span style="color:#c0f">getSession</span><span style="color:#555">(</span>String id<span style="color:#555">)</span> <span style="color:#555">{</span>
-    <span style="color:#069;font-weight:bold">try</span> <span style="color:#555">{</span>
-      <span style="color:#069;font-weight:bold">return</span> delegate<span style="color:#555">.</span><span style="color:#309">getSession</span><span style="color:#555">(</span>id<span style="color:#555">);</span>
-    <span style="color:#555">}</span> <span style="color:#069;font-weight:bold">catch</span><span style="color:#555">(</span>SerializationException e<span style="color:#555">)</span> <span style="color:#555">{</span>
-      logger<span style="color:#555">.</span><span style="color:#309">info</span><span style="color:#555">(</span><span style="color:#c30">&#34;Deleting non-deserializable session with key {}&#34;</span><span style="color:#555">,</span> id<span style="color:#555">);</span>
-      redisTemplate<span style="color:#555">.</span><span style="color:#309">delete</span><span style="color:#555">(</span>BOUNDED_HASH_KEY_PREFIX <span style="color:#555">+</span> id<span style="color:#555">);</span>
-      <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">null</span><span style="color:#555">;</span>
-    <span style="color:#555">}</span>
-  <span style="color:#555">}</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">void</span> save(S <span style="color:#c0f">session</span>) {
+    delegate.<span style="color:#309">save</span>(session);
+  }
 
   <span style="color:#99f">@Override</span>
-  <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">delete</span><span style="color:#555">(</span>String id<span style="color:#555">)</span> <span style="color:#555">{</span>
-    delegate<span style="color:#555">.</span><span style="color:#309">delete</span><span style="color:#555">(</span>id<span style="color:#555">);</span>
-  <span style="color:#555">}</span>
-<span style="color:#555">}</span>
-</code></pre></div><p>However, it is not easy to wire up this repository in the configuration. Since Spring Redis Session is auto configured, the only way to override beans for Redis Session is to extend <code>RedisHttpSessionConfiguration</code> and specify beans. Ideally, we want to override the method <code>RedisHttpSessionConfiguration#sessionRepository</code>. This would mean that <code>SafeDeserializationRepository</code> inherits from <code>RedisOperationsSessionRepository</code>. That does not sound too complicated till you realize that <code>RedisOperationsSessionRepository#getSession(java.lang.String)</code> returns <code>RedisSession</code> which is a final class declared inside <code>RedisOperationsSessionRepository</code>.</p>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">S</span> getSession(String <span style="color:#c0f">id</span>) {
+    <span style="color:#069;font-weight:bold">try</span> {
+      <span style="color:#069;font-weight:bold">return</span> delegate.<span style="color:#309">getSession</span>(id);
+    } <span style="color:#069;font-weight:bold">catch</span>(SerializationException <span style="color:#c0f">e</span>) {
+      logger.<span style="color:#309">info</span>(<span style="color:#c30">&#34;Deleting non-deserializable session with key {}&#34;</span>, id);
+      redisTemplate.<span style="color:#309">delete</span>(BOUNDED_HASH_KEY_PREFIX <span style="color:#555">+</span> id);
+      <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">null</span>;
+    }
+  }
+
+  <span style="color:#99f">@Override</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">void</span> delete(String <span style="color:#c0f">id</span>) {
+    delegate.<span style="color:#309">delete</span>(id);
+  }
+}</code></pre></div>
+<p>However, it is not easy to wire up this repository in the configuration. Since Spring Redis Session is auto configured, the only way to override beans for Redis Session is to extend <code>RedisHttpSessionConfiguration</code> and specify beans. Ideally, we want to override the method <code>RedisHttpSessionConfiguration#sessionRepository</code>. This would mean that <code>SafeDeserializationRepository</code> inherits from <code>RedisOperationsSessionRepository</code>. That does not sound too complicated till you realize that <code>RedisOperationsSessionRepository#getSession(java.lang.String)</code> returns <code>RedisSession</code> which is a final class declared inside <code>RedisOperationsSessionRepository</code>.</p>
+
 <p>On closer look, the repository is hooked in to <code>SessionRepositoryFilter</code> and it is indeed possible to override the <code>SpringHttpSessionConfiguration#springSessionRepositoryFilter</code> method to create a new filter that takes our <code>SafeDeserializationRepository</code>.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Configuration</span>
-<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">RedisSessionConfig</span> <span style="color:#069;font-weight:bold">extends</span> RedisHttpSessionConfiguration <span style="color:#555">{</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">class</span> RedisSessionConfig <span style="color:#c0f">extends</span> RedisHttpSessionConfiguration {
   <span style="color:#99f">@Autowired</span>
-  RedisTemplate<span style="color:#555">&lt;</span>Object<span style="color:#555">,</span> Object<span style="color:#555">&gt;</span> redisTemplate<span style="color:#555">;</span>
+  RedisTemplate<span style="color:#555">&lt;</span>Object, Object<span style="color:#555">&gt;</span> <span style="color:#c0f">redisTemplate</span>;
 
   <span style="color:#99f">@Bean</span>
   <span style="color:#99f">@Override</span>
-  <span style="color:#069;font-weight:bold">public</span> <span style="color:#555">&lt;</span>S <span style="color:#069;font-weight:bold">extends</span> ExpiringSession<span style="color:#555">&gt;</span> SessionRepositoryFilter<span style="color:#555">&lt;?</span> <span style="color:#069;font-weight:bold">extends</span> ExpiringSession<span style="color:#555">&gt;</span> <span style="color:#c0f">springSessionRepositoryFilter</span><span style="color:#555">(</span>SessionRepository<span style="color:#555">&lt;</span>S<span style="color:#555">&gt;</span> sessionRepository<span style="color:#555">)</span> <span style="color:#555">{</span>
-    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">super</span><span style="color:#555">.</span><span style="color:#309">springSessionRepositoryFilter</span><span style="color:#555">(</span><span style="color:#069;font-weight:bold">new</span> SafeDeserializationRepository<span style="color:#555">&lt;&gt;(</span>sessionRepository<span style="color:#555">,</span> redisTemplate<span style="color:#555">));</span>
-  <span style="color:#555">}</span>
-<span style="color:#555">}</span>
-</code></pre></div><section class="footnotes" role="doc-endnotes">
-<hr>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#555">&lt;</span>S <span style="color:#c0f">extends</span> ExpiringSession<span style="color:#555">&gt;</span> <span style="color:#c0f">SessionRepositoryFilter</span><span style="color:#555">&lt;?</span> <span style="color:#069;font-weight:bold">extends</span> <span style="color:#c0f">ExpiringSession</span><span style="color:#555">&gt;</span> springSessionRepositoryFilter(SessionRepository<span style="color:#555">&lt;</span>S<span style="color:#555">&gt;</span> <span style="color:#c0f">sessionRepository</span>) {
+    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">super</span>.<span style="color:#309">springSessionRepositoryFilter</span>(<span style="color:#069;font-weight:bold">new</span> SafeDeserializationRepository<span style="color:#555">&lt;&gt;</span>(sessionRepository, redisTemplate));
+  }
+}</code></pre></div><div class="footnotes">
+
+<hr />
+
 <ol>
-<li id="fn:1" role="doc-endnote">
-<p><a href="https://github.com/spring-projects/spring-session/issues/280">SerializationFailedException after re-deploying with changed session object #280</a>. <a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
-</li>
+<li id="fn:1"><a href="https://github.com/spring-projects/spring-session/issues/280">SerializationFailedException after re-deploying with changed session object #280</a>.
+ <a class="footnote-return" href="#fnref:1"><sup>[return]</sup></a></li>
 </ol>
-</section>
+</div>
         </div>
         <aside id="gh-comments-list">
           <script>
@@ -313,11 +321,15 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2019/08/02/flushing-metrics-in-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Flushing Metrics in Dropwizard Commands</a></li>
-            
-            
-            
-            
             
             
             
@@ -975,6 +987,10 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2014/03/20/clojure-dojo-levenshtein-edit-distance/?utm_source=site&amp;utm_medium=related">Clojure Dojo - Levenshtein edit distance</a></li>
             
             
@@ -1289,14 +1305,6 @@ $(document).ready(function () {
             
             
             
-            
-            
-            
-            
-            
-            
-            
-            
             <li><a href="https://sadique.io/blog/2013/08/15/pythons-bool-type/?utm_source=site&amp;utm_medium=related">Python&#39;s bool type</a></li>
             
             
@@ -1488,6 +1496,14 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             

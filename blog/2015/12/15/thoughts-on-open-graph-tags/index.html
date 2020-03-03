@@ -85,47 +85,62 @@
       <div itemprop="mainContentOfPage"
            itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div>
-          <p>The Open Graph protocol was designed by Facebook to help content creators generate a richer preview of links to their content when they get posted in to Facebook. It was originally proposed as a simple mark up that can be adopted in platforms beyond Facebook. The Open Graph Protocol Design Decisions presentation <sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> does a very good job of enumerating the motivation and design decisions made for Open Graph. I have lately been reading and experimenting with these tags and I notice a fair bit of differences when it comes to how these tags are used by different platforms.</p>
+          <p>The Open Graph protocol was designed by Facebook to help content creators generate a richer preview of links to their content when they get posted in to Facebook. It was originally proposed as a simple mark up that can be adopted in platforms beyond Facebook. The Open Graph Protocol Design Decisions presentation <sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup> does a very good job of enumerating the motivation and design decisions made for Open Graph. I have lately been reading and experimenting with these tags and I notice a fair bit of differences when it comes to how these tags are used by different platforms.</p>
+
 <p>This is by no means an exhaustive list–these are applications I use frequently use and hence encounter the usage of Open Graph tags in. I am deliberately scoping this discussion to a sub set of tags including the following which are the most common tags I have encountered:</p>
+
 <pre><code>og:title
 og:description
 og:url
 og:image
-</code></pre><h2 id="facebook">Facebook</h2>
+</code></pre>
+
+<h2 id="facebook">Facebook</h2>
+
 <p>I do not currently have a Facebook account with which I could test and this and Facebook‘s real name policy makes it hard to create test accounts. Facebook‘s <a href="https://developers.facebook.com/docs/sharing/best-practices">content sharing best practices</a> does make it clear that they use the Open Graph tags and considering Facebook created the protocol, I would guess all the tags work as expected.</p>
+
 <h2 id="twitter">Twitter</h2>
+
 <p>Twitter primarily uses it‘s <a href="https://dev.twitter.com/cards/overview">Twitter Cards</a> functionality to help content creators display richer previews. Twitter Cards defines it‘s own custom tags. However, if these tags are not present in a shared page‘s markup, Twitter does <a href="https://dev.twitter.com/cards/markup">fall back</a> to using the corresponding Open Graph tags.</p>
+
 <p>However, one of the interesting things about sharing content through Twitter cards is that it allows the content to be attributed to the Twitter accounts of the content author and the site where the content is hosted. This is done via the Twitter Card tags <code>twitter:creator</code> and <code>twitter:site</code>. There are no equivalents in the Open Graph world and hence these needs to be explicitly specified for Twitter.</p>
+
 <h2 id="slack">Slack</h2>
-<p>Slack generates rich preview of content using the four Open Graph tags. Slack does this by using it‘s <a href="https://api.slack.com/robots">Link Expanding Bot</a>. In addition to Open Graph tags, Slack looks for oEmbed <sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup> and Twitter Cards.</p>
+
+<p>Slack generates rich preview of content using the four Open Graph tags. Slack does this by using it‘s <a href="https://api.slack.com/robots">Link Expanding Bot</a>. In addition to Open Graph tags, Slack looks for oEmbed <sup class="footnote-ref" id="fnref:2"><a href="#fn:2">2</a></sup> and Twitter Cards.</p>
+
 <h2 id="groupme">GroupMe</h2>
+
 <p>GroupMe parses Open Graph tags and displays them in chat messages. I have been unable to find documentation as to which other tags they parse.</p>
+
 <h2 id="google">Google+</h2>
-<p>Google‘s <a href="https://developers.google.com/+/web/snippet/">recommended method</a> for providing metadata is Schema.org <sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup> annotations. It does fall back to Open Graph tags if Schema.org annotations are not found. Google also uses schema.org microdata to generate rich snippets in their search results. Bing and Yahoo also support rich snippets through Schema.org annotations.</p>
+
+<p>Google‘s <a href="https://developers.google.com/+/web/snippet/">recommended method</a> for providing metadata is Schema.org <sup class="footnote-ref" id="fnref:3"><a href="#fn:3">3</a></sup> annotations. It does fall back to Open Graph tags if Schema.org annotations are not found. Google also uses schema.org microdata to generate rich snippets in their search results. Bing and Yahoo also support rich snippets through Schema.org annotations.</p>
+
 <h2 id="representing-creator-information">Representing creator information</h2>
-<p>As we saw in the example of Twitter, linking to the creator of content is not something that can be solved purely with Open Graph tags. Open Graph does specify an <code>author</code> type <sup id="fnref:4"><a href="#fn:4" class="footnote-ref" role="doc-noteref">4</a></sup>. But in a world where links get shared to multiple platforms, the meaning of this tag is specific to the platform–it could be a Twitter id, a Facebook profile link, a Slack user id, etc. This does force the use of platform specific tags like <code>twitter:site</code>.</p>
+
+<p>As we saw in the example of Twitter, linking to the creator of content is not something that can be solved purely with Open Graph tags. Open Graph does specify an <code>author</code> type <sup class="footnote-ref" id="fnref:4"><a href="#fn:4">4</a></sup>. But in a world where links get shared to multiple platforms, the meaning of this tag is specific to the platform–it could be a Twitter id, a Facebook profile link, a Slack user id, etc. This does force the use of platform specific tags like <code>twitter:site</code>.</p>
+
 <p>It would be interesting to see if Open Graph would one day support scoped author tags that can specify what <code>author:username</code> means for different platforms like this:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">&lt;<span style="color:#309;font-weight:bold">meta</span> <span style="color:#309">property</span><span style="color:#555">=</span><span style="color:#c30">&#34;profile:username&#34;</span> <span style="color:#309">scope</span><span style="color:#555">=</span><span style="color:#c30">“twitter.com“</span> <span style="color:#309">content</span><span style="color:#555">=</span><span style="color:#c30">&#34;@sdqali&#34;</span> /&gt;
 &lt;<span style="color:#309;font-weight:bold">meta</span> <span style="color:#309">property</span><span style="color:#555">=</span><span style="color:#c30">&#34;profile:username&#34;</span> <span style="color:#309">scope</span><span style="color:#555">=</span><span style="color:#c30">“facebook.com“</span> <span style="color:#309">content</span><span style="color:#555">=</span><span style="color:#c30">&#34;http://facebook.com/some-profile-id&#34;</span> /&gt;
-&lt;<span style="color:#309;font-weight:bold">meta</span> <span style="color:#309">property</span><span style="color:#555">=</span><span style="color:#c30">&#34;profile:username&#34;</span> <span style="color:#309">scope</span><span style="color:#555">=</span><span style="color:#c30">“slack.com“</span> <span style="color:#309">content</span><span style="color:#555">=</span><span style="color:#c30">&#34;@some-slack-id&#34;</span> /&gt;
-</code></pre></div><p>In conclusion, while Open Graph tags are used by a lot of platforms, there are specific pieces of information for which platform specific tags and annotations are needed.</p>
-<section class="footnotes" role="doc-endnotes">
-<hr>
+&lt;<span style="color:#309;font-weight:bold">meta</span> <span style="color:#309">property</span><span style="color:#555">=</span><span style="color:#c30">&#34;profile:username&#34;</span> <span style="color:#309">scope</span><span style="color:#555">=</span><span style="color:#c30">“slack.com“</span> <span style="color:#309">content</span><span style="color:#555">=</span><span style="color:#c30">&#34;@some-slack-id&#34;</span> /&gt;</code></pre></div>
+<p>In conclusion, while Open Graph tags are used by a lot of platforms, there are specific pieces of information for which platform specific tags and annotations are needed.</p>
+<div class="footnotes">
+
+<hr />
+
 <ol>
-<li id="fn:1" role="doc-endnote">
-<p>David Recordon–The Open Graph Protocol Design Decisions on <a href="http://www.scribd.com/doc/30715288/The-Open-Graph-Protocol-Design-Decisions">Scribd</a>. <a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
-</li>
-<li id="fn:2" role="doc-endnote">
-<p>oEmbed–Yet another attempt to provide rich representation of URLs. You can find more information on the <a href="http://oembed.com/">official site</a>. <a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
-</li>
-<li id="fn:3" role="doc-endnote">
-<p>Schema.org is an effort to create and promote schemas for structured data. The official site is <a href="http://schema.org/">here</a>. <a href="#fnref:3" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
-</li>
-<li id="fn:4" role="doc-endnote">
-<p>See <code>article:author</code> <a href="http://ogp.me/#type_article">spec</a> and <code>book:author</code> <a href="http://ogp.me/#type_book">spec</a>. <a href="#fnref:4" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
-</li>
+<li id="fn:1">David Recordon–The Open Graph Protocol Design Decisions on <a href="http://www.scribd.com/doc/30715288/The-Open-Graph-Protocol-Design-Decisions">Scribd</a>.
+ <a class="footnote-return" href="#fnref:1"><sup>[return]</sup></a></li>
+<li id="fn:2">oEmbed–Yet another attempt to provide rich representation of URLs. You can find more information on the <a href="http://oembed.com/">official site</a>.
+ <a class="footnote-return" href="#fnref:2"><sup>[return]</sup></a></li>
+<li id="fn:3">Schema.org is an effort to create and promote schemas for structured data. The official site is <a href="http://schema.org/">here</a>.
+ <a class="footnote-return" href="#fnref:3"><sup>[return]</sup></a></li>
+<li id="fn:4">See <code>article:author</code> <a href="http://ogp.me/#type_article">spec</a> and <code>book:author</code> <a href="http://ogp.me/#type_book">spec</a>.
+ <a class="footnote-return" href="#fnref:4"><sup>[return]</sup></a></li>
 </ol>
-</section>
+</div>
         </div>
         <aside id="gh-comments-list">
           <script>
@@ -233,6 +248,10 @@ $(document).ready(function () {
         <aside>
           <h3>If you liked this post, you'll also like...</h3>
           <ul class="related-posts">
+            
+            
+            
+            
             
             
             
@@ -903,6 +922,10 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2014/03/20/clojure-dojo-levenshtein-edit-distance/?utm_source=site&amp;utm_medium=related">Clojure Dojo - Levenshtein edit distance</a></li>
             
             
@@ -1217,14 +1240,6 @@ $(document).ready(function () {
             
             
             
-            
-            
-            
-            
-            
-            
-            
-            
             <li><a href="https://sadique.io/blog/2013/08/15/pythons-bool-type/?utm_source=site&amp;utm_medium=related">Python&#39;s bool type</a></li>
             
             
@@ -1416,6 +1431,14 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             

@@ -98,7 +98,9 @@
            itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div>
           <p>In the <a href="/blog/2016/07/03/jwt-authentication-with-spring-web-part-2/">previous blog post</a>, we built the Spring API that responds with Profile information. Continuing on the path to building authentication with JWT, in this blog post, we will create a login mechanism that issues a JWT when the user presents the correct credentials.</p>
+
 <p>These are the blog posts in this series:</p>
+
 <ul>
 <li><a href="/blog/2016/07/02/jwt-authentication-with-spring-web-part-1/">Part 1</a> - Discussion of JWT and implementation</li>
 <li><a href="/blog/2016/07/03/jwt-authentication-with-spring-web-part-2/">Part 2</a> - A Spring User Profiles API</li>
@@ -106,116 +108,121 @@
 <li><a href="/blog/2016/07/07/jwt-authentication-with-spring-web-part-4/">Part 4</a> - Verifying the token sent back by the client</li>
 <li><a href="/blog/2016/07/13/jwt-authentication-with-spring-web-part-5/">Part 5</a> - Securing the front end</li>
 </ul>
+
 <p>Our fist step is to configure Spring Security to allow access to the login end point we will be building. This can be done as follows:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Configuration</span>
-<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">SecurityConfig</span> <span style="color:#069;font-weight:bold">extends</span> WebSecurityConfigurerAdapter <span style="color:#555">{</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">class</span> SecurityConfig <span style="color:#c0f">extends</span> WebSecurityConfigurerAdapter {
     <span style="color:#99f">@Override</span>
-    <span style="color:#069;font-weight:bold">protected</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">configure</span><span style="color:#555">(</span>HttpSecurity http<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
-        http<span style="color:#555">.</span><span style="color:#309">csrf</span><span style="color:#555">().</span><span style="color:#309">ignoringAntMatchers</span><span style="color:#555">(</span><span style="color:#c30">&#34;/login&#34;</span><span style="color:#555">);</span>
+    <span style="color:#069;font-weight:bold">protected</span> <span style="color:#c0f">void</span> configure(HttpSecurity <span style="color:#c0f">http</span>) <span style="color:#069;font-weight:bold">throws</span> <span style="color:#c0f">Exception</span> {
+        http.<span style="color:#309">csrf</span>().<span style="color:#309">ignoringAntMatchers</span>(<span style="color:#c30">&#34;/login&#34;</span>);
 
-        http<span style="color:#555">.</span><span style="color:#309">authorizeRequests</span><span style="color:#555">()</span>
-                <span style="color:#555">.</span><span style="color:#309">antMatchers</span><span style="color:#555">(</span><span style="color:#c30">&#34;/login&#34;</span><span style="color:#555">)</span>
-                <span style="color:#555">.</span><span style="color:#309">permitAll</span><span style="color:#555">()</span>
-                <span style="color:#555">.</span><span style="color:#309">antMatchers</span><span style="color:#555">(</span><span style="color:#c30">&#34;/**/*&#34;</span><span style="color:#555">)</span>
-                <span style="color:#555">.</span><span style="color:#309">denyAll</span><span style="color:#555">();</span>
-    <span style="color:#555">}</span>
-<span style="color:#555">}</span>
-</code></pre></div><p>We are turning off authentication and CSRF token checking for the <code>/login</code> end point.</p>
+        http.<span style="color:#309">authorizeRequests</span>()
+                .<span style="color:#309">antMatchers</span>(<span style="color:#c30">&#34;/login&#34;</span>)
+                .<span style="color:#309">permitAll</span>()
+                .<span style="color:#309">antMatchers</span>(<span style="color:#c30">&#34;/**/*&#34;</span>)
+                .<span style="color:#309">denyAll</span>();
+    }
+}</code></pre></div>
+<p>We are turning off authentication and CSRF token checking for the <code>/login</code> end point.</p>
+
 <p>Next, we build a <code>LoginController</code> to issue tokens up on a user presenting valid credentials:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@RestController</span>
-<span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span>path <span style="color:#555">=</span> <span style="color:#c30">&#34;/login&#34;</span><span style="color:#555">)</span>
-<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">LoginController</span> <span style="color:#555">{</span>
+<span style="color:#99f">@RequestMapping</span>(path <span style="color:#555">=</span> <span style="color:#c30">&#34;/login&#34;</span>)
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">class</span> LoginController {
 
-    <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">final</span> LoginService loginService<span style="color:#555">;</span>
-    <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">final</span> JwtService jwtService<span style="color:#555">;</span>
+    <span style="color:#069;font-weight:bold">private</span> <span style="color:#c0f">final</span> LoginService <span style="color:#c0f">loginService</span>;
+    <span style="color:#069;font-weight:bold">private</span> <span style="color:#c0f">final</span> JwtService <span style="color:#c0f">jwtService</span>;
 
-    <span style="color:#99f">@SuppressWarnings</span><span style="color:#555">(</span><span style="color:#c30">&#34;unused&#34;</span><span style="color:#555">)</span>
-    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">LoginController</span><span style="color:#555">()</span> <span style="color:#555">{</span>
-        <span style="color:#069;font-weight:bold">this</span><span style="color:#555">(</span><span style="color:#069;font-weight:bold">null</span><span style="color:#555">,</span> <span style="color:#069;font-weight:bold">null</span><span style="color:#555">);</span>
-    <span style="color:#555">}</span>
+    <span style="color:#99f">@SuppressWarnings</span>(<span style="color:#c30">&#34;unused&#34;</span>)
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">LoginController</span>() {
+        <span style="color:#069;font-weight:bold">this</span>(<span style="color:#069;font-weight:bold">null</span>, <span style="color:#069;font-weight:bold">null</span>);
+    }
 
     <span style="color:#99f">@Autowired</span>
-    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">LoginController</span><span style="color:#555">(</span>LoginService loginService<span style="color:#555">,</span> JwtService jwtService<span style="color:#555">)</span> <span style="color:#555">{</span>
-        <span style="color:#069;font-weight:bold">this</span><span style="color:#555">.</span><span style="color:#309">loginService</span> <span style="color:#555">=</span> loginService<span style="color:#555">;</span>
-        <span style="color:#069;font-weight:bold">this</span><span style="color:#555">.</span><span style="color:#309">jwtService</span> <span style="color:#555">=</span> jwtService<span style="color:#555">;</span>
-    <span style="color:#555">}</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">LoginController</span>(LoginService <span style="color:#c0f">loginService</span>, JwtService <span style="color:#c0f">jwtService</span>) {
+        <span style="color:#069;font-weight:bold">this</span>.<span style="color:#309">loginService</span> <span style="color:#555">=</span> loginService;
+        <span style="color:#069;font-weight:bold">this</span>.<span style="color:#309">jwtService</span> <span style="color:#555">=</span> jwtService;
+    }
 
-    <span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span>path <span style="color:#555">=</span> <span style="color:#c30">&#34;&#34;</span><span style="color:#555">,</span>
-            method <span style="color:#555">=</span> POST<span style="color:#555">,</span>
-            produces <span style="color:#555">=</span> APPLICATION_JSON_VALUE<span style="color:#555">)</span>
-    <span style="color:#069;font-weight:bold">public</span> MinimalProfile <span style="color:#c0f">login</span><span style="color:#555">(</span><span style="color:#99f">@RequestBody</span> LoginCredentials credentials<span style="color:#555">,</span>
-                                HttpServletResponse response<span style="color:#555">)</span> <span style="color:#555">{</span>
-        <span style="color:#069;font-weight:bold">return</span> loginService<span style="color:#555">.</span><span style="color:#309">login</span><span style="color:#555">(</span>credentials<span style="color:#555">)</span>
-                <span style="color:#555">.</span><span style="color:#309">map</span><span style="color:#555">(</span>minimalProfile <span style="color:#555">-&gt;</span> <span style="color:#555">{</span>
-                    <span style="color:#069;font-weight:bold">try</span> <span style="color:#555">{</span>
-                        response<span style="color:#555">.</span><span style="color:#309">setHeader</span><span style="color:#555">(</span><span style="color:#c30">&#34;Token&#34;</span><span style="color:#555">,</span> jwtService<span style="color:#555">.</span><span style="color:#309">tokenFor</span><span style="color:#555">(</span>minimalProfile<span style="color:#555">));</span>
-                    <span style="color:#555">}</span> <span style="color:#069;font-weight:bold">catch</span> <span style="color:#555">(</span>Exception e<span style="color:#555">)</span> <span style="color:#555">{</span>
-                        <span style="color:#069;font-weight:bold">throw</span> <span style="color:#069;font-weight:bold">new</span> RuntimeException<span style="color:#555">(</span>e<span style="color:#555">);</span>
-                    <span style="color:#555">}</span>
-                    <span style="color:#069;font-weight:bold">return</span> minimalProfile<span style="color:#555">;</span>
-                <span style="color:#555">})</span>
-                <span style="color:#555">.</span><span style="color:#309">orElseThrow</span><span style="color:#555">(()</span> <span style="color:#555">-&gt;</span> <span style="color:#069;font-weight:bold">new</span> FailedToLoginException<span style="color:#555">(</span>credentials<span style="color:#555">.</span><span style="color:#309">getUsername</span><span style="color:#555">()));</span>
-    <span style="color:#555">}</span>
-<span style="color:#555">}</span>
-</code></pre></div><p>We use the login service to verify the credentials and it returns an <code>Optional&lt;MinimalProfile&gt;</code>. If there is a valid <code>MinimalProfile</code>, we ask the <code>JwtService</code> to issue a token.</p>
+    <span style="color:#99f">@RequestMapping</span>(path <span style="color:#555">=</span> <span style="color:#c30">&#34;&#34;</span>,
+            method <span style="color:#555">=</span> POST,
+            produces <span style="color:#555">=</span> APPLICATION_JSON_VALUE)
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">MinimalProfile</span> login(<span style="color:#99f">@RequestBody</span> LoginCredentials <span style="color:#c0f">credentials</span>,
+                                HttpServletResponse <span style="color:#c0f">response</span>) {
+        <span style="color:#069;font-weight:bold">return</span> loginService.<span style="color:#309">login</span>(credentials)
+                .<span style="color:#309">map</span>(minimalProfile <span style="color:#555">-&gt;</span> {
+                    <span style="color:#069;font-weight:bold">try</span> {
+                        response.<span style="color:#309">setHeader</span>(<span style="color:#c30">&#34;Token&#34;</span>, jwtService.<span style="color:#309">tokenFor</span>(minimalProfile));
+                    } <span style="color:#069;font-weight:bold">catch</span> (Exception <span style="color:#c0f">e</span>) {
+                        <span style="color:#069;font-weight:bold">throw</span> <span style="color:#069;font-weight:bold">new</span> RuntimeException(e);
+                    }
+                    <span style="color:#069;font-weight:bold">return</span> minimalProfile;
+                })
+                .<span style="color:#309">orElseThrow</span>(() <span style="color:#555">-&gt;</span> <span style="color:#069;font-weight:bold">new</span> FailedToLoginException(credentials.<span style="color:#309">getUsername</span>()));
+    }
+}</code></pre></div>
+<p>We use the login service to verify the credentials and it returns an <code>Optional&lt;MinimalProfile&gt;</code>. If there is a valid <code>MinimalProfile</code>, we ask the <code>JwtService</code> to issue a token.</p>
+
 <p>The <code>LoginService</code> uses the <code>ProfileService</code> to load a profile matching the user name and the password presented by the user.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Component</span>
-<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">LoginService</span> <span style="color:#555">{</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">class</span> LoginService {
 
-    <span style="color:#069;font-weight:bold">private</span> ProfileService profileService<span style="color:#555">;</span>
+    <span style="color:#069;font-weight:bold">private</span> <span style="color:#c0f">ProfileService</span> profileService;
 
-    <span style="color:#99f">@SuppressWarnings</span><span style="color:#555">(</span><span style="color:#c30">&#34;unused&#34;</span><span style="color:#555">)</span>
-    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">LoginService</span><span style="color:#555">()</span> <span style="color:#555">{</span>
-        <span style="color:#069;font-weight:bold">this</span><span style="color:#555">(</span><span style="color:#069;font-weight:bold">null</span><span style="color:#555">);</span>
-    <span style="color:#555">}</span>
-
-    <span style="color:#99f">@Autowired</span>
-    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">LoginService</span><span style="color:#555">(</span>ProfileService profileService<span style="color:#555">)</span> <span style="color:#555">{</span>
-        <span style="color:#069;font-weight:bold">this</span><span style="color:#555">.</span><span style="color:#309">profileService</span> <span style="color:#555">=</span> profileService<span style="color:#555">;</span>
-    <span style="color:#555">}</span>
-
-    <span style="color:#069;font-weight:bold">public</span> Optional<span style="color:#555">&lt;</span>MinimalProfile<span style="color:#555">&gt;</span> <span style="color:#c0f">login</span><span style="color:#555">(</span>LoginCredentials credentials<span style="color:#555">)</span> <span style="color:#555">{</span>
-        <span style="color:#069;font-weight:bold">return</span> profileService<span style="color:#555">.</span><span style="color:#309">get</span><span style="color:#555">(</span>credentials<span style="color:#555">.</span><span style="color:#309">getUsername</span><span style="color:#555">())</span>
-                <span style="color:#555">.</span><span style="color:#309">filter</span><span style="color:#555">(</span>profile <span style="color:#555">-&gt;</span> profile<span style="color:#555">.</span><span style="color:#309">getLogin</span><span style="color:#555">().</span><span style="color:#309">getPassword</span><span style="color:#555">().</span><span style="color:#309">equals</span><span style="color:#555">(</span>credentials<span style="color:#555">.</span><span style="color:#309">getPassword</span><span style="color:#555">()))</span>
-                <span style="color:#555">.</span><span style="color:#309">map</span><span style="color:#555">(</span>profile <span style="color:#555">-&gt;</span> <span style="color:#069;font-weight:bold">new</span> MinimalProfile<span style="color:#555">(</span>profile<span style="color:#555">));</span>
-    <span style="color:#555">}</span>
-<span style="color:#555">}</span>
-</code></pre></div><p>Please note that in real applications, you never want to do this. You should be comparing the hashed version of the password presented by the user with the hashed version of the password stored in the database.</p>
-<p>The <code>JwtService</code> creates a token using the profile information and an expiration date of 2 hours with the <code>HMASHA256</code> algorithm. It uses the key provided by <code>SecretKeyProvider</code>. For creating the JWT token, we use the excellent jjwt <sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> library we introduced in <a href="/blog/2016/07/02/jwt-authentication-with-spring-web-part-1/">part 1</a>.</p>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Component</span>
-<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">JwtService</span> <span style="color:#555">{</span>
-    <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">static</span> <span style="color:#069;font-weight:bold">final</span> String ISSUER <span style="color:#555">=</span> <span style="color:#c30">&#34;in.sdqali.jwt&#34;</span><span style="color:#555">;</span>
-    <span style="color:#069;font-weight:bold">private</span> SecretKeyProvider secretKeyProvider<span style="color:#555">;</span>
-
-    <span style="color:#99f">@SuppressWarnings</span><span style="color:#555">(</span><span style="color:#c30">&#34;unused&#34;</span><span style="color:#555">)</span>
-    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">JwtService</span><span style="color:#555">()</span> <span style="color:#555">{</span>
-        <span style="color:#069;font-weight:bold">this</span><span style="color:#555">(</span><span style="color:#069;font-weight:bold">null</span><span style="color:#555">);</span>
-    <span style="color:#555">}</span>
+    <span style="color:#99f">@SuppressWarnings</span>(<span style="color:#c30">&#34;unused&#34;</span>)
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">LoginService</span>() {
+        <span style="color:#069;font-weight:bold">this</span>(<span style="color:#069;font-weight:bold">null</span>);
+    }
 
     <span style="color:#99f">@Autowired</span>
-    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">JwtService</span><span style="color:#555">(</span>SecretKeyProvider secretKeyProvider<span style="color:#555">)</span> <span style="color:#555">{</span>
-        <span style="color:#069;font-weight:bold">this</span><span style="color:#555">.</span><span style="color:#309">secretKeyProvider</span> <span style="color:#555">=</span> secretKeyProvider<span style="color:#555">;</span>
-    <span style="color:#555">}</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">LoginService</span>(ProfileService <span style="color:#c0f">profileService</span>) {
+        <span style="color:#069;font-weight:bold">this</span>.<span style="color:#309">profileService</span> <span style="color:#555">=</span> profileService;
+    }
 
-    <span style="color:#069;font-weight:bold">public</span> String <span style="color:#c0f">tokenFor</span><span style="color:#555">(</span>MinimalProfile minimalProfile<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> IOException<span style="color:#555">,</span> URISyntaxException <span style="color:#555">{</span>
-        <span style="color:#078;font-weight:bold">byte</span><span style="color:#555">[]</span> secretKey <span style="color:#555">=</span> secretKeyProvider<span style="color:#555">.</span><span style="color:#309">getKey</span><span style="color:#555">();</span>
-        Date expiration <span style="color:#555">=</span> Date<span style="color:#555">.</span><span style="color:#309">from</span><span style="color:#555">(</span>LocalDateTime<span style="color:#555">.</span><span style="color:#309">now</span><span style="color:#555">().</span><span style="color:#309">plusHours</span><span style="color:#555">(</span>2<span style="color:#555">).</span><span style="color:#309">toInstant</span><span style="color:#555">(</span>UTC<span style="color:#555">));</span>
-        <span style="color:#069;font-weight:bold">return</span> Jwts<span style="color:#555">.</span><span style="color:#309">builder</span><span style="color:#555">()</span>
-                <span style="color:#555">.</span><span style="color:#309">setSubject</span><span style="color:#555">(</span>minimalProfile<span style="color:#555">.</span><span style="color:#309">getUsername</span><span style="color:#555">())</span>
-                <span style="color:#555">.</span><span style="color:#309">setExpiration</span><span style="color:#555">(</span>expiration<span style="color:#555">)</span>
-                <span style="color:#555">.</span><span style="color:#309">setIssuer</span><span style="color:#555">(</span>ISSUER<span style="color:#555">)</span>
-                <span style="color:#555">.</span><span style="color:#309">signWith</span><span style="color:#555">(</span>SignatureAlgorithm<span style="color:#555">.</span><span style="color:#309">HS512</span><span style="color:#555">,</span> secretKey<span style="color:#555">)</span>
-                <span style="color:#555">.</span><span style="color:#309">compact</span><span style="color:#555">();</span>
-    <span style="color:#555">}</span>
-<span style="color:#555">}</span>
-</code></pre></div><p>The <code>SecretKeyProvider</code> in this example will simply load the secret key from a file, where it is stored in plain text. In a real application, you may store and encrypted version of it and decrypt it when required.</p>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">Optional</span><span style="color:#555">&lt;</span>MinimalProfile<span style="color:#555">&gt;</span> <span style="color:#c0f">login</span>(LoginCredentials <span style="color:#c0f">credentials</span>) {
+        <span style="color:#069;font-weight:bold">return</span> profileService.<span style="color:#309">get</span>(credentials.<span style="color:#309">getUsername</span>())
+                .<span style="color:#309">filter</span>(profile <span style="color:#555">-&gt;</span> profile.<span style="color:#309">getLogin</span>().<span style="color:#309">getPassword</span>().<span style="color:#309">equals</span>(credentials.<span style="color:#309">getPassword</span>()))
+                .<span style="color:#309">map</span>(profile <span style="color:#555">-&gt;</span> <span style="color:#069;font-weight:bold">new</span> MinimalProfile(profile));
+    }
+}</code></pre></div>
+<p>Please note that in real applications, you never want to do this. You should be comparing the hashed version of the password presented by the user with the hashed version of the password stored in the database.</p>
+
+<p>The <code>JwtService</code> creates a token using the profile information and an expiration date of 2 hours with the <code>HMASHA256</code> algorithm. It uses the key provided by <code>SecretKeyProvider</code>. For creating the JWT token, we use the excellent jjwt <sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup> library we introduced in <a href="/blog/2016/07/02/jwt-authentication-with-spring-web-part-1/">part 1</a>.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Component</span>
-<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">SecretKeyProvider</span> <span style="color:#555">{</span>
-    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">byte</span><span style="color:#555">[]</span> <span style="color:#c0f">getKey</span><span style="color:#555">()</span> <span style="color:#069;font-weight:bold">throws</span> URISyntaxException<span style="color:#555">,</span> IOException <span style="color:#555">{</span>
-        <span style="color:#069;font-weight:bold">return</span> Files<span style="color:#555">.</span><span style="color:#309">readAllBytes</span><span style="color:#555">(</span>Paths<span style="color:#555">.</span><span style="color:#309">get</span><span style="color:#555">(</span><span style="color:#069;font-weight:bold">this</span><span style="color:#555">.</span><span style="color:#309">getClass</span><span style="color:#555">().</span><span style="color:#309">getResource</span><span style="color:#555">(</span><span style="color:#c30">&#34;/jwt.key&#34;</span><span style="color:#555">).</span><span style="color:#309">toURI</span><span style="color:#555">()));</span>
-    <span style="color:#555">}</span>
-<span style="color:#555">}</span>
-</code></pre></div><p>With this code, a client can authenticate and receive a JWT. When request is made with correct username and password:</p>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">class</span> JwtService {
+    <span style="color:#069;font-weight:bold">private</span> <span style="color:#c0f">static</span> <span style="color:#069;font-weight:bold">final</span> <span style="color:#c0f">String</span> ISSUER <span style="color:#555">=</span> <span style="color:#c30">&#34;in.sdqali.jwt&#34;</span>;
+    <span style="color:#069;font-weight:bold">private</span> <span style="color:#c0f">SecretKeyProvider</span> secretKeyProvider;
+
+    <span style="color:#99f">@SuppressWarnings</span>(<span style="color:#c30">&#34;unused&#34;</span>)
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">JwtService</span>() {
+        <span style="color:#069;font-weight:bold">this</span>(<span style="color:#069;font-weight:bold">null</span>);
+    }
+
+    <span style="color:#99f">@Autowired</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">JwtService</span>(SecretKeyProvider <span style="color:#c0f">secretKeyProvider</span>) {
+        <span style="color:#069;font-weight:bold">this</span>.<span style="color:#309">secretKeyProvider</span> <span style="color:#555">=</span> secretKeyProvider;
+    }
+
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">String</span> tokenFor(MinimalProfile <span style="color:#c0f">minimalProfile</span>) <span style="color:#069;font-weight:bold">throws</span> <span style="color:#c0f">IOException</span>, URISyntaxException {
+        <span style="color:#078;font-weight:bold">byte</span>[] <span style="color:#c0f">secretKey</span> <span style="color:#555">=</span> secretKeyProvider.<span style="color:#309">getKey</span>();
+        Date <span style="color:#c0f">expiration</span> <span style="color:#555">=</span> Date.<span style="color:#309">from</span>(LocalDateTime.<span style="color:#309">now</span>().<span style="color:#309">plusHours</span>(2).<span style="color:#309">toInstant</span>(UTC));
+        <span style="color:#069;font-weight:bold">return</span> Jwts.<span style="color:#309">builder</span>()
+                .<span style="color:#309">setSubject</span>(minimalProfile.<span style="color:#309">getUsername</span>())
+                .<span style="color:#309">setExpiration</span>(expiration)
+                .<span style="color:#309">setIssuer</span>(ISSUER)
+                .<span style="color:#309">signWith</span>(SignatureAlgorithm.<span style="color:#309">HS512</span>, secretKey)
+                .<span style="color:#309">compact</span>();
+    }
+}</code></pre></div>
+<p>The <code>SecretKeyProvider</code> in this example will simply load the secret key from a file, where it is stored in plain text. In a real application, you may store and encrypted version of it and decrypt it when required.</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Component</span>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">class</span> SecretKeyProvider {
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">byte</span>[] getKey() <span style="color:#069;font-weight:bold">throws</span> <span style="color:#c0f">URISyntaxException</span>, IOException {
+        <span style="color:#069;font-weight:bold">return</span> Files.<span style="color:#309">readAllBytes</span>(Paths.<span style="color:#309">get</span>(<span style="color:#069;font-weight:bold">this</span>.<span style="color:#309">getClass</span>().<span style="color:#309">getResource</span>(<span style="color:#c30">&#34;/jwt.key&#34;</span>).<span style="color:#309">toURI</span>()));
+    }
+}</code></pre></div>
+<p>With this code, a client can authenticate and receive a JWT. When request is made with correct username and password:</p>
+
 <pre><code>$ curl -v -X POST &quot;http://localhost:8080/login&quot; -d '{&quot;username&quot;:&quot;greenrabbit948&quot;, &quot;password&quot;:&quot;celeste&quot;}' --header &quot;Content-Type: application/json&quot;   | jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
@@ -255,8 +262,15 @@
   },
   &quot;thumbnail&quot;: &quot;https://randomuser.me/api/portraits/thumb/women/78.jpg&quot;
 }
-</code></pre><p>We can see the <code>Token</code> header has value <code>eyJhbGciOiJIUzUxMiJ9. eyJzdWIiOiJqd3QtZGVtbyIsImV4cCI6MTQ2Nzc2Njk3MSwiaXNzIjoiaW4uc2RxYWxpLmp3dCJ9. eu_OuBIkc4BfcTsTu4t_6TCwyLkH4HcuQzvWIMzNQYdxXiWA77SfvwCe4mdc7C17mXdtBAsvFGDj 7A9fzI0M1w</code>.</p>
+</code></pre>
+
+<p>We can see the <code>Token</code> header has value <code>eyJhbGciOiJIUzUxMiJ9.
+eyJzdWIiOiJqd3QtZGVtbyIsImV4cCI6MTQ2Nzc2Njk3MSwiaXNzIjoiaW4uc2RxYWxpLmp3dCJ9.
+eu_OuBIkc4BfcTsTu4t_6TCwyLkH4HcuQzvWIMzNQYdxXiWA77SfvwCe4mdc7C17mXdtBAsvFGDj
+7A9fzI0M1w</code>.</p>
+
 <p>If we were to present invalid credentials, the API will return a <code>401</code>:</p>
+
 <pre><code>$ curl -i -X POST &quot;http://localhost:8080/login&quot; -d '{&quot;username&quot;:&quot;greenrabbit948&quot;, &quot;password&quot;:&quot;wrongpassword&quot;}' --header &quot;Content-Type: application/json&quot;
 HTTP/1.1 401 Unauthorized
 Server: Apache-Coyote/1.1
@@ -268,15 +282,18 @@ Expires: 0
 X-Frame-Options: DENY
 Content-Length: 0
 Date: Wed, 06 Jul 2016 06:05:46 GMT
-</code></pre><p>In the next blog post, the fourth is this series, we will move on to verifying the token presented by the client for subsequent requests. The source code for this example for the progress made from part 1 through part 3 is available on <a href="https://github.com/sdqali/jwt-demo/tree/09b02336e4b7c746cb4c134dc020243aef827b66">GitHub</a>.</p>
-<section class="footnotes" role="doc-endnotes">
-<hr>
+</code></pre>
+
+<p>In the next blog post, the fourth is this series, we will move on to verifying the token presented by the client for subsequent requests. The source code for this example for the progress made from part 1 through part 3 is available on <a href="https://github.com/sdqali/jwt-demo/tree/09b02336e4b7c746cb4c134dc020243aef827b66">GitHub</a>.</p>
+<div class="footnotes">
+
+<hr />
+
 <ol>
-<li id="fn:1" role="doc-endnote">
-<p>jjwt - Java JWT: JSON Web Token for Java and Android, available on <a href="https://github.com/jwtk/jjwt">GitHub</a>. <a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
-</li>
+<li id="fn:1">jjwt - Java JWT: JSON Web Token for Java and Android, available on <a href="https://github.com/jwtk/jjwt">GitHub</a>.
+ <a class="footnote-return" href="#fnref:1"><sup>[return]</sup></a></li>
 </ol>
-</section>
+</div>
         </div>
         <aside id="gh-comments-list">
           <script>
@@ -406,11 +423,15 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2019/08/02/flushing-metrics-in-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Flushing Metrics in Dropwizard Commands</a></li>
-            
-            
-            
-            
             
             
             
@@ -1068,6 +1089,10 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2014/03/20/clojure-dojo-levenshtein-edit-distance/?utm_source=site&amp;utm_medium=related">Clojure Dojo - Levenshtein edit distance</a></li>
             
             
@@ -1382,14 +1407,6 @@ $(document).ready(function () {
             
             
             
-            
-            
-            
-            
-            
-            
-            
-            
             <li><a href="https://sadique.io/blog/2013/08/15/pythons-bool-type/?utm_source=site&amp;utm_medium=related">Python&#39;s bool type</a></li>
             
             
@@ -1581,6 +1598,14 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             

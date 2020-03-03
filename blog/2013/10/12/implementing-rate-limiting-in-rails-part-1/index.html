@@ -104,41 +104,54 @@ Rate limiting or throttling is the practice of limiting how frequently legitimat
       <div itemprop="mainContentOfPage"
            itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div>
-          <p><em>The second part of this series can be found <a href="/blog/2013/10/13/implementing-rate-limiting-in-rails-part-2/">here</a>.</em></p>
+          
+
+<p><em>The second part of this series can be found <a href="/blog/2013/10/13/implementing-rate-limiting-in-rails-part-2/">here</a>.</em></p>
+
 <p>Rate limiting or throttling is the practice of limiting how frequently legitimate users of a web service can access the service. Rate limiting is often put in place to prevent the hogging of resources by a sub set of the users of the system. Rate limiting works by responding with error messages when a client exceeds their allocated share of requests within a predefined time window. In addition to the error message, the response should also include information as to when rate limit will be reset so that the client can continue accessing the system after the reset.</p>
+
 <p>What we need is a way to record the number of requests each client is making and reset this number to zero after a predefined time period and decide for each request whether the client making the request has exceeded the limits.</p>
+
 <h3 id="the-test-application">The test application</h3>
+
 <p>We will create a simple Rails application with a single API endpoint at <code>foo.json</code>. The code needed for this is as follows:</p>
+
 <p>Routes:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ruby" data-lang="ruby"><span style="color:#09f;font-style:italic"># config/routes.rb</span>
 
 <span style="color:#360">RailsThrottle</span><span style="color:#555">::</span><span style="color:#360">Application</span><span style="color:#555">.</span>routes<span style="color:#555">.</span>draw <span style="color:#069;font-weight:bold">do</span>
   get <span style="color:#c30">&#39;foo.json&#39;</span> <span style="color:#555">=&gt;</span> <span style="color:#c30">&#39;foo#index&#39;</span>
-<span style="color:#069;font-weight:bold">end</span>
-</code></pre></div><p>The controller:</p>
+<span style="color:#069;font-weight:bold">end</span></code></pre></div>
+<p>The controller:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ruby" data-lang="ruby"><span style="color:#09f;font-style:italic"># app/controllers/foo_controller.rb</span>
 
 <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">FooController</span> <span style="color:#555">&lt;</span> <span style="color:#360">ApplicationController</span>
   <span style="color:#069;font-weight:bold">def</span> <span style="color:#c0f">index</span>
     render <span style="color:#fc3">json</span>: {<span style="color:#fc3">foo</span>: <span style="color:#fc3">:bar</span>}
   <span style="color:#069;font-weight:bold">end</span>
-<span style="color:#069;font-weight:bold">end</span>
-</code></pre></div><h3 id="storing-the-rate-data">Storing the rate data</h3>
-<p>We need a place to store each client&rsquo;s IP address and the number of requests it made. We need to increment this count for each request and reset the count to zero after a time period. Considering these needs, <a href="http://redis.io/">Redis</a> is a great fit for this data store. Redis stores key value pairs and allows expiry time to be specified for each entry. Redis also comes with an <code>INCR</code> <sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> command that ensures that increment operations are atomic. This will be useful to us if we were to run multiple instances of our app behind a load balancer.</p>
-<p>To setup the application to use Redis, we will need to install the <code>redis</code> <sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup> gem. Once we have the gem, we will add a new <code>initializer</code> named <code>throttle.rb</code> which configures our Redis client.</p>
+<span style="color:#069;font-weight:bold">end</span></code></pre></div>
+<h3 id="storing-the-rate-data">Storing the rate data</h3>
+
+<p>We need a place to store each client&rsquo;s IP address and the number of requests it made. We need to increment this count for each request and reset the count to zero after a time period. Considering these needs, <a href="http://redis.io/">Redis</a> is a great fit for this data store. Redis stores key value pairs and allows expiry time to be specified for each entry. Redis also comes with an <code>INCR</code> <sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup> command that ensures that increment operations are atomic. This will be useful to us if we were to run multiple instances of our app behind a load balancer.</p>
+
+<p>To setup the application to use Redis, we will need to install the <code>redis</code> <sup class="footnote-ref" id="fnref:2"><a href="#fn:2">2</a></sup> gem. Once we have the gem, we will add a new <code>initializer</code> named <code>throttle.rb</code> which configures our Redis client.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ruby" data-lang="ruby"><span style="color:#09f;font-style:italic"># config/initializers/throttle.rb</span>
 
 <span style="color:#366">require</span> <span style="color:#c30">&#34;redis&#34;</span>
 
 redis_conf  <span style="color:#555">=</span> <span style="color:#360">YAML</span><span style="color:#555">.</span>load(<span style="color:#360">File</span><span style="color:#555">.</span>join(<span style="color:#360">Rails</span><span style="color:#555">.</span>root, <span style="color:#c30">&#34;config&#34;</span>, <span style="color:#c30">&#34;redis.yml&#34;</span>))
-<span style="color:#360">REDIS</span> <span style="color:#555">=</span> <span style="color:#360">Redis</span><span style="color:#555">.</span>new(<span style="color:#fc3">:host</span> <span style="color:#555">=&gt;</span> redis_conf<span style="color:#555">[</span><span style="color:#c30">&#34;host&#34;</span><span style="color:#555">]</span>, <span style="color:#fc3">:port</span> <span style="color:#555">=&gt;</span> redis_conf<span style="color:#555">[</span><span style="color:#c30">&#34;port&#34;</span><span style="color:#555">]</span>)
-</code></pre></div><p>This will load the Redis server&rsquo;s host and port from the configuration file located at <code>config/redis.yml</code>. This file will look like this:</p>
+<span style="color:#360">REDIS</span> <span style="color:#555">=</span> <span style="color:#360">Redis</span><span style="color:#555">.</span>new(<span style="color:#fc3">:host</span> <span style="color:#555">=&gt;</span> redis_conf<span style="color:#555">[</span><span style="color:#c30">&#34;host&#34;</span><span style="color:#555">]</span>, <span style="color:#fc3">:port</span> <span style="color:#555">=&gt;</span> redis_conf<span style="color:#555">[</span><span style="color:#c30">&#34;port&#34;</span><span style="color:#555">]</span>)</code></pre></div>
+<p>This will load the Redis server&rsquo;s host and port from the configuration file located at <code>config/redis.yml</code>. This file will look like this:</p>
+
 <pre><code># config/redis.yml
 
 host: localhost
 port: 6379
-</code></pre><h3 id="using-a-before_filter-for-rate-limiting">Using a <code>before_filter</code> for rate limiting.</h3>
-<p>The first step is to log the number of requests each client is making. This can easily be achieved with a <code>before_filter</code> <sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup>. Let&rsquo;s add the filter into the <code>ApplicationController</code>.</p>
+</code></pre>
+
+<h3 id="using-a-before-filter-for-rate-limiting">Using a <code>before_filter</code> for rate limiting.</h3>
+
+<p>The first step is to log the number of requests each client is making. This can easily be achieved with a <code>before_filter</code> <sup class="footnote-ref" id="fnref:3"><a href="#fn:3">3</a></sup>. Let&rsquo;s add the filter into the <code>ApplicationController</code>.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ruby" data-lang="ruby"><span style="color:#09f;font-style:italic"># app/controllers/application_controller.rb</span>
 
 <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">ApplicationController</span> <span style="color:#555">&lt;</span> <span style="color:#360">ActionController</span><span style="color:#555">::</span><span style="color:#360">Base</span>
@@ -159,12 +172,16 @@ port: 6379
   <span style="color:#069;font-weight:bold">end</span>
 
   <span style="color:#555">...</span>
-<span style="color:#069;font-weight:bold">end</span>
-</code></pre></div><p>Since this <code>before_filter</code> belongs to the <code>ApplicationController</code>, it will be applied to all requests, unless a specific controller chooses to skip it. So before every request is processed, the filter grabs the client&rsquo;s IP and checks whether there is a count in Redis for this IP. If there is no count key, it creates one. Finally it increments the count.</p>
+<span style="color:#069;font-weight:bold">end</span></code></pre></div>
+<p>Since this <code>before_filter</code> belongs to the <code>ApplicationController</code>, it will be applied to all requests, unless a specific controller chooses to skip it. So before every request is processed, the filter grabs the client&rsquo;s IP and checks whether there is a count in Redis for this IP. If there is no count key, it creates one. Finally it increments the count.</p>
+
 <p>At this point, the filter just records the requests made, but does not limit requests. Let&rsquo;s go ahead and implement limiting. We need to specify the time window for rate limiting and how many requests should be allowed in that time window. We will allow a client a maximum of <code>60</code> requests in <code>15</code> minutes. The following constants need to be defined in <code>throttle.rb</code>.</p>
+
 <pre><code>THROTTLE_TIME_WINDOW = 15 * 60
 THROTTLE_MAX_REQUESTS = 60
-</code></pre><p>The filter needs to be changed to respond with error messages when the rate limit is exceeded.</p>
+</code></pre>
+
+<p>The filter needs to be changed to respond with error messages when the rate limit is exceeded.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ruby" data-lang="ruby"><span style="color:#09f;font-style:italic"># app/controllers/application_controller.rb</span>
 
 <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">ApplicationController</span> <span style="color:#555">&lt;</span> <span style="color:#360">ActionController</span><span style="color:#555">::</span><span style="color:#360">Base</span>
@@ -192,10 +209,11 @@ THROTTLE_MAX_REQUESTS = 60
   <span style="color:#069;font-weight:bold">end</span>
 
   <span style="color:#555">...</span>
-<span style="color:#069;font-weight:bold">end</span>
-</code></pre></div><p>When the limit is reached, subsequent requests will be responded with an error message and the HTTP status code <code>429</code>. The 429 <sup id="fnref:4"><a href="#fn:4" class="footnote-ref" role="doc-noteref">4</a></sup> status code indicates that the user has sent too many requests in a given amount of time.</p>
+<span style="color:#069;font-weight:bold">end</span></code></pre></div>
+<p>When the limit is reached, subsequent requests will be responded with an error message and the HTTP status code <code>429</code>. The 429 <sup class="footnote-ref" id="fnref:4"><a href="#fn:4">4</a></sup> status code indicates that the user has sent too many requests in a given amount of time.</p>
+
 <p>Let&rsquo;s go ahead and test this.</p>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">bash$ <span style="color:#069;font-weight:bold">for</span> i in <span style="color:#555">{</span>1..100<span style="color:#555">}</span>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">bash$ <span style="color:#069;font-weight:bold">for</span> i in <span style="color:#555">{</span><span style="color:#f60">1</span>..100<span style="color:#555">}</span>
 <span style="color:#069;font-weight:bold">do</span>
 curl -i http://localhost:3000/foo.json &gt;&gt; /dev/null
 <span style="color:#069;font-weight:bold">done</span>
@@ -204,29 +222,29 @@ bash$ less log/development.log | grep <span style="color:#c30">&#34;200 OK&#34;<
       <span style="color:#f60">60</span>
 
 bash$ less log/development.log | grep <span style="color:#c30">&#34;429 Too Many Requests&#34;</span> | wc -l
-      <span style="color:#f60">40</span>
+      <span style="color:#f60">40</span></code></pre></div>
+<p>As you can see after <code>60</code> requests, all requests get the <code>429</code> response.</p>
 
-</code></pre></div><p>As you can see after <code>60</code> requests, all requests get the <code>429</code> response.</p>
 <h3 id="improvements">Improvements</h3>
+
 <p>While what we have implemented limits the requests, it does not give the client enough information as to how long it has to wait before making requests again. It would also be helpful if the server tells the client on each request how many total requests it is allowed to make in a window and how many more requests it can perform before limiting kicks in. We will look at this in the next blog post.</p>
+
 <p>A sample application with this rate limiting in place is on <a href="https://github.com/sdqali/rails_throttle/tree/filter">GitHub</a>.</p>
-<section class="footnotes" role="doc-endnotes">
-<hr>
+<div class="footnotes">
+
+<hr />
+
 <ol>
-<li id="fn:1" role="doc-endnote">
-<p><a href="http://redis.io/commands/incr">Redis documentation</a> for INCR command. <a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
-</li>
-<li id="fn:2" role="doc-endnote">
-<p><a href="https://rubygems.org/gems/redis">redis</a> - A Ruby client that tries to match Redis&rsquo; API one-to-one, while still providing an idiomatic interface. It features thread-safety, client-side sharding, pipelining, and an obsession for performance. <a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
-</li>
-<li id="fn:3" role="doc-endnote">
-<p>Rails&rsquo; <a href="http://apidock.com/rails/AbstractController/Callbacks/ClassMethods/before_filter">before filter</a>. <a href="#fnref:3" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
-</li>
-<li id="fn:4" role="doc-endnote">
-<p>IETF: Additional HTTP Status Codes - <a href="https://tools.ietf.org/html/rfc6585#section-4">429 Too Many Requests</a>. <a href="#fnref:4" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
-</li>
+<li id="fn:1"><a href="http://redis.io/commands/incr">Redis documentation</a> for INCR command.
+ <a class="footnote-return" href="#fnref:1"><sup>[return]</sup></a></li>
+<li id="fn:2"><a href="https://rubygems.org/gems/redis">redis</a> - A Ruby client that tries to match Redis&rsquo; API one-to-one, while still providing an idiomatic interface. It features thread-safety, client-side sharding, pipelining, and an obsession for performance.
+ <a class="footnote-return" href="#fnref:2"><sup>[return]</sup></a></li>
+<li id="fn:3">Rails&rsquo; <a href="http://apidock.com/rails/AbstractController/Callbacks/ClassMethods/before_filter">before filter</a>.
+ <a class="footnote-return" href="#fnref:3"><sup>[return]</sup></a></li>
+<li id="fn:4">IETF: Additional HTTP Status Codes - <a href="https://tools.ietf.org/html/rfc6585#section-4">429 Too Many Requests</a>.
+ <a class="footnote-return" href="#fnref:4"><sup>[return]</sup></a></li>
 </ol>
-</section>
+</div>
 
         </div>
         <aside id="gh-comments-list">
@@ -335,6 +353,10 @@ $(document).ready(function () {
         <aside>
           <h3>If you liked this post, you'll also like...</h3>
           <ul class="related-posts">
+            
+            
+            
+            
             
             
             
@@ -969,6 +991,10 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2014/08/02/importing-the-yelp-dataset-into-mongodb/?utm_source=site&amp;utm_medium=related">Importing the Yelp dataset into MongoDB</a></li>
             
             
@@ -1339,14 +1365,6 @@ $(document).ready(function () {
             
             
             
-            
-            
-            
-            
-            
-            
-            
-            
             <li><a href="https://sadique.io/blog/2013/08/15/pythons-bool-type/?utm_source=site&amp;utm_medium=related">Python&#39;s bool type</a></li>
             
             
@@ -1540,6 +1558,14 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             

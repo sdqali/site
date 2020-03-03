@@ -86,31 +86,32 @@
            itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div>
           <p>In the last <a href="/blog/2016/04/17/programmable-exit-codes-for-spring-command-line-applications/">blog post</a>, we took a look at how to implement programmable exit codes for spring command line applications by using exceptions that implement <code>ExitCodeGenerator</code>. This time, we will take a look at how to achieve the same without having to depend on an exception.</p>
+
 <p>This approach depends on the command line runner implementing the <code>ExitCodeGenerator</code>. This does require the usage of <code>System.exit</code>, but instead of it being invoked from different command line runners, it will be used in a single place as follows:</p>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">Application</span>  <span style="color:#555">{</span>
-    <span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">static</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">main</span><span style="color:#555">(</span>String<span style="color:#555">[]</span> args<span style="color:#555">)</span> <span style="color:#555">{</span>
-        ConfigurableApplicationContext ctx <span style="color:#555">=</span> SpringApplication<span style="color:#555">.</span><span style="color:#309">run</span><span style="color:#555">(</span>Application<span style="color:#555">.</span><span style="color:#309">class</span><span style="color:#555">,</span> args<span style="color:#555">);</span>
-        System<span style="color:#555">.</span><span style="color:#309">exit</span><span style="color:#555">(</span>SpringApplication<span style="color:#555">.</span><span style="color:#309">exit</span><span style="color:#555">(</span>ctx<span style="color:#555">));</span>
-    <span style="color:#555">}</span>
-<span style="color:#555">}</span>
-</code></pre></div><p>The command line runner will now implement <code>ExitCodeGenerator</code>:</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">class</span> Application  {
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">static</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">main</span>(String[] <span style="color:#c0f">args</span>) {
+        ConfigurableApplicationContext <span style="color:#c0f">ctx</span> <span style="color:#555">=</span> SpringApplication.<span style="color:#309">run</span>(Application.<span style="color:#309">class</span>, args);
+        System.<span style="color:#309">exit</span>(SpringApplication.<span style="color:#309">exit</span>(ctx));
+    }
+}</code></pre></div>
+<p>The command line runner will now implement <code>ExitCodeGenerator</code>:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Component</span>
-<span style="color:#99f">@Profile</span><span style="color:#555">(</span><span style="color:#c30">&#34;hello&#34;</span><span style="color:#555">)</span>
-<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">HelloWorld</span> <span style="color:#069;font-weight:bold">implements</span> CommandLineRunner<span style="color:#555">,</span> ExitCodeGenerator <span style="color:#555">{</span>
+<span style="color:#99f">@Profile</span>(<span style="color:#c30">&#34;hello&#34;</span>)
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">class</span> HelloWorld <span style="color:#c0f">implements</span> CommandLineRunner, ExitCodeGenerator {
 
-    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">run</span><span style="color:#555">(</span>String<span style="color:#555">...</span> args<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
-        System<span style="color:#555">.</span><span style="color:#309">out</span><span style="color:#555">.</span><span style="color:#309">println</span><span style="color:#555">(</span><span style="color:#c30">&#34;Hello World!&#34;</span><span style="color:#555">);</span>
-    <span style="color:#555">}</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">void</span> run(String... <span style="color:#c0f">args</span>) <span style="color:#069;font-weight:bold">throws</span> <span style="color:#c0f">Exception</span> {
+        System.<span style="color:#309">out</span>.<span style="color:#309">println</span>(<span style="color:#c30">&#34;Hello World!&#34;</span>);
+    }
 
-    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">int</span> <span style="color:#c0f">getExitCode</span><span style="color:#555">()</span> <span style="color:#555">{</span>
-        <span style="color:#069;font-weight:bold">return</span> 45<span style="color:#555">;</span>
-    <span style="color:#555">}</span>
-<span style="color:#555">}</span>
-</code></pre></div><p>This is how the application behaves when run:</p>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ java -Dspring.profiles.active<span style="color:#555">=</span>hello -jar build/libs/exit-code-demo-1.0-SNAPSHOT.jar &gt; /dev/null 2&gt;&amp;<span style="color:#f60">1</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">int</span> getExitCode() {
+        <span style="color:#069;font-weight:bold">return</span> 45;
+    }
+}</code></pre></div>
+<p>This is how the application behaves when run:</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ java -Dspring.profiles.active<span style="color:#555">=</span>hello -jar build/libs/exit-code-demo-1.0-SNAPSHOT.jar &gt; /dev/null <span style="color:#f60">2</span>&gt;&amp;<span style="color:#f60">1</span>
 $ <span style="color:#366">echo</span> <span style="color:#033">$?</span>
-<span style="color:#f60">45</span>
-</code></pre></div><p>This allows us to delegate how the application should exit to the command line runners themselves, without having to throw exceptions.</p>
+<span style="color:#f60">45</span></code></pre></div>
+<p>This allows us to delegate how the application should exit to the command line runners themselves, without having to throw exceptions.</p>
         </div>
         <aside id="gh-comments-list">
           <script>
@@ -240,11 +241,15 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2019/08/02/flushing-metrics-in-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Flushing Metrics in Dropwizard Commands</a></li>
-            
-            
-            
-            
             
             
             
@@ -902,6 +907,10 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2014/03/20/clojure-dojo-levenshtein-edit-distance/?utm_source=site&amp;utm_medium=related">Clojure Dojo - Levenshtein edit distance</a></li>
             
             
@@ -1216,14 +1225,6 @@ $(document).ready(function () {
             
             
             
-            
-            
-            
-            
-            
-            
-            
-            
             <li><a href="https://sadique.io/blog/2013/08/15/pythons-bool-type/?utm_source=site&amp;utm_medium=related">Python&#39;s bool type</a></li>
             
             
@@ -1415,6 +1416,14 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             

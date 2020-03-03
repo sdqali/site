@@ -98,13 +98,18 @@
            itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div>
           <p>In the third part of this <a href="/series/feature-toggles/">series</a> about implementing feature toggles for a Spring Boot application, we will take a look at exposing the state of feature flags as a Spring Boot management end point for monitoring and testing purposes.</p>
+
 <p>Spring Boot Actuator exposes a number of <a href="http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-endpoints.html">end points</a> to monitor and administer the application. The most commonly used of these in my experience are the <code>info</code> and <code>health</code> end points. These end points are used to communicate to load balancers that a particular instance is ready to accept traffic and to monitor the state of the application.</p>
+
 <h2 id="features-management-end-point">Features management end point</h2>
-<p>In our case, this end point will be used by administrators, QA engineers and sometimes business stake holders to see what features are available in a particular environment running the application. Of course, we could have re-used the end point we built in the <a href="">last blog post</a> for this purpose, but creating an management end point allows us to:</p>
+
+<p>In our case, this end point will be used by administrators, QA engineers and sometimes business stake holders to see what features are available in a particular environment running the application. Of course, we could have re-used the end point we built in the [last blog post]() for this purpose, but creating an management end point allows us to:</p>
+
 <ul>
 <li>Control the HTTP end point together with other end points by using the <code>management.context-path</code> property. This will allow us to provide certain nodes in our network access to only the management end points without having to expose application behavior to them.</li>
 <li>Make this information available in a more human readable form for it’s consumers. Even though the information exposed in the <code>/features</code> end point is detailed, the format was designed for consumption by code.</li>
 </ul>
+
 <p>Because this is for human consumption, the end point will display the feature state in the following format:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
   <span style="color:#309;font-weight:bold">&#34;available&#34;</span>: [
@@ -116,61 +121,62 @@
     <span style="color:#c30">&#34;feature.hello&#34;</span>
     <span style="color:#a00;background-color:#faa">...</span>
   ]
-}
-</code></pre></div><p>Management end points in Spring Boot are created by implementing the <code>EndPoint</code> interface. In our case, the end point will depend on <code>FeatureRepository</code> to do the heavy lifting.</p>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">FeatureEndpoint</span> <span style="color:#069;font-weight:bold">implements</span> Endpoint<span style="color:#555">&lt;</span>HashMap<span style="color:#555">&lt;</span>String<span style="color:#555">,</span> Set<span style="color:#555">&lt;</span>String<span style="color:#555">&gt;&gt;&gt;</span> <span style="color:#555">{</span>
+}</code></pre></div>
+<p>Management end points in Spring Boot are created by implementing the <code>EndPoint</code> interface. In our case, the end point will depend on <code>FeatureRepository</code> to do the heavy lifting.</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">class</span> FeatureEndpoint <span style="color:#c0f">implements</span> Endpoint<span style="color:#555">&lt;</span>HashMap<span style="color:#555">&lt;</span>String, Set<span style="color:#555">&lt;</span>String<span style="color:#555">&gt;&gt;&gt;</span> {
 
-  <span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">static</span> <span style="color:#069;font-weight:bold">final</span> String ID <span style="color:#555">=</span> <span style="color:#c30">&#34;features&#34;</span><span style="color:#555">;</span>
-  <span style="color:#069;font-weight:bold">private</span> <span style="color:#069;font-weight:bold">final</span> FeatureRepository featureRepository<span style="color:#555">;</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">static</span> <span style="color:#069;font-weight:bold">final</span> <span style="color:#c0f">String</span> ID <span style="color:#555">=</span> <span style="color:#c30">&#34;features&#34;</span>;
+  <span style="color:#069;font-weight:bold">private</span> <span style="color:#c0f">final</span> FeatureRepository <span style="color:#c0f">featureRepository</span>;
 
-  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">FeatureEndpoint</span><span style="color:#555">(</span>FeatureRepository featureRepository<span style="color:#555">)</span> <span style="color:#555">{</span>
-    <span style="color:#069;font-weight:bold">this</span><span style="color:#555">.</span><span style="color:#309">featureRepository</span> <span style="color:#555">=</span> featureRepository<span style="color:#555">;</span>
-  <span style="color:#555">}</span>
-
-  <span style="color:#99f">@Override</span>
-  <span style="color:#069;font-weight:bold">public</span> String <span style="color:#c0f">getId</span><span style="color:#555">()</span> <span style="color:#555">{</span>
-    <span style="color:#069;font-weight:bold">return</span> ID<span style="color:#555">;</span>
-  <span style="color:#555">}</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">FeatureEndpoint</span>(FeatureRepository <span style="color:#c0f">featureRepository</span>) {
+    <span style="color:#069;font-weight:bold">this</span>.<span style="color:#309">featureRepository</span> <span style="color:#555">=</span> featureRepository;
+  }
 
   <span style="color:#99f">@Override</span>
-  <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">boolean</span> <span style="color:#c0f">isEnabled</span><span style="color:#555">()</span> <span style="color:#555">{</span>
-    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">true</span><span style="color:#555">;</span>
-  <span style="color:#555">}</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">String</span> getId() {
+    <span style="color:#069;font-weight:bold">return</span> ID;
+  }
 
   <span style="color:#99f">@Override</span>
-  <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">boolean</span> <span style="color:#c0f">isSensitive</span><span style="color:#555">()</span> <span style="color:#555">{</span>
-    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">false</span><span style="color:#555">;</span>
-  <span style="color:#555">}</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">boolean</span> isEnabled() {
+    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">true</span>;
+  }
 
   <span style="color:#99f">@Override</span>
-  <span style="color:#069;font-weight:bold">public</span> HashMap<span style="color:#555">&lt;</span>String<span style="color:#555">,</span> Set<span style="color:#555">&lt;</span>String<span style="color:#555">&gt;&gt;</span> <span style="color:#c0f">invoke</span><span style="color:#555">()</span> <span style="color:#555">{</span>
-    HashMap<span style="color:#555">&lt;</span>String<span style="color:#555">,</span> Set<span style="color:#555">&lt;</span>String<span style="color:#555">&gt;&gt;</span> map <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">new</span> HashMap<span style="color:#555">&lt;&gt;();</span>
-    map<span style="color:#555">.</span><span style="color:#309">put</span><span style="color:#555">(</span><span style="color:#c30">&#34;enabled&#34;</span><span style="color:#555">,</span> featureRepository<span style="color:#555">.</span><span style="color:#309">enabledKeys</span><span style="color:#555">());</span>
-    map<span style="color:#555">.</span><span style="color:#309">put</span><span style="color:#555">(</span><span style="color:#c30">&#34;available&#34;</span><span style="color:#555">,</span> featureRepository<span style="color:#555">.</span><span style="color:#309">featureKeys</span><span style="color:#555">());</span>
-    <span style="color:#069;font-weight:bold">return</span> map<span style="color:#555">;</span>
-  <span style="color:#555">}</span>
-<span style="color:#555">}</span>
-</code></pre></div><p>In order to retrieve the keys for features that are toggled on, we will create an <code>enabledKeys</code> method in the repository.</p>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">FeatureRepository</span> <span style="color:#555">{</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">boolean</span> isSensitive() {
+    <span style="color:#069;font-weight:bold">return</span> <span style="color:#069;font-weight:bold">false</span>;
+  }
+
+  <span style="color:#99f">@Override</span>
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">HashMap</span><span style="color:#555">&lt;</span>String, Set<span style="color:#555">&lt;</span>String<span style="color:#555">&gt;&gt;</span> <span style="color:#c0f">invoke</span>() {
+    HashMap<span style="color:#555">&lt;</span>String, Set<span style="color:#555">&lt;</span>String<span style="color:#555">&gt;&gt;</span> <span style="color:#c0f">map</span> <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">new</span> HashMap<span style="color:#555">&lt;&gt;</span>();
+    map.<span style="color:#309">put</span>(<span style="color:#c30">&#34;enabled&#34;</span>, featureRepository.<span style="color:#309">enabledKeys</span>());
+    map.<span style="color:#309">put</span>(<span style="color:#c30">&#34;available&#34;</span>, featureRepository.<span style="color:#309">featureKeys</span>());
+    <span style="color:#069;font-weight:bold">return</span> map;
+  }
+}</code></pre></div>
+<p>In order to retrieve the keys for features that are toggled on, we will create an <code>enabledKeys</code> method in the repository.</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">class</span> FeatureRepository {
   <span style="color:#09f;font-style:italic">// ...
-</span><span style="color:#09f;font-style:italic"></span>  <span style="color:#069;font-weight:bold">public</span> Set<span style="color:#555">&lt;</span>String<span style="color:#555">&gt;</span> <span style="color:#c0f">enabledKeys</span><span style="color:#555">()</span> <span style="color:#555">{</span>
-    <span style="color:#069;font-weight:bold">return</span> featureKeys<span style="color:#555">().</span><span style="color:#309">stream</span><span style="color:#555">()</span>
-        <span style="color:#555">.</span><span style="color:#309">filter</span><span style="color:#555">(</span>f <span style="color:#555">-&gt;</span> isOn<span style="color:#555">(</span>f<span style="color:#555">))</span>
-        <span style="color:#555">.</span><span style="color:#309">collect</span><span style="color:#555">(</span>Collectors<span style="color:#555">.</span><span style="color:#309">toSet</span><span style="color:#555">());</span>
-  <span style="color:#555">}</span>
-<span style="color:#555">}</span>
-</code></pre></div><p>With this end point in place and the <code>management.context-path</code> set to <code>management</code> in our properties, this end point will produce the following output.</p>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#555">&gt;</span> curl <span style="color:#555">-</span>s <span style="color:#c30">&#34;http://localhost:8080/management/features&#34;</span> <span style="color:#555">|</span> jq <span style="color:#555">.</span>
-<span style="color:#555">{</span>
-  <span style="color:#c30">&#34;available&#34;</span><span style="color:#555">:</span> <span style="color:#555">[</span>
-    <span style="color:#c30">&#34;feature.foo&#34;</span><span style="color:#555">,</span>
+</span><span style="color:#09f;font-style:italic"></span>  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">Set</span><span style="color:#555">&lt;</span>String<span style="color:#555">&gt;</span> <span style="color:#c0f">enabledKeys</span>() {
+    <span style="color:#069;font-weight:bold">return</span> featureKeys().<span style="color:#309">stream</span>()
+        .<span style="color:#309">filter</span>(f <span style="color:#555">-&gt;</span> isOn(f))
+        .<span style="color:#309">collect</span>(Collectors.<span style="color:#309">toSet</span>());
+  }
+}</code></pre></div>
+<p>With this end point in place and the <code>management.context-path</code> set to <code>management</code> in our properties, this end point will produce the following output.</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#555">&gt;</span> curl <span style="color:#555">-</span>s <span style="color:#c30">&#34;http://localhost:8080/management/features&#34;</span> <span style="color:#555">|</span> jq .
+{
+  <span style="color:#c30">&#34;available&#34;</span><span style="color:#555">:</span> [
+    <span style="color:#c30">&#34;feature.foo&#34;</span>,
     <span style="color:#c30">&#34;feature.hello&#34;</span>
-  <span style="color:#555">],</span>
-  <span style="color:#c30">&#34;enabled&#34;</span><span style="color:#555">:</span> <span style="color:#555">[</span>
+  ],
+  <span style="color:#c30">&#34;enabled&#34;</span><span style="color:#555">:</span> [
     <span style="color:#c30">&#34;feature.hello&#34;</span>
-  <span style="color:#555">]</span>
-<span style="color:#555">}</span>
-</code></pre></div><p>It is important to note that our end point has it’s sensitivity flag set to false by default. You should consider the <a href="http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-endpoints.html#_security_with_healthindicators">security implications</a> of that before choosing to leave it false.</p>
+  ]
+}</code></pre></div>
+<p>It is important to note that our end point has it’s sensitivity flag set to false by default. You should consider the <a href="http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-endpoints.html#_security_with_healthindicators">security implications</a> of that before choosing to leave it false.</p>
+
 <p>In the next blog post in this <a href="/series/feature-toggles/">series</a>, we will explore how our feature toggle mechanism so far have introduced a dependency on the application being restarted and how to eliminate this dependency.</p>
         </div>
         <aside id="gh-comments-list">
@@ -301,11 +307,15 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2019/08/02/flushing-metrics-in-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Flushing Metrics in Dropwizard Commands</a></li>
-            
-            
-            
-            
             
             
             
@@ -923,6 +933,10 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2014/08/02/importing-the-yelp-dataset-into-mongodb/?utm_source=site&amp;utm_medium=related">Importing the Yelp dataset into MongoDB</a></li>
             
             
@@ -1295,14 +1309,6 @@ $(document).ready(function () {
             
             
             
-            
-            
-            
-            
-            
-            
-            
-            
             <li><a href="https://sadique.io/blog/2013/08/15/pythons-bool-type/?utm_source=site&amp;utm_medium=related">Python&#39;s bool type</a></li>
             
             
@@ -1496,6 +1502,14 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             

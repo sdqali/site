@@ -86,66 +86,78 @@
            itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div>
           <p>Spring&rsquo;s <code>CommandLineRunner</code> provides a great mechanism to build command line applications. While this convenience is great, applications that use <code>CommandLineRunner</code> require extra effort in some areas like integration testing. Exit codes are such an area - applications that use command line runners always report their exit code as <code>0</code> even if there are exceptions thrown. This blog post explains a way to get to programmable exit codes for such applications.</p>
+
 <p>The following example demonstrates this problem. Here we have a simple implementation of <code>CommandLineRunner</code> that simply throws a <code>RuntimeException</code> when started.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Component</span>
-<span style="color:#99f">@Profile</span><span style="color:#555">(</span><span style="color:#c30">&#34;exception&#34;</span><span style="color:#555">)</span>
-<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">WillThrow</span> <span style="color:#069;font-weight:bold">implements</span> CommandLineRunner <span style="color:#555">{</span>
-    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">run</span><span style="color:#555">(</span>String<span style="color:#555">...</span> args<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
-        <span style="color:#069;font-weight:bold">throw</span> <span style="color:#069;font-weight:bold">new</span> RuntimeException<span style="color:#555">(</span><span style="color:#c30">&#34;This should kill the application&#34;</span><span style="color:#555">);</span>
-    <span style="color:#555">}</span>
-<span style="color:#555">}</span>
+<span style="color:#99f">@Profile</span>(<span style="color:#c30">&#34;exception&#34;</span>)
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">class</span> WillThrow <span style="color:#c0f">implements</span> CommandLineRunner {
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">void</span> run(String... <span style="color:#c0f">args</span>) <span style="color:#069;font-weight:bold">throws</span> <span style="color:#c0f">Exception</span> {
+        <span style="color:#069;font-weight:bold">throw</span> <span style="color:#069;font-weight:bold">new</span> RuntimeException(<span style="color:#c30">&#34;This should kill the application&#34;</span>);
+    }
+}</code></pre></div>
+<p>When this application runs, we will see that the exit code is <code>0</code>, as expected.</p>
 
-</code></pre></div><p>When this application runs, we will see that the exit code is <code>0</code>, as expected.</p>
 <pre><code>$ java -Dspring.profiles.active=exception -jar build/libs/exit-code-demo-1.0-SNAPSHOT.jar &gt;&gt; /dev/null 2&amp;&gt;1
 $ echo $?
 0
-</code></pre><p>A simple way to propagate the right exit code is to use <code>java.lang.System#exit</code> and specify an error code. The following snippet shows this:</p>
+</code></pre>
+
+<p>A simple way to propagate the right exit code is to use <code>java.lang.System#exit</code> and specify an error code. The following snippet shows this:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Component</span>
-<span style="color:#99f">@Profile</span><span style="color:#555">(</span><span style="color:#c30">&#34;exit&#34;</span><span style="color:#555">)</span>
-<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">WillExit</span> <span style="color:#069;font-weight:bold">implements</span> CommandLineRunner <span style="color:#555">{</span>
-    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">run</span><span style="color:#555">(</span>String<span style="color:#555">...</span> args<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
-        System<span style="color:#555">.</span><span style="color:#309">exit</span><span style="color:#555">(</span>3<span style="color:#555">);</span>
-    <span style="color:#555">}</span>
-<span style="color:#555">}</span>
-</code></pre></div><p>When run:</p>
+<span style="color:#99f">@Profile</span>(<span style="color:#c30">&#34;exit&#34;</span>)
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">class</span> WillExit <span style="color:#c0f">implements</span> CommandLineRunner {
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">void</span> run(String... <span style="color:#c0f">args</span>) <span style="color:#069;font-weight:bold">throws</span> <span style="color:#c0f">Exception</span> {
+        System.<span style="color:#309">exit</span>(3);
+    }
+}</code></pre></div>
+<p>When run:</p>
+
 <pre><code>$ java -Dspring.profiles.active=exit -jar build/libs/exit-code-demo-1.0-SNAPSHOT.jar &gt;&gt; /dev/null 2&amp;&gt;1
 $ echo $?
 3
-</code></pre><p>This looks straightforward and easy. However, exiting the application from within the <code>CommandLineRunner</code> makes integration testing of this application difficult. Our tests will simply stop execution at that point without giving us the opportunity to assert anything.</p>
-<p>At work, while looking for a solution to this, we stumbled across Spring&rsquo;s <code>ExitCodeGenerator</code> <sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup>. It is an interface whose implementations Spring uses to look up what exit code to use. There are at least two ways to make use of <code>ExitCodeGenerator</code> - one involves making the application&rsquo;s Exceptions implement <code>ExitCodeGenerator</code> and the other involves making the command line runners themselves implement <code>ExitCodeGenerator</code>. We will look at the first approach here.</p>
+</code></pre>
+
+<p>This looks straightforward and easy. However, exiting the application from within the <code>CommandLineRunner</code> makes integration testing of this application difficult. Our tests will simply stop execution at that point without giving us the opportunity to assert anything.</p>
+
+<p>At work, while looking for a solution to this, we stumbled across Spring&rsquo;s <code>ExitCodeGenerator</code> <sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup>. It is an interface whose implementations Spring uses to look up what exit code to use. There are at least two ways to make use of <code>ExitCodeGenerator</code> - one involves making the application&rsquo;s Exceptions implement <code>ExitCodeGenerator</code> and the other involves making the command line runners themselves implement <code>ExitCodeGenerator</code>. We will look at the first approach here.</p>
+
 <p>Our new command line runner will be as:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@Component</span>
-<span style="color:#99f">@Profile</span><span style="color:#555">(</span><span style="color:#c30">&#34;exception&#34;</span><span style="color:#555">)</span>
-<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">WillThrow</span> <span style="color:#069;font-weight:bold">implements</span> CommandLineRunner<span style="color:#555">{</span>
-    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">void</span> <span style="color:#c0f">run</span><span style="color:#555">(</span>String<span style="color:#555">...</span> args<span style="color:#555">)</span> <span style="color:#069;font-weight:bold">throws</span> Exception <span style="color:#555">{</span>
-        <span style="color:#069;font-weight:bold">throw</span> <span style="color:#069;font-weight:bold">new</span> ExceptionWithExitCode<span style="color:#555">(</span><span style="color:#c30">&#34;Hello&#34;</span><span style="color:#555">);</span>
-    <span style="color:#555">}</span>
-<span style="color:#555">}</span>
-</code></pre></div><p>And the exception will resemble:</p>
-<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">ExceptionWithExitCode</span> <span style="color:#069;font-weight:bold">extends</span> RuntimeException <span style="color:#069;font-weight:bold">implements</span> ExitCodeGenerator <span style="color:#555">{</span>
-    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">ExceptionWithExitCode</span><span style="color:#555">(</span>String message<span style="color:#555">)</span> <span style="color:#555">{</span>
-        <span style="color:#069;font-weight:bold">super</span><span style="color:#555">(</span>message<span style="color:#555">);</span>
-    <span style="color:#555">}</span>
+<span style="color:#99f">@Profile</span>(<span style="color:#c30">&#34;exception&#34;</span>)
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">class</span> WillThrow <span style="color:#c0f">implements</span> CommandLineRunner{
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">void</span> run(String... <span style="color:#c0f">args</span>) <span style="color:#069;font-weight:bold">throws</span> <span style="color:#c0f">Exception</span> {
+        <span style="color:#069;font-weight:bold">throw</span> <span style="color:#069;font-weight:bold">new</span> ExceptionWithExitCode(<span style="color:#c30">&#34;Hello&#34;</span>);
+    }
+}</code></pre></div>
+<p>And the exception will resemble:</p>
+<div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">class</span> ExceptionWithExitCode <span style="color:#c0f">extends</span> RuntimeException <span style="color:#c0f">implements</span> ExitCodeGenerator {
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">ExceptionWithExitCode</span>(String <span style="color:#c0f">message</span>) {
+        <span style="color:#069;font-weight:bold">super</span>(message);
+    }
 
-    <span style="color:#069;font-weight:bold">public</span> <span style="color:#078;font-weight:bold">int</span> <span style="color:#c0f">getExitCode</span><span style="color:#555">()</span> <span style="color:#555">{</span>
-        <span style="color:#069;font-weight:bold">return</span> 13<span style="color:#555">;</span>
-    <span style="color:#555">}</span>
-<span style="color:#555">}</span>
+    <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">int</span> getExitCode() {
+        <span style="color:#069;font-weight:bold">return</span> 13;
+    }
+}</code></pre></div>
+<p>When the application runs:</p>
 
-</code></pre></div><p>When the application runs:</p>
 <pre><code>$ java -Dspring.profiles.active=exception -jar build/libs/exit-code-demo-1.0-SNAPSHOT.jar &gt;&gt; /dev/null 2&amp;&gt;1
 $ echo $?
 13
-</code></pre><p>Obviously, this is a rather simple example, but you can see how <code>ExitCodeGenerator</code> allows us to have programmable exit codes. This allows us to have tests for our applications, while giving us the flexibility to control the exit code.</p>
+</code></pre>
+
+<p>Obviously, this is a rather simple example, but you can see how <code>ExitCodeGenerator</code> allows us to have programmable exit codes. This allows us to have tests for our applications, while giving us the flexibility to control the exit code.</p>
+
 <p>We will take a look at the second approach of using <code>ExitCodeGenerator</code> in another blog post.</p>
-<section class="footnotes" role="doc-endnotes">
-<hr>
+<div class="footnotes">
+
+<hr />
+
 <ol>
-<li id="fn:1" role="doc-endnote">
-<p><code>ExitCodeGenerator</code> is an &ldquo;Interface used to generate an &lsquo;exit code&rsquo; from a running command line SpringApplication.&quot;. You can find the JavaDocs <a href="http://docs.spring.io/spring-boot/docs/current/api/org/springframework/boot/ExitCodeGenerator.html">here</a>. <a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
-</li>
+<li id="fn:1"><code>ExitCodeGenerator</code> is an &ldquo;Interface used to generate an &lsquo;exit code&rsquo; from a running command line SpringApplication.&rdquo;. You can find the JavaDocs <a href="http://docs.spring.io/spring-boot/docs/current/api/org/springframework/boot/ExitCodeGenerator.html">here</a>.
+ <a class="footnote-return" href="#fnref:1"><sup>[return]</sup></a></li>
 </ol>
-</section>
+</div>
         </div>
         <aside id="gh-comments-list">
           <script>
@@ -275,11 +287,15 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2019/08/02/flushing-metrics-in-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Flushing Metrics in Dropwizard Commands</a></li>
-            
-            
-            
-            
             
             
             
@@ -937,6 +953,10 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2014/03/20/clojure-dojo-levenshtein-edit-distance/?utm_source=site&amp;utm_medium=related">Clojure Dojo - Levenshtein edit distance</a></li>
             
             
@@ -1251,14 +1271,6 @@ $(document).ready(function () {
             
             
             
-            
-            
-            
-            
-            
-            
-            
-            
             <li><a href="https://sadique.io/blog/2013/08/15/pythons-bool-type/?utm_source=site&amp;utm_medium=related">Python&#39;s bool type</a></li>
             
             
@@ -1450,6 +1462,14 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             

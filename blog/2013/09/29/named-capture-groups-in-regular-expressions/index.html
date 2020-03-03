@@ -99,10 +99,15 @@
       <div itemprop="mainContentOfPage"
            itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div>
-          <p>I will admit that I find regular expressions somewhat hard to parse. While the thinking process needed to write a regular expression is iterative and hence results in the correct expression suitable for the situation, once it is written it lacks readability. I have faced that pain of trying to grok a complex regular expression written years ago. So I was pleasantly surprised when I saw <a href="https://news.ycombinator.com/item?id=6463144">this example</a> from Hacker News user <em>WestCoastJustin</em>. I found it very easy to understand because of the names he had assigned to each capture group in the expression.</p>
+          
+
+<p>I will admit that I find regular expressions somewhat hard to parse. While the thinking process needed to write a regular expression is iterative and hence results in the correct expression suitable for the situation, once it is written it lacks readability. I have faced that pain of trying to grok a complex regular expression written years ago. So I was pleasantly surprised when I saw <a href="https://news.ycombinator.com/item?id=6463144">this example</a> from Hacker News user <em>WestCoastJustin</em>. I found it very easy to understand because of the names he had assigned to each capture group in the expression.</p>
+
 <h2 id="ruby">Ruby</h2>
+
 <p>Ruby has supported named capture groups since version 1.9. Each match group is named by using <code>?&lt;name&gt;</code> inside the match group and these matches are made available has a hash and each match can be accessed by using the match group name as the key.</p>
-<p><em>WestCoastJustin</em>&lsquo;s example will look like this in Ruby:</p>
+
+<p><em>WestCoastJustin</em>&rsquo;s example will look like this in Ruby:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ruby" data-lang="ruby"><span style="color:#09f;font-style:italic">#!/usr/bin/env ruby</span>
 
 test_string <span style="color:#555">=</span> <span style="color:#c30">&#34;Today&#39;s date is: 9/28/2013.&#34;</span>
@@ -111,15 +116,16 @@ match <span style="color:#555">=</span> test_string<span style="color:#555">.</s
 <span style="color:#366">puts</span> match<span style="color:#555">.</span>inspect
 <span style="color:#366">puts</span> match<span style="color:#555">[</span><span style="color:#fc3">:month</span><span style="color:#555">]</span>
 <span style="color:#366">puts</span> match<span style="color:#555">[</span><span style="color:#fc3">:day</span><span style="color:#555">]</span>
-<span style="color:#366">puts</span> match<span style="color:#555">[</span><span style="color:#fc3">:year</span><span style="color:#555">]</span>
-</code></pre></div><p>This is much easier to understand because looking at it, it makes it clear that the intent of matching the first group of 1 or 2 digits is to look for the <strong>month</strong> in the date. Similarly, the intent of the <em>day</em> and <em>year</em> matches are easier to understand.</p>
+<span style="color:#366">puts</span> match<span style="color:#555">[</span><span style="color:#fc3">:year</span><span style="color:#555">]</span></code></pre></div>
+<p>This is much easier to understand because looking at it, it makes it clear that the intent of matching the first group of 1 or 2 digits is to look for the <strong>month</strong> in the date. Similarly, the intent of the <em>day</em> and <em>year</em> matches are easier to understand.</p>
+
 <p>This will result in:</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">&gt; ruby /tmp/named_matches.rb
 <span style="color:#09f;font-style:italic">#&lt;MatchData &#34;9/28/2013&#34; month:&#34;9&#34; day:&#34;28&#34; year:&#34;2013&#34;&gt;</span>
 <span style="color:#f60">9</span>
 <span style="color:#f60">28</span>
-<span style="color:#f60">2013</span>
-</code></pre></div><p>##Python
+<span style="color:#f60">2013</span></code></pre></div>
+<p>##Python
 Python&rsquo;s <code>re</code> module supports named match groups using the <code>?P&lt;name&gt;</code> pattern. After a pattern search, the results are placed in a <code>dict</code>.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#09f;font-style:italic">#!/usr/bin/env ruby</span>
 
@@ -128,8 +134,8 @@ Python&rsquo;s <code>re</code> module supports named match groups using the <cod
 test_string <span style="color:#555">=</span> <span style="color:#c30">&#34;Today&#39;s date is: 9/28/2013.&#34;</span>
 pattern <span style="color:#555">=</span> re<span style="color:#555">.</span>compile(<span style="color:#c30">r</span><span style="color:#c30">&#34;(?P&lt;month&gt;\d{1,2})\/(?P&lt;day&gt;\d{1,2})\/(?P&lt;year&gt;\d{4})&#34;</span>)
 match_dict <span style="color:#555">=</span> pattern<span style="color:#555">.</span>search(test_string)<span style="color:#555">.</span>groupdict()
-<span style="color:#069;font-weight:bold">print</span>(match_dict)
-</code></pre></div><p>JavaScript does not support named capture groups. There are a lot of <a href="http://trentrichardson.com/2011/08/02/javascript-regexp-match-named-captures/">hacks</a> aimed at providing this functionality. The XRegExp library <a href="http://xregexp.com/syntax/#namedCapture">supports</a> named capture groups.</p>
+<span style="color:#069;font-weight:bold">print</span>(match_dict)</code></pre></div>
+<p>JavaScript does not support named capture groups. There are a lot of <a href="http://trentrichardson.com/2011/08/02/javascript-regexp-match-named-captures/">hacks</a> aimed at providing this functionality. The XRegExp library <a href="http://xregexp.com/syntax/#namedCapture">supports</a> named capture groups.</p>
 
         </div>
         <aside id="gh-comments-list">
@@ -238,6 +244,10 @@ $(document).ready(function () {
         <aside>
           <h3>If you liked this post, you'll also like...</h3>
           <ul class="related-posts">
+            
+            
+            
+            
             
             
             
@@ -820,6 +830,10 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2014/08/02/importing-the-yelp-dataset-into-mongodb/?utm_source=site&amp;utm_medium=related">Importing the Yelp dataset into MongoDB</a></li>
             
             
@@ -1190,14 +1204,6 @@ $(document).ready(function () {
             
             
             
-            
-            
-            
-            
-            
-            
-            
-            
             <li><a href="https://sadique.io/blog/2013/08/15/pythons-bool-type/?utm_source=site&amp;utm_medium=related">Python&#39;s bool type</a></li>
             
             
@@ -1389,6 +1395,14 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             

@@ -97,55 +97,90 @@
       <div itemprop="mainContentOfPage"
            itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div>
-          <p>I have been playing around with Kubernetes and Docker lately. To borrow the description of Kubernetes from their website,</p>
+          
+
+<p>I have been playing around with Kubernetes and Docker lately. To borrow the description of Kubernetes from their website,</p>
+
 <blockquote>
 <p>&ldquo;Kubernetes is an open-source system for automating deployment, scaling, and management of containerized applications.&rdquo;</p>
 </blockquote>
+
 <p>One of the first things I did was to try and see what it would take to go from an application to deploying it. I started with a simple Java application and had to set up the development environment. These are my notes from this process. This assumes that you have docker installed on your development environment.</p>
+
 <h2 id="install-minikube">Install minikube</h2>
+
 <p><a href="https://github.com/kubernetes/minikube">Minikube</a> is a tool that makes it easy to run Kubernetes for local development. To run minikube, you need to have a virtualizer installed - in my case I already had VirtualBox installed. Instructions for installing minikube is available <a href="https://github.com/kubernetes/minikube/releases">here</a>. In my case, this is what I did:</p>
+
 <pre><code>&gt; curl -Lo minikube https://storage.googleapis.com/minikube/releases/v0.12.2/minikube-darwin-amd64
 &gt; chmod +x minikube
 &gt; sudo mv minikube /usr/local/bin/
-</code></pre><h2 id="install-kubectl">Install kubectl</h2>
+</code></pre>
+
+<h2 id="install-kubectl">Install kubectl</h2>
+
 <p><a href="http://kubernetes.io/docs/user-guide/kubectl-overview/">Kubectl</a> is a command line application that executes commands against Kubernets clusters. Instructions for installing kubectl are available <a href="http://kubernetes.io/docs/getting-started-guides/minikube/#install-kubectl">here</a>.</p>
+
 <pre><code>&gt; curl -Lo kubectl http://storage.googleapis.com/kubernetes-release/release/v1.3.0/bin/darwin/amd64/kubectl
 &gt; chmod +x kubectl
 &gt; sudo mv kubectl /usr/local/bin/
-</code></pre><h2 id="set-up-a-docker-repository">Set up a Docker repository</h2>
+</code></pre>
+
+<h2 id="set-up-a-docker-repository">Set up a Docker repository</h2>
+
 <p>Kubernetes pulls container images from publicly available registries. But because we are building an application that we will not be publishing to public docker registries, we need to create a local registry. There is a great write up on how to set up a local docker registry at <a href="http://thenewstack.io/tutorial-configuring-ultimate-development-environment-kubernetes/">Newstack</a>.</p>
+
 <h2 id="start-minikube-with-the-registry">Start minikube with the registry</h2>
+
 <p>Now that we have a local docker registry, we can go ahead and tell minikube to consume images from this registry. However, if you have started a minikube cluster previously, the registry override will not be available to it unless it is deleted.</p>
+
 <pre><code>&gt; docker-machine ip registry
 192.168.99.100
 &gt; minikube stop
 &gt; minikube delete
 &gt; minikube start --vm-driver=&quot;virtualbox&quot; --insecure-registry=192.168.99.100:80
-</code></pre><h2 id="create-a-container-image-for-the-application">Create a container image for the application</h2>
+</code></pre>
+
+<h2 id="create-a-container-image-for-the-application">Create a container image for the application</h2>
+
 <p>The application in this case is a simple Spring Boot application that has exactly one controller.</p>
 <div class="highlight"><pre style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#99f">@RestController</span>
-<span style="color:#069;font-weight:bold">public</span> <span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">HelloController</span> <span style="color:#555">{</span>
-  <span style="color:#99f">@RequestMapping</span><span style="color:#555">(</span><span style="color:#c30">&#34;/hello&#34;</span><span style="color:#555">)</span>
-  <span style="color:#069;font-weight:bold">public</span> Map <span style="color:#c0f">hello</span><span style="color:#555">()</span> <span style="color:#555">{</span>
-    <span style="color:#069;font-weight:bold">return</span> singletonMap<span style="color:#555">(</span><span style="color:#c30">&#34;message&#34;</span><span style="color:#555">,</span> <span style="color:#c30">&#34;hello&#34;</span><span style="color:#555">);</span>
-  <span style="color:#555">}</span>
-<span style="color:#555">}</span>
-</code></pre></div><p>In order to create a docker container from this application, we will use the <a href="https://github.com/spotify/docker-maven-plugin">Maven Docker Plugin</a>. We will need to set a prefix for our docker image. This can be done with this maven property:</p>
+<span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">class</span> HelloController {
+  <span style="color:#99f">@RequestMapping</span>(<span style="color:#c30">&#34;/hello&#34;</span>)
+  <span style="color:#069;font-weight:bold">public</span> <span style="color:#c0f">Map</span> hello() {
+    <span style="color:#069;font-weight:bold">return</span> singletonMap(<span style="color:#c30">&#34;message&#34;</span>, <span style="color:#c30">&#34;hello&#34;</span>);
+  }
+}</code></pre></div>
+<p>In order to create a docker container from this application, we will use the <a href="https://github.com/spotify/docker-maven-plugin">Maven Docker Plugin</a>. We will need to set a prefix for our docker image. This can be done with this maven property:</p>
+
 <pre><code>&lt;docker.image.prefix&gt;sadiqueio&lt;/docker.image.prefix&gt;
-</code></pre><p>This plugin expects a <code>Dockerfile</code> to be present in the <code>src/main/docker</code> directory. Our <code>Dockerfile</code> will look like this:</p>
+</code></pre>
+
+<p>This plugin expects a <code>Dockerfile</code> to be present in the <code>src/main/docker</code> directory. Our <code>Dockerfile</code> will look like this:</p>
+
 <pre><code>FROM frolvlad/alpine-oraclejdk8:slim
 ADD hello-world-0.0.1-SNAPSHOT.jar app.jar
 RUN sh -c 'touch /app.jar'
 ENTRYPOINT [&quot;java&quot;,&quot;-jar&quot;,&quot;/app.jar&quot;]
-</code></pre><p>With this in place, we can generate a docker image. We need to ensure that we are looking at the dev docker host.</p>
+</code></pre>
+
+<p>With this in place, we can generate a docker image. We need to ensure that we are looking at the dev docker host.</p>
+
 <pre><code>&gt; eval $(docker-machine env dev)
 &gt; mvn package docker:build
-</code></pre><h2 id="tag-and-push-the-image-to-local-registry">Tag and push the image to local registry</h2>
+</code></pre>
+
+<h2 id="tag-and-push-the-image-to-local-registry">Tag and push the image to local registry</h2>
+
 <p>The generated image <code>sadiqueio/hello-world</code> need to be published to the local registry we created.</p>
+
 <pre><code>&gt; docker tag sadiqueio/hello-world 192.168.99.100:80/hello-world
 &gt; docker push 192.168.99.100:80/hello-world
-</code></pre><h2 id="define-and-create-a-service">Define and create a service</h2>
+</code></pre>
+
+<h2 id="define-and-create-a-service">Define and create a service</h2>
+
 <p>We will define a Kubernetes service object for this application <code>hello-world-service.yaml</code>:</p>
+
 <pre><code>apiVersion: v1
 kind: Service
 metadata:
@@ -161,7 +196,10 @@ spec:
   selector:
     app: hello-world
     tier: backend
-</code></pre><p>The service can be created using:</p>
+</code></pre>
+
+<p>The service can be created using:</p>
+
 <pre><code>&gt; kubectl create -f hello-world-service.yaml
 You have exposed your service on an external port on all nodes in your
 cluster.  If you want to expose this service to the external internet, you may
@@ -169,9 +207,14 @@ need to set up firewall rules for the service port(s) (tcp:30194) to serve traff
 
 See http://releases.k8s.io/release-1.3/docs/user-guide/services-firewalls.md for more details.
 service &quot;hello-world&quot; created
-</code></pre><p>Make a note of the port assigned to this service. We will use this port later to access our application.</p>
+</code></pre>
+
+<p>Make a note of the port assigned to this service. We will use this port later to access our application.</p>
+
 <h2 id="define-and-create-a-deployment">Define and create a deployment</h2>
+
 <p>The next step is to define and create a deployment for our application. This is where we specify the image we previously created and published to the registry.</p>
+
 <pre><code>apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -196,25 +239,39 @@ spec:
           value: dns
         ports:
         - containerPort: 8080
-</code></pre><pre><code>&gt; kubectl create -f hello-world-deployment.yaml
+</code></pre>
+
+<pre><code>&gt; kubectl create -f hello-world-deployment.yaml
 deployment &quot;hello-world&quot; created
-</code></pre><h2 id="ensure-that-the-deployment-is-successful">Ensure that the deployment is successful</h2>
+</code></pre>
+
+<h2 id="ensure-that-the-deployment-is-successful">Ensure that the deployment is successful</h2>
+
 <pre><code>&gt; kubectl get services
 NAME          CLUSTER-IP   EXTERNAL-IP   PORT(S)    AGE
 hello-world   10.0.0.252   &lt;none&gt;        8080/TCP   4m
 &gt; kubectl get deployments
 NAME          DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
 hello-world   1         1         1            1           4m
-</code></pre><h2 id="access-the-service">Access the service</h2>
+</code></pre>
+
+<h2 id="access-the-service">Access the service</h2>
+
 <p>We already know the port assigned to our service. Because we specified <code>type: NodePort</code>, the IP address we need to use is that of the Kubernetes cluster. This IP address can be found using the minikube command.</p>
+
 <pre><code>&gt; minikube ip
 192.168.99.102
-</code></pre><p>Now that we have both pieces of information, we can test that our application is up.</p>
+</code></pre>
+
+<p>Now that we have both pieces of information, we can test that our application is up.</p>
+
 <pre><code>&gt; curl  -s http://192.168.99.102:30194/hello | jq .
 {
   &quot;message&quot;: &quot;hello&quot;
 }
-</code></pre><p>That is it. We have deployed our hello world application using Kubernetes.</p>
+</code></pre>
+
+<p>That is it. We have deployed our hello world application using Kubernetes.</p>
 
         </div>
         <aside id="gh-comments-list">
@@ -345,11 +402,15 @@ $(document).ready(function () {
             
             
             
+            
+            
+            
+            
+            
+            
+            
+            
             <li><a href="https://sadique.io/blog/2019/08/02/flushing-metrics-in-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Flushing Metrics in Dropwizard Commands</a></li>
-            
-            
-            
-            
             
             
             
@@ -860,6 +921,10 @@ $(document).ready(function () {
             
             
             <li><a href="https://sadique.io/blog/2015/06/09/running-multiple-applications-in-the-same-tomcat-installation/?utm_source=site&amp;utm_medium=related">Running multiple applications in the same Tomcat installation</a></li>
+            
+            
+            
+            
             
             
             
