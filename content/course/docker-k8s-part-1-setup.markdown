@@ -17,7 +17,7 @@ date: 2020-03-02T19:53:43-08:00
 
 ### Windows
 
-- Install Docker Desktop for Windows, following instructions [here](https://docs.docker.com/docker-for-windows/install/).
+- Install ~~Docker Desktop for Windows~~ Docker Toolbox for Windows following instructions [here](https://docs.docker.com/toolbox/toolbox_install_windows/).
 - Test your set up by running the command `docker run hello-world`.
 
 ## 2. Install a code editor
