@@ -8,70 +8,7 @@
     <atom:link href="/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
     
     <item>
-      <title>Docker &#43; K8s Workshop - chroot example</title>
-      <link>https://sadique.io/course/docker-k8s-part-1-chroot-demo/?utm_source=site&amp;utm_medium=feed</link>
-      <pubDate>Mon, 02 Mar 2020 19:53:43 -0800</pubDate>
-      
-      <guid>https://sadique.io/course/docker-k8s-part-1-chroot-demo/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>
-
-&lt;h2 id=&#34;create-a-chroot-jail&#34;&gt;Create a chroot jail&lt;/h2&gt;
-
-&lt;pre&gt;&lt;code&gt;mkdir jail
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;create-directories-for-system-binaries&#34;&gt;Create directories for system binaries&lt;/h2&gt;
-
-&lt;pre&gt;&lt;code&gt;mkdir jail/bin
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;copy-the-bash-binary-from-the-host&#34;&gt;Copy the bash binary from the host&lt;/h2&gt;
-
-&lt;pre&gt;&lt;code&gt;cp -v /bin/bash jail/bin
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;create-a-list-of-libraries-needed-for-the-binary-to-work&#34;&gt;Create a list of libraries needed for the binary to work&lt;/h2&gt;
-
-&lt;pre&gt;&lt;code&gt;list_of_libs=&amp;quot;$(ldd /bin/bash | egrep -o &#39;/lib.*\.[0-9]&#39;)&amp;quot;
-echo $list_of_libs
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;copy-the-libraries-recursively&#34;&gt;Copy the libraries recursively&lt;/h2&gt;
-
-&lt;pre&gt;&lt;code&gt;for i in $list_of_libs; do cp  -v --parents &amp;quot;$i&amp;quot; `pwd`/jail; done
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;create-a-demo-script&#34;&gt;Create a demo script&lt;/h2&gt;
-
-&lt;pre&gt;&lt;code&gt;let i=0;
-while :
-do
-        let i++
-        echo &amp;quot;Last value of i is ${i}&amp;quot;
-        read -rep $&#39;Pausing for 5 seconds\n&#39; -t 5
-done
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;copy-the-demo-script-to-the-jail&#34;&gt;Copy the demo script to the jail&lt;/h2&gt;
-
-&lt;pre&gt;&lt;code&gt;chmod +x demos.sh
-cp demo.sh jail/
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;enter-the-chroot&#34;&gt;Enter the chroot&lt;/h2&gt;
-
-&lt;pre&gt;&lt;code&gt;sudo chroot `pwd`/jail /bin/bash
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;in-the-chroot-execute-the-shell-script&#34;&gt;In the chroot, execute the shell script&lt;/h2&gt;
-
-&lt;pre&gt;&lt;code&gt;/bin/bash -c ./demo.sh
-&lt;/code&gt;&lt;/pre&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Docker &#43; K8s Workshop - Setup for Part 1</title>
+      <title>Docker &#43; K8s Workshop - Basics</title>
       <link>https://sadique.io/course/docker-k8s-part-1-basics/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Mon, 02 Mar 2020 19:53:43 -0800</pubDate>
       
@@ -203,6 +140,69 @@ COPY demo.sh
 External storage can be attached using &lt;code&gt;-v&lt;/code&gt;&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;docker run -v external-dir:/external demo-app:v1 bash -c /demo.sh
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Docker &#43; K8s Workshop - chroot example</title>
+      <link>https://sadique.io/course/docker-k8s-part-1-chroot-demo/?utm_source=site&amp;utm_medium=feed</link>
+      <pubDate>Mon, 02 Mar 2020 19:53:43 -0800</pubDate>
+      
+      <guid>https://sadique.io/course/docker-k8s-part-1-chroot-demo/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>
+
+&lt;h2 id=&#34;create-a-chroot-jail&#34;&gt;Create a chroot jail&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code&gt;mkdir jail
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;create-directories-for-system-binaries&#34;&gt;Create directories for system binaries&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code&gt;mkdir jail/bin
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;copy-the-bash-binary-from-the-host&#34;&gt;Copy the bash binary from the host&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code&gt;cp -v /bin/bash jail/bin
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;create-a-list-of-libraries-needed-for-the-binary-to-work&#34;&gt;Create a list of libraries needed for the binary to work&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code&gt;list_of_libs=&amp;quot;$(ldd /bin/bash | egrep -o &#39;/lib.*\.[0-9]&#39;)&amp;quot;
+echo $list_of_libs
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;copy-the-libraries-recursively&#34;&gt;Copy the libraries recursively&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code&gt;for i in $list_of_libs; do cp  -v --parents &amp;quot;$i&amp;quot; `pwd`/jail; done
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;create-a-demo-script&#34;&gt;Create a demo script&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code&gt;let i=0;
+while :
+do
+        let i++
+        echo &amp;quot;Last value of i is ${i}&amp;quot;
+        read -rep $&#39;Pausing for 5 seconds\n&#39; -t 5
+done
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;copy-the-demo-script-to-the-jail&#34;&gt;Copy the demo script to the jail&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code&gt;chmod +x demos.sh
+cp demo.sh jail/
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;enter-the-chroot&#34;&gt;Enter the chroot&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code&gt;sudo chroot `pwd`/jail /bin/bash
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;in-the-chroot-execute-the-shell-script&#34;&gt;In the chroot, execute the shell script&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code&gt;/bin/bash -c ./demo.sh
 &lt;/code&gt;&lt;/pre&gt;
 </description>
     </item>
