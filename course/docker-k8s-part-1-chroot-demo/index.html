@@ -14,7 +14,7 @@
     
     
 
-    <title>Courses - {code that works} by Sadique Ali</title>
+    <title>Docker &#43; K8s Workshop - chroot example - {code that works} by Sadique Ali</title>
 
     
     
@@ -35,6 +35,7 @@
   </ul>
 </nav>
 
+
     
     
     <header itemscope="itemscope" itemtype="http://schema.org/WPHeader">
@@ -42,7 +43,7 @@
         <div >
           <div >
             <div >
-              <h1>  Courses </h1>
+              <h1>Docker &#43; K8s Workshop - chroot example</h1>
               <hr >
             </div>
           </div>
@@ -50,33 +51,72 @@
       </div>
     </header>
 
-    
-    <div itemprop="mainContentOfPage"
-         itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
-      
-      
-      
-      <article>
-        <a href='https://sadique.io/course/docker-k8s-part-1-chroot-demo/'>
-          <h2 >
-            Docker &#43; K8s Workshop - chroot example
-          </h2>
-        </a>
-        <p class="listing"> 2 - Mon, Mar 2, 2020</p>
-      </article>
-      
-      
-      <article>
-        <a href='https://sadique.io/course/docker-k8s-part-1-setup/'>
-          <h2 >
-            Docker &#43; K8s Workshop - Setup for Part 1
-          </h2>
-        </a>
-        <p class="listing"> 1 - Mon, Mar 2, 2020</p>
-      </article>
-      
-    </div>
+    <article>
+      <div itemprop="mainContentOfPage"
+           itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
+        <div >
+          
 
+<h2 id="create-a-chroot-jail">Create a chroot jail</h2>
+
+<pre><code>mkdir jail
+</code></pre>
+
+<h2 id="create-directories-for-system-binaries">Create directories for system binaries</h2>
+
+<pre><code>mkdir jail/bin
+</code></pre>
+
+<h2 id="copy-the-bash-binary-from-the-host">Copy the bash binary from the host</h2>
+
+<pre><code>cp -v /bin/bash jail/bin
+</code></pre>
+
+<h2 id="create-a-list-of-libraries-needed-for-the-binary-to-work">Create a list of libraries needed for the binary to work</h2>
+
+<pre><code>list_of_libs=&quot;$(ldd /bin/bash | egrep -o '/lib.*\.[0-9]')&quot;
+echo $list_of_libs
+</code></pre>
+
+<h2 id="copy-the-libraries-recursively">Copy the libraries recursively</h2>
+
+<pre><code>for i in $list_of_libs; do cp  -v --parents &quot;$i&quot; `pwd`/jail; done
+</code></pre>
+
+<h2 id="create-a-demo-script">Create a demo script</h2>
+
+<pre><code>#!/bin/bash
+
+let i=0;
+while :
+do
+        let i++
+        echo &quot;Last value of i is ${i}&quot;
+        read -rep $'Pausing for 5 seconds\n' -t 5
+done
+</code></pre>
+
+<h2 id="copy-the-demo-script-to-the-jail">Copy the demo script to the jail</h2>
+
+<pre><code>chmod +x demos.sh
+cp demo.sh jail/
+</code></pre>
+
+<h2 id="enter-the-chroot">Enter the chroot</h2>
+
+<pre><code>sudo chroot `pwd`/jail /bin/bash
+</code></pre>
+
+<h2 id="in-the-chroot-execute-the-shell-script">In the chroot, execute the shell script</h2>
+
+<pre><code>./demo.sh
+</code></pre>
+
+        </div>
+      </div>
+    </article>
+
+    <hr>
     
 <footer  itemscope="itemscope" itemtype="http://schema.org/WPFooter">
   <div >
