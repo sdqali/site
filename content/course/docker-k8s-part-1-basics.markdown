@@ -65,3 +65,62 @@ We will build an image from the files we used for the chroot example.
 - Run the container using `docker run <id> ./demo.sh`
 
 ## Creating a custom image from a Linux base.
+
+```
+FROM alpine:latest
+COPY demo.sh
+```
+
+```
+docker build .
+```
+
+```
+docker run <id> ./demo.sh
+```
+
+## Tagging an image
+
+```
+docker tag <id> demo-app:v1
+```
+
+```
+docker image ls
+```
+
+Tag as latest
+
+```
+docker tag demo-app:v1 demo-app:latest
+```
+
+## Tagging during build
+
+
+```
+docker build -t demo-app:v2 .
+```
+
+# Accessing a running container
+
+```
+docker exec -it <container-id> sh
+```
+
+Note: It is the container id and not image id
+
+This can be improved if we name our containers.
+
+```
+docker run demo-app:latest --name demo-app
+```
+
+```
+docker exec -it demoa-app sh
+```
+
+# Mounting volumes
+
+
+
