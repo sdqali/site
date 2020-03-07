@@ -1,0 +1,232 @@
+<!DOCTYPE html5>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us" prefix="og: http://ogp.me/ns#">
+  <head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta content="Programming, Software Development, Java Development, Coding" name="keywords">
+    <meta name="author" content="Sadique Ali">
+
+    
+    
+      
+    
+    
+
+    <title>Docker &#43; K8s Workshop - Setup for Part 1 - {code that works} by Sadique Ali</title>
+
+    
+    
+    
+
+</head>
+
+  <body>
+    <nav itemscope="itemscope" itemtype="http://schema.org/SiteNavigationElement">
+  <ul >
+    <li aria-hidden="true"><a href="/">Home</a> </li>
+    <li><a href="/blog/">Blog</a> </li>
+    <li><a href="/about">About</a> </li>
+    <li><a href="/index.xml">Atom Feed</a> </li>
+    <li><a href="https://github.com/sdqali">GitHub</a> </li>
+    <li><a href="https://twitter.com/sdqali">Twitter</a> </li>
+    <li><a href="https://www.linkedin.com/in/sdqali">LinkedIn</a> </li>
+  </ul>
+</nav>
+
+
+    
+    
+    <header itemscope="itemscope" itemtype="http://schema.org/WPHeader">
+      <div >
+        <div >
+          <div >
+            <div >
+              <h1>Docker &#43; K8s Workshop - Setup for Part 1</h1>
+              <hr >
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <article>
+      <div itemprop="mainContentOfPage"
+           itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
+        <div >
+          
+
+<h2 id="hello-world">Hello World</h2>
+
+<pre><code>docker run hello-world
+</code></pre>
+
+<h3 id="explanation">Explanation</h3>
+
+<p>Docker containers are run time instances of images. Think of a Docker image as a set of files (like the set of files we placed in the jail directory in the chroot demo).</p>
+
+<p>In this case, we are asking docker to create a container with the image <code>hello-world</code>.</p>
+
+<p>The image has to come from somewhere. By default, Docker searches in a public repository of images hosted by Docker at docker.io.</p>
+
+<p>It fetches the image and then creates a container from the image (file system)</p>
+
+<h3 id="what-is-latest">What is <code>latest</code>?</h3>
+
+<p>Docker convention uses <code>latest</code> to denote the very latest version of a particular image. This is just a convention - not all images have a version tagged <code>latest</code>.</p>
+
+<p>By default, <code>docker run</code> tries to run the <code>latest</code> if no specific tag (version) is not specified.</p>
+
+<h3 id="the-second-time">The second time</h3>
+
+<pre><code>docker run docker.io/hello-world:latest
+</code></pre>
+
+<p>This time Docker did not have to download a new image because this is the same image as before.</p>
+
+<h3 id="image-name">Image name</h3>
+
+<p>In <code>docker run docker.io/hello-world:latest</code>:</p>
+
+<ul>
+<li>Registry: <code>docker.io</code></li>
+<li>Product/Service name <code>hello-world</code></li>
+<li>Version <code>latest</code></li>
+</ul>
+
+<h3 id="versioning">Versioning</h3>
+
+<p>Versions can be denoted in any format:</p>
+
+<p>Alpine:</p>
+
+<pre><code>docker run alpine:3.7 echo &quot;Hello from Alpine&quot;
+</code></pre>
+
+<p>OpenJDK 15:</p>
+
+<pre><code>docker run -it openjdk:15-slim-buster bash
+</code></pre>
+
+<h2 id="creating-a-custom-image-from-scratch">Creating a custom image from scratch.</h2>
+
+<p>We will build an image from the files we used for the chroot example.</p>
+
+<ul>
+<li>Download and unzip this [file]().</li>
+<li>Build the image in the directory using <code>docker build .</code></li>
+<li>Run the container using <code>docker run &lt;id&gt; /bin/bash -c /demo.sh</code></li>
+</ul>
+
+<h2 id="creating-a-custom-image-from-a-linux-base">Creating a custom image from a Linux base.</h2>
+
+<pre><code>FROM bash:latest
+COPY demo.sh
+</code></pre>
+
+<pre><code>docker build .
+</code></pre>
+
+<pre><code>docker run &lt;id&gt; bash -c  /demo.sh
+</code></pre>
+
+<h2 id="tagging-an-image">Tagging an image</h2>
+
+<pre><code>docker tag &lt;id&gt; demo-app:v1
+</code></pre>
+
+<pre><code>docker image ls
+</code></pre>
+
+<p>Tag as latest</p>
+
+<pre><code>docker tag demo-app:v1 demo-app:latest
+</code></pre>
+
+<h2 id="tagging-during-build">Tagging during build</h2>
+
+<pre><code>docker build -t demo-app:v2 .
+</code></pre>
+
+<h1 id="accessing-a-running-container">Accessing a running container</h1>
+
+<pre><code>docker exec -it &lt;container-id&gt; sh
+</code></pre>
+
+<p>Note: It is the container id and not image id</p>
+
+<p>This can be improved if we name our containers.</p>
+
+<pre><code>docker run demo-app:latest --name demo-app
+</code></pre>
+
+<pre><code>docker exec -it demoa-app sh
+</code></pre>
+
+<h1 id="mounting-volumes">Mounting volumes</h1>
+
+<p>Docker container&rsquo;s disk is ephemeral.
+External storage can be attached using <code>-v</code></p>
+
+<pre><code>docker run -v external-dir:/external demo-app:v1 bash -c /demo.sh
+</code></pre>
+
+        </div>
+      </div>
+    </article>
+
+    <hr>
+    
+<footer  itemscope="itemscope" itemtype="http://schema.org/WPFooter">
+  <div >
+    <div >
+      <div >
+        <ul >
+          <li>
+            <a href="https://twitter.com/sdqali">
+              <span aria-hidden="true" class="icon-twitter"></span>
+              <span class="sr-only">Twitter profile</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://linkedin.com/in/sdqali">
+              <span aria-hidden="true" class="icon-linkedin"></span>
+              <span class="sr-only">LinkedIn profile</span>
+            </a>
+            </a>
+          </li>
+          <li>
+            <a href="https://github.com/sdqali">
+              <span aria-hidden="true" class="icon-github"></span>
+              <span class="sr-only">GitHub profile</span>
+            </a>
+          </li>
+          <li>
+            <a href="/index.xml">
+              <span aria-hidden="true" class="icon-feed"></span>
+              <span class="sr-only">Atom feed</span>
+            </a>
+          </li>
+        </ul>
+        <p class="copyright">&copy; All rights reserved.</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-86967633-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+<link rel="stylesheet" href="/style.css"/>
+
+  </body>
+</html>
