@@ -1,23 +1,23 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Feature-Toggles on {code that works}</title>
-    <link>https://sadique.io/categories/feature-toggles/?utm_source=site&amp;utm_medium=feed</link>
+    <link>http://localhost:1313/categories/feature-toggles/?utm_source=site&amp;utm_medium=feed</link>
     <description>Recent content in Feature-Toggles on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Wed, 30 Nov 2016 05:50:42 +0000</lastBuildDate>
-    <atom:link href="https://sadique.io/categories/feature-toggles/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:1313/categories/feature-toggles/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
     
     <item>
       <title>Implementing feature toggles for a Spring Boot application - Part 4</title>
-      <link>https://sadique.io/blog/2016/11/30/implementing-feature-toggles-for-a-spring-boot-application-part-4/?utm_source=site&amp;utm_medium=feed</link>
+      <link>http://localhost:1313/blog/2016/11/30/implementing-feature-toggles-for-a-spring-boot-application-part-4/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Wed, 30 Nov 2016 05:50:42 +0000</pubDate>
       
-      <guid>https://sadique.io/blog/2016/11/30/implementing-feature-toggles-for-a-spring-boot-application-part-4/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>&lt;p&gt;In the fourth part of this &lt;a href=&#34;https://sadique.io/series/feature-toggles/&#34;&gt;series&lt;/a&gt; about implementing &lt;a href=&#34;https://sadique.io/blog/2016/11/21/implementing-feature-toggles-for-a-spring-boot-application-part-1/&#34;&gt;feature toggles&lt;/a&gt; for a Spring Boot application, we will take a look at how our implementation so far introduced a dependency on the application being restarted for changes to take place.&lt;/p&gt;
-&lt;p&gt;In &lt;a href=&#34;https://sadique.io/blog/2016/11/21/implementing-feature-toggles-for-a-spring-boot-application-part-1/&#34;&gt;part 1&lt;/a&gt;, we modified the &lt;code&gt;FeatureToggle&lt;/code&gt; annotation to support toggling beans and decided to use that for toggling features at the controller level. If we had a system capable of providing the feature toggle information to the application without restarts, the change in the state of the controller level toggles will have no effect because the controller is not going to be re-wired for request mapping, unless the application is restarted.&lt;/p&gt;
+      <guid>http://localhost:1313/blog/2016/11/30/implementing-feature-toggles-for-a-spring-boot-application-part-4/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;In the fourth part of this &lt;a href=&#34;http://localhost:1313/series/feature-toggles/&#34;&gt;series&lt;/a&gt; about implementing &lt;a href=&#34;http://localhost:1313/blog/2016/11/21/implementing-feature-toggles-for-a-spring-boot-application-part-1/&#34;&gt;feature toggles&lt;/a&gt; for a Spring Boot application, we will take a look at how our implementation so far introduced a dependency on the application being restarted for changes to take place.&lt;/p&gt;
+&lt;p&gt;In &lt;a href=&#34;http://localhost:1313/blog/2016/11/21/implementing-feature-toggles-for-a-spring-boot-application-part-1/&#34;&gt;part 1&lt;/a&gt;, we modified the &lt;code&gt;FeatureToggle&lt;/code&gt; annotation to support toggling beans and decided to use that for toggling features at the controller level. If we had a system capable of providing the feature toggle information to the application without restarts, the change in the state of the controller level toggles will have no effect because the controller is not going to be re-wired for request mapping, unless the application is restarted.&lt;/p&gt;
 &lt;p&gt;This raises the interesting question - Are bean level switches really feature toggles, considering that they can never be altered without application restarts? A better approach would be to consider bean switches as purely configurations and use facades that route commands to either of the beans based on a feature flag. In the example configuration provided, is treating the choice between storing sessions in-memory / Redis an actual feature, considering it does not provide any value to the end-user?&lt;/p&gt;
-&lt;p&gt;To ensure that we are not tying feature toggling to restarts, we will remove the meta-annotation we introduced to &lt;code&gt;FeatureToggle&lt;/code&gt; in &lt;a href=&#34;https://sadique.io/blog/2016/11/21/implementing-feature-toggles-for-a-spring-boot-application-part-1/&#34;&gt;part 1&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;To ensure that we are not tying feature toggling to restarts, we will remove the meta-annotation we introduced to &lt;code&gt;FeatureToggle&lt;/code&gt; in &lt;a href=&#34;http://localhost:1313/blog/2016/11/21/implementing-feature-toggles-for-a-spring-boot-application-part-1/&#34;&gt;part 1&lt;/a&gt;.&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#99f&#34;&gt;@Target&lt;/span&gt;({ElementType.&lt;span style=&#34;color:#309&#34;&gt;TYPE&lt;/span&gt;,&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;ElementType.&lt;span style=&#34;color:#309&#34;&gt;METHOD&lt;/span&gt;})&lt;span style=&#34;color:#bbb&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#99f&#34;&gt;@Retention&lt;/span&gt;(RetentionPolicy.&lt;span style=&#34;color:#309&#34;&gt;RUNTIME&lt;/span&gt;)&lt;span style=&#34;color:#bbb&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#99f&#34;&gt;@Documented&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
@@ -95,11 +95,11 @@
     
     <item>
       <title>Implementing feature toggles for a Spring Boot application - Part 3</title>
-      <link>https://sadique.io/blog/2016/11/29/implementing-feature-toggles-for-a-spring-boot-application-part-3/?utm_source=site&amp;utm_medium=feed</link>
+      <link>http://localhost:1313/blog/2016/11/29/implementing-feature-toggles-for-a-spring-boot-application-part-3/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Tue, 29 Nov 2016 05:50:39 +0000</pubDate>
       
-      <guid>https://sadique.io/blog/2016/11/29/implementing-feature-toggles-for-a-spring-boot-application-part-3/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>&lt;p&gt;In the third part of this &lt;a href=&#34;https://sadique.io/series/feature-toggles/&#34;&gt;series&lt;/a&gt; about implementing feature toggles for a Spring Boot application, we will take a look at exposing the state of feature flags as a Spring Boot management end point for monitoring and testing purposes.&lt;/p&gt;
+      <guid>http://localhost:1313/blog/2016/11/29/implementing-feature-toggles-for-a-spring-boot-application-part-3/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;In the third part of this &lt;a href=&#34;http://localhost:1313/series/feature-toggles/&#34;&gt;series&lt;/a&gt; about implementing feature toggles for a Spring Boot application, we will take a look at exposing the state of feature flags as a Spring Boot management end point for monitoring and testing purposes.&lt;/p&gt;
 &lt;p&gt;Spring Boot Actuator exposes a number of &lt;a href=&#34;http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-endpoints.html&#34;&gt;end points&lt;/a&gt; to monitor and administer the application. The most commonly used of these in my experience are the &lt;code&gt;info&lt;/code&gt; and &lt;code&gt;health&lt;/code&gt; end points. These end points are used to communicate to load balancers that a particular instance is ready to accept traffic and to monitor the state of the application.&lt;/p&gt;
 &lt;h2 id=&#34;features-management-end-point&#34;&gt;Features management end point&lt;/h2&gt;
 &lt;p&gt;In our case, this end point will be used by administrators, QA engineers and sometimes business stake holders to see what features are available in a particular environment running the application. Of course, we could have re-used the end point we built in the &lt;a href=&#34;&#34;&gt;last blog post&lt;/a&gt; for this purpose, but creating an management end point allows us to:&lt;/p&gt;
@@ -173,16 +173,16 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;}&lt;span style=&#34;color:#bbb&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;It is important to note that our end point has it’s sensitivity flag set to false by default. You should consider the &lt;a href=&#34;http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-endpoints.html#_security_with_healthindicators&#34;&gt;security implications&lt;/a&gt; of that before choosing to leave it false.&lt;/p&gt;
-&lt;p&gt;In the next blog post in this &lt;a href=&#34;https://sadique.io/series/feature-toggles/&#34;&gt;series&lt;/a&gt;, we will explore how our feature toggle mechanism so far have introduced a dependency on the application being restarted and how to eliminate this dependency.&lt;/p&gt;</description>
+&lt;p&gt;In the next blog post in this &lt;a href=&#34;http://localhost:1313/series/feature-toggles/&#34;&gt;series&lt;/a&gt;, we will explore how our feature toggle mechanism so far have introduced a dependency on the application being restarted and how to eliminate this dependency.&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Implementing feature toggles for a Spring Boot application - Part 2</title>
-      <link>https://sadique.io/blog/2016/11/27/implementing-feature-toggles-for-a-spring-boot-application-part-2/?utm_source=site&amp;utm_medium=feed</link>
+      <link>http://localhost:1313/blog/2016/11/27/implementing-feature-toggles-for-a-spring-boot-application-part-2/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Sun, 27 Nov 2016 05:48:48 +0000</pubDate>
       
-      <guid>https://sadique.io/blog/2016/11/27/implementing-feature-toggles-for-a-spring-boot-application-part-2/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>&lt;p&gt;In the second part of this &lt;a href=&#34;https://sadique.io/series/feature-toggles/&#34;&gt;series&lt;/a&gt; about implementing feature toggles for a Spring Boot application, we will look at exposing the features to the Angular front-end so that features can be toggled in UI components.&lt;/p&gt;
+      <guid>http://localhost:1313/blog/2016/11/27/implementing-feature-toggles-for-a-spring-boot-application-part-2/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;In the second part of this &lt;a href=&#34;http://localhost:1313/series/feature-toggles/&#34;&gt;series&lt;/a&gt; about implementing feature toggles for a Spring Boot application, we will look at exposing the features to the Angular front-end so that features can be toggled in UI components.&lt;/p&gt;
 &lt;h2 id=&#34;toggling-at-the-front-end&#34;&gt;Toggling at the front end&lt;/h2&gt;
 &lt;p&gt;We decided to use the &lt;a href=&#34;https://github.com/mjt01/angular-feature-flags&#34;&gt;angular-feature-flags&lt;/a&gt; library to toggle features at the front end because it provided us the three features that we were looking for:&lt;/p&gt;
 &lt;ul&gt;
@@ -250,19 +250,19 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;For our use case, we were comfortable re-using the feature key as the name and description of the feature. You may want to capture these meta data in your application configuration and expose this using Spring Boot’s &lt;a href=&#34;http://docs.spring.io/spring-boot/docs/1.1.7.RELEASE/api/org/springframework/boot/context/properties/ConfigurationProperties.html&#34;&gt;ConfigurationProperties&lt;/a&gt;. You can find an example of how use structured configurations in &lt;a href=&#34;https://github.com/sdqali/config-properties&#34;&gt;my example project&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;In the next part of this &lt;a href=&#34;https://sadique.io/series/feature-toggles/&#34;&gt;series&lt;/a&gt;, we will take a look at how to expose the feature information as an &lt;a href=&#34;http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-endpoints.html&#34;&gt;admin end point&lt;/a&gt;.&lt;/p&gt;</description>
+&lt;p&gt;In the next part of this &lt;a href=&#34;http://localhost:1313/series/feature-toggles/&#34;&gt;series&lt;/a&gt;, we will take a look at how to expose the feature information as an &lt;a href=&#34;http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-endpoints.html&#34;&gt;admin end point&lt;/a&gt;.&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Implementing feature toggles for a Spring Boot application - Part 1</title>
-      <link>https://sadique.io/blog/2016/11/22/implementing-feature-toggles-for-a-spring-boot-application-part-1/?utm_source=site&amp;utm_medium=feed</link>
+      <link>http://localhost:1313/blog/2016/11/22/implementing-feature-toggles-for-a-spring-boot-application-part-1/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Tue, 22 Nov 2016 01:03:03 +0000</pubDate>
       
-      <guid>https://sadique.io/blog/2016/11/22/implementing-feature-toggles-for-a-spring-boot-application-part-1/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>&lt;p&gt;In one of our recent projects at work, we implemented feature toggles for a Spring MVC / Angular JS code base and this &lt;a href=&#34;https://sadique.io/series/feature-toggles&#34;&gt;series of blog posts&lt;/a&gt; discusses our motivations and requirements, the approach we took and what we learned from it.&lt;/p&gt;
+      <guid>http://localhost:1313/blog/2016/11/22/implementing-feature-toggles-for-a-spring-boot-application-part-1/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;In one of our recent projects at work, we implemented feature toggles for a Spring MVC / Angular JS code base and this &lt;a href=&#34;http://localhost:1313/series/feature-toggles&#34;&gt;series of blog posts&lt;/a&gt; discusses our motivations and requirements, the approach we took and what we learned from it.&lt;/p&gt;
 &lt;h2 id=&#34;introduction&#34;&gt;Introduction&lt;/h2&gt;
 &lt;p&gt;Feature Toggles are a mechanism to change the behavior of software without having to re-deploy code. Pete Hogdson has a comprehensive &lt;a href=&#34;http://martinfowler.com/articles/feature-toggles.html&#34;&gt;blog post&lt;/a&gt; explaining the complexities of feature toggles.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://sadique.io/images/feature-toggles.svg&#34; alt=&#34;Feature toggles&#34; title=&#34;Feature toggles&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/feature-toggles.svg&#34; alt=&#34;Feature toggles&#34; title=&#34;Feature toggles&#34;&gt;&lt;/p&gt;
 &lt;h2 id=&#34;requirements&#34;&gt;Requirements&lt;/h2&gt;
 &lt;p&gt;Our application is a Spring Boot web application that gets deployed in a Tomcat instance. The application is deployed via Chef and chef sets up the appropriate configuration parameters for the application as Tomcat &lt;a href=&#34;https://tomcat.apache.org/tomcat-8.0-doc/config/context.html#Environment_Entries&#34;&gt;Environment&lt;/a&gt; entries. Since feature toggles are ultimately application parameters &lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;, we started by setting them as Tomcat environment variables. Having considered this, we identified the following requirements:&lt;/p&gt;
 &lt;ul&gt;
@@ -387,7 +387,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;Collections.&lt;span style=&#34;color:#309&#34;&gt;singletonMap&lt;/span&gt;(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;message&amp;#34;&lt;/span&gt;,&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;hello foo!&amp;#34;&lt;/span&gt;);&lt;span style=&#34;color:#bbb&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;}&lt;span style=&#34;color:#bbb&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;}&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;However, now we have two different mechanisms to toggle methods and controllers. It will be nice to consolidate them and doing so will allow us to use the same mechanism for toggling beans. This can be done by annotating &lt;code&gt;FeatureToggle&lt;/code&gt; with the &lt;a href=&#34;https://sadique.io/blog/2015/12/06/implementing-custom-annotations-for-spring-mvc/&#34;&gt;meta annotation&lt;/a&gt; &lt;code&gt;Conditional&lt;/code&gt; that looks up the state of feature toggles using the custom condition &lt;code&gt;FeatureCondition&lt;/code&gt;. This will change &lt;code&gt;FeatureToggle&lt;/code&gt; to:&lt;/p&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;However, now we have two different mechanisms to toggle methods and controllers. It will be nice to consolidate them and doing so will allow us to use the same mechanism for toggling beans. This can be done by annotating &lt;code&gt;FeatureToggle&lt;/code&gt; with the &lt;a href=&#34;http://localhost:1313/blog/2015/12/06/implementing-custom-annotations-for-spring-mvc/&#34;&gt;meta annotation&lt;/a&gt; &lt;code&gt;Conditional&lt;/code&gt; that looks up the state of feature toggles using the custom condition &lt;code&gt;FeatureCondition&lt;/code&gt;. This will change &lt;code&gt;FeatureToggle&lt;/code&gt; to:&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#99f&#34;&gt;@Target&lt;/span&gt;({ElementType.&lt;span style=&#34;color:#309&#34;&gt;TYPE&lt;/span&gt;,&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;ElementType.&lt;span style=&#34;color:#309&#34;&gt;METHOD&lt;/span&gt;})&lt;span style=&#34;color:#bbb&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#99f&#34;&gt;@Retention&lt;/span&gt;(RetentionPolicy.&lt;span style=&#34;color:#309&#34;&gt;RUNTIME&lt;/span&gt;)&lt;span style=&#34;color:#bbb&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#99f&#34;&gt;@Documented&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
@@ -446,7 +446,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;super&lt;/span&gt;.&lt;span style=&#34;color:#309&#34;&gt;addInterceptors&lt;/span&gt;(registry);&lt;span style=&#34;color:#bbb&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;}&lt;span style=&#34;color:#bbb&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;}&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;In the second part of &lt;a href=&#34;https://sadique.io/series/feature-toggles&#34;&gt;this series&lt;/a&gt;, we will explore how the feature toggle can be exposed to the front end and how to consume this and use it for toggling features in the Angular components.&lt;/p&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;In the second part of &lt;a href=&#34;http://localhost:1313/series/feature-toggles&#34;&gt;this series&lt;/a&gt;, we will explore how the feature toggle can be exposed to the front end and how to consume this and use it for toggling features in the Angular components.&lt;/p&gt;
 &lt;div class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
 &lt;hr&gt;
 &lt;ol&gt;
