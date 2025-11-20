@@ -1,75 +1,474 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Python on {code that works}</title>
-    <link>http://localhost:1313/tags/python/</link>
+    <link>https://sadique.io/tags/python/?utm_source=site&amp;utm_medium=feed</link>
     <description>Recent content in Python on {code that works}</description>
-    <generator>Hugo</generator>
+    <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Tue, 26 Sep 2017 04:22:39 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1313/tags/python/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://sadique.io/tags/python/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    
     <item>
       <title>Python URL manipulation revisited</title>
-      <link>http://localhost:1313/blog/2017/09/26/python-url-manipulation-revisited/</link>
+      <link>https://sadique.io/blog/2017/09/26/python-url-manipulation-revisited/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Tue, 26 Sep 2017 04:22:39 +0000</pubDate>
-      <guid>http://localhost:1313/blog/2017/09/26/python-url-manipulation-revisited/</guid>
-      <description>My last blog post about publishing standalone files to Nexus repositories prompted me to revisit URL manipulation in Python. When I did this the last time, I used Python stand library&amp;rsquo;s urlparse and it did the job. This time around, I needed to do a different kind of manipulation. Given a URL, I had to set credentials on it.&#xA;I started at urlparse and soon realized that Python3 moved this module to urllib.</description>
+      
+      <guid>https://sadique.io/blog/2017/09/26/python-url-manipulation-revisited/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;My &lt;a href=&#34;https://sadique.io/blog/2017/08/17/uploading-a-standalone-artifact-to-nexus-3/&#34;&gt;last blog post&lt;/a&gt; about publishing standalone files to Nexus repositories prompted me to revisit URL manipulation in Python. When I did this &lt;a href=&#34;https://sadique.io/blog/2013/09/26/decomposing-urls-in-python/&#34;&gt;the last time&lt;/a&gt;, I used Python stand library&amp;rsquo;s &lt;code&gt;urlparse&lt;/code&gt; and it did the job. This time around, I needed to do a different kind of manipulation. Given a URL, I had to set credentials on it.&lt;/p&gt;
+&lt;p&gt;I started at &lt;code&gt;urlparse&lt;/code&gt; and soon realized that Python3 moved this module to &lt;a href=&#34;https://docs.python.org/3/library/urllib.parse.html&#34;&gt;urllib.parse&lt;/a&gt;. That is not too bad, I thought. After playing around with it, it became clear that &lt;code&gt;urllib.parse&lt;/code&gt; can&amp;rsquo;t manipulate credentials in a URL.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;In [&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;]: &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#0cf;font-weight:bold&#34;&gt;urllib&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;import&lt;/span&gt; parse
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;In [&lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;]: url &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; parse&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;urlparse(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;http://example.com&amp;#39;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;In [&lt;span style=&#34;color:#f60&#34;&gt;3&lt;/span&gt;]: &lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt;(url)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;ParseResult(scheme&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;http&amp;#39;&lt;/span&gt;, netloc&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;example.com&amp;#39;&lt;/span&gt;, path&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;, params&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;, query&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;, fragment&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;In [&lt;span style=&#34;color:#f60&#34;&gt;4&lt;/span&gt;]: url&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;username &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;username&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#555&#34;&gt;---------------------------------------------------------------------------&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c00;font-weight:bold&#34;&gt;AttributeError&lt;/span&gt;                            Traceback (most recent call last)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;ipython&lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#366&#34;&gt;input&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;4&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;60e52&lt;/span&gt;fe02603&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;module&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt;()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#555&#34;&gt;----&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt; url&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;username &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;username&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c00;font-weight:bold&#34;&gt;AttributeError&lt;/span&gt;: can&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;t set attribute&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;In [&lt;span style=&#34;color:#f60&#34;&gt;5&lt;/span&gt;]: url&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;password &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;password&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#555&#34;&gt;---------------------------------------------------------------------------&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c00;font-weight:bold&#34;&gt;AttributeError&lt;/span&gt;                            Traceback (most recent call last)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;ipython&lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#366&#34;&gt;input&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;5&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;4&lt;/span&gt;f64c7192b99&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;module&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt;()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#555&#34;&gt;----&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt; url&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;password &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;password&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c00;font-weight:bold&#34;&gt;AttributeError&lt;/span&gt;: can&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;t set attribute&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;In [&lt;span style=&#34;color:#f60&#34;&gt;6&lt;/span&gt;]: url&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;username &lt;span style=&#34;color:#555&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;None&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Out[&lt;span style=&#34;color:#f60&#34;&gt;6&lt;/span&gt;]: &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;True&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;In [&lt;span style=&#34;color:#f60&#34;&gt;7&lt;/span&gt;]: url&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;password &lt;span style=&#34;color:#555&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;None&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Out[&lt;span style=&#34;color:#f60&#34;&gt;7&lt;/span&gt;]: &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;True&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;After spending time with various URL manipulation libraries in Python, &lt;a href=&#34;https://github.com/gruns/furl&#34;&gt;furl&lt;/a&gt; was the only library that I found to be capable of this seemingly simple and common enough operation.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;In [&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;]: &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#0cf;font-weight:bold&#34;&gt;furl&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;import&lt;/span&gt; furl
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;In [&lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;]: url &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; furl(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;http://example.com&amp;#39;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;In [&lt;span style=&#34;color:#f60&#34;&gt;3&lt;/span&gt;]: url
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Out[&lt;span style=&#34;color:#f60&#34;&gt;3&lt;/span&gt;]: furl(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;http://example.com&amp;#39;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;In [&lt;span style=&#34;color:#f60&#34;&gt;4&lt;/span&gt;]: url&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;password &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;password&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;In [&lt;span style=&#34;color:#f60&#34;&gt;5&lt;/span&gt;]: url&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;username &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;user&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;In [&lt;span style=&#34;color:#f60&#34;&gt;6&lt;/span&gt;]: url&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;tostr()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Out[&lt;span style=&#34;color:#f60&#34;&gt;6&lt;/span&gt;]: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;http://user:password@example.com&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description>
     </item>
+    
     <item>
       <title>Python Hack - Dynamically override an object&#39;s attribute</title>
-      <link>http://localhost:1313/blog/2013/10/07/python-hack-dynamically-override-an-objects-attribute/</link>
+      <link>https://sadique.io/blog/2013/10/07/python-hack-dynamically-override-an-objects-attribute/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Mon, 07 Oct 2013 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/blog/2013/10/07/python-hack-dynamically-override-an-objects-attribute/</guid>
-      <description>While working with Locust 1 recently, we ran into a situation where we had to dynamically override an attribute in a class in the Locust library so as to control what value it got assigned. After a lot of scratching our heads and reading the Python documentation, we came across the property function. We were able to use this to hack together a solution that ensures that every time an attribute is read, it returns the result of executing a method.</description>
+      
+      <guid>https://sadique.io/blog/2013/10/07/python-hack-dynamically-override-an-objects-attribute/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;While working with Locust &lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; recently, we ran into a situation where we had to dynamically override an attribute in a class in the Locust library so as to control what value it got assigned. After a lot of scratching our heads and reading the Python documentation, we came across the &lt;code&gt;property&lt;/code&gt; function. We were able to use this to hack together a solution that ensures that every time an attribute is read, it returns the result of executing a method.&lt;/p&gt;
+&lt;p&gt;The following example demonstrates a stripped down version of this hack.&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;import random
+
+class Foo(object):
+    bar = random.random()
+
+foo = Foo()
+
+# Prints the value assigned when the Foo object is initialised.
+print(&amp;#34;Before override&amp;#34;)
+print(foo.bar)
+print(foo.bar)
+
+# Override
+Foo.bar = property(lambda self: random.random())
+
+print(&amp;#34;After override&amp;#34;)
+print(foo.bar)
+print(foo.bar)
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;This snippet when executed will output the following:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;Before override
+0.0373028550804
+0.0373028550804
+After override
+0.603160033663
+0.501455108419
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;It can be seen that before introducing the override, the value of the &lt;code&gt;bar&lt;/code&gt; attribute is set when the class is initialised and as expected, it does not change how many ever times the attribute is read. However, after the override, the attribute is assigned a new value every time it is read.&lt;/p&gt;
+&lt;h2 id=&#34;how-does-this-work&#34;&gt;How does this work?&lt;/h2&gt;
+&lt;p&gt;The &lt;code&gt;property()&lt;/code&gt; &lt;sup id=&#34;fnref:2&#34;&gt;&lt;a href=&#34;#fn:2&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;2&lt;/a&gt;&lt;/sup&gt; function returns an attribute for any class. It allows the creation of Ruby&amp;rsquo;s &lt;code&gt;attr_accessor&lt;/code&gt; &lt;sup id=&#34;fnref:3&#34;&gt;&lt;a href=&#34;#fn:3&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;3&lt;/a&gt;&lt;/sup&gt; style attributes on classes so that one can write &lt;code&gt;instance.attrib&lt;/code&gt; to read an attribute value and &lt;code&gt;instance.attrib= &lt;/code&gt; to set an attribute value. What line &lt;code&gt;14&lt;/code&gt; in the snippet does is to re-define the &lt;code&gt;bar&lt;/code&gt; attribute to be a property whose &lt;code&gt;getter&lt;/code&gt; is a &lt;code&gt;lambda&lt;/code&gt;. Every time the &lt;code&gt;bar&lt;/code&gt; attribute is read, the &lt;code&gt;lambda&lt;/code&gt; gets executed.&lt;/p&gt;
+&lt;p&gt;A more comprehensive example of this can be found in my &lt;a href=&#34;https://github.com/sdqali/python_dojo/blob/master/dynamic_override/dynamic_override.py&#34;&gt;Python dojo repository&lt;/a&gt; on GitHub.&lt;/p&gt;
+&lt;div class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
+&lt;hr&gt;
+&lt;ol&gt;
+&lt;li id=&#34;fn:1&#34;&gt;
+&lt;p&gt;&lt;a href=&#34;http://locust.io/&#34;&gt;Locust&lt;/a&gt; - a modern load testing framework.&amp;#160;&lt;a href=&#34;#fnref:1&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id=&#34;fn:2&#34;&gt;
+&lt;p&gt;Python&amp;rsquo;s built-in functions - &lt;a href=&#34;http://docs.python.org/2/library/functions.html#property&#34;&gt;property&lt;/a&gt;.&amp;#160;&lt;a href=&#34;#fnref:2&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id=&#34;fn:3&#34;&gt;
+&lt;p&gt;Ruby&amp;rsquo;s &lt;a href=&#34;http://www.ruby-doc.org/core-1.9.3/Module.html#method-i-attr_accessor&#34;&gt;&lt;code&gt;attr_accessor&lt;/code&gt; method&lt;/a&gt;.&amp;#160;&lt;a href=&#34;#fnref:3&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+</description>
     </item>
+    
     <item>
       <title>Named Capture Groups in Regular Expressions</title>
-      <link>http://localhost:1313/blog/2013/09/29/named-capture-groups-in-regular-expressions/</link>
+      <link>https://sadique.io/blog/2013/09/29/named-capture-groups-in-regular-expressions/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Sun, 29 Sep 2013 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/blog/2013/09/29/named-capture-groups-in-regular-expressions/</guid>
-      <description>I will admit that I find regular expressions somewhat hard to parse. While the thinking process needed to write a regular expression is iterative and hence results in the correct expression suitable for the situation, once it is written it lacks readability. I have faced that pain of trying to grok a complex regular expression written years ago. So I was pleasantly surprised when I saw this example from Hacker News user WestCoastJustin.</description>
+      
+      <guid>https://sadique.io/blog/2013/09/29/named-capture-groups-in-regular-expressions/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;I will admit that I find regular expressions somewhat hard to parse. While the thinking process needed to write a regular expression is iterative and hence results in the correct expression suitable for the situation, once it is written it lacks readability. I have faced that pain of trying to grok a complex regular expression written years ago. So I was pleasantly surprised when I saw &lt;a href=&#34;https://news.ycombinator.com/item?id=6463144&#34;&gt;this example&lt;/a&gt; from Hacker News user &lt;em&gt;WestCoastJustin&lt;/em&gt;. I found it very easy to understand because of the names he had assigned to each capture group in the expression.&lt;/p&gt;
+&lt;h2 id=&#34;ruby&#34;&gt;Ruby&lt;/h2&gt;
+&lt;p&gt;Ruby has supported named capture groups since version 1.9. Each match group is named by using &lt;code&gt;?&amp;lt;name&amp;gt;&lt;/code&gt; inside the match group and these matches are made available has a hash and each match can be accessed by using the match group name as the key.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;WestCoastJustin&lt;/em&gt;&amp;rsquo;s example will look like this in Ruby:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;#!/usr/bin/env ruby&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;test_string &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Today&amp;#39;s date is: 9/28/2013.&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;match &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; test_string&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;match &lt;span style=&#34;color:#3aa&#34;&gt;/(?&amp;lt;month&amp;gt;\d{1,2})\/(?&amp;lt;day&amp;gt;\d{1,2})\/(?&amp;lt;year&amp;gt;\d{4})/&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; match&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;inspect
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; match&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#fc3&#34;&gt;:month&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; match&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#fc3&#34;&gt;:day&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; match&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#fc3&#34;&gt;:year&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This is much easier to understand because looking at it, it makes it clear that the intent of matching the first group of 1 or 2 digits is to look for the &lt;strong&gt;month&lt;/strong&gt; in the date. Similarly, the intent of the &lt;em&gt;day&lt;/em&gt; and &lt;em&gt;year&lt;/em&gt; matches are easier to understand.&lt;/p&gt;
+&lt;p&gt;This will result in:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&amp;gt; ruby /tmp/named_matches.rb
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;#&amp;lt;MatchData &amp;#34;9/28/2013&amp;#34; month:&amp;#34;9&amp;#34; day:&amp;#34;28&amp;#34; year:&amp;#34;2013&amp;#34;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f60&#34;&gt;9&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f60&#34;&gt;28&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f60&#34;&gt;2013&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;##Python
+Python&amp;rsquo;s &lt;code&gt;re&lt;/code&gt; module supports named match groups using the &lt;code&gt;?P&amp;lt;name&amp;gt;&lt;/code&gt; pattern. After a pattern search, the results are placed in a &lt;code&gt;dict&lt;/code&gt;.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;#!/usr/bin/env ruby&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color:#0cf;font-weight:bold&#34;&gt;re&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;test_string &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Today&amp;#39;s date is: 9/28/2013.&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;pattern &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; re&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;compile(&lt;span style=&#34;color:#c30&#34;&gt;r&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;(?P&amp;lt;month&amp;gt;\d{1,2})\/(?P&amp;lt;day&amp;gt;\d{1,2})\/(?P&amp;lt;year&amp;gt;\d&lt;/span&gt;&lt;span style=&#34;color:#a00&#34;&gt;{4}&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;)&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;match_dict &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; pattern&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;search(test_string)&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;groupdict()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt;(match_dict)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;JavaScript does not support named capture groups. There are a lot of &lt;a href=&#34;http://trentrichardson.com/2011/08/02/javascript-regexp-match-named-captures/&#34;&gt;hacks&lt;/a&gt; aimed at providing this functionality. The XRegExp library &lt;a href=&#34;http://xregexp.com/syntax/#namedCapture&#34;&gt;supports&lt;/a&gt; named capture groups.&lt;/p&gt;
+</description>
     </item>
+    
     <item>
       <title>Decomposing URLs in Python</title>
-      <link>http://localhost:1313/blog/2013/09/26/decomposing-urls-in-python/</link>
+      <link>https://sadique.io/blog/2013/09/26/decomposing-urls-in-python/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Thu, 26 Sep 2013 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/blog/2013/09/26/decomposing-urls-in-python/</guid>
-      <description>Python&amp;rsquo;s urlparse module breaks down URLs in to components. It supports all the URL schemes specified in RFC 3986 1.&#xA;&amp;gt;&amp;gt;&amp;gt; import urlparse &amp;gt;&amp;gt;&amp;gt; &amp;gt;&amp;gt;&amp;gt; urlparse.urlparse(&amp;#34;https://example.com/foo?param=bar&amp;#34;) ParseResult(scheme=&amp;#39;https&amp;#39;, netloc=&amp;#39;example.com&amp;#39;, path=&amp;#39;/foo&amp;#39;, params=&amp;#39;&amp;#39;, query=&amp;#39;param=bar&amp;#39;, fragment=&amp;#39;&amp;#39;) &amp;gt;&amp;gt;&amp;gt; &amp;gt;&amp;gt;&amp;gt; urlparse.urlparse(&amp;#34;file://example.com/etc/fstab&amp;#34;) ParseResult(scheme=&amp;#39;file&amp;#39;, netloc=&amp;#39;example.com&amp;#39;, path=&amp;#39;/etc/fstab&amp;#39;, params=&amp;#39;&amp;#39;, query=&amp;#39;&amp;#39;, fragment=&amp;#39;&amp;#39;) &amp;gt;&amp;gt;&amp;gt; &amp;gt;&amp;gt;&amp;gt; urlparse.urlparse(&amp;#34;news:comp.infosystems.www.misc&amp;#34;) ParseResult(scheme=&amp;#39;news&amp;#39;, netloc=&amp;#39;&amp;#39;, path=&amp;#39;comp.infosystems.www.misc&amp;#39;, params=&amp;#39;&amp;#39;, query=&amp;#39;&amp;#39;, fragment=&amp;#39;&amp;#39;) IETF - RFC for Uniform Resource Identifier (URI): Generic Syntax.&amp;#160;&amp;#x21a9;&amp;#xfe0e;</description>
+      
+      <guid>https://sadique.io/blog/2013/09/26/decomposing-urls-in-python/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;Python&amp;rsquo;s &lt;code&gt;urlparse&lt;/code&gt; module breaks down URLs in to components. It supports all the URL schemes specified in RFC 3986 &lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&amp;gt;&amp;gt;&amp;gt; import urlparse
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&amp;gt;&amp;gt;&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&amp;gt;&amp;gt;&amp;gt; urlparse.urlparse&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;https://example.com/foo?param=bar&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;ParseResult&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#033&#34;&gt;scheme&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;https&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#033&#34;&gt;netloc&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;example.com&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#033&#34;&gt;path&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;/foo&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#033&#34;&gt;params&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#033&#34;&gt;query&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;param=bar&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#033&#34;&gt;fragment&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&amp;gt;&amp;gt;&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&amp;gt;&amp;gt;&amp;gt; urlparse.urlparse&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;file://example.com/etc/fstab&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;ParseResult&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#033&#34;&gt;scheme&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;file&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#033&#34;&gt;netloc&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;example.com&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#033&#34;&gt;path&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;/etc/fstab&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#033&#34;&gt;params&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#033&#34;&gt;query&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#033&#34;&gt;fragment&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&amp;gt;&amp;gt;&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&amp;gt;&amp;gt;&amp;gt; urlparse.urlparse&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;news:comp.infosystems.www.misc&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;ParseResult&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#033&#34;&gt;scheme&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;news&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#033&#34;&gt;netloc&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#033&#34;&gt;path&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;comp.infosystems.www.misc&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#033&#34;&gt;params&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#033&#34;&gt;query&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#033&#34;&gt;fragment&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
+&lt;hr&gt;
+&lt;ol&gt;
+&lt;li id=&#34;fn:1&#34;&gt;
+&lt;p&gt;IETF - RFC for &lt;a href=&#34;https://tools.ietf.org/html/rfc3986&#34;&gt;Uniform Resource Identifier (URI): Generic Syntax&lt;/a&gt;.&amp;#160;&lt;a href=&#34;#fnref:1&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+</description>
     </item>
+    
     <item>
       <title>Python&#39;s bool type</title>
-      <link>http://localhost:1313/blog/2013/08/15/pythons-bool-type/</link>
+      <link>https://sadique.io/blog/2013/08/15/pythons-bool-type/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Thu, 15 Aug 2013 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/blog/2013/08/15/pythons-bool-type/</guid>
-      <description>Python does not have a true boolean type. The True and False built-in values in Python are wrappers around the integers 1 and 0. This results in some interesting results involving True and False.&#xA;&amp;gt;&amp;gt;&amp;gt; True == 1 True &amp;gt;&amp;gt;&amp;gt; False == 0 True &amp;gt;&amp;gt;&amp;gt; True + 9 10 &amp;gt;&amp;gt;&amp;gt; False - 1 -1 &amp;gt;&amp;gt;&amp;gt; str(True) &amp;#39;True&amp;#39; &amp;gt;&amp;gt;&amp;gt; repr(True) &amp;#39;True&amp;#39; The Python bool implementation got formalised in PEP 285 1 in 2002 by Guido van Rossum.</description>
+      
+      <guid>https://sadique.io/blog/2013/08/15/pythons-bool-type/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;Python does not have a true boolean type. The &lt;code&gt;True&lt;/code&gt; and &lt;code&gt;False&lt;/code&gt; built-in values in Python are wrappers around the integers &lt;code&gt;1&lt;/code&gt; and &lt;code&gt;0&lt;/code&gt;. This results in some interesting results involving True and False.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;True&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;True&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;False&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;True&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;True&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;9&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f60&#34;&gt;10&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;False&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#366&#34;&gt;str&lt;/span&gt;(&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;True&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;True&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#366&#34;&gt;repr&lt;/span&gt;(&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;True&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;True&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The Python bool implementation got formalised in PEP 285 &lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; in 2002 by Guido van Rossum. The specification gives a lot of insight into von Rossum&amp;rsquo;s insistence on maintaining backward compatibility and the Python way. It also touches up on another aspect of truthness in Python. In Python, almost all objects can be used to represent truth values. This means an empty list is false and a non-empty list is true.&lt;/p&gt;
+&lt;p&gt;So this&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; []:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Truth&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;else&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Falsehood&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;will print &amp;ldquo;Falsehood&amp;rdquo; and the following&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; [&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;3&lt;/span&gt;]:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Truth&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;else&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Falsehood&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;will print &amp;ldquo;Truth&amp;rdquo;.&lt;/p&gt;
+&lt;div class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
+&lt;hr&gt;
+&lt;ol&gt;
+&lt;li id=&#34;fn:1&#34;&gt;
+&lt;p&gt;&lt;a href=&#34;http://www.python.org/dev/peps/pep-0285/&#34;&gt;Adding a bool type&lt;/a&gt; by Guido van Rossum.&amp;#160;&lt;a href=&#34;#fnref:1&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+</description>
     </item>
+    
     <item>
       <title>Understanding Python&#39;s &#34;with&#34; statement</title>
-      <link>http://localhost:1313/blog/2012/07/09/understanding-pythons-with-statement/</link>
+      <link>https://sadique.io/blog/2012/07/09/understanding-pythons-with-statement/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Mon, 09 Jul 2012 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/blog/2012/07/09/understanding-pythons-with-statement/</guid>
-      <description>&lt;h2 id=&#34;what-is-it&#34;&gt;What is it?&lt;/h2&gt;&#xA;&lt;p&gt;Python&amp;rsquo;s &lt;code&gt;with&lt;/code&gt; statement provides a very convenient way of dealing with the situation where you have to do a setup and teardown to make something happen. A very good example for this is the situation where you want to gain a handler to a file, read data from the file and the close the file handler.&lt;/p&gt;&#xA;&lt;p&gt;Without the &lt;code&gt;with&lt;/code&gt; statement, one would write something along the lines of:&lt;/p&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;file &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#366&#34;&gt;open&lt;/span&gt;(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/tmp/foo.txt&amp;#34;&lt;/span&gt;)&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;data &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; file&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;read()&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;file&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;close()&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;There are two annoying things here. First, you end up forgetting to close the file handler. The second is how to handle exceptions that may occur once the file handler has been obtained. One could write something like this to get around this:&lt;/p&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;file &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#366&#34;&gt;open&lt;/span&gt;(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/tmp/foo.txt&amp;#34;&lt;/span&gt;)&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;try&lt;/span&gt;:&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    data &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; file&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;read()&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;finally&lt;/span&gt;:&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    file&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;close()&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;While this works well, it is unnecessarily verbose. This is where &lt;code&gt;with&lt;/code&gt; is useful. The good thing about &lt;code&gt;with&lt;/code&gt; apart from the better syntax is that it is very good handling exceptions. The above code would look like this, when using &lt;code&gt;with&lt;/code&gt;:&lt;/p&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;with&lt;/span&gt; &lt;span style=&#34;color:#366&#34;&gt;open&lt;/span&gt;(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/tmp/foo.txt&amp;#34;&lt;/span&gt;) &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;as&lt;/span&gt; file:&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;   data &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; file&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;read()&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description>
+      
+      <guid>https://sadique.io/blog/2012/07/09/understanding-pythons-with-statement/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;h2 id=&#34;what-is-it&#34;&gt;What is it?&lt;/h2&gt;
+&lt;p&gt;Python&amp;rsquo;s &lt;code&gt;with&lt;/code&gt; statement provides a very convenient way of dealing with the situation where you have to do a setup and teardown to make something happen. A very good example for this is the situation where you want to gain a handler to a file, read data from the file and the close the file handler.&lt;/p&gt;
+&lt;p&gt;Without the &lt;code&gt;with&lt;/code&gt; statement, one would write something along the lines of:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;file &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#366&#34;&gt;open&lt;/span&gt;(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/tmp/foo.txt&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;data &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; file&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;read()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;file&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;close()
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;There are two annoying things here. First, you end up forgetting to close the file handler. The second is how to handle exceptions that may occur once the file handler has been obtained. One could write something like this to get around this:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;file &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#366&#34;&gt;open&lt;/span&gt;(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/tmp/foo.txt&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;try&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    data &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; file&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;read()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;finally&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    file&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;close()
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;While this works well, it is unnecessarily verbose. This is where &lt;code&gt;with&lt;/code&gt; is useful. The good thing about &lt;code&gt;with&lt;/code&gt; apart from the better syntax is that it is very good handling exceptions. The above code would look like this, when using &lt;code&gt;with&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;with&lt;/span&gt; &lt;span style=&#34;color:#366&#34;&gt;open&lt;/span&gt;(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/tmp/foo.txt&amp;#34;&lt;/span&gt;) &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;as&lt;/span&gt; file:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;   data &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; file&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;read()
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;how-does-it-work&#34;&gt;How does it work?&lt;/h2&gt;
+&lt;p&gt;While this might look like magic, the way Python handles &lt;code&gt;with&lt;/code&gt; is more clever than magic. The basic idea is that the statement after &lt;code&gt;with&lt;/code&gt; has to evaluate an object that responds to an &lt;code&gt;__enter__()&lt;/code&gt; as well as an &lt;code&gt;__exit__()&lt;/code&gt; function.&lt;/p&gt;
+&lt;p&gt;After the statement that follows &lt;code&gt;with&lt;/code&gt; is evaluated, the &lt;code&gt;__enter__()&lt;/code&gt; function on the resulting object is called. The value returned by this function is assigned to the variable following &lt;code&gt;as&lt;/code&gt;. After every statement in the block is evaluated, the &lt;code&gt;__exit__()&lt;/code&gt; function is called.&lt;/p&gt;
+&lt;p&gt;This can be demonstrated with the following example:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;#!/usr/bin/env python&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# with_example01.py&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;Sample&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;__enter__&lt;/span&gt;(&lt;span style=&#34;color:#366&#34;&gt;self&lt;/span&gt;):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;In __enter__()&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Foo&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;__exit__&lt;/span&gt;(&lt;span style=&#34;color:#366&#34;&gt;self&lt;/span&gt;, &lt;span style=&#34;color:#366&#34;&gt;type&lt;/span&gt;, value, trace):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;In __exit__()&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;get_sample&lt;/span&gt;():
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; Sample()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;with&lt;/span&gt; get_sample() &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;as&lt;/span&gt; sample:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;sample:&amp;#34;&lt;/span&gt;, sample
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;When executed, this will result in:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;bash-3.2$ ./with_example01.py
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;In __enter__&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sample: Foo
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;In __exit__&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;As you can see,&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;The &lt;code&gt;__enter__()&lt;/code&gt; function is executed&lt;/li&gt;
+&lt;li&gt;The value returned by it - in this case &lt;code&gt;&amp;quot;Foo&amp;quot;&lt;/code&gt; is assigned to &lt;code&gt;sample&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;The body of the block is executed, thereby printing the value of &lt;code&gt;sample&lt;/code&gt; ie. &lt;code&gt;&amp;quot;Foo&amp;quot;&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;The &lt;code&gt;__exit__()&lt;/code&gt; function is called.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;What makes &lt;code&gt;with&lt;/code&gt; really powerful is the fact that it can handle exceptions. You would have noticed that the &lt;code&gt;__exit__()&lt;/code&gt; function for &lt;code&gt;Sample&lt;/code&gt; takes three arguments - &lt;code&gt;val&lt;/code&gt;, &lt;code&gt;type&lt;/code&gt; and &lt;code&gt;trace&lt;/code&gt;. These are useful in exception handling. Let&amp;rsquo;s see how this works by modifying the above example.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;#!/usr/bin/env python&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# with_example02.py&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;Sample&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;__enter__&lt;/span&gt;(&lt;span style=&#34;color:#366&#34;&gt;self&lt;/span&gt;):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#366&#34;&gt;self&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;__exit__&lt;/span&gt;(&lt;span style=&#34;color:#366&#34;&gt;self&lt;/span&gt;, &lt;span style=&#34;color:#366&#34;&gt;type&lt;/span&gt;, value, trace):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;type:&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#366&#34;&gt;type&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;value:&amp;#34;&lt;/span&gt;, value
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;trace:&amp;#34;&lt;/span&gt;, trace
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;do_something&lt;/span&gt;(&lt;span style=&#34;color:#366&#34;&gt;self&lt;/span&gt;):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        bar &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;/&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; bar &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;10&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;with&lt;/span&gt; Sample() &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;as&lt;/span&gt; sample:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    sample&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;do_something()
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Notice how in this example, instead of &lt;code&gt;get_sample()&lt;/code&gt;, &lt;code&gt;with&lt;/code&gt; takes &lt;code&gt;Sample()&lt;/code&gt;. It does not matter, as long as the statement that follows &lt;code&gt;with&lt;/code&gt; evaluates to an object that has an &lt;code&gt;__enter__()&lt;/code&gt; and &lt;code&gt;__exit__()&lt;/code&gt; functions. In this case, &lt;code&gt;Sample()&lt;/code&gt;&amp;rsquo;s &lt;code&gt;__enter__()&lt;/code&gt; returns the newly created instance of &lt;code&gt;Sample&lt;/code&gt; and that is what gets passed to &lt;code&gt;sample&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;When executed:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;bash-3.2$ ./with_example02.py
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;type: &amp;lt;&lt;span style=&#34;color:#366&#34;&gt;type&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;exceptions.ZeroDivisionError&amp;#39;&lt;/span&gt;&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;value: integer division or modulo by zero
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;trace: &amp;lt;traceback object at 0x1004a8128&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Traceback &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;most recent call last&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  File &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;./with_example02.py&amp;#34;&lt;/span&gt;, line 19, in &amp;lt;module&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    sample.do_something&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  File &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;./with_example02.py&amp;#34;&lt;/span&gt;, line 15, in do_something
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#033&#34;&gt;bar&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; 1/0
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;ZeroDivisionError: integer division or modulo by zero
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Essentially, if there are exceptions being thrown from anywhere inside the block, the &lt;code&gt;__exit__()&lt;/code&gt; function for the object is called. As you can see, the type, value and the stack trace associated with the exception thrown is passed to this function. In this case, you can see that there was a &lt;code&gt;ZeroDivisionError&lt;/code&gt; exception being thrown. People implementing libraries can write code that clean up resources, close files etc. in their &lt;code&gt;__exit__()&lt;/code&gt; functions.&lt;/p&gt;
+&lt;p&gt;Thus, Python&amp;rsquo;s &lt;code&gt;with&lt;/code&gt; is a nifty construct that makes code a little less verbose and makes cleaning up during exceptions a bit easier.&lt;/p&gt;
+&lt;p&gt;I have put the code examples given here on &lt;a href=&#34;https://github.com/sdqali/python_dojo/tree/master/with&#34;&gt;Github&lt;/a&gt;.&lt;/p&gt;</description>
     </item>
+    
     <item>
       <title>Heredocs in Ruby and Python</title>
-      <link>http://localhost:1313/blog/2012/07/04/heredocs-in-ruby-and-python/</link>
+      <link>https://sadique.io/blog/2012/07/04/heredocs-in-ruby-and-python/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Wed, 04 Jul 2012 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/blog/2012/07/04/heredocs-in-ruby-and-python/</guid>
-      <description>&lt;p&gt;I have been doing some coding in Python recently. While playing around with some code, I noticed that the way &lt;a href=&#34;http://en.wikipedia.org/wiki/Here_document&#34;&gt;heredocs&lt;/a&gt; are used in Python is different from Ruby.&lt;/p&gt;&#xA;&lt;h2 id=&#34;python&#34;&gt;Python&lt;/h2&gt;&#xA;&lt;p&gt;Consider the following snippet:&lt;/p&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# test.py&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;some text in single line&amp;#34;&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&amp;#34;&amp;#34;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt;As opposed to&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt;some text&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt;written as&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt;heredoc&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;and then another single line&amp;#34;&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;When run, this would result in this:&lt;/p&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;bash-3.2$ python test.py&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;some text in single line&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;As opposed to&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;some text&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;written as&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;heredoc&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;and &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;then&lt;/span&gt; another single line&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Notice how there is a preceding and trailing linebreak around the string printed using heredoc.&lt;/p&gt;</description>
+      
+      <guid>https://sadique.io/blog/2012/07/04/heredocs-in-ruby-and-python/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;I have been doing some coding in Python recently. While playing around with some code, I noticed that the way &lt;a href=&#34;http://en.wikipedia.org/wiki/Here_document&#34;&gt;heredocs&lt;/a&gt; are used in Python is different from Ruby.&lt;/p&gt;
+&lt;h2 id=&#34;python&#34;&gt;Python&lt;/h2&gt;
+&lt;p&gt;Consider the following snippet:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# test.py&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;some text in single line&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&amp;#34;&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt;As opposed to
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt;some text
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt;written as
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt;heredoc
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;and then another single line&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;When run, this would result in this:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;bash-3.2$ python test.py
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;some text in single line
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;As opposed to
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;some text
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;written as
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;heredoc
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;and &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;then&lt;/span&gt; another single line
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Notice how there is a preceding and trailing linebreak around the string printed using heredoc.&lt;/p&gt;
+&lt;p&gt;I spent a lot of time trying to figure out how and why this was happening. Finally, help came from &lt;code&gt;@dibb&lt;/code&gt; on &lt;code&gt;#python&lt;/code&gt;. Looks like I was doing it wrong. In Python, the useful part of the heredoc starts immediately after the &lt;code&gt;&amp;quot;&amp;quot;&amp;quot;&lt;/code&gt;. So if you don&amp;rsquo;t want those excess linebreaks, you should write something like this:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# test2.py&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;some text in single line&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&amp;#34;&amp;#34;As opposed to
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt;some text
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt;written as
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt;heredoc&amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;and then another single line&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;When run, this would print the text without the extra line breaks:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;bash-3.2$ python test2.py
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;some text in single line
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;As opposed to
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;some text
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;written as
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;heredoc
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;and &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;then&lt;/span&gt; another single line
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;If you don&amp;rsquo;t want to write the string just after the &lt;code&gt;&amp;quot;&amp;quot;&amp;quot;&lt;/code&gt;, you could use a &lt;code&gt;\&lt;/code&gt; to remove the linebreaks, like this:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# test3.py&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;As opposed to
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt;some text
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt;written as
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt;heredoc&lt;/span&gt;&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;ruby&#34;&gt;Ruby&lt;/h2&gt;
+&lt;p&gt;I come from the Ruby world, where the heredocs behave in a slightly different way. The equivalent code in Ruby would look like this:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# test.rb&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;some text in single line&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;lt;&amp;lt;-STR
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#360&#34;&gt;As&lt;/span&gt; opposed to
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;some text
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;written as
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;heredoc
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#360&#34;&gt;STR&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;and then another single line&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Notice how the actual content of the heredoc begins only on the line after &lt;code&gt;&amp;lt;&amp;lt;-STR&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;I hope being aware of this detail saves you some time.&lt;/p&gt;</description>
     </item>
+    
     <item>
       <title>Micro Journal - simple Git-backed journal in Python</title>
-      <link>http://localhost:1313/blog/2012/06/25/micro-journal-simple-git-backed-journal-in-python/</link>
+      <link>https://sadique.io/blog/2012/06/25/micro-journal-simple-git-backed-journal-in-python/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Mon, 25 Jun 2012 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/blog/2012/06/25/micro-journal-simple-git-backed-journal-in-python/</guid>
-      <description>Today, I pushed out Microjournal, a simple and lightweight journal. I wrote Microjournal to reduce the pain of typing a number of commands to create and maintain my daily journal which I type out in Emacs and use Git to store. It is a single file Python script.&#xA;Microjournal does not do much on it&amp;rsquo;s own. It creates a Git repository for you, and then you can write down entries whenever you feel like.</description>
+      
+      <guid>https://sadique.io/blog/2012/06/25/micro-journal-simple-git-backed-journal-in-python/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;Today, I pushed out &lt;a href=&#34;https://github.com/sdqali/microjournal&#34;&gt;Microjournal&lt;/a&gt;, a simple and lightweight journal. I wrote Microjournal to reduce the pain of typing a number of commands to create and maintain my daily journal which I type out in Emacs and use Git to store. It is a single file Python script.&lt;/p&gt;
+&lt;p&gt;Microjournal does not do much on it&amp;rsquo;s own. It creates a Git repository for you, and then you can write down entries whenever you feel like. It opens the entry for the day in your $EDITOR. It adds the current date and time to the entry so that you don&amp;rsquo;t have to manually enter it.&lt;/p&gt;
+&lt;p&gt;This was also an experiment in
+&lt;a href=&#34;http://tom.preston-werner.com/2010/08/23/readme-driven-development.html&#34;&gt;Readme driven development&lt;/a&gt;. The act of writing your README beforehand makes you think about how the user would interact with the tool.&lt;/p&gt;
+&lt;p&gt;You can find the code &lt;a href=&#34;https://github.com/sdqali/microjournal&#34;&gt;here&lt;/a&gt;. If you
+don&amp;rsquo;t want to bother with cloning the repo, you can grab a &lt;a href=&#34;https://github.com/sdqali/microjournal/tarball/master&#34;&gt;tarball&lt;/a&gt; or a &lt;a href=&#34;https://github.com/sdqali/microjournal/zipball/master&#34;&gt;zip&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;As always, feedback and pull requests are welcome.&lt;/p&gt;
+</description>
     </item>
+    
     <item>
       <title>Autorun.py - Execute stuff on file change</title>
-      <link>http://localhost:1313/blog/2010/01/09/autorun.py-execute-stuff-on-file-change/</link>
+      <link>https://sadique.io/blog/2010/01/09/autorun.py-execute-stuff-on-file-change/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Sat, 09 Jan 2010 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/blog/2010/01/09/autorun.py-execute-stuff-on-file-change/</guid>
-      <description>I really liked ZenTest&amp;rsquo;s Autospec in action. Recently, when I was trying to write some Python stuff, I thought it would be nice if I would have a tool that would just run the unit tests, so that I don&amp;rsquo;t have to switch between console windows. Better still, I could run it from inside my Emacs.&#xA;Clearly, monitoring files for changes, shouldn&amp;rsquo;t be big deal. I decided to write the tool myself in Python.</description>
+      
+      <guid>https://sadique.io/blog/2010/01/09/autorun.py-execute-stuff-on-file-change/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;I really liked ZenTest&amp;rsquo;s Autospec in action. Recently, when I was trying to write some Python stuff, I thought it would be nice if I would have a tool that would just run the unit tests, so that I don&amp;rsquo;t have to switch between console windows. Better still, I could run it from inside my Emacs.&lt;/p&gt;
+&lt;p&gt;Clearly, monitoring files for changes, shouldn&amp;rsquo;t be big deal. I decided to write the tool myself in Python. the prime intension was to help myself learn Python. Although that didn&amp;rsquo;t quite workout, I managed to come up with a quick and dirty hack to do it. It uses &lt;code&gt;pyinotify&lt;/code&gt;, which is a Python module for monitoring filesystem changes. Since &lt;code&gt;pyinotify&lt;/code&gt; depends on the Linux kernel, this would work only on Linux boxes.&lt;/p&gt;
+&lt;p&gt;I named it &lt;code&gt;autorun.py&lt;/code&gt;. If you want to run some task, depending on file changes in a directory, you navigate to that directory and start autorunner as:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;~/src/sdq/ocr$ ./autorun.py &amp;quot;python Test*.py&amp;quot;&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;That would start &lt;code&gt;autorun.py&lt;/code&gt; and every time I modify a file in the present directory the command  &lt;code&gt;python Test*.py&lt;/code&gt; is executed. In my case, I am using the unittest framework that comes with Python. So everytime, a file is updates, it runs all my unit tests, as seen below:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sadiquea@sadiquea-laptop:~/src/sdq/ocr$ ./autorun.py &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;python Test*.py&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Autorunner in action
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;.............
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;----------------------------------------------------------------------
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Ran &lt;span style=&#34;color:#f60&#34;&gt;13&lt;/span&gt; tests in 0.763s
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;OK
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;If I were working with Ruby and wanted to run all my unit tests when I modify the files, I could start the tool like this: &lt;code&gt;./autorun.py &amp;quot;rake spec&amp;quot;&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;I would really like to add the ability to exclude some files/subdirectories from being watched for changes.&lt;/p&gt;
+&lt;p&gt;Here is the code snippet that does the trick:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;#!/usr/bin/env python&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color:#0cf;font-weight:bold&#34;&gt;sys&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color:#0cf;font-weight:bold&#34;&gt;os&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color:#0cf;font-weight:bold&#34;&gt;pyinotify&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color:#366&#34;&gt;len&lt;/span&gt;(sys&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;argv)&lt;span style=&#34;color:#555&#34;&gt;==&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Please pass a command to excute as a parameter&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;For example autorun.py &amp;#39;ruby foo.rb&amp;#39;&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    sys&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;exit()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;commandToRun &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; sys&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;argv[&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;]
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;watchManager &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; pyinotify&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;WatchManager()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;mask &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; pyinotify&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;IN_MODIFY
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;ActionProcesser&lt;/span&gt;(pyinotify&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;ProcessEvent):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;process_IN_MODIFY&lt;/span&gt;(&lt;span style=&#34;color:#366&#34;&gt;self&lt;/span&gt;, event):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Autorunner in action&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        os&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;system(commandToRun)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;notifier &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; pyinotify&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;Notifier(watchManager, ActionProcesser())
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;wdd &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; watchManager&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;add_watch(os&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;getcwd(), mask, rec&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;True&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;while&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;True&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;try&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        notifier&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;process_events()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; notifier&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;check_events():
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            notifier&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;read_events()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;except&lt;/span&gt; &lt;span style=&#34;color:#c00;font-weight:bold&#34;&gt;KeyboardInterrupt&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        notifier&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;stop()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;break&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description>
     </item>
+    
   </channel>
 </rss>

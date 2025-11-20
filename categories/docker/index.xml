@@ -1,19 +1,139 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Docker on {code that works}</title>
-    <link>http://localhost:1313/categories/docker/</link>
+    <link>https://sadique.io/categories/docker/?utm_source=site&amp;utm_medium=feed</link>
     <description>Recent content in Docker on {code that works}</description>
-    <generator>Hugo</generator>
+    <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Sat, 05 Nov 2016 05:34:53 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1313/categories/docker/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://sadique.io/categories/docker/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    
     <item>
       <title>A very basic introduction to deploying a Java application using Kubernetes</title>
-      <link>http://localhost:1313/blog/2016/11/05/a-very-basic-introduction-to-deploying-a-java-application-using-kubernetes/</link>
+      <link>https://sadique.io/blog/2016/11/05/a-very-basic-introduction-to-deploying-a-java-application-using-kubernetes/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Sat, 05 Nov 2016 05:34:53 +0000</pubDate>
-      <guid>http://localhost:1313/blog/2016/11/05/a-very-basic-introduction-to-deploying-a-java-application-using-kubernetes/</guid>
-      <description>I have been playing around with Kubernetes and Docker lately. To borrow the description of Kubernetes from their website,&#xA;&amp;ldquo;Kubernetes is an open-source system for automating deployment, scaling, and management of containerized applications.&amp;rdquo;&#xA;One of the first things I did was to try and see what it would take to go from an application to deploying it. I started with a simple Java application and had to set up the development environment.</description>
+      
+      <guid>https://sadique.io/blog/2016/11/05/a-very-basic-introduction-to-deploying-a-java-application-using-kubernetes/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;I have been playing around with Kubernetes and Docker lately. To borrow the description of Kubernetes from their website,&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&amp;ldquo;Kubernetes is an open-source system for automating deployment, scaling, and management of containerized applications.&amp;rdquo;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;One of the first things I did was to try and see what it would take to go from an application to deploying it. I started with a simple Java application and had to set up the development environment. These are my notes from this process. This assumes that you have docker installed on your development environment.&lt;/p&gt;
+&lt;h2 id=&#34;install-minikube&#34;&gt;Install minikube&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/kubernetes/minikube&#34;&gt;Minikube&lt;/a&gt; is a tool that makes it easy to run Kubernetes for local development. To run minikube, you need to have a virtualizer installed - in my case I already had VirtualBox installed. Instructions for installing minikube is available &lt;a href=&#34;https://github.com/kubernetes/minikube/releases&#34;&gt;here&lt;/a&gt;. In my case, this is what I did:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;&amp;gt; curl -Lo minikube https://storage.googleapis.com/minikube/releases/v0.12.2/minikube-darwin-amd64
+&amp;gt; chmod +x minikube
+&amp;gt; sudo mv minikube /usr/local/bin/
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;install-kubectl&#34;&gt;Install kubectl&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;http://kubernetes.io/docs/user-guide/kubectl-overview/&#34;&gt;Kubectl&lt;/a&gt; is a command line application that executes commands against Kubernets clusters. Instructions for installing kubectl are available &lt;a href=&#34;http://kubernetes.io/docs/getting-started-guides/minikube/#install-kubectl&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;&amp;gt; curl -Lo kubectl http://storage.googleapis.com/kubernetes-release/release/v1.3.0/bin/darwin/amd64/kubectl
+&amp;gt; chmod +x kubectl
+&amp;gt; sudo mv kubectl /usr/local/bin/
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;set-up-a-docker-repository&#34;&gt;Set up a Docker repository&lt;/h2&gt;
+&lt;p&gt;Kubernetes pulls container images from publicly available registries. But because we are building an application that we will not be publishing to public docker registries, we need to create a local registry. There is a great write up on how to set up a local docker registry at &lt;a href=&#34;http://thenewstack.io/tutorial-configuring-ultimate-development-environment-kubernetes/&#34;&gt;Newstack&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;start-minikube-with-the-registry&#34;&gt;Start minikube with the registry&lt;/h2&gt;
+&lt;p&gt;Now that we have a local docker registry, we can go ahead and tell minikube to consume images from this registry. However, if you have started a minikube cluster previously, the registry override will not be available to it unless it is deleted.&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;&amp;gt; docker-machine ip registry
+192.168.99.100
+&amp;gt; minikube stop
+&amp;gt; minikube delete
+&amp;gt; minikube start --vm-driver=&amp;#34;virtualbox&amp;#34; --insecure-registry=192.168.99.100:80
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;create-a-container-image-for-the-application&#34;&gt;Create a container image for the application&lt;/h2&gt;
+&lt;p&gt;The application in this case is a simple Spring Boot application that has exactly one controller.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#99f&#34;&gt;@RestController&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;HelloController&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;{&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;&lt;span style=&#34;color:#99f&#34;&gt;@RequestMapping&lt;/span&gt;(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/hello&amp;#34;&lt;/span&gt;)&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;Map&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#c0f&#34;&gt;hello&lt;/span&gt;()&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;{&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;singletonMap(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;message&amp;#34;&lt;/span&gt;,&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;hello&amp;#34;&lt;/span&gt;);&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;}&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;}&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;In order to create a docker container from this application, we will use the &lt;a href=&#34;https://github.com/spotify/docker-maven-plugin&#34;&gt;Maven Docker Plugin&lt;/a&gt;. We will need to set a prefix for our docker image. This can be done with this maven property:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;&amp;lt;docker.image.prefix&amp;gt;sadiqueio&amp;lt;/docker.image.prefix&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;This plugin expects a &lt;code&gt;Dockerfile&lt;/code&gt; to be present in the &lt;code&gt;src/main/docker&lt;/code&gt; directory. Our &lt;code&gt;Dockerfile&lt;/code&gt; will look like this:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;FROM frolvlad/alpine-oraclejdk8:slim
+ADD hello-world-0.0.1-SNAPSHOT.jar app.jar
+RUN sh -c &amp;#39;touch /app.jar&amp;#39;
+ENTRYPOINT [&amp;#34;java&amp;#34;,&amp;#34;-jar&amp;#34;,&amp;#34;/app.jar&amp;#34;]
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;With this in place, we can generate a docker image. We need to ensure that we are looking at the dev docker host.&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;&amp;gt; eval $(docker-machine env dev)
+&amp;gt; mvn package docker:build
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;tag-and-push-the-image-to-local-registry&#34;&gt;Tag and push the image to local registry&lt;/h2&gt;
+&lt;p&gt;The generated image &lt;code&gt;sadiqueio/hello-world&lt;/code&gt; need to be published to the local registry we created.&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;&amp;gt; docker tag sadiqueio/hello-world 192.168.99.100:80/hello-world
+&amp;gt; docker push 192.168.99.100:80/hello-world
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;define-and-create-a-service&#34;&gt;Define and create a service&lt;/h2&gt;
+&lt;p&gt;We will define a Kubernetes service object for this application &lt;code&gt;hello-world-service.yaml&lt;/code&gt;:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;apiVersion: v1
+kind: Service
+metadata:
+  name: hello-world
+  labels:
+    app: hello-world
+    tier: backend
+spec:
+  type: NodePort
+  ports:
+    # the port that this service should serve on
+  - port: 8080
+  selector:
+    app: hello-world
+    tier: backend
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;The service can be created using:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;&amp;gt; kubectl create -f hello-world-service.yaml
+You have exposed your service on an external port on all nodes in your
+cluster.  If you want to expose this service to the external internet, you may
+need to set up firewall rules for the service port(s) (tcp:30194) to serve traffic.
+
+See http://releases.k8s.io/release-1.3/docs/user-guide/services-firewalls.md for more details.
+service &amp;#34;hello-world&amp;#34; created
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Make a note of the port assigned to this service. We will use this port later to access our application.&lt;/p&gt;
+&lt;h2 id=&#34;define-and-create-a-deployment&#34;&gt;Define and create a deployment&lt;/h2&gt;
+&lt;p&gt;The next step is to define and create a deployment for our application. This is where we specify the image we previously created and published to the registry.&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: hello-world
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: hello-world
+        tier: backend
+    spec:
+      containers:
+      - name: hello-world
+        image: 192.168.99.100:80/hello-world
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        env:
+        - name: GET_HOSTS_FROM
+          value: dns
+        ports:
+        - containerPort: 8080
+&lt;/code&gt;&lt;/pre&gt;&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;&amp;gt; kubectl create -f hello-world-deployment.yaml
+deployment &amp;#34;hello-world&amp;#34; created
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;ensure-that-the-deployment-is-successful&#34;&gt;Ensure that the deployment is successful&lt;/h2&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;&amp;gt; kubectl get services
+NAME          CLUSTER-IP   EXTERNAL-IP   PORT(S)    AGE
+hello-world   10.0.0.252   &amp;lt;none&amp;gt;        8080/TCP   4m
+&amp;gt; kubectl get deployments
+NAME          DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+hello-world   1         1         1            1           4m
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;access-the-service&#34;&gt;Access the service&lt;/h2&gt;
+&lt;p&gt;We already know the port assigned to our service. Because we specified &lt;code&gt;type: NodePort&lt;/code&gt;, the IP address we need to use is that of the Kubernetes cluster. This IP address can be found using the minikube command.&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;&amp;gt; minikube ip
+192.168.99.102
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Now that we have both pieces of information, we can test that our application is up.&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;&amp;gt; curl  -s http://192.168.99.102:30194/hello | jq .
+{
+  &amp;#34;message&amp;#34;: &amp;#34;hello&amp;#34;
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;That is it. We have deployed our hello world application using Kubernetes.&lt;/p&gt;
+</description>
     </item>
+    
   </channel>
 </rss>

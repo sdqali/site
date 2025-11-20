@@ -1,26 +1,129 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Best-Practices on {code that works}</title>
-    <link>http://localhost:1313/categories/best-practices/</link>
+    <link>https://sadique.io/categories/best-practices/?utm_source=site&amp;utm_medium=feed</link>
     <description>Recent content in Best-Practices on {code that works}</description>
-    <generator>Hugo</generator>
+    <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Fri, 03 Feb 2012 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1313/categories/best-practices/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://sadique.io/categories/best-practices/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    
     <item>
       <title>Bullet proof Jenkins setup</title>
-      <link>http://localhost:1313/blog/2012/02/03/bullet-proof-jenkins-setup/</link>
+      <link>https://sadique.io/blog/2012/02/03/bullet-proof-jenkins-setup/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Fri, 03 Feb 2012 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/blog/2012/02/03/bullet-proof-jenkins-setup/</guid>
-      <description>&lt;p&gt;In this post, I will describe how a neat setup and some discipline will ensure a Jenkins that can be rolled back and recreated very easily - a bullet proof Jenkins setup.  I have been working on configuring our Jenkins instance. This was the first time I had played around with Jenkins. I am fairly comfortable with &lt;!-- raw HTML omitted --&gt;Go&lt;!-- raw HTML omitted --&gt; from ThoughtWorks Studios. All of my past teams used Go as their tool for continuous delivery.&lt;/p&gt;&#xA;&lt;p&gt;One of the things I found very different from Go in Jenkins is the absence of the notion of a Pipeline as the basic entity of build, as proposed in &lt;!-- raw HTML omitted --&gt;Continuous Delivery&lt;!-- raw HTML omitted --&gt;. Although there are plugins to make this available in Jenkins, we decided to go with Jenkins&amp;rsquo; model of Jobs.&lt;/p&gt;</description>
+      
+      <guid>https://sadique.io/blog/2012/02/03/bullet-proof-jenkins-setup/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;In this post, I will describe how a neat setup and some discipline will ensure a Jenkins that can be rolled back and recreated very easily - a bullet proof Jenkins setup.  I have been working on configuring our Jenkins instance. This was the first time I had played around with Jenkins. I am fairly comfortable with &lt;a href=&#34;http://www.thoughtworks-studios.com/go-agile-release-management&#34; target=&#34;_blank&#34;&gt;Go&lt;/a&gt; from ThoughtWorks Studios. All of my past teams used Go as their tool for continuous delivery.&lt;/p&gt;
+&lt;p&gt;One of the things I found very different from Go in Jenkins is the absence of the notion of a Pipeline as the basic entity of build, as proposed in &lt;a href=&#34;http://continuousdelivery.com/&#34; target=&#34;_blank&#34;&gt;Continuous Delivery&lt;/a&gt;. Although there are plugins to make this available in Jenkins, we decided to go with Jenkins&amp;rsquo; model of Jobs.&lt;/p&gt;
+&lt;p&gt;Another difference I spotted is that when a custom task is defined as part of a Job, Jenkins creates a shell script with all the steps while executing the Job. In Go, each of the steps will have to be defined as a custom command.&lt;/p&gt;
+&lt;p&gt;We wanted to ensure that our Jenkins configuration is version controlled. While this is a huge win, one of the ways this situation deteriorates is when a large number of changes are made to the configuration over a period of time and these is not checked in. So we decided to take this one step further and ensure that these changes are automatically checked in. There are instructions on how to do this, but we had to do some tweaking to get this working for us.&lt;/p&gt;
+&lt;p&gt;These are the steps to setup a bullet proof Jenkins setup. This assumes that Jenkins is running on a Linux box.&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Create a Git repository in Jenkins&amp;rsquo; base directory - This is generally &lt;code&gt;/var/lib/jenkins&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;2.Create a &lt;code&gt;.gitignore&lt;/code&gt; file to exclude Jenkins workspaces. The Jenkins base directory is the home directory for the Jenkins user created to run Jenkins. This means that there will be a number ofLinux user specific files like &lt;code&gt;.ssh/&lt;/code&gt; , &lt;code&gt;.gem&lt;/code&gt; etc. These files need to be specified in the &lt;code&gt;.gitignore&lt;/code&gt; file. A sample &lt;code&gt;.gitignore&lt;/code&gt; file is listed below.&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;# The following ignores...
+# Miscellaneous Hudson litter
+*.log
+*.tmp
+*.old
+*.bak
+*.jar
+*.json
+
+# Linux user files
+.Xauthority
+.bash_history
+.bash_profile
+.fontconfig
+.gitconfig
+.gem
+.lesshst
+.mysql_history
+.owner
+.ri
+.rvm
+.ssh
+.viminfo
+.vnc
+bin/
+
+# Generated Hudson state
+/.owner
+/secret.key
+/queue.xml
+/fingerprints/
+/shelvedProjects/
+/updates/
+jobs/*/workspace/
+plugins/*.bak
+updates/default.json
+war/
+*.bak
+
+# Tools that Hudson manages
+/tools/
+
+# Extracted plugins
+/plugins/*/
+
+# Job state
+builds/
+workspace/
+lastStable
+lastSuccessful
+nextBuildNumber
+modules/
+
+# Project specific stuff
+custom_deps/
+slave/workspace/
+slave-slave.log.*
+&lt;/code&gt;&lt;/pre&gt;&lt;ol start=&#34;3&#34;&gt;
+&lt;li&gt;Setup a Jenkins job to check in the changed configuration files every day at midnight. (Or whatever time interval you choose). Add a custom task with the following steps:&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;#/usr/bin/env bash&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#033&#34;&gt;JENKINS_HOME&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;/var/lib/jenkins
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;cd&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;$JENKINS_HOME&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;git add *.xml jobs/*/config.xml users/*/config.xml userContent/*
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#033&#34;&gt;CHANGES_TO_BE_COMMITTED&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;$(&lt;/span&gt;git status | grep &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;^# Changes to be committed:&amp;#34;&lt;/span&gt; | wc -l&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;$CHANGES_TO_BE_COMMITTED&lt;/span&gt; -eq &lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;then&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#366&#34;&gt;echo&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Nothing to commit&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;else&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  git commit -m &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Automated commit of Jenkins configuration at &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;$(&lt;/span&gt;date&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  git push origin master
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;fi&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;While this ensures that the configuration is more or less tracked well, there are times when somebody makes a massive change in the configuration. This is where the most important piece of the bullet proof configuration comes in - team discipline. The team should ensure that big changes are checked in as soon add possible. This can be easily done by triggering the Jenkins job manually, without having to ssh in to the Jenkins box.&lt;/p&gt;
+&lt;h3 id=&#34;credits&#34;&gt;Credits:&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;The Jenkins community documentation provided a nice &lt;a href=&#34;http://jenkins-ci.org/content/keeping-your-configuration-and-data-subversion&#34; target=&#34;_blank&#34;&gt;starting point&lt;/a&gt; for this.&lt;/li&gt;
+&lt;li&gt;The &lt;code&gt;.gitignore&lt;/code&gt; file was forked from &lt;a href=&#34;https://gist.github.com/780105&#34; target=&#34;_blank&#34;&gt;this gist&lt;/a&gt; by &lt;a href=&#34;https://github.com/sit&#34; target=&#34;_blank&#34;&gt;&lt;span id=&#34;goog_1138400375&#34;&gt;&lt;/span&gt;sit&lt;/a&gt;. I have added some project specific stuff to it.&lt;/li&gt;
+&lt;/ol&gt;</description>
     </item>
+    
     <item>
       <title>Why your project should have a Getting Started guide.</title>
-      <link>http://localhost:1313/blog/2012/01/17/why-your-project-should-have-a-getting-started-guide./</link>
+      <link>https://sadique.io/blog/2012/01/17/why-your-project-should-have-a-getting-started-guide./?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Tue, 17 Jan 2012 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/blog/2012/01/17/why-your-project-should-have-a-getting-started-guide./</guid>
-      <description>My new team at work is writing a bunch of Rails applications. This is one of those codebases that one would call &amp;ldquo;legacy&amp;rdquo; without much argument. Most of these apps have their own patched, vendorized Rails versions.&#xA;Getting up and running was an absolute pain. This project existed before Bundler and the list of gem dependencies are not checked in. I got the output of running gem list on a colleague&amp;rsquo;s box, wrote a Ruby script to generate a shell script that installs all the gems.</description>
+      
+      <guid>https://sadique.io/blog/2012/01/17/why-your-project-should-have-a-getting-started-guide./?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;My new team at work is writing a bunch of Rails applications. This is one of those codebases that one would call &amp;ldquo;legacy&amp;rdquo; without much argument. Most of these apps have their own patched, vendorized Rails versions.&lt;/p&gt;
+&lt;p&gt;Getting up and running was an absolute pain. This project existed before Bundler and the list of gem dependencies are not checked in. I got the output of running &lt;code&gt;gem list&lt;/code&gt; on a colleague&amp;rsquo;s box, wrote a Ruby script to generate a shell script that installs all the gems. When I tried running the tests in one of those apps, I got a nice error.&lt;/p&gt;
+&lt;p&gt;It looked obvious that we were using patched Rails versions. Surprisingly, theses were not checked in to the &lt;code&gt;vendor/&lt;/code&gt; directory. This was proving to be a pain, and today I sat with a team member and wrote a developer guide to get started on the project. We actually had to pull patched Rails tar balls from a remote box and untar them to &lt;code&gt;vendor/&lt;/code&gt; directory. I was really surprised that these patches had not been checked in. We checked in all the patches. Apart from the Rails patches, there was a gem that had to be checked in.&lt;/p&gt;
+&lt;p&gt;This is why I think every project needs a Getting Started guide:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;As a developer joining a new team, I want to look at the code as soon as I can. For me, this involves reading and running the tests.&lt;/li&gt;
+&lt;li&gt;Due to various reasons, a project may have patches and dependencies. Being very specific to the project, there is no way a new developer on the team would figure out these hidden dependencies.&lt;/li&gt;
+&lt;li&gt;There needs to be a single place where all the dependencies are specified.&lt;/li&gt;
+&lt;li&gt;While spoon-feeding someone may not be the best way to get them started, a little bit of hand-holding will not do anyone any harm.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;One of the biggest problems I see with things like these guides is that as the application and it&amp;rsquo;s dependencies evolve, the guides are not updated to reflect these changes. The only possible time the guide will be updated is when a new developer joins the team, follows these instructions and finds the need to update the guide.&lt;/p&gt;
+</description>
     </item>
+    
   </channel>
 </rss>

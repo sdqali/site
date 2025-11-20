@@ -1,82 +1,438 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Javascript on {code that works}</title>
-    <link>http://localhost:1313/categories/javascript/</link>
+    <link>https://sadique.io/categories/javascript/?utm_source=site&amp;utm_medium=feed</link>
     <description>Recent content in Javascript on {code that works}</description>
-    <generator>Hugo</generator>
+    <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Fri, 08 Aug 2014 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1313/categories/javascript/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://sadique.io/categories/javascript/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    
     <item>
       <title>Disputed territories and merging shapes and features</title>
-      <link>http://localhost:1313/blog/2014/08/08/disputed-territories-and-merging-shapes-and-features/</link>
+      <link>https://sadique.io/blog/2014/08/08/disputed-territories-and-merging-shapes-and-features/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Fri, 08 Aug 2014 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/blog/2014/08/08/disputed-territories-and-merging-shapes-and-features/</guid>
-      <description>Making a map that shows a disputed territory can be a tricky business. Nation states vigorously contest maps that appear to portray a boundary that challenges what a border looks like. From the Falkland Islands to Kuril Islands; from Western Sahara to Arunachal Pradesh, disputed territories result in omissions, additions and inaccuracies in maps.&#xA;I grew up looking at maps in books printed by the Oxford Press, that came with a disclaimer in blue rubber stamped across them that stated how the map was wrong.</description>
+      
+      <guid>https://sadique.io/blog/2014/08/08/disputed-territories-and-merging-shapes-and-features/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;Making a map that shows a disputed territory can be a tricky business. Nation states vigorously contest maps that appear to portray a boundary that challenges what a border looks like. From the Falkland Islands to Kuril Islands; from Western Sahara to Arunachal Pradesh, disputed territories result in omissions, additions and inaccuracies in maps.&lt;/p&gt;
+&lt;p&gt;I grew up looking at maps in books printed by the Oxford Press, that came with a disclaimer in blue rubber stamped across them that stated how the map was wrong. This was due to the fact that the maps showed only the parts of Kashmir being administered by India, thereby omitting areas under Chinese and Pakistani control. The Criminal Law Amendment Act, 1961 in India makes it punishable with imprisonment up to 6 months to publish a map that excludes all or parts of Kashmir&lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
+&lt;p&gt;This creates a lot of trouble for people who make maps for fun or to visualize data. Survey of India does not make it easy to get hold of shape files that represent India&amp;rsquo;s boundaries, and all the shape files that are available from international sources exclude parts of Kashmir. So, how do we solve this problem?&lt;/p&gt;
+&lt;p&gt;The North American Cartographic Information Society&amp;rsquo;s Natural Earth &lt;sup id=&#34;fnref:2&#34;&gt;&lt;a href=&#34;#fn:2&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;2&lt;/a&gt;&lt;/sup&gt; maps has all the disputed territories available for download as shape files. One way to solve the issue on our hands will be to take the shapes relevant to Kashmir from this file and merge it with the rest of India.&lt;/p&gt;
+&lt;p&gt;We will explore how to perform and an operation like this through QGIS &lt;sup id=&#34;fnref:3&#34;&gt;&lt;a href=&#34;#fn:3&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;3&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Open the disputed areas shape file in QGIS.&lt;/li&gt;
+&lt;li&gt;Select all the regions in Kashmir that are seen by India as it&amp;rsquo;s territories.&lt;/li&gt;
+&lt;li&gt;In order to make merging these shapes easier, we will introduce a new attribute on them. Go to &lt;code&gt;Layer → Open Attribute Table&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Switch to editing mode in the Attribute Table by clicking the &lt;code&gt;Toggle editing mode&lt;/code&gt; button.&lt;/li&gt;
+&lt;li&gt;Click &lt;code&gt;New column&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Choose a name for the column. In this example we are using &lt;code&gt;target&lt;/code&gt;. Select &lt;code&gt;Text (string)&lt;/code&gt; as the Type and choose a number like &lt;code&gt;10&lt;/code&gt; for width.&lt;/li&gt;
+&lt;li&gt;For all the selected shapes, set the value of &lt;code&gt;target&lt;/code&gt; to Kashmir.&lt;/li&gt;
+&lt;li&gt;Use the &lt;code&gt;Dissolve&lt;/code&gt; tool, found at &lt;code&gt;Vector → Geoprocessing tools → Dissolve&lt;/code&gt; to dissolve the shapes in to a single shape file. Choose &lt;code&gt;target&lt;/code&gt; as the value for &lt;code&gt;dissolve&lt;/code&gt; field. Save the output to a new shape file.&lt;/li&gt;
+&lt;li&gt;Install the QGIS plugin &lt;code&gt;MergeShapes&lt;/code&gt;. Plugins can be installed from &lt;code&gt;Plugins → Manage and Install Plugins&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Copy the &lt;a href=&#34;http://biogeo.ucdavis.edu/data/diva/adm/IND_adm.zip&#34;&gt;India shape file&lt;/a&gt; from DIVA-GIS and the newly generated Kashmir shape file to a directory.&lt;/li&gt;
+&lt;li&gt;Merge these into a single shape using &lt;code&gt;Vector → MergeShapes → MergeShapes&lt;/code&gt;.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;With that we have a shape File for India that closely resembles India&amp;rsquo;s official version.&lt;/p&gt;
+&lt;p&gt;Once we have the shape File for Kashmir from step &lt;code&gt;8&lt;/code&gt;, we could do the merging by converting both shape Files to their corresponding GeoJSON formats and doing simple JavaScript operations on the objects.&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Start by converting both shape Files to their GeoJSON representation.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&amp;gt; ogr2ogr -f GeoJSON india.geo.json india.shp
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&amp;gt; ogr2ogr -f GeoJSON kashmir.geo.json kashmir.shp
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ol&gt;
+&lt;li&gt;Load the two feature collections in to a JavaScript console. I tend to use Chromium&amp;rsquo;s Developer Tools, but in this example I am using  Node.js&amp;rsquo; REPL.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;kashmir &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; JSON.parse(fs.readFileSync(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;./kashmir.geo.json&amp;#34;&lt;/span&gt;).toString());
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;india &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; JSON.parse(fs.readFileSync(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;./india.geo.json&amp;#34;&lt;/span&gt;).toString());
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ol&gt;
+&lt;li&gt;Identify the Kashmir feature in the India feature collection.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;kin &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; india.features.filter(&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;function&lt;/span&gt;(f) {&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; f.properties.NAME_1.match(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Kashmir&amp;#34;&lt;/span&gt;);})[&lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;];
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ol&gt;
+&lt;li&gt;Replace it&amp;rsquo;s coordinates with the unified Kashmir we generated.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;kin.geometry.coordinates &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; kashmir.features[&lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;].geometry.coordinates;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ol&gt;
+&lt;li&gt;Save it back to a GeoJSON file.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;fs.writeFileSync(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;full_india.geo.json&amp;#34;&lt;/span&gt;, JSON.stringify(india));
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Now the GeoJSON file can be transformed back in to a shape file.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;ogr2ogr -f &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;ESRI Shapefile&amp;#39;&lt;/span&gt; full_india.shp full_india.geo.json
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Back to Kashmir and laws. Will this map save one from trouble? I am not sure, but this is an improvement on the omission of territories.&lt;/p&gt;
+&lt;div class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
+&lt;hr&gt;
+&lt;ol&gt;
+&lt;li id=&#34;fn:1&#34;&gt;
+&lt;p&gt;The Criminal Law Amendment Act, 1961 - &lt;a href=&#34;http://www.vakilno1.com/bareacts/laws/the-criminal-law-amendment-act-1961.html#2_Questioning_the_territorial_integrity_or_frontiers_of_India_in_a_manner_prejudicial_to_the_interests_of_safety_and_security_of_India&#34;&gt;Questioning the territorial integrity or frontiers of India in a manner prejudicial to the interests of safety and security of India.&lt;/a&gt;&amp;#160;&lt;a href=&#34;#fnref:1&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id=&#34;fn:2&#34;&gt;
+&lt;p&gt;Natural Earth is a public domain map dataset available at 1:10m, 1:50m, and 1:110 million scales. The data set is available for download &lt;a href=&#34;http://www.naturalearthdata.com/downloads/&#34;&gt;here&lt;/a&gt;.&amp;#160;&lt;a href=&#34;#fnref:2&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id=&#34;fn:3&#34;&gt;
+&lt;p&gt;&lt;a href=&#34;http://qgis.org/en/site/&#34;&gt;QGIS&lt;/a&gt; is a cross-platform free and open source desktop geographic information systems application that provides data viewing, editing, and analysis capabilities.&amp;#160;&lt;a href=&#34;#fnref:3&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+</description>
     </item>
+    
     <item>
       <title>A list of GIS tools</title>
-      <link>http://localhost:1313/blog/2014/08/03/a-list-of-gis-tools/</link>
+      <link>https://sadique.io/blog/2014/08/03/a-list-of-gis-tools/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Sun, 03 Aug 2014 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/blog/2014/08/03/a-list-of-gis-tools/</guid>
-      <description>I have been playing around with maps a lot these days and have ended up using various tools in the process. This blog post is a way to make a note of these tools for later use.&#xA;geojson.io Mapbox&amp;rsquo;s geojson.io is a simple tool for creating, editing and sharing maps. It lets you import map data in various formats and has an editor to modify maps.&#xA;GeoJSON-TopoJSON Jeff Paine&amp;rsquo;s GeoJSON-TopoJSON is a simple tool to convert between the more common GeoJSON format and the TopoJSON format used by libraries like D3.</description>
+      
+      <guid>https://sadique.io/blog/2014/08/03/a-list-of-gis-tools/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;I have been playing around with maps a lot these days and have ended up using various tools in the process. This blog post is a way to make a note of these tools for later use.&lt;/p&gt;
+&lt;h1 id=&#34;geojsonio&#34;&gt;geojson.io&lt;/h1&gt;
+&lt;p&gt;Mapbox&amp;rsquo;s &lt;a href=&#34;http://geojson.io/&#34;&gt;geojson.io&lt;/a&gt; is a simple tool for creating, editing and sharing maps. It lets you import map data in various formats and has an editor to modify maps.&lt;/p&gt;
+&lt;h1 id=&#34;geojson-topojson&#34;&gt;GeoJSON-TopoJSON&lt;/h1&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/JeffPaine&#34;&gt;Jeff Paine&lt;/a&gt;&amp;rsquo;s &lt;a href=&#34;https://github.com/JeffPaine/geojson-topojson&#34;&gt;GeoJSON-TopoJSON&lt;/a&gt; is a simple tool to convert between the more common GeoJSON format and the TopoJSON format used by libraries like D3.js. It is a simple tool, but it does exactly what it says on the tin.&lt;/p&gt;
+&lt;h1 id=&#34;the-distillery&#34;&gt;The Distillery&lt;/h1&gt;
+&lt;p&gt;The New York Times&amp;rsquo; &lt;a href=&#34;http://shancarter.com/&#34;&gt;Shan Carter&lt;/a&gt; built &lt;a href=&#34;http://shancarter.github.io/distillery/&#34;&gt;The Distillery&lt;/a&gt;, a GUI around TopoJSON. Apart from converting GeoJSON to TopoJSON, it allows you to alter the map&amp;rsquo;s projection.&lt;/p&gt;
+&lt;h1 id=&#34;ogr2ogr&#34;&gt;ogr2ogr&lt;/h1&gt;
+&lt;p&gt;&lt;a href=&#34;http://www.gdal.org/ogr2ogr.html&#34;&gt;ogr2ogr&lt;/a&gt; is a command line utility to convert features data between different file formats.&lt;/p&gt;
+&lt;h1 id=&#34;ogre---ogr2ogr-web-client&#34;&gt;Ogre - ogr2ogr web client&lt;/h1&gt;
+&lt;p&gt;&lt;a href=&#34;http://ogre.adc4gis.com/&#34;&gt;Ogre&lt;/a&gt; is a web UI around ogr2ogr. It lets you do transformations on your map files when you are lazy and don&amp;rsquo;t want to use the command line to run ogr2ogr.&lt;/p&gt;
+&lt;h1 id=&#34;merge-geojson-features&#34;&gt;merge-geojson-features&lt;/h1&gt;
+&lt;p&gt;&lt;a href=&#34;https://www.npmjs.org/package/&#34;&gt;merge-geojson-features&lt;/a&gt; is a Node.js module to combine Features defined in different files in to a single FeatureCollection. I use it when I am not in the mood to alter GeoJSON objects from a JavaScript console by hand.&lt;/p&gt;
+</description>
     </item>
+    
     <item>
       <title>Fitting an Image in to a Canvas object</title>
-      <link>http://localhost:1313/blog/2013/10/03/fitting-an-image-in-to-a-canvas-object/</link>
+      <link>https://sadique.io/blog/2013/10/03/fitting-an-image-in-to-a-canvas-object/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Thu, 03 Oct 2013 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/blog/2013/10/03/fitting-an-image-in-to-a-canvas-object/</guid>
-      <description>I have been playing around with Canvas objects and images for a side project I am doing. One of the first things I had to figure out for this project was how to fit an image of arbitrary height and width on to a Canvas object of arbitrary, but known dimensions while preserving the aspect ratios of the image. This blog post is an explanation of the solution I came up with for this.</description>
+      
+      <guid>https://sadique.io/blog/2013/10/03/fitting-an-image-in-to-a-canvas-object/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;I have been playing around with Canvas objects and images for a side project I am doing. One of the first things I had to figure out for this project was how to fit an image of arbitrary height and width on to a Canvas object of arbitrary, but known dimensions while preserving the aspect ratios of the image. This blog post is an explanation of the solution I came up with for this.&lt;/p&gt;
+&lt;h3 id=&#34;the-problem&#34;&gt;The problem&lt;/h3&gt;
+&lt;p&gt;The application has a Canvas object on which it needs to draw arbitrary images. The Canvas&amp;rsquo;s dimensions are set to &lt;strong&gt;450px&lt;/strong&gt; by &lt;strong&gt;300px&lt;/strong&gt;. The image that needs to be drawn will have unknown aspect ratio. The ideal case will be when the image&amp;rsquo;s aspect ratio is &lt;strong&gt;3:2&lt;/strong&gt;, just like the canvas. In this case, there is no need for any adjustments to be made and the image can be drawn like this:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;var&lt;/span&gt; canvas &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#366&#34;&gt;document&lt;/span&gt;.getElementById(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;canvas&amp;#39;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;var&lt;/span&gt; context &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; canvas.getContext(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;2d&amp;#39;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;var&lt;/span&gt; imageObj &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;new&lt;/span&gt; Image();
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;imageObj.onload &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;function&lt;/span&gt;() {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	context.drawImage(imageObj, &lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;, canvas.width, canvas.height);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;But fitting images with aspect ratios different from the Canvas can be a little tricky. The fundamental problem here is that when aspect ratio is different, there is only one pair of edges-either vertical or horizontal-that can be fitted on to the canvas. The image will have to be placed in the center along the other axis. The following diagram illustrates this.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://sadique.io/images/canvas_fitting.png&#34; alt=&#34;Canvas fitting&#34; title=&#34;Canvas fitting&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Since fitting depends on the aspect ratio, the code should take it into consideration. The following code compares the ratios and chooses to fit the image horizontally or vertically.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;var&lt;/span&gt; canvas &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#366&#34;&gt;document&lt;/span&gt;.getElementById(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;canvas&amp;#39;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;var&lt;/span&gt; context &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; canvas.getContext(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;2d&amp;#39;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;var&lt;/span&gt; imageObj &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;new&lt;/span&gt; Image();
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;var&lt;/span&gt; fitImageOn &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;function&lt;/span&gt;(canvas, imageObj) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;var&lt;/span&gt; imageAspectRatio &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; imageObj.width &lt;span style=&#34;color:#555&#34;&gt;/&lt;/span&gt; imageObj.height;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;var&lt;/span&gt; canvasAspectRatio &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; canvas.width &lt;span style=&#34;color:#555&#34;&gt;/&lt;/span&gt; canvas.height;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;var&lt;/span&gt; renderableHeight, renderableWidth, xStart, yStart;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// If image&amp;#39;s aspect ratio is less than canvas&amp;#39;s we fit on height
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// and place the image centrally along width
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt;(imageAspectRatio &lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt; canvasAspectRatio) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		renderableHeight &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; canvas.height;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		renderableWidth &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; imageObj.width &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; (renderableHeight &lt;span style=&#34;color:#555&#34;&gt;/&lt;/span&gt; imageObj.height);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		xStart &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; (canvas.width &lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt; renderableWidth) &lt;span style=&#34;color:#555&#34;&gt;/&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		yStart &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	}
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// If image&amp;#39;s aspect ratio is greater than canvas&amp;#39;s we fit on width
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// and place the image centrally along height
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;else&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt;(imageAspectRatio &lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt; canvasAspectRatio) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		renderableWidth &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; canvas.width
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		renderableHeight &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; imageObj.height &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; (renderableWidth &lt;span style=&#34;color:#555&#34;&gt;/&lt;/span&gt; imageObj.width);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		xStart &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		yStart &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; (canvas.height &lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt; renderableHeight) &lt;span style=&#34;color:#555&#34;&gt;/&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	}
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;// Happy path - keep aspect ratio
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;else&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		renderableHeight &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; canvas.height;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		renderableWidth &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; canvas.width;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		xStart &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		yStart &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	}
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	context.drawImage(imageObj, xStart, yStart, renderableWidth, renderableHeight);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;};
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;imageObj.onload &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;function&lt;/span&gt;() {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	fitImageOn(canvas, imageObj)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;};
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;A demo of this code in action can be found &lt;a href=&#34;https://sadique.io/demos/canvas_fitting.html&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+</description>
     </item>
+    
     <item>
       <title>Named Capture Groups in Regular Expressions</title>
-      <link>http://localhost:1313/blog/2013/09/29/named-capture-groups-in-regular-expressions/</link>
+      <link>https://sadique.io/blog/2013/09/29/named-capture-groups-in-regular-expressions/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Sun, 29 Sep 2013 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/blog/2013/09/29/named-capture-groups-in-regular-expressions/</guid>
-      <description>I will admit that I find regular expressions somewhat hard to parse. While the thinking process needed to write a regular expression is iterative and hence results in the correct expression suitable for the situation, once it is written it lacks readability. I have faced that pain of trying to grok a complex regular expression written years ago. So I was pleasantly surprised when I saw this example from Hacker News user WestCoastJustin.</description>
+      
+      <guid>https://sadique.io/blog/2013/09/29/named-capture-groups-in-regular-expressions/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;I will admit that I find regular expressions somewhat hard to parse. While the thinking process needed to write a regular expression is iterative and hence results in the correct expression suitable for the situation, once it is written it lacks readability. I have faced that pain of trying to grok a complex regular expression written years ago. So I was pleasantly surprised when I saw &lt;a href=&#34;https://news.ycombinator.com/item?id=6463144&#34;&gt;this example&lt;/a&gt; from Hacker News user &lt;em&gt;WestCoastJustin&lt;/em&gt;. I found it very easy to understand because of the names he had assigned to each capture group in the expression.&lt;/p&gt;
+&lt;h2 id=&#34;ruby&#34;&gt;Ruby&lt;/h2&gt;
+&lt;p&gt;Ruby has supported named capture groups since version 1.9. Each match group is named by using &lt;code&gt;?&amp;lt;name&amp;gt;&lt;/code&gt; inside the match group and these matches are made available has a hash and each match can be accessed by using the match group name as the key.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;WestCoastJustin&lt;/em&gt;&amp;rsquo;s example will look like this in Ruby:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;#!/usr/bin/env ruby&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;test_string &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Today&amp;#39;s date is: 9/28/2013.&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;match &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; test_string&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;match &lt;span style=&#34;color:#3aa&#34;&gt;/(?&amp;lt;month&amp;gt;\d{1,2})\/(?&amp;lt;day&amp;gt;\d{1,2})\/(?&amp;lt;year&amp;gt;\d{4})/&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; match&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;inspect
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; match&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#fc3&#34;&gt;:month&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; match&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#fc3&#34;&gt;:day&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; match&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#fc3&#34;&gt;:year&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This is much easier to understand because looking at it, it makes it clear that the intent of matching the first group of 1 or 2 digits is to look for the &lt;strong&gt;month&lt;/strong&gt; in the date. Similarly, the intent of the &lt;em&gt;day&lt;/em&gt; and &lt;em&gt;year&lt;/em&gt; matches are easier to understand.&lt;/p&gt;
+&lt;p&gt;This will result in:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&amp;gt; ruby /tmp/named_matches.rb
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;#&amp;lt;MatchData &amp;#34;9/28/2013&amp;#34; month:&amp;#34;9&amp;#34; day:&amp;#34;28&amp;#34; year:&amp;#34;2013&amp;#34;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f60&#34;&gt;9&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f60&#34;&gt;28&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f60&#34;&gt;2013&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;##Python
+Python&amp;rsquo;s &lt;code&gt;re&lt;/code&gt; module supports named match groups using the &lt;code&gt;?P&amp;lt;name&amp;gt;&lt;/code&gt; pattern. After a pattern search, the results are placed in a &lt;code&gt;dict&lt;/code&gt;.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;#!/usr/bin/env ruby&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color:#0cf;font-weight:bold&#34;&gt;re&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;test_string &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Today&amp;#39;s date is: 9/28/2013.&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;pattern &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; re&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;compile(&lt;span style=&#34;color:#c30&#34;&gt;r&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;(?P&amp;lt;month&amp;gt;\d{1,2})\/(?P&amp;lt;day&amp;gt;\d{1,2})\/(?P&amp;lt;year&amp;gt;\d&lt;/span&gt;&lt;span style=&#34;color:#a00&#34;&gt;{4}&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;)&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;match_dict &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; pattern&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;search(test_string)&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;groupdict()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt;(match_dict)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;JavaScript does not support named capture groups. There are a lot of &lt;a href=&#34;http://trentrichardson.com/2011/08/02/javascript-regexp-match-named-captures/&#34;&gt;hacks&lt;/a&gt; aimed at providing this functionality. The XRegExp library &lt;a href=&#34;http://xregexp.com/syntax/#namedCapture&#34;&gt;supports&lt;/a&gt; named capture groups.&lt;/p&gt;
+</description>
     </item>
+    
     <item>
       <title>JavaScript, clipboard access and hidden flash widgets</title>
-      <link>http://localhost:1313/blog/2013/04/05/javascript-clipboard-access-and-hidden-flash-widgets/</link>
+      <link>https://sadique.io/blog/2013/04/05/javascript-clipboard-access-and-hidden-flash-widgets/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Fri, 05 Apr 2013 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/blog/2013/04/05/javascript-clipboard-access-and-hidden-flash-widgets/</guid>
-      <description>Letting users copy text and URLs from a webpage effortlessly is one of those things that sound easy in theory, but is a pain when it comes to implementation. Browsers take great efforts to ensure that web pages are sand boxed in such a way that a web application can not read from or write to the system&amp;rsquo;s clipboard without jumping through hoops. Firefox asks you to change browser configurations to give web applications access to the system clipboard, while Internet Explorer shows a modal dialog to confirm that you really want to allow the application access.</description>
+      
+      <guid>https://sadique.io/blog/2013/04/05/javascript-clipboard-access-and-hidden-flash-widgets/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;Letting users copy text and URLs from a webpage effortlessly is one of those things that sound easy in theory, but is a pain when it comes to implementation. Browsers take great efforts to ensure that web pages are sand boxed in such a way that a web application can not read from or write to the system&amp;rsquo;s clipboard without jumping through hoops. Firefox asks you to change browser configurations to give web applications access to the system clipboard, while Internet Explorer shows a modal dialog to confirm that you really want to allow the application access. This diminishes any user experience gains made by implementing this feature in the first place. Brook Novak has a very good article about JavaScript and the clipboard &lt;a href=&#34;http://brooknovak.wordpress.com/2009/07/28/accessing-the-system-clipboard-with-javascript/&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;The approach taken by a number of popular applications like GitHub and Dropbox is one that Novak describes. Flash objects embedded on a page can access the system clipboard. Till Flash 9, objects could anonymously read from and write data to the clipboard without the user initiating any action. This vulnerability resulted in attacks like &lt;a href=&#34;http://news.cnet.com/8301-1009_3-10021715-83.html&#34;&gt;this&lt;/a&gt;.
+Flash still allows clipboard access, but in version 10, needs an explicit user initiated action to do so.&lt;/p&gt;
+&lt;p&gt;Libraries like &lt;a href=&#34;https://github.com/jonrohan/ZeroClipboard&#34;&gt;ZeroClipBoard&lt;/a&gt; provides a flash object and JavaScript bindings to access the clipboard. Applications that use this library overlay a flash object over the copy button and when the user clicks on the button, without them knowing it, they end up clicking on the Flash object.&lt;/p&gt;
+&lt;p&gt;While this greatly improves the user experience of copying text, I am not sure if hijacking the user&amp;rsquo;s interaction with a button and passing it on to a flash object whose presence the user is not aware of is the right thing to do.&lt;/p&gt;
+&lt;h1 id=&#34;an-alternate-approach-to-copying-content&#34;&gt;An alternate approach to copying content&lt;/h1&gt;
+&lt;p&gt;I have been thinking about alternate approaches to enabling the copy feature. The approach that I have zeroed in involves programmatically selecting the content that you want the user to copy and presenting this to the user. This is the approach that Google Maps uses.&lt;/p&gt;
+&lt;p&gt;This has two advantages:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;There is no clickjacking.&lt;/li&gt;
+&lt;li&gt;This method allows the copying of richer content, for example HTML formatted content with a hyperlink. Depending on the application where the selected content is pasted, it would be treated as plain text or as rich text.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;You can see this in action in the video below or the demo &lt;a href=&#34;https://sadique.io/demos/copy_text.html&#34;&gt;here&lt;/a&gt;:&lt;/p&gt;
+&lt;iframe width=&#34;420&#34; height=&#34;315&#34; src=&#34;http://www.youtube.com/embed/l6DGqQBBOb8&#34; frameborder=&#34;0&#34; allowfullscreen&gt;&lt;/iframe&gt;</description>
     </item>
+    
     <item>
       <title>My first Firefox plugin: GetCache - View cached version of the current page</title>
-      <link>http://localhost:1313/blog/2012/11/29/my-first-firefox-plugin-getcache-view-cached-version-of-the-current-page/</link>
+      <link>https://sadique.io/blog/2012/11/29/my-first-firefox-plugin-getcache-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Thu, 29 Nov 2012 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/blog/2012/11/29/my-first-firefox-plugin-getcache-view-cached-version-of-the-current-page/</guid>
-      <description>&lt;p&gt;I released my &lt;a href=&#34;https://addons.mozilla.org/en-US/firefox/addon/getcache-ff/&#34;&gt;first Firefox plugin&lt;/a&gt; today. It&#xA;is awaiting review, but if you are adventurous, you can install it right&#xA;now. Go on, try it.&lt;/p&gt;&#xA;&lt;p&gt;After I had written the &lt;a href=&#34;http://localhost:1313/blog/2012/11/28/getcache-a-chrome-plugin-to-view-cached-version-of-the-current-page/&#34;&gt;Chrome version&lt;/a&gt; yesterday, &lt;a href=&#34;https://twitter.com/ManishChaks&#34;&gt;Manish&lt;/a&gt; suggested&#xA;that I should write one for Firefox. There already exist Firfox plugins&#xA;that does exactly what GetCache does, but I decided to go ahead and write it&#xA;for fun. And of course, the fact that I could publish it without having&#xA;to sign up with my Credit Card information was enticing.&lt;/p&gt;</description>
+      
+      <guid>https://sadique.io/blog/2012/11/29/my-first-firefox-plugin-getcache-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;I released my &lt;a href=&#34;https://addons.mozilla.org/en-US/firefox/addon/getcache-ff/&#34;&gt;first Firefox plugin&lt;/a&gt; today. It
+is awaiting review, but if you are adventurous, you can install it right
+now. Go on, try it.&lt;/p&gt;
+&lt;p&gt;After I had written the &lt;a href=&#34;https://sadique.io/blog/2012/11/28/getcache-a-chrome-plugin-to-view-cached-version-of-the-current-page/&#34;&gt;Chrome version&lt;/a&gt; yesterday, &lt;a href=&#34;https://twitter.com/ManishChaks&#34;&gt;Manish&lt;/a&gt; suggested
+that I should write one for Firefox. There already exist Firfox plugins
+that does exactly what GetCache does, but I decided to go ahead and write it
+for fun. And of course, the fact that I could publish it without having
+to sign up with my Credit Card information was enticing.&lt;/p&gt;
+&lt;p&gt;There are three approaches to write a Firefox plugin:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://developer.mozilla.org/en-US/docs/XUL_School/Introduction&#34;&gt;Traditional extensions&lt;/a&gt; - Uses JAvaScript and XUL.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://addons.mozilla.org/en-US/developers/builder&#34;&gt;Jetpacks&lt;/a&gt; - Uses
+HTML, CSS and JavaScript.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://developer.mozilla.org/en-US/docs/Extensions/Bootstrapped_extensions&#34;&gt;Bootstrapped extensions&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;!--more--&gt;
+&lt;p&gt;I decided to go the Jetpack because the development process and
+technologies were similar to Chrome plugins. And I had no prior
+experience with XUL. Once I had downloaded the SDK and set it up, things
+were pretty easy. The
+&lt;a href=&#34;https://addons.mozilla.org/en-US/developers/docs/sdk/latest/&#34;&gt;API&lt;/a&gt; is
+well documented.&lt;/p&gt;
+&lt;h2 id=&#34;the-api&#34;&gt;The API&lt;/h2&gt;
+&lt;p&gt;The bulk of the code is JavaScript. The API is easy to use. The
+following snippet adds a widget to the Addon toolbar at the bottom of
+the Firefox window:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;var&lt;/span&gt; createWidget &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;function&lt;/span&gt; () {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;new&lt;/span&gt; Widget({
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        id&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;sdqali-getcache&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        label&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Get Google&amp;#39;s cached version of the current page..&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        contentURL&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; self.data.url (&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;images/icon.png&amp;#34;&lt;/span&gt;),
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        onClick&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;function&lt;/span&gt;(event) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;          loadCachedPage ();
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      });
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    };
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;adding-context-menu-entries&#34;&gt;Adding context menu entries&lt;/h2&gt;
+&lt;p&gt;While things were pretty smooth overall, I ran in to a weird edge
+case. I wanted a context menu entry that would load the Google cache
+page, and I wanted this entry to be available regardless of whether the
+user has selected some text in the page or not. The API uses the notion
+of
+&lt;a href=&#34;https://addons.mozilla.org/en-US/developers/docs/sdk/latest/packages/addon-kit/context-menu.html&#34;&gt;&lt;code&gt;Contexts&lt;/code&gt;&lt;/a&gt;
+o decide when the menu entry will be available. While the API says that
+I can use an arrays of &lt;code&gt;Contexts&lt;/code&gt;, I had no success with it. I ended up
+creating two context menu entries, one attached to the &lt;code&gt;PageContext&lt;/code&gt; and
+one attached to the &lt;code&gt;SelectionContext&lt;/code&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;source&#34;&gt;Source&lt;/h2&gt;
+&lt;p&gt;I used this
+&lt;a href=&#34;http://www.iconfinder.com/icondetails/7065/128/cache_icon&#34;&gt;beautiful icon&lt;/a&gt;
+by Sergio Sanchez Lopez. Since it comes with a GPL license, the plugin
+is also licensed under GPL.
+I have put the source code on &lt;a href=&#34;https://github.com/sdqali/getcache-ff&#34;&gt;Github&lt;/a&gt;.&lt;/p&gt;</description>
     </item>
+    
     <item>
       <title>GetCache - A Chrome plugin to view cached version of the current page</title>
-      <link>http://localhost:1313/blog/2012/11/28/getcache-a-chrome-plugin-to-view-cached-version-of-the-current-page/</link>
+      <link>https://sadique.io/blog/2012/11/28/getcache-a-chrome-plugin-to-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Wed, 28 Nov 2012 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/blog/2012/11/28/getcache-a-chrome-plugin-to-view-cached-version-of-the-current-page/</guid>
-      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;Download the plugin&#xA;&lt;a href=&#34;http://localhost:1313/downloads/GetCache.crx&#34;&gt;here&lt;/a&gt;&lt;/p&gt;&#xA;&lt;/blockquote&gt;&#xA;&lt;p&gt;On numerous occasions, I have ran in to the situation where I had to&#xA;look up how to load Google&amp;rsquo;s cached version of a particular page. This&#xA;happens often when I follow a link from Hacker News or Reddit to a blog&#xA;post and the blog has went down due to the great avalanche of traffic&#xA;from HN and Reddit.&lt;/p&gt;&#xA;&lt;p&gt;After struggling to remember and having to Google how to get the cached&#xA;version, I decided to finally solve this issue. I wrote &lt;code&gt;GetCache&lt;/code&gt;, a&#xA;dead simple Google Chrome plugin that loads Google&amp;rsquo;s cached version of&#xA;the current page.&lt;/p&gt;&#xA;&lt;h2 id=&#34;installing&#34;&gt;Installing&lt;/h2&gt;&#xA;&lt;p&gt;You can download the plugin&#xA;&lt;a href=&#34;http://localhost:1313/downloads/GetCache.crx&#34;&gt;here&lt;/a&gt;. In order to install it, open your&#xA;Extensions page (&lt;code&gt;Window -&amp;gt; Extensions&lt;/code&gt;) and drag the downloaded &lt;code&gt;CRX&lt;/code&gt;&#xA;file to the page.&lt;/p&gt;</description>
+      
+      <guid>https://sadique.io/blog/2012/11/28/getcache-a-chrome-plugin-to-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;Download the plugin
+&lt;a href=&#34;https://sadique.io/downloads/GetCache.crx&#34;&gt;here&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;On numerous occasions, I have ran in to the situation where I had to
+look up how to load Google&amp;rsquo;s cached version of a particular page. This
+happens often when I follow a link from Hacker News or Reddit to a blog
+post and the blog has went down due to the great avalanche of traffic
+from HN and Reddit.&lt;/p&gt;
+&lt;p&gt;After struggling to remember and having to Google how to get the cached
+version, I decided to finally solve this issue. I wrote &lt;code&gt;GetCache&lt;/code&gt;, a
+dead simple Google Chrome plugin that loads Google&amp;rsquo;s cached version of
+the current page.&lt;/p&gt;
+&lt;h2 id=&#34;installing&#34;&gt;Installing&lt;/h2&gt;
+&lt;p&gt;You can download the plugin
+&lt;a href=&#34;https://sadique.io/downloads/GetCache.crx&#34;&gt;here&lt;/a&gt;. In order to install it, open your
+Extensions page (&lt;code&gt;Window -&amp;gt; Extensions&lt;/code&gt;) and drag the downloaded &lt;code&gt;CRX&lt;/code&gt;
+file to the page.&lt;/p&gt;
+&lt;h2 id=&#34;usage&#34;&gt;Usage&lt;/h2&gt;
+&lt;p&gt;On any page, click on the GetCache icon to load the cached page.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://sadique.io/images/get_cache_icon.png&#34; alt=&#34;GetCache icon&#34; title=&#34;GetCache icon&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Or you could right click on the page and select &lt;code&gt;View Google&#39;s cache&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://sadique.io/images/get_cache_context_menu.png&#34; alt=&#34;GetCache context menu&#34; title=&#34;GetCache context menu&#34;&gt;&lt;/p&gt;
+&lt;h2 id=&#34;source-code&#34;&gt;Source Code&lt;/h2&gt;
+&lt;p&gt;The source code for the plugin is dead simple. All it does is to append
+&lt;code&gt;http://webcache.googleusercontent.com/search?q=cache:&lt;/code&gt; to the beginning
+of the current URL and ask chrome to load the new URL in the same
+tab. The interesting bit of the code is below:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;(&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;function&lt;/span&gt; () {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;var&lt;/span&gt; navigateToCachedPage &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;function&lt;/span&gt; (tab) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;var&lt;/span&gt; gCacheUrlPrefix &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;http://webcache.googleusercontent.com/search?q=cache:&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;var&lt;/span&gt; currentUrl &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; tab.url;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;var&lt;/span&gt; cacheUrl &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; gCacheUrlPrefix &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; currentUrl;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    chrome.tabs.update(tab.id, {url&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; cacheUrl});
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  };
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  chrome.browserAction.onClicked.addListener(&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;function&lt;/span&gt;(tab) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    navigateToCachedPage (tab);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  });
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  chrome.contextMenus.create({
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    title&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;View Google&amp;#39;s cache&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    contexts&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt;[&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;all&amp;#34;&lt;/span&gt;],
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    onclick&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;function&lt;/span&gt; (clickData, tab) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      navigateToCachedPage (tab);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  });
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}) ();
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;I used this
+&lt;a href=&#34;http://www.iconfinder.com/icondetails/7065/128/cache_icon&#34;&gt;beautiful icon&lt;/a&gt;
+by Sergio Sanchez Lopez. Since it comes with a GPL license, the plugin
+is also licensed under GPL.&lt;/p&gt;
+&lt;p&gt;The source code for the plugin is on &lt;a href=&#34;https://github.com/sdqali/GetCache&#34;&gt;Github&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;why-is-this-not-on-the-chrome-store&#34;&gt;Why is this not on the Chrome store?&lt;/h2&gt;
+&lt;p&gt;I wanted to push it to the Google Chrome web store. But it looks like I
+need to verify my developer account by paying a sum of USD 5.0. Even
+worse, I have to create a Google Wallet acount. At this
+point, I am not so keen to be on the Webstore. In the future, I might
+get a verified developer account.&lt;/p&gt;</description>
     </item>
+    
     <item>
       <title>How Browsers Detect If You Are Offline</title>
-      <link>http://localhost:1313/blog/2012/11/22/how-browsers-detect-if-you-are-offline/</link>
+      <link>https://sadique.io/blog/2012/11/22/how-browsers-detect-if-you-are-offline/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Thu, 22 Nov 2012 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/blog/2012/11/22/how-browsers-detect-if-you-are-offline/</guid>
-      <description>When I saw the newly released Heyoffline.js library, I was curious to see how it figured out if the user was online or not. This led me to the window.navigator.onLine API and how different browsers implement it. Chrome, Safari and Inernet Explorer 10 make sure that the API detects if the user is connected to a network, while Firefox changes this flag if and only if the user chooses the Work Offline option.</description>
+      
+      <guid>https://sadique.io/blog/2012/11/22/how-browsers-detect-if-you-are-offline/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;When I saw the newly released
+&lt;a href=&#34;http://oskarkrawczyk.github.com/heyoffline.js/&#34;&gt;Heyoffline.js&lt;/a&gt; library,
+I was curious to see how it figured out if the user was online or
+not. This led me to the &lt;code&gt;window.navigator.onLine&lt;/code&gt; &lt;a href=&#34;https://developer.mozilla.org/en-US/docs/DOM/window.navigator.onLine&#34;&gt;API&lt;/a&gt; and how
+different browsers implement it. Chrome, Safari and Inernet Explorer 10
+make sure that the API detects if the user is connected to a network,
+while Firefox changes this flag if and only if the user chooses the
+&lt;code&gt;Work Offline&lt;/code&gt; option. A detailed discussion of this difference in
+implementation is available
+&lt;a href=&#34;http://schalk-neethling.com/2011/05/navigator-online-and-the-differing-implementations-of-a-standard/&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;While this is an interesting example of how despite the efforts put into
+standardising specifications they get interpreted differently, I was
+more interested in seeing how different browsers detect if the user is
+offline or not.&lt;/p&gt;
+&lt;p&gt;I did some digging around and this is what I found:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;I expected Internet Explorer to use the &lt;a href=&#34;http://blog.superuser.com/2011/05/16/windows-7-network-awareness/&#34;&gt;Network Connectivity Status
+Indicator&lt;/a&gt;
+service. It looks like that is not the case. Setting the registry
+entry
+&lt;code&gt;HKEY_LOCAL_MACHINESYSTEM\CurrentControlSet\Services\NlaSvc\Parameters\Internet -&amp;gt; EnableActiveProbing&lt;/code&gt; to &lt;code&gt;0&lt;/code&gt; did not seem to have any effect on
+Explorer&amp;rsquo;s ability to find if the user is online or not.&lt;/li&gt;
+&lt;li&gt;Google Chrome on Windows uses the &lt;a href=&#34;%22http://msdn.microsoft.com/en-us/library/windows/desktop/ms741641(v=vs.85).aspx%22&#34;&gt;Winsock API&lt;/a&gt; to detect if a network
+is available. The relevant source code is
+&lt;a href=&#34;http://src.chromium.org/svn/trunk/src/net/base/network_change_notifier_win.cc&#34;&gt;here&lt;/a&gt;. Look
+for the method &lt;code&gt;GetCurrentConnectionType()&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Google Chrome on Linux uses a wrapper around NetworkManager&amp;rsquo;s D-Bus
+API. The code is
+&lt;a href=&#34;http://src.chromium.org/svn/trunk/src/net/base/network_change_notifier_linux.cc&#34;&gt;here&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;Google Chrome on Mac tries to reach &lt;code&gt;0.0.0.0&lt;/code&gt;. This can be seen
+&lt;a href=&#34;http://src.chromium.org/svn/trunk/src/net/base/network_change_notifier_mac.cc&#34;&gt;here&lt;/a&gt;. Look for the method &lt;code&gt;SetInitialConnectionType()&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+</description>
     </item>
+    
     <item>
       <title>XConf 6 - Data, My Heart!</title>
-      <link>http://localhost:1313/blog/2012/07/16/xconf-6-data-my-heart/</link>
+      <link>https://sadique.io/blog/2012/07/16/xconf-6-data-my-heart/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Mon, 16 Jul 2012 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/blog/2012/07/16/xconf-6-data-my-heart/</guid>
-      <description>&lt;p&gt;Last Saturday,  Srijayanth Sridhar (&lt;a href=&#34;https://twitter.com/craftybones&#34;&gt;@craftybones&lt;/a&gt;) and I gave a talk at XConf, ThoughtWorks India&amp;rsquo;s internal conference series.&lt;/p&gt;&#xA;&lt;p&gt;We talked about visualising data, and the various visualisations that one could use to answer questions about the dataset you have. We looked at two particular datasets -  one showing the consumption of juice at the fresh juice counter in office and one about Indian and Pakistani players. We looked at various visualizations like Area charts, Box Plots, Chord Diagrams, Line Charts, Pie Charts, Donut Charts, Small Multiples, Spark Lines, Stack Charts and Treemaps.&lt;/p&gt;</description>
+      
+      <guid>https://sadique.io/blog/2012/07/16/xconf-6-data-my-heart/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;Last Saturday,  Srijayanth Sridhar (&lt;a href=&#34;https://twitter.com/craftybones&#34;&gt;@craftybones&lt;/a&gt;) and I gave a talk at XConf, ThoughtWorks India&amp;rsquo;s internal conference series.&lt;/p&gt;
+&lt;p&gt;We talked about visualising data, and the various visualisations that one could use to answer questions about the dataset you have. We looked at two particular datasets -  one showing the consumption of juice at the fresh juice counter in office and one about Indian and Pakistani players. We looked at various visualizations like Area charts, Box Plots, Chord Diagrams, Line Charts, Pie Charts, Donut Charts, Small Multiples, Spark Lines, Stack Charts and Treemaps.&lt;/p&gt;
+&lt;p&gt;The talk went well and we got a lot of good feedback. I thought it was an engaging session for the audience because the visualisations we showed revealed a great deal about juice consumption in the office.&lt;/p&gt;
+&lt;p&gt;I am waiting for the video of our talk to be made available. Last time I gave a talk at XConf, I made a lot of stupid mistakes like saying &amp;ldquo;Right&amp;rdquo; a many many times. I believe I did not make the same mistake this time. But I will have to wait and see.&lt;/p&gt;
+&lt;p&gt;Putting together this talk took a lot of effort, the biggest of them being the process of typing out large number of ledgers. We had planned to visualise about 6 months worth of data, but ended up using only 1 month&amp;rsquo;s worth. We learned a lot of things in the process.&lt;/p&gt;
+&lt;p&gt;As usual, Srijayanth did most of the hardwork, while I helped put together the visualisations and the presentation, which incidentally used &lt;a href=&#34;http://imakewebthings.com/deck.js/&#34;&gt;deck.js&lt;/a&gt;. Thanks, man!&lt;/p&gt;
+&lt;p&gt;You can take a look at the presentation &lt;a href=&#34;https://sadique.io/visualizations/datamyheart/presentation/index.html&#34;&gt;here&lt;/a&gt;. The code for the whole thing can be found &lt;a href=&#34;https://github.com/sdqali/datamyheart&#34;&gt;here&lt;/a&gt; on Github.&lt;/p&gt;</description>
     </item>
+    
     <item>
       <title>Indian and Pakistani cricketers - who make better debuts?</title>
-      <link>http://localhost:1313/blog/2012/05/11/indian-and-pakistani-cricketers-who-make-better-debuts/</link>
+      <link>https://sadique.io/blog/2012/05/11/indian-and-pakistani-cricketers-who-make-better-debuts/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Fri, 11 May 2012 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/blog/2012/05/11/indian-and-pakistani-cricketers-who-make-better-debuts/</guid>
-      <description>&lt;p&gt;Recently a friend and I had an argument about who makes better debuts among Indian and Pakistani cricket players. Now, I am not into cricket. But I do watch the odd matches here and there and am generally aware of what is going on in the game. My stand was that Pakistani players make better debuts compared to Indian players, while my friend was adamant that Indian players make better debuts. My friend is more of a cricket guy than I ever was and he asked me what is the basis of my stand. It was just a gut feel for me and I had to leave it as there was no way for me to prove that my gut feel was correct. But I did want to try, though.&lt;/p&gt;&#xA;&lt;p&gt;I decided to see if I could prove my theory. Luckily, Cricinfo has all this data, although they dont make it easy for you to get it. I wrote some scripts to pull this data and decided to visualise this using the awesome d3 library. In the end, this became more about figuring out d3 than winning the argument, but doing this was fun.&lt;/p&gt;</description>
+      
+      <guid>https://sadique.io/blog/2012/05/11/indian-and-pakistani-cricketers-who-make-better-debuts/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;Recently a friend and I had an argument about who makes better debuts among Indian and Pakistani cricket players. Now, I am not into cricket. But I do watch the odd matches here and there and am generally aware of what is going on in the game. My stand was that Pakistani players make better debuts compared to Indian players, while my friend was adamant that Indian players make better debuts. My friend is more of a cricket guy than I ever was and he asked me what is the basis of my stand. It was just a gut feel for me and I had to leave it as there was no way for me to prove that my gut feel was correct. But I did want to try, though.&lt;/p&gt;
+&lt;p&gt;I decided to see if I could prove my theory. Luckily, Cricinfo has all this data, although they dont make it easy for you to get it. I wrote some scripts to pull this data and decided to visualise this using the awesome d3 library. In the end, this became more about figuring out d3 than winning the argument, but doing this was fun.&lt;/p&gt;
+&lt;h2 id=&#34;batsmen&#34;&gt;Batsmen&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;https://sadique.io/visualizations/debuts/batsmen.html&#34;&gt;This scatter-plot&lt;/a&gt; shows debut batting performances by all the test players to have ever played for India and Paskistan (Except those players whose batting averages were not computed). As you would have guessed, the blue bubbles are Indian players and the green ones are Pakistanis. The number of runs scored by the each batsman is on the x-axis and batting average in the debut series is on the y-axis. The size of the bubble is representative of the highest score the player scored in the debut series.&lt;/p&gt;
+&lt;p&gt;I learned some interesting things from this graph:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Sunil Gavaskar made an amazing debut. His score card for his debut series in 1971 against the might West Indies of 1970&amp;rsquo;s read like this - Matches: 4, Total Runs: 774, High Score: 220, Batting Average: 154.80, 100s: 4, 50s: 3. That is incredible and adding him to this plot would have totally skewed this plot. So technically, I did not learn about Gavaskar&amp;rsquo;s amazing debut from this plot, but from the process of plotting it. But you get the idea.&lt;/li&gt;
+&lt;li&gt;It looks like Indian batsmen have historically made slightly better debuts. From my not-so-keen-cricket-lover point of view, anybody who scored 150 runs at an average of 40 had a good debut series. (I chose that arbitrarily, but if you are more of a cricket fan than me, you would have better scales to spot a good debut, and you can draw your own conclusions :-)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;bowlers&#34;&gt;Bowlers&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;https://sadique.io/visualizations/debuts/bowlers.html&#34;&gt;This scatter-plot&lt;/a&gt; shows debut bowling performances by all the test players to have ever played for India and Paskistan (Except those players who took no wickets and hence is not of interest to us). The X-axis shows bowling average and the Y-axis shows number of wickets. The size of the bubble is representative of the number of wickets the bowler had in his best bowling performance in the debut series. Since it is indicative of only the wickets, players with best performances of 2/12 and 2/76 would be shown with bubbles of same size.&lt;/p&gt;
+&lt;p&gt;Interesting bits:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Pakistani bowlers make better debuts than Indian bowlers. In the crowd of players with a bowling average of less than 35 and 5 wickets of above, Pakistani players dominate. (Again, disclaimer about arbitrary scales to measure a good performance :-)&lt;/li&gt;
+&lt;li&gt;There are a number of Indian bowlers like Dilip Doshi, Shivlal Yadav, Ravichandran Ashwin and Srinivas Venkataraghavn whose debut performances were clear outliers.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;the-code&#34;&gt;The Code&lt;/h2&gt;
+&lt;p&gt;All the code I used to pull data from Cricinfo, the actual dataset and the Javascript code that generated these plots is available &lt;a href=&#34;https://github.com/sdqali/debuts&#34;&gt;here&lt;/a&gt; on Github. Feel free to use the dataset to create better visualisations than mine.&lt;/p&gt;
+&lt;h2 id=&#34;credits&#34;&gt;Credits&lt;/h2&gt;
+&lt;p&gt;Srijayanth (&lt;a href=&#34;https://twitter.com/craftybones&#34;&gt;@craftybones&lt;/a&gt;) helped me a lot with d3 and choosing the colors for the visualisation.&lt;/p&gt;</description>
     </item>
+    
   </channel>
 </rss>

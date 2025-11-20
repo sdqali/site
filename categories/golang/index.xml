@@ -1,19 +1,61 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Golang on {code that works}</title>
-    <link>http://localhost:1313/categories/golang/</link>
+    <link>https://sadique.io/categories/golang/?utm_source=site&amp;utm_medium=feed</link>
     <description>Recent content in Golang on {code that works}</description>
-    <generator>Hugo</generator>
+    <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Tue, 15 Dec 2015 02:47:06 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1313/categories/golang/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://sadique.io/categories/golang/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    
     <item>
       <title>Thoughts on Open Graph tags</title>
-      <link>http://localhost:1313/blog/2015/12/15/thoughts-on-open-graph-tags/</link>
+      <link>https://sadique.io/blog/2015/12/15/thoughts-on-open-graph-tags/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Tue, 15 Dec 2015 02:47:06 +0000</pubDate>
-      <guid>http://localhost:1313/blog/2015/12/15/thoughts-on-open-graph-tags/</guid>
-      <description>&lt;p&gt;The Open Graph protocol was designed by Facebook to help content creators generate a richer preview of links to their content when they get posted in to Facebook. It was originally proposed as a simple mark up that can be adopted in platforms beyond Facebook. The Open Graph Protocol Design Decisions presentation &lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; does a very good job of enumerating the motivation and design decisions made for Open Graph. I have lately been reading and experimenting with these tags and I notice a fair bit of differences when it comes to how these tags are used by different platforms.&lt;/p&gt;</description>
+      
+      <guid>https://sadique.io/blog/2015/12/15/thoughts-on-open-graph-tags/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;The Open Graph protocol was designed by Facebook to help content creators generate a richer preview of links to their content when they get posted in to Facebook. It was originally proposed as a simple mark up that can be adopted in platforms beyond Facebook. The Open Graph Protocol Design Decisions presentation &lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; does a very good job of enumerating the motivation and design decisions made for Open Graph. I have lately been reading and experimenting with these tags and I notice a fair bit of differences when it comes to how these tags are used by different platforms.&lt;/p&gt;
+&lt;p&gt;This is by no means an exhaustive list–these are applications I use frequently use and hence encounter the usage of Open Graph tags in. I am deliberately scoping this discussion to a sub set of tags including the following which are the most common tags I have encountered:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;og:title
+og:description
+og:url
+og:image
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;facebook&#34;&gt;Facebook&lt;/h2&gt;
+&lt;p&gt;I do not currently have a Facebook account with which I could test and this and Facebook‘s real name policy makes it hard to create test accounts. Facebook‘s &lt;a href=&#34;https://developers.facebook.com/docs/sharing/best-practices&#34;&gt;content sharing best practices&lt;/a&gt; does make it clear that they use the Open Graph tags and considering Facebook created the protocol, I would guess all the tags work as expected.&lt;/p&gt;
+&lt;h2 id=&#34;twitter&#34;&gt;Twitter&lt;/h2&gt;
+&lt;p&gt;Twitter primarily uses it‘s &lt;a href=&#34;https://dev.twitter.com/cards/overview&#34;&gt;Twitter Cards&lt;/a&gt; functionality to help content creators display richer previews. Twitter Cards defines it‘s own custom tags. However, if these tags are not present in a shared page‘s markup, Twitter does &lt;a href=&#34;https://dev.twitter.com/cards/markup&#34;&gt;fall back&lt;/a&gt; to using the corresponding Open Graph tags.&lt;/p&gt;
+&lt;p&gt;However, one of the interesting things about sharing content through Twitter cards is that it allows the content to be attributed to the Twitter accounts of the content author and the site where the content is hosted. This is done via the Twitter Card tags &lt;code&gt;twitter:creator&lt;/code&gt; and &lt;code&gt;twitter:site&lt;/code&gt;. There are no equivalents in the Open Graph world and hence these needs to be explicitly specified for Twitter.&lt;/p&gt;
+&lt;h2 id=&#34;slack&#34;&gt;Slack&lt;/h2&gt;
+&lt;p&gt;Slack generates rich preview of content using the four Open Graph tags. Slack does this by using it‘s &lt;a href=&#34;https://api.slack.com/robots&#34;&gt;Link Expanding Bot&lt;/a&gt;. In addition to Open Graph tags, Slack looks for oEmbed &lt;sup id=&#34;fnref:2&#34;&gt;&lt;a href=&#34;#fn:2&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;2&lt;/a&gt;&lt;/sup&gt; and Twitter Cards.&lt;/p&gt;
+&lt;h2 id=&#34;groupme&#34;&gt;GroupMe&lt;/h2&gt;
+&lt;p&gt;GroupMe parses Open Graph tags and displays them in chat messages. I have been unable to find documentation as to which other tags they parse.&lt;/p&gt;
+&lt;h2 id=&#34;google&#34;&gt;Google+&lt;/h2&gt;
+&lt;p&gt;Google‘s &lt;a href=&#34;https://developers.google.com/+/web/snippet/&#34;&gt;recommended method&lt;/a&gt; for providing metadata is Schema.org &lt;sup id=&#34;fnref:3&#34;&gt;&lt;a href=&#34;#fn:3&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;3&lt;/a&gt;&lt;/sup&gt; annotations. It does fall back to Open Graph tags if Schema.org annotations are not found. Google also uses schema.org microdata to generate rich snippets in their search results. Bing and Yahoo also support rich snippets through Schema.org annotations.&lt;/p&gt;
+&lt;h2 id=&#34;representing-creator-information&#34;&gt;Representing creator information&lt;/h2&gt;
+&lt;p&gt;As we saw in the example of Twitter, linking to the creator of content is not something that can be solved purely with Open Graph tags. Open Graph does specify an &lt;code&gt;author&lt;/code&gt; type &lt;sup id=&#34;fnref:4&#34;&gt;&lt;a href=&#34;#fn:4&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;4&lt;/a&gt;&lt;/sup&gt;. But in a world where links get shared to multiple platforms, the meaning of this tag is specific to the platform–it could be a Twitter id, a Facebook profile link, a Slack user id, etc. This does force the use of platform specific tags like &lt;code&gt;twitter:site&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;It would be interesting to see if Open Graph would one day support scoped author tags that can specify what &lt;code&gt;author:username&lt;/code&gt; means for different platforms like this:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;meta&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;property&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;profile:username&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;scope&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;“twitter.com“&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;content&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;@sdqali&amp;#34;&lt;/span&gt; /&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;meta&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;property&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;profile:username&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;scope&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;“facebook.com“&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;content&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;http://facebook.com/some-profile-id&amp;#34;&lt;/span&gt; /&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&amp;lt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;meta&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;property&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;profile:username&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;scope&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;“slack.com“&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;content&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;@some-slack-id&amp;#34;&lt;/span&gt; /&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;In conclusion, while Open Graph tags are used by a lot of platforms, there are specific pieces of information for which platform specific tags and annotations are needed.&lt;/p&gt;
+&lt;div class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
+&lt;hr&gt;
+&lt;ol&gt;
+&lt;li id=&#34;fn:1&#34;&gt;
+&lt;p&gt;David Recordon–The Open Graph Protocol Design Decisions on &lt;a href=&#34;http://www.scribd.com/doc/30715288/The-Open-Graph-Protocol-Design-Decisions&#34;&gt;Scribd&lt;/a&gt;.&amp;#160;&lt;a href=&#34;#fnref:1&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id=&#34;fn:2&#34;&gt;
+&lt;p&gt;oEmbed–Yet another attempt to provide rich representation of URLs. You can find more information on the &lt;a href=&#34;http://oembed.com/&#34;&gt;official site&lt;/a&gt;.&amp;#160;&lt;a href=&#34;#fnref:2&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id=&#34;fn:3&#34;&gt;
+&lt;p&gt;Schema.org is an effort to create and promote schemas for structured data. The official site is &lt;a href=&#34;http://schema.org/&#34;&gt;here&lt;/a&gt;.&amp;#160;&lt;a href=&#34;#fnref:3&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id=&#34;fn:4&#34;&gt;
+&lt;p&gt;See &lt;code&gt;article:author&lt;/code&gt; &lt;a href=&#34;http://ogp.me/#type_article&#34;&gt;spec&lt;/a&gt; and &lt;code&gt;book:author&lt;/code&gt; &lt;a href=&#34;http://ogp.me/#type_book&#34;&gt;spec&lt;/a&gt;.&amp;#160;&lt;a href=&#34;#fnref:4&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;</description>
     </item>
+    
   </channel>
 </rss>

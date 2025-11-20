@@ -1,26 +1,102 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Gis on {code that works}</title>
-    <link>http://localhost:1313/tags/gis/</link>
+    <link>https://sadique.io/tags/gis/?utm_source=site&amp;utm_medium=feed</link>
     <description>Recent content in Gis on {code that works}</description>
-    <generator>Hugo</generator>
+    <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Fri, 08 Aug 2014 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1313/tags/gis/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://sadique.io/tags/gis/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    
     <item>
       <title>Disputed territories and merging shapes and features</title>
-      <link>http://localhost:1313/blog/2014/08/08/disputed-territories-and-merging-shapes-and-features/</link>
+      <link>https://sadique.io/blog/2014/08/08/disputed-territories-and-merging-shapes-and-features/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Fri, 08 Aug 2014 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/blog/2014/08/08/disputed-territories-and-merging-shapes-and-features/</guid>
-      <description>Making a map that shows a disputed territory can be a tricky business. Nation states vigorously contest maps that appear to portray a boundary that challenges what a border looks like. From the Falkland Islands to Kuril Islands; from Western Sahara to Arunachal Pradesh, disputed territories result in omissions, additions and inaccuracies in maps.&#xA;I grew up looking at maps in books printed by the Oxford Press, that came with a disclaimer in blue rubber stamped across them that stated how the map was wrong.</description>
+      
+      <guid>https://sadique.io/blog/2014/08/08/disputed-territories-and-merging-shapes-and-features/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;Making a map that shows a disputed territory can be a tricky business. Nation states vigorously contest maps that appear to portray a boundary that challenges what a border looks like. From the Falkland Islands to Kuril Islands; from Western Sahara to Arunachal Pradesh, disputed territories result in omissions, additions and inaccuracies in maps.&lt;/p&gt;
+&lt;p&gt;I grew up looking at maps in books printed by the Oxford Press, that came with a disclaimer in blue rubber stamped across them that stated how the map was wrong. This was due to the fact that the maps showed only the parts of Kashmir being administered by India, thereby omitting areas under Chinese and Pakistani control. The Criminal Law Amendment Act, 1961 in India makes it punishable with imprisonment up to 6 months to publish a map that excludes all or parts of Kashmir&lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
+&lt;p&gt;This creates a lot of trouble for people who make maps for fun or to visualize data. Survey of India does not make it easy to get hold of shape files that represent India&amp;rsquo;s boundaries, and all the shape files that are available from international sources exclude parts of Kashmir. So, how do we solve this problem?&lt;/p&gt;
+&lt;p&gt;The North American Cartographic Information Society&amp;rsquo;s Natural Earth &lt;sup id=&#34;fnref:2&#34;&gt;&lt;a href=&#34;#fn:2&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;2&lt;/a&gt;&lt;/sup&gt; maps has all the disputed territories available for download as shape files. One way to solve the issue on our hands will be to take the shapes relevant to Kashmir from this file and merge it with the rest of India.&lt;/p&gt;
+&lt;p&gt;We will explore how to perform and an operation like this through QGIS &lt;sup id=&#34;fnref:3&#34;&gt;&lt;a href=&#34;#fn:3&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;3&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Open the disputed areas shape file in QGIS.&lt;/li&gt;
+&lt;li&gt;Select all the regions in Kashmir that are seen by India as it&amp;rsquo;s territories.&lt;/li&gt;
+&lt;li&gt;In order to make merging these shapes easier, we will introduce a new attribute on them. Go to &lt;code&gt;Layer → Open Attribute Table&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Switch to editing mode in the Attribute Table by clicking the &lt;code&gt;Toggle editing mode&lt;/code&gt; button.&lt;/li&gt;
+&lt;li&gt;Click &lt;code&gt;New column&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Choose a name for the column. In this example we are using &lt;code&gt;target&lt;/code&gt;. Select &lt;code&gt;Text (string)&lt;/code&gt; as the Type and choose a number like &lt;code&gt;10&lt;/code&gt; for width.&lt;/li&gt;
+&lt;li&gt;For all the selected shapes, set the value of &lt;code&gt;target&lt;/code&gt; to Kashmir.&lt;/li&gt;
+&lt;li&gt;Use the &lt;code&gt;Dissolve&lt;/code&gt; tool, found at &lt;code&gt;Vector → Geoprocessing tools → Dissolve&lt;/code&gt; to dissolve the shapes in to a single shape file. Choose &lt;code&gt;target&lt;/code&gt; as the value for &lt;code&gt;dissolve&lt;/code&gt; field. Save the output to a new shape file.&lt;/li&gt;
+&lt;li&gt;Install the QGIS plugin &lt;code&gt;MergeShapes&lt;/code&gt;. Plugins can be installed from &lt;code&gt;Plugins → Manage and Install Plugins&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Copy the &lt;a href=&#34;http://biogeo.ucdavis.edu/data/diva/adm/IND_adm.zip&#34;&gt;India shape file&lt;/a&gt; from DIVA-GIS and the newly generated Kashmir shape file to a directory.&lt;/li&gt;
+&lt;li&gt;Merge these into a single shape using &lt;code&gt;Vector → MergeShapes → MergeShapes&lt;/code&gt;.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;With that we have a shape File for India that closely resembles India&amp;rsquo;s official version.&lt;/p&gt;
+&lt;p&gt;Once we have the shape File for Kashmir from step &lt;code&gt;8&lt;/code&gt;, we could do the merging by converting both shape Files to their corresponding GeoJSON formats and doing simple JavaScript operations on the objects.&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Start by converting both shape Files to their GeoJSON representation.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&amp;gt; ogr2ogr -f GeoJSON india.geo.json india.shp
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&amp;gt; ogr2ogr -f GeoJSON kashmir.geo.json kashmir.shp
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ol&gt;
+&lt;li&gt;Load the two feature collections in to a JavaScript console. I tend to use Chromium&amp;rsquo;s Developer Tools, but in this example I am using  Node.js&amp;rsquo; REPL.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;kashmir &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; JSON.parse(fs.readFileSync(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;./kashmir.geo.json&amp;#34;&lt;/span&gt;).toString());
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;india &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; JSON.parse(fs.readFileSync(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;./india.geo.json&amp;#34;&lt;/span&gt;).toString());
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ol&gt;
+&lt;li&gt;Identify the Kashmir feature in the India feature collection.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;kin &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; india.features.filter(&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;function&lt;/span&gt;(f) {&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; f.properties.NAME_1.match(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Kashmir&amp;#34;&lt;/span&gt;);})[&lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;];
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ol&gt;
+&lt;li&gt;Replace it&amp;rsquo;s coordinates with the unified Kashmir we generated.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;kin.geometry.coordinates &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; kashmir.features[&lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;].geometry.coordinates;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ol&gt;
+&lt;li&gt;Save it back to a GeoJSON file.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;fs.writeFileSync(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;full_india.geo.json&amp;#34;&lt;/span&gt;, JSON.stringify(india));
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Now the GeoJSON file can be transformed back in to a shape file.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;ogr2ogr -f &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;ESRI Shapefile&amp;#39;&lt;/span&gt; full_india.shp full_india.geo.json
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Back to Kashmir and laws. Will this map save one from trouble? I am not sure, but this is an improvement on the omission of territories.&lt;/p&gt;
+&lt;div class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
+&lt;hr&gt;
+&lt;ol&gt;
+&lt;li id=&#34;fn:1&#34;&gt;
+&lt;p&gt;The Criminal Law Amendment Act, 1961 - &lt;a href=&#34;http://www.vakilno1.com/bareacts/laws/the-criminal-law-amendment-act-1961.html#2_Questioning_the_territorial_integrity_or_frontiers_of_India_in_a_manner_prejudicial_to_the_interests_of_safety_and_security_of_India&#34;&gt;Questioning the territorial integrity or frontiers of India in a manner prejudicial to the interests of safety and security of India.&lt;/a&gt;&amp;#160;&lt;a href=&#34;#fnref:1&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id=&#34;fn:2&#34;&gt;
+&lt;p&gt;Natural Earth is a public domain map dataset available at 1:10m, 1:50m, and 1:110 million scales. The data set is available for download &lt;a href=&#34;http://www.naturalearthdata.com/downloads/&#34;&gt;here&lt;/a&gt;.&amp;#160;&lt;a href=&#34;#fnref:2&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id=&#34;fn:3&#34;&gt;
+&lt;p&gt;&lt;a href=&#34;http://qgis.org/en/site/&#34;&gt;QGIS&lt;/a&gt; is a cross-platform free and open source desktop geographic information systems application that provides data viewing, editing, and analysis capabilities.&amp;#160;&lt;a href=&#34;#fnref:3&#34; class=&#34;footnote-backref&#34; role=&#34;doc-backlink&#34;&gt;&amp;#x21a9;&amp;#xfe0e;&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+</description>
     </item>
+    
     <item>
       <title>A list of GIS tools</title>
-      <link>http://localhost:1313/blog/2014/08/03/a-list-of-gis-tools/</link>
+      <link>https://sadique.io/blog/2014/08/03/a-list-of-gis-tools/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Sun, 03 Aug 2014 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/blog/2014/08/03/a-list-of-gis-tools/</guid>
-      <description>I have been playing around with maps a lot these days and have ended up using various tools in the process. This blog post is a way to make a note of these tools for later use.&#xA;geojson.io Mapbox&amp;rsquo;s geojson.io is a simple tool for creating, editing and sharing maps. It lets you import map data in various formats and has an editor to modify maps.&#xA;GeoJSON-TopoJSON Jeff Paine&amp;rsquo;s GeoJSON-TopoJSON is a simple tool to convert between the more common GeoJSON format and the TopoJSON format used by libraries like D3.</description>
+      
+      <guid>https://sadique.io/blog/2014/08/03/a-list-of-gis-tools/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;I have been playing around with maps a lot these days and have ended up using various tools in the process. This blog post is a way to make a note of these tools for later use.&lt;/p&gt;
+&lt;h1 id=&#34;geojsonio&#34;&gt;geojson.io&lt;/h1&gt;
+&lt;p&gt;Mapbox&amp;rsquo;s &lt;a href=&#34;http://geojson.io/&#34;&gt;geojson.io&lt;/a&gt; is a simple tool for creating, editing and sharing maps. It lets you import map data in various formats and has an editor to modify maps.&lt;/p&gt;
+&lt;h1 id=&#34;geojson-topojson&#34;&gt;GeoJSON-TopoJSON&lt;/h1&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/JeffPaine&#34;&gt;Jeff Paine&lt;/a&gt;&amp;rsquo;s &lt;a href=&#34;https://github.com/JeffPaine/geojson-topojson&#34;&gt;GeoJSON-TopoJSON&lt;/a&gt; is a simple tool to convert between the more common GeoJSON format and the TopoJSON format used by libraries like D3.js. It is a simple tool, but it does exactly what it says on the tin.&lt;/p&gt;
+&lt;h1 id=&#34;the-distillery&#34;&gt;The Distillery&lt;/h1&gt;
+&lt;p&gt;The New York Times&amp;rsquo; &lt;a href=&#34;http://shancarter.com/&#34;&gt;Shan Carter&lt;/a&gt; built &lt;a href=&#34;http://shancarter.github.io/distillery/&#34;&gt;The Distillery&lt;/a&gt;, a GUI around TopoJSON. Apart from converting GeoJSON to TopoJSON, it allows you to alter the map&amp;rsquo;s projection.&lt;/p&gt;
+&lt;h1 id=&#34;ogr2ogr&#34;&gt;ogr2ogr&lt;/h1&gt;
+&lt;p&gt;&lt;a href=&#34;http://www.gdal.org/ogr2ogr.html&#34;&gt;ogr2ogr&lt;/a&gt; is a command line utility to convert features data between different file formats.&lt;/p&gt;
+&lt;h1 id=&#34;ogre---ogr2ogr-web-client&#34;&gt;Ogre - ogr2ogr web client&lt;/h1&gt;
+&lt;p&gt;&lt;a href=&#34;http://ogre.adc4gis.com/&#34;&gt;Ogre&lt;/a&gt; is a web UI around ogr2ogr. It lets you do transformations on your map files when you are lazy and don&amp;rsquo;t want to use the command line to run ogr2ogr.&lt;/p&gt;
+&lt;h1 id=&#34;merge-geojson-features&#34;&gt;merge-geojson-features&lt;/h1&gt;
+&lt;p&gt;&lt;a href=&#34;https://www.npmjs.org/package/&#34;&gt;merge-geojson-features&lt;/a&gt; is a Node.js module to combine Features defined in different files in to a single FeatureCollection. I use it when I am not in the mood to alter GeoJSON objects from a JavaScript console by hand.&lt;/p&gt;
+</description>
     </item>
+    
   </channel>
 </rss>
