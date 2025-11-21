@@ -1,19 +1,19 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Datadog on {code that works}</title>
-    <link>http://localhost:1313/tags/datadog/?utm_source=site&amp;utm_medium=feed</link>
+    <link>https://sadique.io/tags/datadog/?utm_source=site&amp;utm_medium=feed</link>
     <description>Recent content in Datadog on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Fri, 02 Aug 2019 18:19:32 -0700</lastBuildDate>
-    <atom:link href="http://localhost:1313/tags/datadog/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    <atom:link href="https://sadique.io/tags/datadog/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
     
     <item>
       <title>Flushing Metrics in Dropwizard Commands</title>
-      <link>http://localhost:1313/blog/2019/08/02/flushing-metrics-in-dropwizard-commands/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sadique.io/blog/2019/08/02/flushing-metrics-in-dropwizard-commands/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Fri, 02 Aug 2019 18:19:32 -0700</pubDate>
       
-      <guid>http://localhost:1313/blog/2019/08/02/flushing-metrics-in-dropwizard-commands/?utm_source=site&amp;utm_medium=feed</guid>
+      <guid>https://sadique.io/blog/2019/08/02/flushing-metrics-in-dropwizard-commands/?utm_source=site&amp;utm_medium=feed</guid>
       <description>&lt;p&gt;Users of Dropwizard Metrics will be familiar with &lt;code&gt;ScheduledReporter&lt;/code&gt;  - it is a nice pattern that allows metrics reporting to be off loaded to a different thread which periodically sends out the collected metrics instead of making a network call every time a metric is collected. In most use cases, this works great - especially if you are running a server.&lt;/p&gt;
 &lt;p&gt;However, the implementation of &lt;code&gt;ScheduledReporter&lt;/code&gt; comes with an interesting quirk - it reports metrics only on the configured schedule, but does not flush the metrics it has collected after the last flush when the reporter is closed.&lt;/p&gt;
 &lt;p&gt;Datadog Metrics wires up ScheduledReporters that you configure as Dropwizard Lifecycle managed entities, guaranteeing that when your application shuts down, the reporter is closed.&lt;/p&gt;
@@ -22,56 +22,60 @@
 &lt;h2 id=&#34;solution&#34;&gt;Solution&lt;/h2&gt;
 &lt;p&gt;If you have the ability to override the specific &lt;code&gt;ScheduledReporter&lt;/code&gt; you are using, you could inherit from it and override the &lt;code&gt;#close()&lt;/code&gt; method to call &lt;code&gt;#report&lt;/code&gt; before issuing &lt;code&gt;#stop&lt;/code&gt;. For example, if you were using the &lt;code&gt;ConsoleReporter&lt;/code&gt;, you could override the method and then use a &lt;a href=&#34;https://docs.oracle.com/javase/tutorial/sound/SPI-intro.html&#34;&gt;Service Provider Interface&lt;/a&gt; to provide your new reporter to Datadog Metrics.&lt;/p&gt;
 &lt;p&gt;The SPI goes in the file &lt;code&gt;src/main/resources/META-INF/services/io.dropwizard.metrics.ReporterFactory&lt;/code&gt;&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;io.sadique.dropwizard.metrics.flush.CustomReporterFactory
-&lt;/code&gt;&lt;/pre&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;CustomReporterFactory&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;extends&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;BaseReporterFactory&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;{&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;&lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;ScheduledReporter&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#c0f&#34;&gt;build&lt;/span&gt;(MetricRegistry&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;registry)&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;{&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;FlushingReporter.&lt;span style=&#34;color:#309&#34;&gt;forRegistry&lt;/span&gt;(registry)&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;      &lt;/span&gt;.&lt;span style=&#34;color:#309&#34;&gt;build&lt;/span&gt;();&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;}&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;}&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;If you are using a reporter like &lt;code&gt;DataogReporter&lt;/code&gt;, it is hard to override it as the constructor is marked private. In such situations, we can create a wrapper that provides the overridden behavior:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;FlushOnCloseReporter&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;extends&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;ScheduledReporter&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;{&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;private&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;final&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;ScheduledReporter&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;wrapped;&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#c0f&#34;&gt;FlushOnCloseReporter&lt;/span&gt;(ScheduledReporter&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;wrapped,&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;MetricRegistry&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;registry,&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;String&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;name,&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;                              &lt;/span&gt;MetricFilter&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;filter,&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;TimeUnit&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;rateUnit,&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;TimeUnit&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;durationUnit)&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;{&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;super&lt;/span&gt;(registry,&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;name,&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;filter,&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;rateUnit,&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;durationUnit);&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;this&lt;/span&gt;.&lt;span style=&#34;color:#309&#34;&gt;wrapped&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;wrapped;&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;}&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;&lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;void&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#c0f&#34;&gt;report&lt;/span&gt;(SortedMap&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;String,&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;Gauge&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;gauges,&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;SortedMap&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;String,&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;Counter&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;counters,&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;                     &lt;/span&gt;SortedMap&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;String,&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;Histogram&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;histograms,&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;SortedMap&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;String,&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;Meter&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;meters,&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;                     &lt;/span&gt;SortedMap&lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt;String,&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;Timer&lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;timers)&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;{&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;wrapped.&lt;span style=&#34;color:#309&#34;&gt;report&lt;/span&gt;(gauges,&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;counters,&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;histograms,&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;meters,&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;timers);&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;}&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;&lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;void&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#c0f&#34;&gt;start&lt;/span&gt;(&lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;long&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;period,&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;TimeUnit&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;unit)&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;{&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;wrapped.&lt;span style=&#34;color:#309&#34;&gt;start&lt;/span&gt;(period,&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;unit);&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;}&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;&lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;void&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#c0f&#34;&gt;stop&lt;/span&gt;()&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;{&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;wrapped.&lt;span style=&#34;color:#309&#34;&gt;report&lt;/span&gt;();&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;wrapped.&lt;span style=&#34;color:#309&#34;&gt;stop&lt;/span&gt;();&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;}&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;}&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;And the reporter factory can be modified to wrap the &lt;code&gt;DatadogReporter&lt;/code&gt;.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;CustomReporterFactory&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;extends&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;BaseReporterFactory&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;{&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;&lt;span style=&#34;color:#99f&#34;&gt;@Override&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;ScheduledReporter&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#c0f&#34;&gt;build&lt;/span&gt;(MetricRegistry&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;registry)&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;{&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;DatadogReporter&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;consoleReporter&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;DatadogReporter.&lt;span style=&#34;color:#309&#34;&gt;forRegistry&lt;/span&gt;(registry)&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;      &lt;/span&gt;.&lt;span style=&#34;color:#309&#34;&gt;filter&lt;/span&gt;(getFilter())&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;      &lt;/span&gt;.&lt;span style=&#34;color:#309&#34;&gt;convertDurationsTo&lt;/span&gt;(getDurationUnit())&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;      &lt;/span&gt;.&lt;span style=&#34;color:#309&#34;&gt;convertRatesTo&lt;/span&gt;(getRateUnit())&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;      &lt;/span&gt;.&lt;span style=&#34;color:#309&#34;&gt;build&lt;/span&gt;();&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;new&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;FlushOnCloseReporter(consoleReporter,&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;registry,&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;flush-on-close(DatadogReporter)&amp;#34;&lt;/span&gt;,&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;      &lt;/span&gt;getFilter(),&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;getRateUnit(),&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;getDurationUnit());&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;}&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;}&lt;span style=&#34;color:#bbb&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This will ensure that reports are always flushed before the reporter is shutdown by Dropwizard lifecycle.&lt;/p&gt;</description>
+&lt;pre&gt;&lt;code&gt;io.sadique.dropwizard.metrics.flush.CustomReporterFactory
+&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code class=&#34;language-java&#34;&gt;public class CustomReporterFactory extends BaseReporterFactory {
+  @Override
+  public ScheduledReporter build(MetricRegistry registry) {
+    return FlushingReporter.forRegistry(registry)
+      .build();
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;If you are using a reporter like &lt;code&gt;DataogReporter&lt;/code&gt;, it is hard to override it as the constructor is marked private. In such situations, we can create a wrapper that provides the overridden behavior:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-java&#34;&gt;public class FlushOnCloseReporter extends ScheduledReporter  {
+  private final ScheduledReporter wrapped;
+
+  public FlushOnCloseReporter(ScheduledReporter wrapped, MetricRegistry registry, String name,
+                              MetricFilter filter, TimeUnit rateUnit, TimeUnit durationUnit) {
+    super(registry, name, filter, rateUnit, durationUnit);
+    this.wrapped = wrapped;
+  }
+
+  @Override
+  public void report(SortedMap&amp;lt;String, Gauge&amp;gt; gauges, SortedMap&amp;lt;String, Counter&amp;gt; counters,
+                     SortedMap&amp;lt;String, Histogram&amp;gt; histograms, SortedMap&amp;lt;String, Meter&amp;gt; meters,
+                     SortedMap&amp;lt;String, Timer&amp;gt; timers) {
+    wrapped.report(gauges, counters, histograms, meters, timers);
+  }
+
+  @Override
+  public void start(long period, TimeUnit unit) {
+    wrapped.start(period, unit);
+  }
+
+  @Override
+  public void stop() {
+    wrapped.report();
+    wrapped.stop();
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And the reporter factory can be modified to wrap the &lt;code&gt;DatadogReporter&lt;/code&gt;.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-java&#34;&gt;public class CustomReporterFactory extends BaseReporterFactory {
+  @Override
+  public ScheduledReporter build(MetricRegistry registry) {
+    DatadogReporter consoleReporter = DatadogReporter.forRegistry(registry)
+      .filter(getFilter())
+      .convertDurationsTo(getDurationUnit())
+      .convertRatesTo(getRateUnit())
+      .build();
+    return new FlushOnCloseReporter(consoleReporter, registry, &amp;quot;flush-on-close(DatadogReporter)&amp;quot;,
+      getFilter(), getRateUnit(), getDurationUnit());
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This will ensure that reports are always flushed before the reporter is shutdown by Dropwizard lifecycle.&lt;/p&gt;</description>
     </item>
     
   </channel>

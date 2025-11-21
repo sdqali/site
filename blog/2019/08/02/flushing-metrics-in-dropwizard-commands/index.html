@@ -1,6 +1,6 @@
 <!DOCTYPE html5>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us" prefix="og: http://ogp.me/ns#">
-  <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <head>
 
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -33,13 +33,13 @@
   <meta name="twitter:creator" content="@sdqali">
   <meta name="twitter:title" content="Flushing Metrics in Dropwizard Commands">
   <meta name="twitter:description" content="Users of Dropwizard Metrics will be familiar with ScheduledReporter  - it is a nice pattern that allows metrics reporting to be off loaded to a different thread which periodically sends out the collected metrics instead of making a network call every time a metric is collected. In most use cases, this works great - especially if you are running a server.">
-  <meta name="twitter:image" content="http://localhost:1313//">
+  <meta name="twitter:image" content="https://sadique.io//">
 
   <meta property="og:title" content="Flushing Metrics in Dropwizard Commands" />
   <meta property="og:description" content="Users of Dropwizard Metrics will be familiar with ScheduledReporter  - it is a nice pattern that allows metrics reporting to be off loaded to a different thread which periodically sends out the collected metrics instead of making a network call every time a metric is collected. In most use cases, this works great - especially if you are running a server." itemprop="description"/>
-  <meta property="og:url" content="http://localhost:1313/blog/2019/08/02/flushing-metrics-in-dropwizard-commands/" />
-  <meta property="og:image" content="http://localhost:1313//" />
-  <meta name="hugo:permalink" content="http://localhost:1313/blog/2019/08/02/flushing-metrics-in-dropwizard-commands/">
+  <meta property="og:url" content="https://sadique.io/blog/2019/08/02/flushing-metrics-in-dropwizard-commands/" />
+  <meta property="og:image" content="https://sadique.io//" />
+  <meta name="hugo:permalink" content="https://sadique.io/blog/2019/08/02/flushing-metrics-in-dropwizard-commands/">
   <meta name="hugo:filepath" content="content/blog/2019-08-02-flushing-metrics-in-dropwizard-commands.markdown">
   <body>
     <script>
@@ -98,56 +98,60 @@
 <h2 id="solution">Solution</h2>
 <p>If you have the ability to override the specific <code>ScheduledReporter</code> you are using, you could inherit from it and override the <code>#close()</code> method to call <code>#report</code> before issuing <code>#stop</code>. For example, if you were using the <code>ConsoleReporter</code>, you could override the method and then use a <a href="https://docs.oracle.com/javase/tutorial/sound/SPI-intro.html">Service Provider Interface</a> to provide your new reporter to Datadog Metrics.</p>
 <p>The SPI goes in the file <code>src/main/resources/META-INF/services/io.dropwizard.metrics.ReporterFactory</code></p>
-<pre tabindex="0"><code>io.sadique.dropwizard.metrics.flush.CustomReporterFactory
-</code></pre><div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">CustomReporterFactory</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">extends</span><span style="color:#bbb"> </span>BaseReporterFactory<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@Override</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>ScheduledReporter<span style="color:#bbb"> </span><span style="color:#c0f">build</span>(MetricRegistry<span style="color:#bbb"> </span>registry)<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>FlushingReporter.<span style="color:#309">forRegistry</span>(registry)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span>.<span style="color:#309">build</span>();<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><p>If you are using a reporter like <code>DataogReporter</code>, it is hard to override it as the constructor is marked private. In such situations, we can create a wrapper that provides the overridden behavior:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">FlushOnCloseReporter</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">extends</span><span style="color:#bbb"> </span>ScheduledReporter<span style="color:#bbb">  </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">final</span><span style="color:#bbb"> </span>ScheduledReporter<span style="color:#bbb"> </span>wrapped;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#c0f">FlushOnCloseReporter</span>(ScheduledReporter<span style="color:#bbb"> </span>wrapped,<span style="color:#bbb"> </span>MetricRegistry<span style="color:#bbb"> </span>registry,<span style="color:#bbb"> </span>String<span style="color:#bbb"> </span>name,<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                              </span>MetricFilter<span style="color:#bbb"> </span>filter,<span style="color:#bbb"> </span>TimeUnit<span style="color:#bbb"> </span>rateUnit,<span style="color:#bbb"> </span>TimeUnit<span style="color:#bbb"> </span>durationUnit)<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">super</span>(registry,<span style="color:#bbb"> </span>name,<span style="color:#bbb"> </span>filter,<span style="color:#bbb"> </span>rateUnit,<span style="color:#bbb"> </span>durationUnit);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">this</span>.<span style="color:#309">wrapped</span><span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>wrapped;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@Override</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">report</span>(SortedMap<span style="color:#555">&lt;</span>String,<span style="color:#bbb"> </span>Gauge<span style="color:#555">&gt;</span><span style="color:#bbb"> </span>gauges,<span style="color:#bbb"> </span>SortedMap<span style="color:#555">&lt;</span>String,<span style="color:#bbb"> </span>Counter<span style="color:#555">&gt;</span><span style="color:#bbb"> </span>counters,<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                     </span>SortedMap<span style="color:#555">&lt;</span>String,<span style="color:#bbb"> </span>Histogram<span style="color:#555">&gt;</span><span style="color:#bbb"> </span>histograms,<span style="color:#bbb"> </span>SortedMap<span style="color:#555">&lt;</span>String,<span style="color:#bbb"> </span>Meter<span style="color:#555">&gt;</span><span style="color:#bbb"> </span>meters,<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                     </span>SortedMap<span style="color:#555">&lt;</span>String,<span style="color:#bbb"> </span>Timer<span style="color:#555">&gt;</span><span style="color:#bbb"> </span>timers)<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>wrapped.<span style="color:#309">report</span>(gauges,<span style="color:#bbb"> </span>counters,<span style="color:#bbb"> </span>histograms,<span style="color:#bbb"> </span>meters,<span style="color:#bbb"> </span>timers);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@Override</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">start</span>(<span style="color:#078;font-weight:bold">long</span><span style="color:#bbb"> </span>period,<span style="color:#bbb"> </span>TimeUnit<span style="color:#bbb"> </span>unit)<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>wrapped.<span style="color:#309">start</span>(period,<span style="color:#bbb"> </span>unit);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@Override</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">stop</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>wrapped.<span style="color:#309">report</span>();<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>wrapped.<span style="color:#309">stop</span>();<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><p>And the reporter factory can be modified to wrap the <code>DatadogReporter</code>.</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">CustomReporterFactory</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">extends</span><span style="color:#bbb"> </span>BaseReporterFactory<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@Override</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>ScheduledReporter<span style="color:#bbb"> </span><span style="color:#c0f">build</span>(MetricRegistry<span style="color:#bbb"> </span>registry)<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>DatadogReporter<span style="color:#bbb"> </span>consoleReporter<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>DatadogReporter.<span style="color:#309">forRegistry</span>(registry)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span>.<span style="color:#309">filter</span>(getFilter())<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span>.<span style="color:#309">convertDurationsTo</span>(getDurationUnit())<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span>.<span style="color:#309">convertRatesTo</span>(getRateUnit())<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span>.<span style="color:#309">build</span>();<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>FlushOnCloseReporter(consoleReporter,<span style="color:#bbb"> </span>registry,<span style="color:#bbb"> </span><span style="color:#c30">&#34;flush-on-close(DatadogReporter)&#34;</span>,<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span>getFilter(),<span style="color:#bbb"> </span>getRateUnit(),<span style="color:#bbb"> </span>getDurationUnit());<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><p>This will ensure that reports are always flushed before the reporter is shutdown by Dropwizard lifecycle.</p>
+<pre><code>io.sadique.dropwizard.metrics.flush.CustomReporterFactory
+</code></pre>
+<pre><code class="language-java">public class CustomReporterFactory extends BaseReporterFactory {
+  @Override
+  public ScheduledReporter build(MetricRegistry registry) {
+    return FlushingReporter.forRegistry(registry)
+      .build();
+  }
+}
+</code></pre>
+<p>If you are using a reporter like <code>DataogReporter</code>, it is hard to override it as the constructor is marked private. In such situations, we can create a wrapper that provides the overridden behavior:</p>
+<pre><code class="language-java">public class FlushOnCloseReporter extends ScheduledReporter  {
+  private final ScheduledReporter wrapped;
+
+  public FlushOnCloseReporter(ScheduledReporter wrapped, MetricRegistry registry, String name,
+                              MetricFilter filter, TimeUnit rateUnit, TimeUnit durationUnit) {
+    super(registry, name, filter, rateUnit, durationUnit);
+    this.wrapped = wrapped;
+  }
+
+  @Override
+  public void report(SortedMap&lt;String, Gauge&gt; gauges, SortedMap&lt;String, Counter&gt; counters,
+                     SortedMap&lt;String, Histogram&gt; histograms, SortedMap&lt;String, Meter&gt; meters,
+                     SortedMap&lt;String, Timer&gt; timers) {
+    wrapped.report(gauges, counters, histograms, meters, timers);
+  }
+
+  @Override
+  public void start(long period, TimeUnit unit) {
+    wrapped.start(period, unit);
+  }
+
+  @Override
+  public void stop() {
+    wrapped.report();
+    wrapped.stop();
+  }
+}
+</code></pre>
+<p>And the reporter factory can be modified to wrap the <code>DatadogReporter</code>.</p>
+<pre><code class="language-java">public class CustomReporterFactory extends BaseReporterFactory {
+  @Override
+  public ScheduledReporter build(MetricRegistry registry) {
+    DatadogReporter consoleReporter = DatadogReporter.forRegistry(registry)
+      .filter(getFilter())
+      .convertDurationsTo(getDurationUnit())
+      .convertRatesTo(getRateUnit())
+      .build();
+    return new FlushOnCloseReporter(consoleReporter, registry, &quot;flush-on-close(DatadogReporter)&quot;,
+      getFilter(), getRateUnit(), getDurationUnit());
+  }
+}
+</code></pre>
+<p>This will ensure that reports are always flushed before the reporter is shutdown by Dropwizard lifecycle.</p>
         </div>
         <aside id="gh-comments-list">
           <script>
@@ -305,7 +309,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2019/07/28/managing-environment-lifecycles-for-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Managing environment lifecycles for Dropwizard Commands</a></li>
+            <li><a href="https://sadique.io/blog/2019/07/28/managing-environment-lifecycles-for-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Managing environment lifecycles for Dropwizard Commands</a></li>
             
             
             
@@ -359,7 +363,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2018/06/09/formatting-java-instant-for-resolutions/?utm_source=site&amp;utm_medium=related">Formatting Java Instant for resolutions</a></li>
+            <li><a href="https://sadique.io/blog/2018/06/09/formatting-java-instant-for-resolutions/?utm_source=site&amp;utm_medium=related">Formatting Java Instant for resolutions</a></li>
             
             
             
@@ -373,7 +377,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2018/05/05/freebuilder-plugin-for-intellij/?utm_source=site&amp;utm_medium=related">FreeBuilder plugin for IntelliJ</a></li>
+            <li><a href="https://sadique.io/blog/2018/05/05/freebuilder-plugin-for-intellij/?utm_source=site&amp;utm_medium=related">FreeBuilder plugin for IntelliJ</a></li>
             
             
             
@@ -403,7 +407,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2018/03/23/a-jackson-and-freebuilder-quirk/?utm_source=site&amp;utm_medium=related">A Jackson and FreeBuilder quirk</a></li>
+            <li><a href="https://sadique.io/blog/2018/03/23/a-jackson-and-freebuilder-quirk/?utm_source=site&amp;utm_medium=related">A Jackson and FreeBuilder quirk</a></li>
             
             
             
@@ -441,7 +445,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2017/08/18/uploading-a-standalone-artifact-to-nexus-3/?utm_source=site&amp;utm_medium=related">Uploading a standalone artifact to Nexus 3</a></li>
+            <li><a href="https://sadique.io/blog/2017/08/18/uploading-a-standalone-artifact-to-nexus-3/?utm_source=site&amp;utm_medium=related">Uploading a standalone artifact to Nexus 3</a></li>
             
             
             
@@ -475,7 +479,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/30/implementing-feature-toggles-for-a-spring-boot-application-part-4/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 4</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/30/implementing-feature-toggles-for-a-spring-boot-application-part-4/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 4</a></li>
             
             
             
@@ -497,19 +501,19 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/29/implementing-feature-toggles-for-a-spring-boot-application-part-3/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 3</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/29/implementing-feature-toggles-for-a-spring-boot-application-part-3/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 3</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/27/implementing-feature-toggles-for-a-spring-boot-application-part-2/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 2</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/27/implementing-feature-toggles-for-a-spring-boot-application-part-2/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 2</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/22/implementing-feature-toggles-for-a-spring-boot-application-part-1/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 1</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/22/implementing-feature-toggles-for-a-spring-boot-application-part-1/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 1</a></li>
             
             
             
@@ -547,7 +551,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/05/a-very-basic-introduction-to-deploying-a-java-application-using-kubernetes/?utm_source=site&amp;utm_medium=related">A very basic introduction to deploying a Java application using Kubernetes</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/05/a-very-basic-introduction-to-deploying-a-java-application-using-kubernetes/?utm_source=site&amp;utm_medium=related">A very basic introduction to deploying a Java application using Kubernetes</a></li>
             
             
             
@@ -565,7 +569,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/02/handling-deserialization-errors-in-spring-redis-sessions/?utm_source=site&amp;utm_medium=related">Handling Deserialization errors in Spring Redis Sessions</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/02/handling-deserialization-errors-in-spring-redis-sessions/?utm_source=site&amp;utm_medium=related">Handling Deserialization errors in Spring Redis Sessions</a></li>
             
             
             
@@ -583,7 +587,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/16/controlling-redis-auto-configuration-for-spring-boot-session/?utm_source=site&amp;utm_medium=related">Controlling Redis auto-configuration for Spring Boot Session</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/16/controlling-redis-auto-configuration-for-spring-boot-session/?utm_source=site&amp;utm_medium=related">Controlling Redis auto-configuration for Spring Boot Session</a></li>
             
             
             
@@ -597,7 +601,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/14/jwt-authentication-with-spring-web-part-5/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 5</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/14/jwt-authentication-with-spring-web-part-5/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 5</a></li>
             
             
             
@@ -615,19 +619,19 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/08/jwt-authentication-with-spring-web-part-4/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 4</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/08/jwt-authentication-with-spring-web-part-4/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 4</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/06/jwt-authentication-with-spring-web-part-3/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 3</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/06/jwt-authentication-with-spring-web-part-3/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 3</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/03/jwt-authentication-with-spring-web-part-2/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 2</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/03/jwt-authentication-with-spring-web-part-2/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 2</a></li>
             
             
             
@@ -637,13 +641,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/03/jwt-authentication-with-spring-web-part-1/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 1</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/03/jwt-authentication-with-spring-web-part-1/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 1</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/06/30/json-logging-for-spring-applications/?utm_source=site&amp;utm_medium=related">JSON logging for Spring applications</a></li>
+            <li><a href="https://sadique.io/blog/2016/06/30/json-logging-for-spring-applications/?utm_source=site&amp;utm_medium=related">JSON logging for Spring applications</a></li>
             
             
             
@@ -653,13 +657,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/06/29/injecting-dependencies-into-a-spring-@configuration/?utm_source=site&amp;utm_medium=related">Injecting dependencies into a Spring @Configuration</a></li>
+            <li><a href="https://sadique.io/blog/2016/06/29/injecting-dependencies-into-a-spring-@configuration/?utm_source=site&amp;utm_medium=related">Injecting dependencies into a Spring @Configuration</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/06/08/filtering-responses-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Filtering responses in Spring MVC</a></li>
+            <li><a href="https://sadique.io/blog/2016/06/08/filtering-responses-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Filtering responses in Spring MVC</a></li>
             
             
             
@@ -701,31 +705,31 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/04/24/deprecating-domain-events-in-axon/?utm_source=site&amp;utm_medium=related">Deprecating domain events in Axon</a></li>
+            <li><a href="https://sadique.io/blog/2016/04/24/deprecating-domain-events-in-axon/?utm_source=site&amp;utm_medium=related">Deprecating domain events in Axon</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/04/20/programmable-exit-codes-for-spring-command-line-applications-2/?utm_source=site&amp;utm_medium=related">Programmable exit codes for spring command line applications - 2</a></li>
+            <li><a href="https://sadique.io/blog/2016/04/20/programmable-exit-codes-for-spring-command-line-applications-2/?utm_source=site&amp;utm_medium=related">Programmable exit codes for spring command line applications - 2</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/04/18/programmable-exit-codes-for-spring-command-line-applications/?utm_source=site&amp;utm_medium=related">Programmable exit codes for Spring command line applications</a></li>
+            <li><a href="https://sadique.io/blog/2016/04/18/programmable-exit-codes-for-spring-command-line-applications/?utm_source=site&amp;utm_medium=related">Programmable exit codes for Spring command line applications</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/01/30/using-custom-arguments-in-spring-mvc-controllers/?utm_source=site&amp;utm_medium=related">Using custom arguments in Spring MVC controllers</a></li>
+            <li><a href="https://sadique.io/blog/2016/01/30/using-custom-arguments-in-spring-mvc-controllers/?utm_source=site&amp;utm_medium=related">Using custom arguments in Spring MVC controllers</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/16/authentication-for-apache-camel-http-components/?utm_source=site&amp;utm_medium=related">Authentication for Apache Camel HTTP components</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/16/authentication-for-apache-camel-http-components/?utm_source=site&amp;utm_medium=related">Authentication for Apache Camel HTTP components</a></li>
             
             
             
@@ -751,13 +755,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/11/integration-testing-spring-command-line-applications/?utm_source=site&amp;utm_medium=related">Integration testing Spring command line applications</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/11/integration-testing-spring-command-line-applications/?utm_source=site&amp;utm_medium=related">Integration testing Spring command line applications</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/11/integration-testing-challenges-for-non-web-spring-applications/?utm_source=site&amp;utm_medium=related">Integration testing challenges for non-web Spring applications</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/11/integration-testing-challenges-for-non-web-spring-applications/?utm_source=site&amp;utm_medium=related">Integration testing challenges for non-web Spring applications</a></li>
             
             
             
@@ -767,7 +771,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/06/implementing-custom-annotations-for-spring-mvc/?utm_source=site&amp;utm_medium=related">Implementing custom annotations for Spring MVC</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/06/implementing-custom-annotations-for-spring-mvc/?utm_source=site&amp;utm_medium=related">Implementing custom annotations for Spring MVC</a></li>
             
             
             
@@ -781,7 +785,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/05/validating-requestparams-and-pathvariables-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Validating RequestParams and PathVariables in Spring MVC</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/05/validating-requestparams-and-pathvariables-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Validating RequestParams and PathVariables in Spring MVC</a></li>
             
             
             
@@ -795,13 +799,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/11/24/testing-async-responses-using-mockmvc/?utm_source=site&amp;utm_medium=related">Testing async responses using MockMvc</a></li>
+            <li><a href="https://sadique.io/blog/2015/11/24/testing-async-responses-using-mockmvc/?utm_source=site&amp;utm_medium=related">Testing async responses using MockMvc</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/06/09/running-multiple-applications-in-the-same-tomcat-installation/?utm_source=site&amp;utm_medium=related">Running multiple applications in the same Tomcat installation</a></li>
+            <li><a href="https://sadique.io/blog/2015/06/09/running-multiple-applications-in-the-same-tomcat-installation/?utm_source=site&amp;utm_medium=related">Running multiple applications in the same Tomcat installation</a></li>
             
             
             
@@ -943,7 +947,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2014/02/17/a-simple-jmeter-test-with-login/?utm_source=site&amp;utm_medium=related">A simple JMeter test with login</a></li>
+            <li><a href="https://sadique.io/blog/2014/02/17/a-simple-jmeter-test-with-login/?utm_source=site&amp;utm_medium=related">A simple JMeter test with login</a></li>
             
             
             
@@ -1933,7 +1937,11 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2010/03/16/java-arrays-in-jruby/?utm_source=site&amp;utm_medium=related">Java Arrays in JRuby</a></li>
+            <li><a href="https://sadique.io/blog/2010/03/16/java-arrays-in-jruby/?utm_source=site&amp;utm_medium=related">Java Arrays in JRuby</a></li>
+            
+            
+            
+            
             
             
             

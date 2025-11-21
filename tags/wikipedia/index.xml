@@ -1,19 +1,19 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Wikipedia on {code that works}</title>
-    <link>http://localhost:1313/tags/wikipedia/?utm_source=site&amp;utm_medium=feed</link>
+    <link>https://sadique.io/tags/wikipedia/?utm_source=site&amp;utm_medium=feed</link>
     <description>Recent content in Wikipedia on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Tue, 17 May 2011 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1313/tags/wikipedia/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    <atom:link href="https://sadique.io/tags/wikipedia/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
     
     <item>
       <title>Wikipedia Page Hopping</title>
-      <link>http://localhost:1313/blog/2011/05/17/wikipedia-page-hopping/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sadique.io/blog/2011/05/17/wikipedia-page-hopping/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Tue, 17 May 2011 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/blog/2011/05/17/wikipedia-page-hopping/?utm_source=site&amp;utm_medium=feed</guid>
+      <guid>https://sadique.io/blog/2011/05/17/wikipedia-page-hopping/?utm_source=site&amp;utm_medium=feed</guid>
       <description>&lt;p&gt;I have realized that like most users of Wikipedia, I do a lot of Wikipedia page-hopping [1]. Wikipedia is sort of addictive that way. You start reading about a piece of Flamenco music and after twenty minutes find yourself staring at the page about &lt;a href=&#34;http://en.wikipedia.org/wiki/ETA&#34;&gt;ETA&lt;/a&gt;, a Basque nationalist organization. So I decided to figure out how I exactly do I get lost in the huge list of interconnected articles. I use Chromium, and it stores its history in a SQLite3 database file. I wrote a small Ruby script that parses the history, splits them to chunks of articles accessed per day, and filter only Wikipedia links from this.&lt;/p&gt;
 &lt;p&gt;This is basically what I had to do:&lt;/p&gt;
 &lt;ul&gt;
@@ -89,84 +89,85 @@ http://en.wikipedia.org/wiki/The_Heart_of_Midlothian
 &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;I am still trying to make more sense of the links that I clicked away and the articles I read when I was page hopping.&lt;/p&gt;
 &lt;p&gt;The Ruby script that parses Chromium history and figures out the Wikipedia links is below:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;#!/usr/bin/env ruby&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# Ruby script to parse Chromium (or Google Chrome) history to identify Wikipedia pages read per day.&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# usage: ./wikipedia_history.rb &amp;lt;location of Chromium history db&amp;gt;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# The Chromium history db can be usually found under ~/.config/chromium/Default&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;require&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;rubygems&amp;#39;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;require&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;sqlite3&amp;#39;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#360&#34;&gt;US_IN_A_DAY&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;24&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;60&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;60&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;1000000&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#360&#34;&gt;SITE&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;wikipedia&amp;#34;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;module&lt;/span&gt; &lt;span style=&#34;color:#0cf;font-weight:bold&#34;&gt;ChromiumHP&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;DbConnection&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;initialize&lt;/span&gt; db_name
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#033&#34;&gt;@db_name&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; db_name
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;urls_history&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      db &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;SQLite3&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;&lt;span style=&#34;color:#360&#34;&gt;Database&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;new &lt;span style=&#34;color:#033&#34;&gt;@db_name&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      urls &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; db&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;execute(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;SELECT last_visit_time, url from urls ORDER BY last_visit_time;&amp;#34;&lt;/span&gt;)&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;map &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;do&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;t, u&lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        {&lt;span style=&#34;color:#fc3&#34;&gt;:last_visit_time&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; t, &lt;span style=&#34;color:#fc3&#34;&gt;:url&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; u}
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      db&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;close
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      urls
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;Parser&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;initialize&lt;/span&gt; db_name
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#033&#34;&gt;@db_name&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; db_name
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;chunks&lt;/span&gt; days
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#033&#34;&gt;@history&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;||=&lt;/span&gt; get_history
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      parts &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;@history&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;group_by &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;do&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;h&lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;         h&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#fc3&#34;&gt;:last_visit_time&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;/&lt;/span&gt; (days &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;US_IN_A_DAY&lt;/span&gt;)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      parts&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;map { &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;k, group&lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; group }
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069&#34;&gt;private&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;get_history&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#360&#34;&gt;DbConnection&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;new(&lt;span style=&#34;color:#033&#34;&gt;@db_name&lt;/span&gt;)&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;urls_history
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;Analyzer&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c0f&#34;&gt;graph&lt;/span&gt; chunks
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      chunks&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;map &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;do&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;c&lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        c&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;find_all &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;do&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;entry&lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;          url &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; entry&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#fc3&#34;&gt;:url&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;          url&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;include?(&lt;span style=&#34;color:#360&#34;&gt;SITE&lt;/span&gt;) &lt;span style=&#34;color:#555&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            &lt;span style=&#34;color:#555&#34;&gt;!&lt;/span&gt;url&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;include?(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;facebook&amp;#34;&lt;/span&gt;) &lt;span style=&#34;color:#555&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            &lt;span style=&#34;color:#555&#34;&gt;!&lt;/span&gt;url&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;include?(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;google&amp;#34;&lt;/span&gt;)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;find_all &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;do&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;c&lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#555&#34;&gt;!&lt;/span&gt;c&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;empty?
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;sort_by &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;do&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;c&lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        c&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;length
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;map &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;do&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;c&lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        c&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;map &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;do&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;entry&lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;          entry&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#fc3&#34;&gt;:url&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;history_loc &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;ARGV&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;first
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;abort&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Error: Pass the chromium history location as parameter&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; history_loc&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;nil?
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;daily_chunks &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;ChromiumHP&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;&lt;span style=&#34;color:#360&#34;&gt;Parser&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;new(history_loc &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/History&amp;#34;&lt;/span&gt;)&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;chunks(&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#360&#34;&gt;ChromiumHP&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;&lt;span style=&#34;color:#360&#34;&gt;Analyzer&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;graph(daily_chunks)&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;each &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;do&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;entries&lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; entries
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description>
+&lt;pre&gt;&lt;code class=&#34;language-ruby&#34;&gt;#!/usr/bin/env ruby
+# Ruby script to parse Chromium (or Google Chrome) history to identify Wikipedia pages read per day.
+# usage: ./wikipedia_history.rb &amp;lt;location of Chromium history db&amp;gt;
+# The Chromium history db can be usually found under ~/.config/chromium/Default
+
+require &#39;rubygems&#39;
+require &#39;sqlite3&#39;
+
+US_IN_A_DAY = 24 * 60 * 60 * 1000000
+SITE = &amp;quot;wikipedia&amp;quot;
+
+module ChromiumHP
+  class DbConnection
+    def initialize db_name
+      @db_name = db_name
+    end
+
+    def urls_history
+      db = SQLite3::Database.new @db_name
+      urls = db.execute(&amp;quot;SELECT last_visit_time, url from urls ORDER BY last_visit_time;&amp;quot;).map do |t, u|
+        {:last_visit_time =&amp;gt; t, :url =&amp;gt; u}
+      end
+      db.close
+      urls
+    end
+  end
+
+  class Parser
+    def initialize db_name
+      @db_name = db_name
+    end
+
+    def chunks days
+      @history ||= get_history
+      parts = @history.group_by do |h|
+         h[:last_visit_time] / (days * US_IN_A_DAY)
+      end
+      parts.map { |k, group| group }
+    end
+
+    private
+    def get_history
+      DbConnection.new(@db_name).urls_history
+    end
+  end
+
+  class Analyzer
+    def self.graph chunks
+      chunks.map do |c|
+        c.find_all do |entry|
+          url = entry[:url]
+          url.include?(SITE) &amp;amp;&amp;amp;
+            !url.include?(&amp;quot;facebook&amp;quot;) &amp;amp;&amp;amp;
+            !url.include?(&amp;quot;google&amp;quot;)
+        end
+      end.find_all do |c|
+        !c.empty?
+      end.sort_by do |c|
+        c.length
+      end.map do |c|
+        c.map do |entry|
+          entry[:url]
+        end
+      end
+    end
+  end
+end
+
+
+history_loc = ARGV.first
+abort &amp;quot;Error: Pass the chromium history location as parameter&amp;quot; if history_loc.nil?
+
+daily_chunks = ChromiumHP::Parser.new(history_loc + &amp;quot;/History&amp;quot;).chunks(1)
+ChromiumHP::Analyzer.graph(daily_chunks).each do |entries|
+  puts entries
+  puts &amp;quot;&amp;quot;
+end
+&lt;/code&gt;&lt;/pre&gt;
+</description>
     </item>
     
   </channel>

@@ -1,6 +1,6 @@
 <!DOCTYPE html5>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us" prefix="og: http://ogp.me/ns#">
-  <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <head>
 
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -37,15 +37,15 @@ However, there are situations where you want methods to receive a parameter of a
   <meta name="twitter:description" content="
 Most of the Spring controllers in the real world accept a lot of different types of parameters - Path variables, URL parameters, request headers, request body and sometimes even the entire HTTP Request object. This provides a flexible mechanism to create APIs. Spring is really good at parsing these parameters in to Java types as long as there is an ObjectMapper (like Jackson) configured to take care of the de-serialization.
 However, there are situations where you want methods to receive a parameter of a particular type that has to resolved from a set of parameters–for example, an API can expect consumers to send meta data about a request in the form of headers and need a custom type to hold this information. Spring provides a convenient way to provide such custom arguments. This blog post explores this feature and how to implement it and test it.">
-  <meta name="twitter:image" content="http://localhost:1313//images/spring-by-pivotal.png">
+  <meta name="twitter:image" content="https://sadique.io//images/spring-by-pivotal.png">
 
   <meta property="og:title" content="Using custom arguments in Spring MVC controllers" />
   <meta property="og:description" content="
 Most of the Spring controllers in the real world accept a lot of different types of parameters - Path variables, URL parameters, request headers, request body and sometimes even the entire HTTP Request object. This provides a flexible mechanism to create APIs. Spring is really good at parsing these parameters in to Java types as long as there is an ObjectMapper (like Jackson) configured to take care of the de-serialization.
 However, there are situations where you want methods to receive a parameter of a particular type that has to resolved from a set of parameters–for example, an API can expect consumers to send meta data about a request in the form of headers and need a custom type to hold this information. Spring provides a convenient way to provide such custom arguments. This blog post explores this feature and how to implement it and test it." itemprop="description"/>
-  <meta property="og:url" content="http://localhost:1313/blog/2016/01/30/using-custom-arguments-in-spring-mvc-controllers/" />
-  <meta property="og:image" content="http://localhost:1313//images/spring-by-pivotal.png" />
-  <meta name="hugo:permalink" content="http://localhost:1313/blog/2016/01/30/using-custom-arguments-in-spring-mvc-controllers/">
+  <meta property="og:url" content="https://sadique.io/blog/2016/01/30/using-custom-arguments-in-spring-mvc-controllers/" />
+  <meta property="og:image" content="https://sadique.io//images/spring-by-pivotal.png" />
+  <meta name="hugo:permalink" content="https://sadique.io/blog/2016/01/30/using-custom-arguments-in-spring-mvc-controllers/">
   <meta name="hugo:filepath" content="content/blog/2016-01-29-using-custom-arguments-in-spring-mvc-controllers.markdown">
   <body>
     <script>
@@ -95,114 +95,120 @@ Most of the Spring controllers in the real world accept a lot of different types
 <p>However, there are situations where you want methods to receive a parameter of a particular type that has to resolved from a set of parameters–for example, an API can expect consumers to send meta data about a request in the form of headers and need a custom type to hold this information. Spring provides a convenient way to provide such custom arguments. This blog post explores this feature and how to implement it and test it.</p>
 <h2 id="argument-resolvers">Argument Resolvers</h2>
 <p>Spring uses argument resolvers to determine how to parse a particular argument required by a controller method from HTTP request body, the URL, URL parameters and HTTP headers. For example when a method expects a request header as in the following example, Spring uses a particular resolver named <code>RequestHeaderMethodArgumentResolver</code> to resolve this argument. All argument resolvers implement the <code>HandlerMethodArgumentResolver</code> interface whose contract is:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">interface</span> <span style="color:#0a8;font-weight:bold">HandlerMethodArgumentResolver</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#078;font-weight:bold">boolean</span><span style="color:#bbb"> </span><span style="color:#c0f">supportsParameter</span>(MethodParameter<span style="color:#bbb"> </span>parameter);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>Object<span style="color:#bbb"> </span><span style="color:#c0f">resolveArgument</span>(MethodParameter<span style="color:#bbb"> </span>parameter,<span style="color:#bbb"> </span>ModelAndViewContainer<span style="color:#bbb"> </span>mavContainer,<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>NativeWebRequest<span style="color:#bbb"> </span>webRequest,<span style="color:#bbb"> </span>WebDataBinderFactory<span style="color:#bbb"> </span>binderFactory)<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>Exception;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><p>The <code>supportsParameter</code> method determines if this resolver is capable of parsing a given parameter and <code>resolveArgument</code> specifies how it‘s value should be computed. Notice how this method has the web <code>NativeWebRequest</code> argument passed to it to allow the look up of request parameters like body, url and headers.</p>
+<pre><code class="language-java">public interface HandlerMethodArgumentResolver {
+    boolean supportsParameter(MethodParameter parameter);
+    Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+            NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception;
+}
+</code></pre>
+<p>The <code>supportsParameter</code> method determines if this resolver is capable of parsing a given parameter and <code>resolveArgument</code> specifies how it‘s value should be computed. Notice how this method has the web <code>NativeWebRequest</code> argument passed to it to allow the look up of request parameters like body, url and headers.</p>
 <p>For this example, the MetaData that we are interested in can be represented as a type:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">MetaData</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@JsonProperty</span>(<span style="color:#c30">&#34;data&#34;</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span>Map<span style="color:#555">&lt;</span>String,<span style="color:#bbb"> </span>String<span style="color:#555">&gt;</span><span style="color:#bbb"> </span>map<span style="color:#bbb">  </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>HashMap<span style="color:#555">&lt;&gt;</span>();<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span><span style="color:#c0f">MetaData</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#c0f">MetaData</span>(Map<span style="color:#555">&lt;</span>String,<span style="color:#bbb"> </span>String<span style="color:#555">&gt;</span><span style="color:#bbb"> </span>map)<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">this</span>.<span style="color:#309">map</span><span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>map;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>String<span style="color:#bbb"> </span><span style="color:#c0f">get</span>(String<span style="color:#bbb"> </span>key)<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>map.<span style="color:#309">get</span>(key);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><p>An argument resolver to compute this from the incoming request can be written as follows:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">MetaDataResolver</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">implements</span><span style="color:#bbb"> </span>HandlerMethodArgumentResolver<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">static</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">final</span><span style="color:#bbb"> </span>String<span style="color:#bbb"> </span>TRANSACTION_ID<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;TRANSACTION-ID&#34;</span>;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">static</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">final</span><span style="color:#bbb"> </span>String<span style="color:#bbb"> </span>ACCESS_KEY<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;ACCESS-KEY&#34;</span>;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span>List<span style="color:#555">&lt;</span>String<span style="color:#555">&gt;</span><span style="color:#bbb"> </span>metaDataHeaderNames<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>Arrays.<span style="color:#309">asList</span>(TRANSACTION_ID,<span style="color:#bbb"> </span>ACCESS_KEY);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">boolean</span><span style="color:#bbb"> </span><span style="color:#c0f">supportsParameter</span>(MethodParameter<span style="color:#bbb"> </span>parameter)<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>parameter.<span style="color:#309">getParameterType</span>().<span style="color:#309">equals</span>(MetaData.<span style="color:#309">class</span>);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>Object<span style="color:#bbb"> </span><span style="color:#c0f">resolveArgument</span>(MethodParameter<span style="color:#bbb"> </span>parameter,<span style="color:#bbb"> </span>ModelAndViewContainer<span style="color:#bbb"> </span>mavContainer,<span style="color:#bbb"> </span>NativeWebRequest<span style="color:#bbb"> </span>webRequest,<span style="color:#bbb"> </span>WebDataBinderFactory<span style="color:#bbb"> </span>binderFactory)<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>HashMap<span style="color:#555">&lt;</span>String,<span style="color:#bbb"> </span>String<span style="color:#555">&gt;</span><span style="color:#bbb"> </span>map<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>HashMap<span style="color:#555">&lt;&gt;</span>();<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>metaDataHeaderNames.<span style="color:#309">forEach</span>(name<span style="color:#bbb"> </span><span style="color:#555">-&gt;</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(webRequest.<span style="color:#309">getHeader</span>(name)<span style="color:#bbb"> </span><span style="color:#555">!=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>)<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>map.<span style="color:#309">put</span>(name,<span style="color:#bbb"> </span>webRequest.<span style="color:#309">getHeader</span>(name));<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>});<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>MetaData(map);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><p>This resolver will try and compute the value for the argument if the arguments type is <code>MetaData</code>. It computes it by extracting all the headers representing the meta data from the request.</p>
+<pre><code class="language-java">public class MetaData {
+    @JsonProperty(&quot;data&quot;)
+    private Map&lt;String, String&gt; map  = new HashMap&lt;&gt;();
+
+    private MetaData() {
+    }
+
+    public MetaData(Map&lt;String, String&gt; map) {
+        this.map = map;
+    }
+
+    public String get(String key) {
+        return map.get(key);
+    }
+}
+</code></pre>
+<p>An argument resolver to compute this from the incoming request can be written as follows:</p>
+<pre><code class="language-java">public class MetaDataResolver implements HandlerMethodArgumentResolver {
+    private static final String TRANSACTION_ID = &quot;TRANSACTION-ID&quot;;
+    private static final String ACCESS_KEY = &quot;ACCESS-KEY&quot;;
+    private List&lt;String&gt; metaDataHeaderNames = Arrays.asList(TRANSACTION_ID, ACCESS_KEY);
+
+    @Override
+    public boolean supportsParameter(MethodParameter parameter) {
+        return parameter.getParameterType().equals(MetaData.class);
+    }
+
+    @Override
+    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+        HashMap&lt;String, String&gt; map = new HashMap&lt;&gt;();
+        metaDataHeaderNames.forEach(name -&gt; {
+            if (webRequest.getHeader(name) != null) {
+                map.put(name, webRequest.getHeader(name));
+            }
+        });
+        return new MetaData(map);
+    }
+}
+</code></pre>
+<p>This resolver will try and compute the value for the argument if the arguments type is <code>MetaData</code>. It computes it by extracting all the headers representing the meta data from the request.</p>
 <h2 id="using-in-a-controller-method">Using in a controller method</h2>
 <p>This parameter can be accessed in a controller method as follows:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@RestController</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@RequestMapping</span>(<span style="color:#c30">&#34;/profiles&#34;</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">ProfileController</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Autowired</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>ProfileService<span style="color:#bbb"> </span>profileService;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@RequestMapping</span>(path<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;/&#34;</span>,<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>method<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>RequestMethod.<span style="color:#309">POST</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>Map<span style="color:#555">&lt;</span>String,<span style="color:#bbb"> </span>String<span style="color:#555">&gt;</span><span style="color:#bbb"> </span><span style="color:#c0f">create</span>(<span style="color:#99f">@RequestBody</span><span style="color:#bbb"> </span>Profile<span style="color:#bbb"> </span>profile,<span style="color:#bbb"> </span>MetaData<span style="color:#bbb"> </span>metaData)<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>profileService.<span style="color:#309">create</span>(profile,<span style="color:#bbb"> </span>metaData);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>System.<span style="color:#309">out</span>.<span style="color:#309">printf</span>(metaData.<span style="color:#309">toString</span>());<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>Collections.<span style="color:#309">singletonMap</span>(<span style="color:#c30">&#34;message&#34;</span>,<span style="color:#bbb"> </span><span style="color:#c30">&#34;success&#34;</span>);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><p>If we were to run this app and make a request with the following headers, we will see that the MetaData instance did not get constructed with the right parameters.</p>
+<pre><code class="language-java">@RestController
+@RequestMapping(&quot;/profiles&quot;)
+public class ProfileController {
+    @Autowired
+    ProfileService profileService;
+
+    @RequestMapping(path = &quot;/&quot;,
+    method = RequestMethod.POST)
+    public Map&lt;String, String&gt; create(@RequestBody Profile profile, MetaData metaData) {
+        profileService.create(profile, metaData);
+        System.out.printf(metaData.toString());
+        return Collections.singletonMap(&quot;message&quot;, &quot;success&quot;);
+    }
+}
+</code></pre>
+<p>If we were to run this app and make a request with the following headers, we will see that the MetaData instance did not get constructed with the right parameters.</p>
 <h2 id="wiring-up-the-custom-resolver">Wiring up the custom resolver</h2>
 <p>For this resolver to work, it needs to be added to the chain of resolvers that Spring uses. This can be done by extending <code>WebMvcConfigurerAdapter</code>‘s <code>addArgumentResolvers</code> method as follows:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Configuration</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">Config</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">extends</span><span style="color:#bbb"> </span>WebMvcConfigurerAdapter<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">addArgumentResolvers</span>(List<span style="color:#555">&lt;</span>HandlerMethodArgumentResolver<span style="color:#555">&gt;</span><span style="color:#bbb"> </span>argumentResolvers)<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>argumentResolvers.<span style="color:#309">add</span>(<span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>MetaDataResolver());<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><h2 id="testing-using-mockmvc">Testing using MockMvc</h2>
+<pre><code class="language-java">@Configuration
+public class Config extends WebMvcConfigurerAdapter {
+    @Override
+    public void addArgumentResolvers(List&lt;HandlerMethodArgumentResolver&gt; argumentResolvers) {
+        argumentResolvers.add(new MetaDataResolver());
+    }
+}
+</code></pre>
+<h2 id="testing-using-mockmvc">Testing using MockMvc</h2>
 <p>In order to test the behavior of a controller in the presence of a custom argument resolver using MockMvc, the resolver need to be added to the list of resolvers that MockMvc is going to use.
 An example test for the above class is as follows:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@RunWith</span>(MockitoJUnitRunner.<span style="color:#309">class</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">ProfileControllerTest</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">extends</span><span style="color:#bbb"> </span>TestCase<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span>ProfileController<span style="color:#bbb"> </span>profileController;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span>MockMvc<span style="color:#bbb"> </span>mockMvc;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span>ObjectMapper<span style="color:#bbb"> </span>objectMapper;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Mock</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span>ProfileService<span style="color:#bbb"> </span>profileService;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Before</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">setUp</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>objectMapper<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>ObjectMapper();<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>profileController<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>ProfileController(profileService);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>mockMvc<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>MockMvcBuilders<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">standaloneSetup</span>(profileController)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">setCustomArgumentResolvers</span>(<span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>MetaDataResolver())<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">build</span>();<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Test</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">shouldCreateAProfile</span>()<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Profile<span style="color:#bbb"> </span>profile<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>Profile(<span style="color:#c30">&#34;foo&#34;</span>,<span style="color:#bbb"> </span><span style="color:#c30">&#34;foo@bar.com&#34;</span>);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>MetaData<span style="color:#bbb"> </span>metaData<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>MetaData(Collections.<span style="color:#309">singletonMap</span>(<span style="color:#c30">&#34;TRANSACTION-ID&#34;</span>,<span style="color:#bbb"> </span><span style="color:#c30">&#34;foo&#34;</span>));<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>mockMvc.<span style="color:#309">perform</span>(post(<span style="color:#c30">&#34;/profiles/&#34;</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">content</span>(objectMapper.<span style="color:#309">writeValueAsBytes</span>(profile))<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">contentType</span>(MediaType.<span style="color:#309">APPLICATION_JSON</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">header</span>(<span style="color:#c30">&#34;TRANSACTION-ID&#34;</span>,<span style="color:#bbb"> </span><span style="color:#c30">&#34;foo&#34;</span>))<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">andExpect</span>(status().<span style="color:#309">isOk</span>());<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Mockito.<span style="color:#309">verify</span>(profileService).<span style="color:#309">create</span>(eq(profile),<span style="color:#bbb"> </span>eq(metaData));<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><p>This test is self-explanatory–we wire up the argument resolver, make a request with one of the meta data headers and expect the profile service to be invoked with the right parameters.</p>
+<pre><code class="language-java">@RunWith(MockitoJUnitRunner.class)
+public class ProfileControllerTest extends TestCase {
+
+    private ProfileController profileController;
+    private MockMvc mockMvc;
+    private ObjectMapper objectMapper;
+
+    @Mock
+    private ProfileService profileService;
+
+    @Before
+    public void setUp() {
+        objectMapper = new ObjectMapper();
+        profileController = new ProfileController(profileService);
+        mockMvc = MockMvcBuilders
+                .standaloneSetup(profileController)
+                .setCustomArgumentResolvers(new MetaDataResolver())
+                .build();
+    }
+
+    @Test
+    public void shouldCreateAProfile() throws Exception {
+        Profile profile = new Profile(&quot;foo&quot;, &quot;foo@bar.com&quot;);
+        MetaData metaData = new MetaData(Collections.singletonMap(&quot;TRANSACTION-ID&quot;, &quot;foo&quot;));
+
+        mockMvc.perform(post(&quot;/profiles/&quot;)
+                .content(objectMapper.writeValueAsBytes(profile))
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(&quot;TRANSACTION-ID&quot;, &quot;foo&quot;))
+                .andExpect(status().isOk());
+        Mockito.verify(profileService).create(eq(profile), eq(metaData));
+    }
+}
+</code></pre>
+<p>This test is self-explanatory–we wire up the argument resolver, make a request with one of the meta data headers and expect the profile service to be invoked with the right parameters.</p>
         </div>
         <aside id="gh-comments-list">
           <script>
@@ -348,7 +354,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2019/08/02/flushing-metrics-in-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Flushing Metrics in Dropwizard Commands</a></li>
+            <li><a href="https://sadique.io/blog/2019/08/02/flushing-metrics-in-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Flushing Metrics in Dropwizard Commands</a></li>
             
             
             
@@ -362,7 +368,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2019/07/28/managing-environment-lifecycles-for-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Managing environment lifecycles for Dropwizard Commands</a></li>
+            <li><a href="https://sadique.io/blog/2019/07/28/managing-environment-lifecycles-for-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Managing environment lifecycles for Dropwizard Commands</a></li>
             
             
             
@@ -396,13 +402,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2019/03/23/understanding-trailing-@-processing-in-sas-input/?utm_source=site&amp;utm_medium=related">Understanding trailing @ processing in SAS input</a></li>
+            <li><a href="https://sadique.io/blog/2019/03/23/understanding-trailing-@-processing-in-sas-input/?utm_source=site&amp;utm_medium=related">Understanding trailing @ processing in SAS input</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2019/03/23/importing-the-sasuser-datasets-in-sas-studio/?utm_source=site&amp;utm_medium=related">Importing the SASUSER datasets in SAS Studio</a></li>
+            <li><a href="https://sadique.io/blog/2019/03/23/importing-the-sasuser-datasets-in-sas-studio/?utm_source=site&amp;utm_medium=related">Importing the SASUSER datasets in SAS Studio</a></li>
             
             
             
@@ -420,7 +426,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2018/06/09/formatting-java-instant-for-resolutions/?utm_source=site&amp;utm_medium=related">Formatting Java Instant for resolutions</a></li>
+            <li><a href="https://sadique.io/blog/2018/06/09/formatting-java-instant-for-resolutions/?utm_source=site&amp;utm_medium=related">Formatting Java Instant for resolutions</a></li>
             
             
             
@@ -434,7 +440,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2018/05/05/freebuilder-plugin-for-intellij/?utm_source=site&amp;utm_medium=related">FreeBuilder plugin for IntelliJ</a></li>
+            <li><a href="https://sadique.io/blog/2018/05/05/freebuilder-plugin-for-intellij/?utm_source=site&amp;utm_medium=related">FreeBuilder plugin for IntelliJ</a></li>
             
             
             
@@ -464,7 +470,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2018/03/23/a-jackson-and-freebuilder-quirk/?utm_source=site&amp;utm_medium=related">A Jackson and FreeBuilder quirk</a></li>
+            <li><a href="https://sadique.io/blog/2018/03/23/a-jackson-and-freebuilder-quirk/?utm_source=site&amp;utm_medium=related">A Jackson and FreeBuilder quirk</a></li>
             
             
             
@@ -502,7 +508,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2017/08/18/uploading-a-standalone-artifact-to-nexus-3/?utm_source=site&amp;utm_medium=related">Uploading a standalone artifact to Nexus 3</a></li>
+            <li><a href="https://sadique.io/blog/2017/08/18/uploading-a-standalone-artifact-to-nexus-3/?utm_source=site&amp;utm_medium=related">Uploading a standalone artifact to Nexus 3</a></li>
             
             
             
@@ -536,7 +542,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/30/implementing-feature-toggles-for-a-spring-boot-application-part-4/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 4</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/30/implementing-feature-toggles-for-a-spring-boot-application-part-4/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 4</a></li>
             
             
             
@@ -558,19 +564,19 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/29/implementing-feature-toggles-for-a-spring-boot-application-part-3/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 3</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/29/implementing-feature-toggles-for-a-spring-boot-application-part-3/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 3</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/27/implementing-feature-toggles-for-a-spring-boot-application-part-2/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 2</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/27/implementing-feature-toggles-for-a-spring-boot-application-part-2/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 2</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/22/implementing-feature-toggles-for-a-spring-boot-application-part-1/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 1</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/22/implementing-feature-toggles-for-a-spring-boot-application-part-1/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 1</a></li>
             
             
             
@@ -604,13 +610,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/11/setting-up-a-secure-etcd-cluster-behind-a-proxy/?utm_source=site&amp;utm_medium=related">Setting up a secure etcd cluster behind a proxy</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/11/setting-up-a-secure-etcd-cluster-behind-a-proxy/?utm_source=site&amp;utm_medium=related">Setting up a secure etcd cluster behind a proxy</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/05/a-very-basic-introduction-to-deploying-a-java-application-using-kubernetes/?utm_source=site&amp;utm_medium=related">A very basic introduction to deploying a Java application using Kubernetes</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/05/a-very-basic-introduction-to-deploying-a-java-application-using-kubernetes/?utm_source=site&amp;utm_medium=related">A very basic introduction to deploying a Java application using Kubernetes</a></li>
             
             
             
@@ -628,7 +634,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/02/handling-deserialization-errors-in-spring-redis-sessions/?utm_source=site&amp;utm_medium=related">Handling Deserialization errors in Spring Redis Sessions</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/02/handling-deserialization-errors-in-spring-redis-sessions/?utm_source=site&amp;utm_medium=related">Handling Deserialization errors in Spring Redis Sessions</a></li>
             
             
             
@@ -642,13 +648,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/21/csrf-protection-with-spring-security-and-angular-js/?utm_source=site&amp;utm_medium=related">CSRF Protection with Spring Security and Angular JS</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/21/csrf-protection-with-spring-security-and-angular-js/?utm_source=site&amp;utm_medium=related">CSRF Protection with Spring Security and Angular JS</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/16/controlling-redis-auto-configuration-for-spring-boot-session/?utm_source=site&amp;utm_medium=related">Controlling Redis auto-configuration for Spring Boot Session</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/16/controlling-redis-auto-configuration-for-spring-boot-session/?utm_source=site&amp;utm_medium=related">Controlling Redis auto-configuration for Spring Boot Session</a></li>
             
             
             
@@ -662,7 +668,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/14/jwt-authentication-with-spring-web-part-5/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 5</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/14/jwt-authentication-with-spring-web-part-5/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 5</a></li>
             
             
             
@@ -680,19 +686,19 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/08/jwt-authentication-with-spring-web-part-4/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 4</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/08/jwt-authentication-with-spring-web-part-4/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 4</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/06/jwt-authentication-with-spring-web-part-3/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 3</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/06/jwt-authentication-with-spring-web-part-3/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 3</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/03/jwt-authentication-with-spring-web-part-2/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 2</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/03/jwt-authentication-with-spring-web-part-2/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 2</a></li>
             
             
             
@@ -702,13 +708,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/03/jwt-authentication-with-spring-web-part-1/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 1</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/03/jwt-authentication-with-spring-web-part-1/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 1</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/06/30/json-logging-for-spring-applications/?utm_source=site&amp;utm_medium=related">JSON logging for Spring applications</a></li>
+            <li><a href="https://sadique.io/blog/2016/06/30/json-logging-for-spring-applications/?utm_source=site&amp;utm_medium=related">JSON logging for Spring applications</a></li>
             
             
             
@@ -718,13 +724,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/06/29/injecting-dependencies-into-a-spring-@configuration/?utm_source=site&amp;utm_medium=related">Injecting dependencies into a Spring @Configuration</a></li>
+            <li><a href="https://sadique.io/blog/2016/06/29/injecting-dependencies-into-a-spring-@configuration/?utm_source=site&amp;utm_medium=related">Injecting dependencies into a Spring @Configuration</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/06/08/filtering-responses-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Filtering responses in Spring MVC</a></li>
+            <li><a href="https://sadique.io/blog/2016/06/08/filtering-responses-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Filtering responses in Spring MVC</a></li>
             
             
             
@@ -766,19 +772,19 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/04/24/deprecating-domain-events-in-axon/?utm_source=site&amp;utm_medium=related">Deprecating domain events in Axon</a></li>
+            <li><a href="https://sadique.io/blog/2016/04/24/deprecating-domain-events-in-axon/?utm_source=site&amp;utm_medium=related">Deprecating domain events in Axon</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/04/20/programmable-exit-codes-for-spring-command-line-applications-2/?utm_source=site&amp;utm_medium=related">Programmable exit codes for spring command line applications - 2</a></li>
+            <li><a href="https://sadique.io/blog/2016/04/20/programmable-exit-codes-for-spring-command-line-applications-2/?utm_source=site&amp;utm_medium=related">Programmable exit codes for spring command line applications - 2</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/04/18/programmable-exit-codes-for-spring-command-line-applications/?utm_source=site&amp;utm_medium=related">Programmable exit codes for Spring command line applications</a></li>
+            <li><a href="https://sadique.io/blog/2016/04/18/programmable-exit-codes-for-spring-command-line-applications/?utm_source=site&amp;utm_medium=related">Programmable exit codes for Spring command line applications</a></li>
             
             
             
@@ -788,7 +794,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/16/authentication-for-apache-camel-http-components/?utm_source=site&amp;utm_medium=related">Authentication for Apache Camel HTTP components</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/16/authentication-for-apache-camel-http-components/?utm_source=site&amp;utm_medium=related">Authentication for Apache Camel HTTP components</a></li>
             
             
             
@@ -810,31 +816,31 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/15/thoughts-on-open-graph-tags/?utm_source=site&amp;utm_medium=related">Thoughts on Open Graph tags</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/15/thoughts-on-open-graph-tags/?utm_source=site&amp;utm_medium=related">Thoughts on Open Graph tags</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/11/integration-testing-spring-command-line-applications/?utm_source=site&amp;utm_medium=related">Integration testing Spring command line applications</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/11/integration-testing-spring-command-line-applications/?utm_source=site&amp;utm_medium=related">Integration testing Spring command line applications</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/11/integration-testing-challenges-for-non-web-spring-applications/?utm_source=site&amp;utm_medium=related">Integration testing challenges for non-web Spring applications</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/11/integration-testing-challenges-for-non-web-spring-applications/?utm_source=site&amp;utm_medium=related">Integration testing challenges for non-web Spring applications</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/08/how-thinking-of-documentation-as-legislation-helped-me-become-a-better-programmer/?utm_source=site&amp;utm_medium=related">How thinking of Documentation as Legislation helped me become a better programmer</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/08/how-thinking-of-documentation-as-legislation-helped-me-become-a-better-programmer/?utm_source=site&amp;utm_medium=related">How thinking of Documentation as Legislation helped me become a better programmer</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/06/implementing-custom-annotations-for-spring-mvc/?utm_source=site&amp;utm_medium=related">Implementing custom annotations for Spring MVC</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/06/implementing-custom-annotations-for-spring-mvc/?utm_source=site&amp;utm_medium=related">Implementing custom annotations for Spring MVC</a></li>
             
             
             
@@ -848,7 +854,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/05/validating-requestparams-and-pathvariables-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Validating RequestParams and PathVariables in Spring MVC</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/05/validating-requestparams-and-pathvariables-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Validating RequestParams and PathVariables in Spring MVC</a></li>
             
             
             
@@ -862,13 +868,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/11/24/testing-async-responses-using-mockmvc/?utm_source=site&amp;utm_medium=related">Testing async responses using MockMvc</a></li>
+            <li><a href="https://sadique.io/blog/2015/11/24/testing-async-responses-using-mockmvc/?utm_source=site&amp;utm_medium=related">Testing async responses using MockMvc</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/06/09/running-multiple-applications-in-the-same-tomcat-installation/?utm_source=site&amp;utm_medium=related">Running multiple applications in the same Tomcat installation</a></li>
+            <li><a href="https://sadique.io/blog/2015/06/09/running-multiple-applications-in-the-same-tomcat-installation/?utm_source=site&amp;utm_medium=related">Running multiple applications in the same Tomcat installation</a></li>
             
             
             
@@ -898,7 +904,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/05/22/making-sense-of-cloud-foundry-security-group-declarations/?utm_source=site&amp;utm_medium=related">Making sense of Cloud Foundry security group declarations</a></li>
+            <li><a href="https://sadique.io/blog/2015/05/22/making-sense-of-cloud-foundry-security-group-declarations/?utm_source=site&amp;utm_medium=related">Making sense of Cloud Foundry security group declarations</a></li>
             
             
             
@@ -908,7 +914,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/05/21/configuring-cloud-foundry-java-memory-parameters/?utm_source=site&amp;utm_medium=related">Configuring Cloud Foundry Java Memory Parameters</a></li>
+            <li><a href="https://sadique.io/blog/2015/05/21/configuring-cloud-foundry-java-memory-parameters/?utm_source=site&amp;utm_medium=related">Configuring Cloud Foundry Java Memory Parameters</a></li>
             
             
             
@@ -1010,13 +1016,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2014/03/20/clojure-dojo-levenshtein-edit-distance/?utm_source=site&amp;utm_medium=related">Clojure Dojo - Levenshtein edit distance</a></li>
+            <li><a href="https://sadique.io/blog/2014/03/20/clojure-dojo-levenshtein-edit-distance/?utm_source=site&amp;utm_medium=related">Clojure Dojo - Levenshtein edit distance</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2014/02/17/a-simple-jmeter-test-with-login/?utm_source=site&amp;utm_medium=related">A simple JMeter test with login</a></li>
+            <li><a href="https://sadique.io/blog/2014/02/17/a-simple-jmeter-test-with-login/?utm_source=site&amp;utm_medium=related">A simple JMeter test with login</a></li>
             
             
             
@@ -1110,7 +1116,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/10/13/implementing-rate-limiting-in-rails-part-2/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 2</a></li>
+            <li><a href="https://sadique.io/blog/2013/10/13/implementing-rate-limiting-in-rails-part-2/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 2</a></li>
             
             
             
@@ -1132,7 +1138,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/10/12/implementing-rate-limiting-in-rails-part-1/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 1</a></li>
+            <li><a href="https://sadique.io/blog/2013/10/12/implementing-rate-limiting-in-rails-part-1/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 1</a></li>
             
             
             
@@ -1142,7 +1148,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/10/07/python-hack-dynamically-override-an-objects-attribute/?utm_source=site&amp;utm_medium=related">Python Hack - Dynamically override an object&#39;s attribute</a></li>
+            <li><a href="https://sadique.io/blog/2013/10/07/python-hack-dynamically-override-an-objects-attribute/?utm_source=site&amp;utm_medium=related">Python Hack - Dynamically override an object&#39;s attribute</a></li>
             
             
             
@@ -1260,7 +1266,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/09/12/managing-gemsets-in-rbenv/?utm_source=site&amp;utm_medium=related">Managing Gemsets in Rbenv</a></li>
+            <li><a href="https://sadique.io/blog/2013/09/12/managing-gemsets-in-rbenv/?utm_source=site&amp;utm_medium=related">Managing Gemsets in Rbenv</a></li>
             
             
             
@@ -1274,7 +1280,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/09/08/looking-up-compiler-params-used-to-compile-a-ruby-version/?utm_source=site&amp;utm_medium=related">Looking up Compiler params used to compile a Ruby version</a></li>
+            <li><a href="https://sadique.io/blog/2013/09/08/looking-up-compiler-params-used-to-compile-a-ruby-version/?utm_source=site&amp;utm_medium=related">Looking up Compiler params used to compile a Ruby version</a></li>
             
             
             
@@ -1324,7 +1330,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/08/15/pythons-bool-type/?utm_source=site&amp;utm_medium=related">Python&#39;s bool type</a></li>
+            <li><a href="https://sadique.io/blog/2013/08/15/pythons-bool-type/?utm_source=site&amp;utm_medium=related">Python&#39;s bool type</a></li>
             
             
             
@@ -1438,7 +1444,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/07/31/validating-json-in-emacs/?utm_source=site&amp;utm_medium=related">Validating JSON in Emacs</a></li>
+            <li><a href="https://sadique.io/blog/2013/07/31/validating-json-in-emacs/?utm_source=site&amp;utm_medium=related">Validating JSON in Emacs</a></li>
             
             
             
@@ -1464,7 +1470,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/04/29/emacs-hack-viewing-git-logs-while-composing-commit-messages/?utm_source=site&amp;utm_medium=related">Emacs hack: Viewing Git logs while composing commit messages</a></li>
+            <li><a href="https://sadique.io/blog/2013/04/29/emacs-hack-viewing-git-logs-while-composing-commit-messages/?utm_source=site&amp;utm_medium=related">Emacs hack: Viewing Git logs while composing commit messages</a></li>
             
             
             
@@ -1478,7 +1484,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/04/14/configure-gits-comment-character/?utm_source=site&amp;utm_medium=related">Configure Git&#39;s comment character</a></li>
+            <li><a href="https://sadique.io/blog/2013/04/14/configure-gits-comment-character/?utm_source=site&amp;utm_medium=related">Configure Git&#39;s comment character</a></li>
             
             
             
@@ -1492,7 +1498,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/04/11/my-experience-working-remotely/?utm_source=site&amp;utm_medium=related">My experience working remotely</a></li>
+            <li><a href="https://sadique.io/blog/2013/04/11/my-experience-working-remotely/?utm_source=site&amp;utm_medium=related">My experience working remotely</a></li>
             
             
             
@@ -1514,7 +1520,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
+            <li><a href="https://sadique.io/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
             
             
             
@@ -1544,7 +1550,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/04/05/javascript-clipboard-access-and-hidden-flash-widgets/?utm_source=site&amp;utm_medium=related">JavaScript, clipboard access and hidden flash widgets</a></li>
+            <li><a href="https://sadique.io/blog/2013/04/05/javascript-clipboard-access-and-hidden-flash-widgets/?utm_source=site&amp;utm_medium=related">JavaScript, clipboard access and hidden flash widgets</a></li>
             
             
             
@@ -1558,7 +1564,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/01/22/reducing-emacs-startup-time-while-committing/?utm_source=site&amp;utm_medium=related">Reducing Emacs startup time while committing</a></li>
+            <li><a href="https://sadique.io/blog/2013/01/22/reducing-emacs-startup-time-while-committing/?utm_source=site&amp;utm_medium=related">Reducing Emacs startup time while committing</a></li>
             
             
             
@@ -1588,7 +1594,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/11/29/my-first-firefox-plugin-getcache-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">My first Firefox plugin: GetCache - View cached version of the current page</a></li>
+            <li><a href="https://sadique.io/blog/2012/11/29/my-first-firefox-plugin-getcache-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">My first Firefox plugin: GetCache - View cached version of the current page</a></li>
             
             
             
@@ -1602,7 +1608,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/11/28/getcache-a-chrome-plugin-to-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">GetCache - A Chrome plugin to view cached version of the current page</a></li>
+            <li><a href="https://sadique.io/blog/2012/11/28/getcache-a-chrome-plugin-to-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">GetCache - A Chrome plugin to view cached version of the current page</a></li>
             
             
             
@@ -1632,7 +1638,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/11/27/on-rest-content-type-google-chrome-and-caching/?utm_source=site&amp;utm_medium=related">On REST, Content-Type, Google Chrome and Caching</a></li>
+            <li><a href="https://sadique.io/blog/2012/11/27/on-rest-content-type-google-chrome-and-caching/?utm_source=site&amp;utm_medium=related">On REST, Content-Type, Google Chrome and Caching</a></li>
             
             
             
@@ -1738,7 +1744,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/07/09/understanding-pythons-with-statement/?utm_source=site&amp;utm_medium=related">Understanding Python&#39;s &#34;with&#34; statement</a></li>
+            <li><a href="https://sadique.io/blog/2012/07/09/understanding-pythons-with-statement/?utm_source=site&amp;utm_medium=related">Understanding Python&#39;s &#34;with&#34; statement</a></li>
             
             
             
@@ -1752,13 +1758,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/07/04/heredocs-in-ruby-and-python/?utm_source=site&amp;utm_medium=related">Heredocs in Ruby and Python</a></li>
+            <li><a href="https://sadique.io/blog/2012/07/04/heredocs-in-ruby-and-python/?utm_source=site&amp;utm_medium=related">Heredocs in Ruby and Python</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/06/25/micro-journal-simple-git-backed-journal-in-python/?utm_source=site&amp;utm_medium=related">Micro Journal - simple Git-backed journal in Python</a></li>
+            <li><a href="https://sadique.io/blog/2012/06/25/micro-journal-simple-git-backed-journal-in-python/?utm_source=site&amp;utm_medium=related">Micro Journal - simple Git-backed journal in Python</a></li>
             
             
             
@@ -1796,13 +1802,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/06/24/vodqa-ncr-maintaining-large-test-suites/?utm_source=site&amp;utm_medium=related">VodQA NCR: Maintaining Large Test Suites</a></li>
+            <li><a href="https://sadique.io/blog/2012/06/24/vodqa-ncr-maintaining-large-test-suites/?utm_source=site&amp;utm_medium=related">VodQA NCR: Maintaining Large Test Suites</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/06/06/know-your-tools-dont-shoot-yourself-in-the-foot/?utm_source=site&amp;utm_medium=related">Know Your Tools - Don&#39;t Shoot Yourself in the Foot</a></li>
+            <li><a href="https://sadique.io/blog/2012/06/06/know-your-tools-dont-shoot-yourself-in-the-foot/?utm_source=site&amp;utm_medium=related">Know Your Tools - Don&#39;t Shoot Yourself in the Foot</a></li>
             
             
             
@@ -1848,7 +1854,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/06/05/managing-security-certificates-from-the-console-on-windows-mac-os-x-and-linux/?utm_source=site&amp;utm_medium=related">Managing security certificates from the console - on Windows, Mac OS X and Linux</a></li>
+            <li><a href="https://sadique.io/blog/2012/06/05/managing-security-certificates-from-the-console-on-windows-mac-os-x-and-linux/?utm_source=site&amp;utm_medium=related">Managing security certificates from the console - on Windows, Mac OS X and Linux</a></li>
             
             
             
@@ -1894,7 +1900,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/05/11/indian-and-pakistani-cricketers-who-make-better-debuts/?utm_source=site&amp;utm_medium=related">Indian and Pakistani cricketers - who make better debuts?</a></li>
+            <li><a href="https://sadique.io/blog/2012/05/11/indian-and-pakistani-cricketers-who-make-better-debuts/?utm_source=site&amp;utm_medium=related">Indian and Pakistani cricketers - who make better debuts?</a></li>
             
             
             
@@ -1908,7 +1914,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/05/04/fixing-flyspell-for-emacs-in-mac-os-x/?utm_source=site&amp;utm_medium=related">Fixing Flyspell for Emacs in Mac OS X</a></li>
+            <li><a href="https://sadique.io/blog/2012/05/04/fixing-flyspell-for-emacs-in-mac-os-x/?utm_source=site&amp;utm_medium=related">Fixing Flyspell for Emacs in Mac OS X</a></li>
             
             
             
@@ -1922,7 +1928,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/04/29/finding-un-merged-commits-with-git-cherry/?utm_source=site&amp;utm_medium=related">Finding un-merged commits with git cherry</a></li>
+            <li><a href="https://sadique.io/blog/2012/04/29/finding-un-merged-commits-with-git-cherry/?utm_source=site&amp;utm_medium=related">Finding un-merged commits with git cherry</a></li>
             
             
             
@@ -1952,7 +1958,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/02/03/bullet-proof-jenkins-setup/?utm_source=site&amp;utm_medium=related">Bullet proof Jenkins setup</a></li>
+            <li><a href="https://sadique.io/blog/2012/02/03/bullet-proof-jenkins-setup/?utm_source=site&amp;utm_medium=related">Bullet proof Jenkins setup</a></li>
             
             
             
@@ -1982,7 +1988,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/01/17/why-your-project-should-have-a-getting-started-guide./?utm_source=site&amp;utm_medium=related">Why your project should have a Getting Started guide.</a></li>
+            <li><a href="https://sadique.io/blog/2012/01/17/why-your-project-should-have-a-getting-started-guide./?utm_source=site&amp;utm_medium=related">Why your project should have a Getting Started guide.</a></li>
             
             
             
@@ -2004,7 +2010,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/01/16/debugging-c-sharps-httpwebrequest-100-continue-and-nginx/?utm_source=site&amp;utm_medium=related">Debugging: C Sharp&#39;s HttpWebRequest, 100-Continue and nginx</a></li>
+            <li><a href="https://sadique.io/blog/2012/01/16/debugging-c-sharps-httpwebrequest-100-continue-and-nginx/?utm_source=site&amp;utm_medium=related">Debugging: C Sharp&#39;s HttpWebRequest, 100-Continue and nginx</a></li>
             
             
             
@@ -2030,7 +2036,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2011/05/17/wikipedia-page-hopping/?utm_source=site&amp;utm_medium=related">Wikipedia Page Hopping</a></li>
+            <li><a href="https://sadique.io/blog/2011/05/17/wikipedia-page-hopping/?utm_source=site&amp;utm_medium=related">Wikipedia Page Hopping</a></li>
             
             
             
@@ -2052,13 +2058,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2011/03/24/empathy-log-parser/?utm_source=site&amp;utm_medium=related">Empathy Log Parser</a></li>
+            <li><a href="https://sadique.io/blog/2011/03/24/empathy-log-parser/?utm_source=site&amp;utm_medium=related">Empathy Log Parser</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2011/03/23/binary-signature-art/?utm_source=site&amp;utm_medium=related">Binary Signature Art</a></li>
+            <li><a href="https://sadique.io/blog/2011/03/23/binary-signature-art/?utm_source=site&amp;utm_medium=related">Binary Signature Art</a></li>
             
             
             
@@ -2068,7 +2074,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2010/03/16/java-arrays-in-jruby/?utm_source=site&amp;utm_medium=related">Java Arrays in JRuby</a></li>
+            <li><a href="https://sadique.io/blog/2010/03/16/java-arrays-in-jruby/?utm_source=site&amp;utm_medium=related">Java Arrays in JRuby</a></li>
             
             
             
@@ -2106,7 +2112,11 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2010/01/09/autorun.py-execute-stuff-on-file-change/?utm_source=site&amp;utm_medium=related">Autorun.py - Execute stuff on file change</a></li>
+            <li><a href="https://sadique.io/blog/2010/01/09/autorun.py-execute-stuff-on-file-change/?utm_source=site&amp;utm_medium=related">Autorun.py - Execute stuff on file change</a></li>
+            
+            
+            
+            
             
             
             

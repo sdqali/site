@@ -1,38 +1,41 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Jruby on {code that works}</title>
-    <link>http://localhost:1313/categories/jruby/?utm_source=site&amp;utm_medium=feed</link>
+    <link>https://sadique.io/categories/jruby/?utm_source=site&amp;utm_medium=feed</link>
     <description>Recent content in Jruby on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Tue, 16 Mar 2010 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1313/categories/jruby/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    <atom:link href="https://sadique.io/categories/jruby/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
     
     <item>
       <title>Java Arrays in JRuby</title>
-      <link>http://localhost:1313/blog/2010/03/16/java-arrays-in-jruby/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sadique.io/blog/2010/03/16/java-arrays-in-jruby/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Tue, 16 Mar 2010 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/blog/2010/03/16/java-arrays-in-jruby/?utm_source=site&amp;utm_medium=feed</guid>
+      <guid>https://sadique.io/blog/2010/03/16/java-arrays-in-jruby/?utm_source=site&amp;utm_medium=feed</guid>
       <description>&lt;p&gt;Recently my team encountered a frustrating thing while working with a Java library in JRuby. It took us long to figure out what was going wrong. This is an attempt to write down what was happening.&lt;/p&gt;
 &lt;p&gt;You are in Ruby world, a world of weak typing, no type casting and pure bliss in coding. You forget that some languages care about the type of elements in an Array. And you end up spending a lot of time figuring out why you are staring at a stupid looking exception.&lt;/p&gt;
 &lt;p&gt;I will be using a dummy example for describing the problem.&lt;/p&gt;
 &lt;p&gt;The following code snippet tries to compare two arrays in JRuby using Java Arrays&amp;rsquo; equals method. In JRuby world, one would expect this to work. Actually, one should not, but Ruby really gets into you.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;require&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;java&amp;#39;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;import &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;java.util.Arrays&amp;#39;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Arrays equal&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;Arrays&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;equals(&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;3&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;, &lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;3&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;)
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Well, it does not. You get an error:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;no equals with arguments matching &lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;class org.jruby.RubyArray, class org.jruby.RubyArray&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; on object Java::JavaUtil::Arrays &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;NameError&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This error message is informative. In our case, our unit tests threw an error that was very difficult to make any sense of. The reason why this fails is obvious.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-ruby&#34;&gt;require &#39;java&#39;
+import &#39;java.util.Arrays&#39;
+
+puts &amp;quot;Arrays equal&amp;quot; if Arrays.equals([1, 2, 3], [1, 2, 3])
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Well, it does not. You get an error:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;no equals with arguments matching [class org.jruby.RubyArray, class org.jruby.RubyArray] on object Java::JavaUtil::Arrays (NameError)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This error message is informative. In our case, our unit tests threw an error that was very difficult to make any sense of. The reason why this fails is obvious.&lt;/p&gt;
 &lt;p&gt;Java does care about the Type of things that form an Array. So you need to cast it to the correct type.&lt;/p&gt;
 &lt;p&gt;Here is the code that actually works:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;require&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;java&amp;#39;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;import &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;java.util.Arrays&amp;#39;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Arrays equal&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;Arrays&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;equals(&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;,&lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;,&lt;span style=&#34;color:#f60&#34;&gt;3&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;].&lt;/span&gt;to_java(java&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;lang&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;Integer),
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                                     &lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;,&lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;,&lt;span style=&#34;color:#f60&#34;&gt;3&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;].&lt;/span&gt;to_java(java&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;lang&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;Integer))
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The &lt;code&gt;to_java&lt;/code&gt; method casts the elements of the Ruby array into Java array with elements of type specified.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-ruby&#34;&gt;require &#39;java&#39;
+import &#39;java.util.Arrays&#39;
+
+puts &amp;quot;Arrays equal&amp;quot; if Arrays.equals([1,2,3].to_java(java.lang.Integer),
+                                     [1,2,3].to_java(java.lang.Integer))
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The &lt;code&gt;to_java&lt;/code&gt; method casts the elements of the Ruby array into Java array with elements of type specified.&lt;/p&gt;
 </description>
     </item>
     

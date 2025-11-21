@@ -1,19 +1,19 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tools on {code that works}</title>
-    <link>http://localhost:1313/tags/tools/?utm_source=site&amp;utm_medium=feed</link>
+    <link>https://sadique.io/tags/tools/?utm_source=site&amp;utm_medium=feed</link>
     <description>Recent content in Tools on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Fri, 08 Aug 2014 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1313/tags/tools/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    <atom:link href="https://sadique.io/tags/tools/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
     
     <item>
       <title>Disputed territories and merging shapes and features</title>
-      <link>http://localhost:1313/blog/2014/08/08/disputed-territories-and-merging-shapes-and-features/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sadique.io/blog/2014/08/08/disputed-territories-and-merging-shapes-and-features/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Fri, 08 Aug 2014 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/blog/2014/08/08/disputed-territories-and-merging-shapes-and-features/?utm_source=site&amp;utm_medium=feed</guid>
+      <guid>https://sadique.io/blog/2014/08/08/disputed-territories-and-merging-shapes-and-features/?utm_source=site&amp;utm_medium=feed</guid>
       <description>&lt;p&gt;Making a map that shows a disputed territory can be a tricky business. Nation states vigorously contest maps that appear to portray a boundary that challenges what a border looks like. From the Falkland Islands to Kuril Islands; from Western Sahara to Arunachal Pradesh, disputed territories result in omissions, additions and inaccuracies in maps.&lt;/p&gt;
 &lt;p&gt;I grew up looking at maps in books printed by the Oxford Press, that came with a disclaimer in blue rubber stamped across them that stated how the map was wrong. This was due to the fact that the maps showed only the parts of Kashmir being administered by India, thereby omitting areas under Chinese and Pakistani control. The Criminal Law Amendment Act, 1961 in India makes it punishable with imprisonment up to 6 months to publish a map that excludes all or parts of Kashmir&lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
 &lt;p&gt;This creates a lot of trouble for people who make maps for fun or to visualize data. Survey of India does not make it easy to get hold of shape files that represent India&amp;rsquo;s boundaries, and all the shape files that are available from international sources exclude parts of Kashmir. So, how do we solve this problem?&lt;/p&gt;
@@ -37,28 +37,34 @@
 &lt;ol&gt;
 &lt;li&gt;Start by converting both shape Files to their GeoJSON representation.&lt;/li&gt;
 &lt;/ol&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&amp;gt; ogr2ogr -f GeoJSON india.geo.json india.shp
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&amp;gt; ogr2ogr -f GeoJSON kashmir.geo.json kashmir.shp
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ol&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;&amp;gt; ogr2ogr -f GeoJSON india.geo.json india.shp
+&amp;gt; ogr2ogr -f GeoJSON kashmir.geo.json kashmir.shp
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ol&gt;
 &lt;li&gt;Load the two feature collections in to a JavaScript console. I tend to use Chromium&amp;rsquo;s Developer Tools, but in this example I am using  Node.js&amp;rsquo; REPL.&lt;/li&gt;
 &lt;/ol&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;kashmir &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; JSON.parse(fs.readFileSync(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;./kashmir.geo.json&amp;#34;&lt;/span&gt;).toString());
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;india &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; JSON.parse(fs.readFileSync(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;./india.geo.json&amp;#34;&lt;/span&gt;).toString());
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ol&gt;
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;kashmir = JSON.parse(fs.readFileSync(&amp;quot;./kashmir.geo.json&amp;quot;).toString());
+india = JSON.parse(fs.readFileSync(&amp;quot;./india.geo.json&amp;quot;).toString());
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ol&gt;
 &lt;li&gt;Identify the Kashmir feature in the India feature collection.&lt;/li&gt;
 &lt;/ol&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;kin &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; india.features.filter(&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;function&lt;/span&gt;(f) {&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; f.properties.NAME_1.match(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Kashmir&amp;#34;&lt;/span&gt;);})[&lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;];
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ol&gt;
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;kin = india.features.filter(function(f) {return f.properties.NAME_1.match(&amp;quot;Kashmir&amp;quot;);})[0];
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ol&gt;
 &lt;li&gt;Replace it&amp;rsquo;s coordinates with the unified Kashmir we generated.&lt;/li&gt;
 &lt;/ol&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;kin.geometry.coordinates &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; kashmir.features[&lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;].geometry.coordinates;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ol&gt;
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;kin.geometry.coordinates = kashmir.features[0].geometry.coordinates;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ol&gt;
 &lt;li&gt;Save it back to a GeoJSON file.&lt;/li&gt;
 &lt;/ol&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;fs.writeFileSync(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;full_india.geo.json&amp;#34;&lt;/span&gt;, JSON.stringify(india));
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Now the GeoJSON file can be transformed back in to a shape file.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;ogr2ogr -f &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;ESRI Shapefile&amp;#39;&lt;/span&gt; full_india.shp full_india.geo.json
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Back to Kashmir and laws. Will this map save one from trouble? I am not sure, but this is an improvement on the omission of territories.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;fs.writeFileSync(&amp;quot;full_india.geo.json&amp;quot;, JSON.stringify(india));
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now the GeoJSON file can be transformed back in to a shape file.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;ogr2ogr -f &#39;ESRI Shapefile&#39; full_india.shp full_india.geo.json
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Back to Kashmir and laws. Will this map save one from trouble? I am not sure, but this is an improvement on the omission of territories.&lt;/p&gt;
 &lt;div class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
 &lt;hr&gt;
 &lt;ol&gt;
@@ -78,10 +84,10 @@
     
     <item>
       <title>A list of GIS tools</title>
-      <link>http://localhost:1313/blog/2014/08/03/a-list-of-gis-tools/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sadique.io/blog/2014/08/03/a-list-of-gis-tools/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Sun, 03 Aug 2014 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/blog/2014/08/03/a-list-of-gis-tools/?utm_source=site&amp;utm_medium=feed</guid>
+      <guid>https://sadique.io/blog/2014/08/03/a-list-of-gis-tools/?utm_source=site&amp;utm_medium=feed</guid>
       <description>&lt;p&gt;I have been playing around with maps a lot these days and have ended up using various tools in the process. This blog post is a way to make a note of these tools for later use.&lt;/p&gt;
 &lt;h1 id=&#34;geojsonio&#34;&gt;geojson.io&lt;/h1&gt;
 &lt;p&gt;Mapbox&amp;rsquo;s &lt;a href=&#34;http://geojson.io/&#34;&gt;geojson.io&lt;/a&gt; is a simple tool for creating, editing and sharing maps. It lets you import map data in various formats and has an editor to modify maps.&lt;/p&gt;
@@ -100,22 +106,22 @@
     
     <item>
       <title>A simple JMeter test with login</title>
-      <link>http://localhost:1313/blog/2014/02/17/a-simple-jmeter-test-with-login/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sadique.io/blog/2014/02/17/a-simple-jmeter-test-with-login/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Mon, 17 Feb 2014 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/blog/2014/02/17/a-simple-jmeter-test-with-login/?utm_source=site&amp;utm_medium=feed</guid>
+      <guid>https://sadique.io/blog/2014/02/17/a-simple-jmeter-test-with-login/?utm_source=site&amp;utm_medium=feed</guid>
       <description>&lt;meta content=&#34;jmeter, login&#34; name=&#34;keywords&#34;&gt;
 I had to set up a JMeter test last week - the test included logging in to a site, and then hitting a bunch of URLs, all of them being GET requests. I found it hard to find a simple documentation that described how to do this - the ones I found were either incomplete or were trying to teach me a large number of things at the same time. So when I figured it out, I decided to write this down, for anyone else finding themselves in the same place as me.
 &lt;p&gt;For this example, the application under test is a simple Rails application, with the login form at &lt;code&gt;/login&lt;/code&gt; and a &lt;code&gt;POST&lt;/code&gt; request to &lt;code&gt;/login&lt;/code&gt; does the authentication.&lt;/p&gt;
 &lt;h3 id=&#34;add-a-thread-group&#34;&gt;Add a Thread Group&lt;/h3&gt;
 &lt;p&gt;A Thread Group defines a pool of users that will execute a particular test case against the server. JMeter makes the number of users, and the ramp-rate configurable. For the purpose of this example, Number of Threads is 2 and the ramp up time period is 1 second. This thread group is also configured to run forever.
-&lt;img src=&#34;http://localhost:1313/images/jmeter/thread_group.png&#34; alt=&#34;&amp;ldquo;Screenshot of Thread Group window&amp;rdquo;&#34; title=&#34;Thread Groups&#34;&gt;&lt;/p&gt;
+&lt;img src=&#34;https://sadique.io/images/jmeter/thread_group.png&#34; alt=&#34;&amp;ldquo;Screenshot of Thread Group window&amp;rdquo;&#34; title=&#34;Thread Groups&#34;&gt;&lt;/p&gt;
 &lt;h3 id=&#34;http-request-defaults&#34;&gt;HTTP Request Defaults&lt;/h3&gt;
 &lt;p&gt;The net step is to add an HTTP Request Defaults configuration element to the Thread Group. This configuration element sets up the domain or I.P. address of the server, the port and the protocol (HTTP / HTTPS). In this example, Server Name is &lt;code&gt;127.0.0.1&lt;/code&gt; and Port is &lt;code&gt;3000&lt;/code&gt;.
-&lt;img src=&#34;http://localhost:1313/images/jmeter/request_defaults.png&#34; alt=&#34;&amp;ldquo;Screenshot of HTTP Request Defaults&amp;rdquo;&#34; title=&#34;HTTP Request Defaults&#34;&gt;&lt;/p&gt;
+&lt;img src=&#34;https://sadique.io/images/jmeter/request_defaults.png&#34; alt=&#34;&amp;ldquo;Screenshot of HTTP Request Defaults&amp;rdquo;&#34; title=&#34;HTTP Request Defaults&#34;&gt;&lt;/p&gt;
 &lt;h3 id=&#34;http-cookie-manager&#34;&gt;HTTP Cookie Manager&lt;/h3&gt;
 &lt;p&gt;A cookie manager stores and sends cookies, as a web browser would do if an actual user was hitting the server. For the purposes of this example, the default configurations are enough.
-&lt;img src=&#34;http://localhost:1313/images/jmeter/cookie_manager.png&#34; alt=&#34;&amp;ldquo;Screenshot of Cookie Manager&amp;rdquo;&#34; title=&#34;Cookie Manager&#34;&gt;&lt;/p&gt;
+&lt;img src=&#34;https://sadique.io/images/jmeter/cookie_manager.png&#34; alt=&#34;&amp;ldquo;Screenshot of Cookie Manager&amp;rdquo;&#34; title=&#34;Cookie Manager&#34;&gt;&lt;/p&gt;
 &lt;h3 id=&#34;implement-normal-page-actions&#34;&gt;Implement normal page actions&lt;/h3&gt;
 &lt;p&gt;From this point, all that remains is to implement HTTP Requests to the end points that are relevant to this test. In this example, we navigate to the Login page at &lt;code&gt;/login&lt;/code&gt;, fire a &lt;code&gt;POST&lt;/code&gt; request to &lt;code&gt;/login&lt;/code&gt; with the appropriate form input values and proceed to the Admin page.&lt;/p&gt;
 </description>
@@ -123,29 +129,30 @@ I had to set up a JMeter test last week - the test included logging in to a site
     
     <item>
       <title>Shared history in Bash</title>
-      <link>http://localhost:1313/blog/2013/09/15/shared-history-in-bash/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sadique.io/blog/2013/09/15/shared-history-in-bash/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Sun, 15 Sep 2013 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/blog/2013/09/15/shared-history-in-bash/?utm_source=site&amp;utm_medium=feed</guid>
+      <guid>https://sadique.io/blog/2013/09/15/shared-history-in-bash/?utm_source=site&amp;utm_medium=feed</guid>
       <description>&lt;p&gt;One of the features that I miss most in Bash is the shared history between terminals that Zsh supports. I was hunting down a solution for this and came across this Stack Overflow answer &lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; by user &lt;em&gt;lesmana&lt;/em&gt;. This code snippet does the trick:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#033&#34;&gt;HISTSIZE&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;9000&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#033&#34;&gt;HISTFILESIZE&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#033&#34;&gt;$HISTSIZE&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#033&#34;&gt;HISTCONTROL&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;ignorespace:ignoredups
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;history&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  _bash_history_sync
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#366&#34;&gt;builtin&lt;/span&gt; &lt;span style=&#34;color:#366&#34;&gt;history&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#033&#34;&gt;$@&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;_bash_history_sync&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#366&#34;&gt;builtin&lt;/span&gt; &lt;span style=&#34;color:#366&#34;&gt;history&lt;/span&gt; -a         &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;#1&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#033&#34;&gt;HISTFILESIZE&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#033&#34;&gt;$HISTSIZE&lt;/span&gt;     &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;#2&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#366&#34;&gt;builtin&lt;/span&gt; &lt;span style=&#34;color:#366&#34;&gt;history&lt;/span&gt; -c         &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;#3&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#366&#34;&gt;builtin&lt;/span&gt; &lt;span style=&#34;color:#366&#34;&gt;history&lt;/span&gt; -r         &lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;#4&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#033&#34;&gt;PROMPT_COMMAND&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;_bash_history_sync;&lt;/span&gt;&lt;span style=&#34;color:#033&#34;&gt;$PROMPT_COMMAND&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This is very hacky—This setting overrides the shell prompt to sync history every time the prompt is loaded. But like all great hacks, it works.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;HISTSIZE=9000
+HISTFILESIZE=$HISTSIZE
+HISTCONTROL=ignorespace:ignoredups
+
+history() {
+  _bash_history_sync
+  builtin history &amp;quot;$@&amp;quot;
+}
+
+_bash_history_sync() {
+  builtin history -a         #1
+  HISTFILESIZE=$HISTSIZE     #2
+  builtin history -c         #3
+  builtin history -r         #4
+}
+
+PROMPT_COMMAND=&amp;quot;_bash_history_sync;$PROMPT_COMMAND&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This is very hacky—This setting overrides the shell prompt to sync history every time the prompt is loaded. But like all great hacks, it works.&lt;/p&gt;
 &lt;div class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
 &lt;hr&gt;
 &lt;ol&gt;
@@ -159,19 +166,20 @@ I had to set up a JMeter test last week - the test included logging in to a site
     
     <item>
       <title>Navigating Stacktraces in Emacs</title>
-      <link>http://localhost:1313/blog/2013/08/22/navigating-stacktraces-in-emacs/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sadique.io/blog/2013/08/22/navigating-stacktraces-in-emacs/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Thu, 22 Aug 2013 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/blog/2013/08/22/navigating-stacktraces-in-emacs/?utm_source=site&amp;utm_medium=feed</guid>
+      <guid>https://sadique.io/blog/2013/08/22/navigating-stacktraces-in-emacs/?utm_source=site&amp;utm_medium=feed</guid>
       <description>&lt;p&gt;I had to debug an issue today and that meant dealing with Rails stack traces. I got tired of having to constantly switch between reading the trace in the terminal and the code in Emacs to figure out what was going wrong and get more context around it. I felt that there should be an easier way of doing this. A quick search &lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; did not yield anything. But then I remembered Grep mode &lt;sup id=&#34;fnref:2&#34;&gt;&lt;a href=&#34;#fn:2&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;2&lt;/a&gt;&lt;/sup&gt; and it occurred to me that hijacking Grep mode&amp;rsquo;s navigation feature would let me navigate the stack trace better. This is the solution I came up with.&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Open the log in a buffer.&lt;/li&gt;
 &lt;li&gt;Replace any leading file paths in the logs with the appropriate path for your local copy of the code. In the following case, I would replace all &lt;code&gt;/opt/thoughtworks/mingle&lt;/code&gt; with empty string &lt;sup id=&#34;fnref:3&#34;&gt;&lt;a href=&#34;#fn:3&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;3&lt;/a&gt;&lt;/sup&gt;.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;/opt/thoughtworks/mingle/app/models/foo.rb:46:in &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;compare_bar&amp;#39;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;/opt/thoughtworks/mingle/app/controllers/foos_controller.rb:42:in &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;validate_bar&amp;#39;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;...
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ul&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;/opt/thoughtworks/mingle/app/models/foo.rb:46:in &#39;compare_bar&#39;
+/opt/thoughtworks/mingle/app/controllers/foos_controller.rb:42:in &#39;validate_bar&#39;
+...
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
 &lt;li&gt;Load the Grep mode with &lt;code&gt;M-x grep-mode&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Now I can easily press &lt;code&gt;Enter&lt;/code&gt; on the lines of the stack trace and Emacs will navigate to the correct source file and line number.&lt;/p&gt;
@@ -193,25 +201,27 @@ I had to set up a JMeter test last week - the test included logging in to a site
     
     <item>
       <title>Validating JSON in Emacs</title>
-      <link>http://localhost:1313/blog/2013/07/31/validating-json-in-emacs/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sadique.io/blog/2013/07/31/validating-json-in-emacs/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Wed, 31 Jul 2013 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/blog/2013/07/31/validating-json-in-emacs/?utm_source=site&amp;utm_medium=feed</guid>
+      <guid>https://sadique.io/blog/2013/07/31/validating-json-in-emacs/?utm_source=site&amp;utm_medium=feed</guid>
       <description>&lt;meta content=&#34;validate&#34; name=&#34;keywords&#34;&gt;
 At work, I have to deal with Amazon CloudFormation [^1] templates a fair bit. These templates are JSON files. More and more members of our team are moving away from TextMate to Emacs which makes me really happy. We would like to validate these CloudFormation templates in Emacs. Today we set this up and I hope this turns out to be of help to some one else trying to do the same.
 &lt;ul&gt;
 &lt;li&gt;Grab jsonlint. It is a command line utility that validates JSON. There seems to be two flavors of jsonlint available. A pure JavaScript implementation &lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; that runs on the Node.js runtime and a native Mac OS X &lt;sup id=&#34;fnref:2&#34;&gt;&lt;a href=&#34;#fn:2&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;2&lt;/a&gt;&lt;/sup&gt; version. We use the Node.js version.&lt;/li&gt;
 &lt;li&gt;Ensure that your Emacs can find the jsonlint binary. This can be done by adding the following snippet in your Emacs configuration:&lt;/li&gt;
 &lt;/ul&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-cl&#34; data-lang=&#34;cl&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;(&lt;span style=&#34;color:#033&#34;&gt;setenv&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;PATH&amp;#34;&lt;/span&gt; (&lt;span style=&#34;color:#033&#34;&gt;concat&lt;/span&gt; (&lt;span style=&#34;color:#033&#34;&gt;getenv&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;PATH&amp;#34;&lt;/span&gt;) &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;:/usr/local/share/npm/bin&amp;#34;&lt;/span&gt;))
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;(&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;setq&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;exec-path&lt;/span&gt; (&lt;span style=&#34;color:#c0f&#34;&gt;append&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;exec-path&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;&amp;#39;&lt;/span&gt;(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/usr/local/share/npm/bin&amp;#34;&lt;/span&gt;)))
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Of course, the path you add will depend on where your installation process put the binary.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-cl&#34;&gt;(setenv &amp;quot;PATH&amp;quot; (concat (getenv &amp;quot;PATH&amp;quot;) &amp;quot;:/usr/local/share/npm/bin&amp;quot;))
+(setq exec-path (append exec-path &#39;(&amp;quot;/usr/local/share/npm/bin&amp;quot;)))
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Of course, the path you add will depend on where your installation process put the binary.&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Install &lt;code&gt;flymake-json&lt;/code&gt; &lt;sup id=&#34;fnref:3&#34;&gt;&lt;a href=&#34;#fn:3&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;3&lt;/a&gt;&lt;/sup&gt;, using your Emacs package manager.&lt;/li&gt;
 &lt;li&gt;Bind a key to &lt;code&gt;flymake-json-load&lt;/code&gt; which is the command to perform jsonlint on the current file. This can be done with the following snippet:&lt;/li&gt;
 &lt;/ul&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-cl&#34; data-lang=&#34;cl&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;(&lt;span style=&#34;color:#033&#34;&gt;global-set-key&lt;/span&gt; (&lt;span style=&#34;color:#033&#34;&gt;kbd&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;C-c j v&amp;#34;&lt;/span&gt;) &lt;span style=&#34;color:#fc3&#34;&gt;&amp;#39;flymake-json-load&lt;/span&gt;)
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Enjoy!&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-cl&#34;&gt;(global-set-key (kbd &amp;quot;C-c j v&amp;quot;) &#39;flymake-json-load)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Enjoy!&lt;/p&gt;
 &lt;div class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
 &lt;hr&gt;
 &lt;ol&gt;
@@ -230,57 +240,62 @@ At work, I have to deal with Amazon CloudFormation [^1] templates a fair bit. Th
     
     <item>
       <title>Emacs hack: Viewing Git logs while composing commit messages</title>
-      <link>http://localhost:1313/blog/2013/04/29/emacs-hack-viewing-git-logs-while-composing-commit-messages/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sadique.io/blog/2013/04/29/emacs-hack-viewing-git-logs-while-composing-commit-messages/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Mon, 29 Apr 2013 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/blog/2013/04/29/emacs-hack-viewing-git-logs-while-composing-commit-messages/?utm_source=site&amp;utm_medium=feed</guid>
+      <guid>https://sadique.io/blog/2013/04/29/emacs-hack-viewing-git-logs-while-composing-commit-messages/?utm_source=site&amp;utm_medium=feed</guid>
       <description>&lt;p&gt;I use Emacs as my editor to compose Git commit messages. I almost never commit from the terminal with &lt;code&gt;git commit -m&lt;/code&gt;. This approach has two advantages: I get a chance to verify what is being committed and get to compose the message using a proper editor complete with spell checking provided by &lt;em&gt;flyspell mode&lt;/em&gt;. One thing I wish I had access to while composing commit messages is the git log. This is useful to refer to work items and encourages one to use a consistent style in the messages. This was easier in the terminal as one could do something like &lt;code&gt;git log -n 3&lt;/code&gt; and then commit with the &lt;code&gt;-m&lt;/code&gt; flag.&lt;/p&gt;
 &lt;p&gt;I decided to fix this today and some tinkering later came up with a hack tp do this.&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Git commit messages are stored in the &lt;code&gt;COMMIT_EDITMSG&lt;/code&gt; file under &lt;code&gt;.git/&lt;/code&gt;. So the first thing to do is to ensure that this file always gets loaded with a custom minor mode. This can be done as follows:&lt;/li&gt;
 &lt;/ul&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-cl&#34; data-lang=&#34;cl&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;(&lt;span style=&#34;color:#033&#34;&gt;add-to-list&lt;/span&gt; &lt;span style=&#34;color:#fc3&#34;&gt;&amp;#39;auto-mode-alist&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;&amp;#39;&lt;/span&gt;(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;\\COMMIT_EDITMSG\\&amp;#39;&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;load-magit-log-when-committing-mode&lt;/span&gt;))
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The minor mode does not need to do anything. The definition would be like this:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-cl&#34; data-lang=&#34;cl&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;(&lt;span style=&#34;color:#033&#34;&gt;define-minor-mode&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;load-magit-log-when-committing-mode&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;dummy&amp;#34;&lt;/span&gt;)
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ul&gt;
+&lt;pre&gt;&lt;code class=&#34;language-cl&#34;&gt;(add-to-list &#39;auto-mode-alist &#39;(&amp;quot;\\COMMIT_EDITMSG\\&#39;&amp;quot; . load-magit-log-when-committing-mode))
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The minor mode does not need to do anything. The definition would be like this:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-cl&#34;&gt;(define-minor-mode load-magit-log-when-committing-mode
+  &amp;quot;dummy&amp;quot;)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
 &lt;li&gt;Next step is to add a custom hook that gets run after loading the minor mode. This hook calls the function to load git logs. The code for this is:&lt;/li&gt;
 &lt;/ul&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-cl&#34; data-lang=&#34;cl&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;(&lt;span style=&#34;color:#033&#34;&gt;add-hook&lt;/span&gt; &lt;span style=&#34;color:#fc3&#34;&gt;&amp;#39;load-magit-log-when-committing-mode-hook&lt;/span&gt; &lt;span style=&#34;color:#fc3&#34;&gt;&amp;#39;show-magit-log-hook&lt;/span&gt;)
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ul&gt;
+&lt;pre&gt;&lt;code class=&#34;language-cl&#34;&gt;(add-hook &#39;load-magit-log-when-committing-mode-hook &#39;show-magit-log-hook)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
 &lt;li&gt;The actual function to load git logs. It calls &lt;code&gt;magit-log&lt;/code&gt; to load the logs and then opens the original &lt;code&gt;COMMIT_EDITMSG&lt;/code&gt; in the other frame.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-cl&#34; data-lang=&#34;cl&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;(&lt;span style=&#34;color:#366&#34;&gt;defun&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;show-magit-log-hook&lt;/span&gt; ()
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  (&lt;span style=&#34;color:#033&#34;&gt;cd&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;..&amp;#34;&lt;/span&gt;)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  (&lt;span style=&#34;color:#033&#34;&gt;magit-log&lt;/span&gt;)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  (&lt;span style=&#34;color:#033&#34;&gt;switch-to-buffer-other-window&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;COMMIT_EDITMSG&amp;#34;&lt;/span&gt;))
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This is how Emacs looks while committing with this hack in place:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:1313/images/screenshot_git_commit_log.png&#34; alt=&#34;&amp;ldquo;Screenshot showing git commit log&amp;rdquo;&#34; title=&#34;Screenshot showing git commit log&#34;&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-cl&#34;&gt;(defun show-magit-log-hook ()
+  (cd &amp;quot;..&amp;quot;)
+  (magit-log)
+  (switch-to-buffer-other-window &amp;quot;COMMIT_EDITMSG&amp;quot;))
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This is how Emacs looks while committing with this hack in place:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://sadique.io/images/screenshot_git_commit_log.png&#34; alt=&#34;&amp;ldquo;Screenshot showing git commit log&amp;rdquo;&#34; title=&#34;Screenshot showing git commit log&#34;&gt;&lt;/p&gt;
 &lt;p&gt;If you want to use this, copy the following snippet to your &lt;code&gt;init.el&lt;/code&gt;.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-cl&#34; data-lang=&#34;cl&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;;; load-magit-log-when-committing-mode&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;(&lt;span style=&#34;color:#033&#34;&gt;define-minor-mode&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;load-magit-log-when-committing-mode&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;dummy&amp;#34;&lt;/span&gt;)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;;; the hook&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;(&lt;span style=&#34;color:#366&#34;&gt;defun&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;show-magit-log-hook&lt;/span&gt; ()
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  (&lt;span style=&#34;color:#033&#34;&gt;cd&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;..&amp;#34;&lt;/span&gt;)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  (&lt;span style=&#34;color:#033&#34;&gt;magit-log&lt;/span&gt;)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  (&lt;span style=&#34;color:#033&#34;&gt;switch-to-buffer-other-window&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;COMMIT_EDITMSG&amp;#34;&lt;/span&gt;))
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;;; add the hook&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;(&lt;span style=&#34;color:#033&#34;&gt;add-hook&lt;/span&gt; &lt;span style=&#34;color:#fc3&#34;&gt;&amp;#39;load-magit-log-when-committing-mode-hook&lt;/span&gt; &lt;span style=&#34;color:#fc3&#34;&gt;&amp;#39;show-magit-log-hook&lt;/span&gt;)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;;; load the mode for commit message&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;(&lt;span style=&#34;color:#033&#34;&gt;add-to-list&lt;/span&gt; &lt;span style=&#34;color:#fc3&#34;&gt;&amp;#39;auto-mode-alist&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;&amp;#39;&lt;/span&gt;(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;\\COMMIT_EDITMSG\\&amp;#39;&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;load-magit-log-when-committing-mode&lt;/span&gt;))
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description>
+&lt;pre&gt;&lt;code class=&#34;language-cl&#34;&gt;;; load-magit-log-when-committing-mode
+(define-minor-mode load-magit-log-when-committing-mode
+  &amp;quot;dummy&amp;quot;)
+
+;; the hook
+(defun show-magit-log-hook ()
+  (cd &amp;quot;..&amp;quot;)
+  (magit-log)
+  (switch-to-buffer-other-window &amp;quot;COMMIT_EDITMSG&amp;quot;))
+
+;; add the hook
+(add-hook &#39;load-magit-log-when-committing-mode-hook &#39;show-magit-log-hook)
+
+;; load the mode for commit message
+(add-to-list &#39;auto-mode-alist &#39;(&amp;quot;\\COMMIT_EDITMSG\\&#39;&amp;quot; . load-magit-log-when-committing-mode))
+&lt;/code&gt;&lt;/pre&gt;
+</description>
     </item>
     
     <item>
       <title>Configure Git&#39;s comment character</title>
-      <link>http://localhost:1313/blog/2013/04/14/configure-gits-comment-character/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sadique.io/blog/2013/04/14/configure-gits-comment-character/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Sun, 14 Apr 2013 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/blog/2013/04/14/configure-gits-comment-character/?utm_source=site&amp;utm_medium=feed</guid>
+      <guid>https://sadique.io/blog/2013/04/14/configure-gits-comment-character/?utm_source=site&amp;utm_medium=feed</guid>
       <description>&lt;p&gt;TL;DR -
 Use the &lt;code&gt;core.commentchar&lt;/code&gt; configuration to change the character Git uses to mark comment lines in commit messages.&lt;/p&gt;
 &lt;p&gt;My team has a convention of putting the number of the current Issue/Ticket/Story that we are working on at the beginning of every commit message. This is great because it lets us make sense of the history of our code by helping us answer&lt;/p&gt;
@@ -290,29 +305,31 @@ Use the &lt;code&gt;core.commentchar&lt;/code&gt; configuration to change the ch
 &lt;/ul&gt;
 &lt;p&gt;We use the format &lt;code&gt;#123 Foo bar&lt;/code&gt; for the message where &lt;code&gt;123&lt;/code&gt; is the issue number because it lets &lt;a href=&#34;http://www.thoughtworks-studios.com/mingle&#34;&gt;Mingle&lt;/a&gt;, our project management tool track the commits made against each card.&lt;/p&gt;
 &lt;p&gt;Things work fine, except for me. I almost never use &lt;code&gt;git ci -m&lt;/code&gt;. I like Git to open up an editor (almost always Emacs), and type my comment message out. But if I type the commit message according to the convention, because the line starts with a &lt;code&gt;#&lt;/code&gt;, Git would treat it as a comment and the commit will be aborted.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;#123 Foobar
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;# Please enter the commit message for your changes. Lines starting
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;# with &amp;#39;#&amp;#39; will be ignored, and an empty message aborts the commit.
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;# On branch source
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;#
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;# Changes to be committed:
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;#   (use &amp;#34;git reset HEAD &amp;lt;file&amp;gt;...&amp;#34; to unstage)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;...
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;I have been getting around this issue by pre-pending a space before the message. So I was really happy to see that Git &lt;code&gt;1.8.2&lt;/code&gt; ships with a new configuration &lt;code&gt;core.commentchar&lt;/code&gt;. This let&amp;rsquo;s you configure the characters that marks a comment in the commit message. From the &lt;a href=&#34;http://git-scm.com/docs/git-config&#34;&gt;doc&lt;/a&gt;:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-text&#34;&gt;#123 Foobar
+# Please enter the commit message for your changes. Lines starting
+# with &#39;#&#39; will be ignored, and an empty message aborts the commit.
+# On branch source
+#
+# Changes to be committed:
+#   (use &amp;quot;git reset HEAD &amp;lt;file&amp;gt;...&amp;quot; to unstage)
+...
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;I have been getting around this issue by pre-pending a space before the message. So I was really happy to see that Git &lt;code&gt;1.8.2&lt;/code&gt; ships with a new configuration &lt;code&gt;core.commentchar&lt;/code&gt;. This let&amp;rsquo;s you configure the characters that marks a comment in the commit message. From the &lt;a href=&#34;http://git-scm.com/docs/git-config&#34;&gt;doc&lt;/a&gt;:&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;core.commentchar&lt;/p&gt;
 &lt;p&gt;Commands such as commit and tag that lets you edit messages consider a line that begins with this character commented, and removes them after the editor returns (default #).&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;So with this set to &lt;code&gt;$&lt;/code&gt;, I can just type in my commit message.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;#123 Foobar
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ Please enter the commit message for your changes. Lines starting
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ with &amp;#39;$&amp;#39; will be ignored, and an empty message aborts the commit.
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ On branch source
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ Changes to be committed:
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$   (use &amp;#34;git reset HEAD &amp;lt;file&amp;gt;...&amp;#34; to unstage)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;...
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This configuration is available only in versions &lt;code&gt;1.8.2&lt;/code&gt; and later.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-text&#34;&gt;#123 Foobar
+$ Please enter the commit message for your changes. Lines starting
+$ with &#39;$&#39; will be ignored, and an empty message aborts the commit.
+$ On branch source
+$
+$ Changes to be committed:
+$   (use &amp;quot;git reset HEAD &amp;lt;file&amp;gt;...&amp;quot; to unstage)
+...
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This configuration is available only in versions &lt;code&gt;1.8.2&lt;/code&gt; and later.&lt;/p&gt;
 </description>
     </item>
     

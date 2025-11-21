@@ -1,51 +1,55 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>C# on {code that works}</title>
-    <link>http://localhost:1313/categories/c%23/?utm_source=site&amp;utm_medium=feed</link>
+    <link>https://sadique.io/categories/c%23/?utm_source=site&amp;utm_medium=feed</link>
     <description>Recent content in C# on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Mon, 16 Jan 2012 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1313/categories/c%23/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    <atom:link href="https://sadique.io/categories/c%23/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
     
     <item>
       <title>Debugging: C Sharp&#39;s HttpWebRequest, 100-Continue and nginx</title>
-      <link>http://localhost:1313/blog/2012/01/16/debugging-c-sharps-httpwebrequest-100-continue-and-nginx/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sadique.io/blog/2012/01/16/debugging-c-sharps-httpwebrequest-100-continue-and-nginx/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Mon, 16 Jan 2012 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/blog/2012/01/16/debugging-c-sharps-httpwebrequest-100-continue-and-nginx/?utm_source=site&amp;utm_medium=feed</guid>
+      <guid>https://sadique.io/blog/2012/01/16/debugging-c-sharps-httpwebrequest-100-continue-and-nginx/?utm_source=site&amp;utm_medium=feed</guid>
       <description>&lt;p&gt;Recently I spent some time debugging an issue our team was facing around some C# code making a request on one of our servers. The request was throwing a &lt;code&gt;The server committed a protocol violation. Section=ResponseStatusLine&lt;/code&gt; error.&lt;/p&gt;
 &lt;p&gt;Initial investigation suggested that this could happen if we are making HTTP/1.1 requests to a server configured for HTTP/1.0. Our Rails application runs on Mongrel fronted with nginx 0.6.5. We modified the C# code to use HTTP/1.0 and the error went away. The following line does the trick.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-c#&#34; data-lang=&#34;c#&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;request.ProtocolVersion = HttpVersion.Version10;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;But wait! This means that somewhere in the chain, a server is configured to use HTTP/1.0. It looked unlikely and further debugging revealed that it was indeed not the case. Further staring at the Rails logs showed that one of the headers that the app expects was not being set, when the request was done using HTTP/1.1 from the code.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-c#&#34;&gt;request.ProtocolVersion = HttpVersion.Version10;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;But wait! This means that somewhere in the chain, a server is configured to use HTTP/1.0. It looked unlikely and further debugging revealed that it was indeed not the case. Further staring at the Rails logs showed that one of the headers that the app expects was not being set, when the request was done using HTTP/1.1 from the code.&lt;/p&gt;
 &lt;p&gt;After some time, we figured &lt;a href=&#34;http://stackoverflow.com/questions/2482715/the-server-committed-a-protocol-violation-section-responsestatusline-error&#34;&gt;out&lt;/a&gt; that the .Net library throws the &lt;code&gt;server committed ...&lt;/code&gt; error if it is expecting the HTTP 100 (Continue) response in the wrong way. We set the code to not expect the HTTP 100 response from the server using&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-c#&#34; data-lang=&#34;c#&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;request.ServicePoint.Expect100Continue = &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;false&lt;/span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;and voila, it worked. The Rails app received all the headers it expected and things worked fine. The code looked like this:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-c#&#34; data-lang=&#34;c#&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;var&lt;/span&gt; request = (HttpWebRequest) HttpWebRequest.Create(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;https://example.com/foo&amp;#34;&lt;/span&gt;);
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;request.ServicePoint.Expect100Continue = &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;false&lt;/span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;request.Credentials = &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;new&lt;/span&gt; NetworkCredential(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;user&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;password&amp;#34;&lt;/span&gt;);
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;request.Method = &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;PUT&amp;#34;&lt;/span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;request.ContentType = &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;application/x-www-form-urlencoded&amp;#34;&lt;/span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;byte&lt;/span&gt;[] objByteArray = Encoding.UTF8.GetBytes(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;foo=bar&amp;#34;&lt;/span&gt;);
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;request.ContentLength = objByteArray.Length;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;var&lt;/span&gt; dataStream = request.GetRequestStream();
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;dataStream.Write(objByteArray, &lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;, objByteArray.Length);
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;dataStream.Close();
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#078;font-weight:bold&#34;&gt;var&lt;/span&gt; response = request.GetResponse();
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;So what is happening?&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-c#&#34;&gt;request.ServicePoint.Expect100Continue = false;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;and voila, it worked. The Rails app received all the headers it expected and things worked fine. The code looked like this:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-c#&#34;&gt;var request = (HttpWebRequest) HttpWebRequest.Create(&amp;quot;https://example.com/foo&amp;quot;);
+request.ServicePoint.Expect100Continue = false;
+request.Credentials = new NetworkCredential(&amp;quot;user&amp;quot;, &amp;quot;password&amp;quot;);
+request.Method = &amp;quot;PUT&amp;quot;;
+request.ContentType = &amp;quot;application/x-www-form-urlencoded&amp;quot;;
+byte[] objByteArray = Encoding.UTF8.GetBytes(&amp;quot;foo=bar&amp;quot;);
+request.ContentLength = objByteArray.Length;
+var dataStream = request.GetRequestStream();
+dataStream.Write(objByteArray, 0, objByteArray.Length);
+dataStream.Close();
+
+var response = request.GetResponse();
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;So what is happening?&lt;/p&gt;
 &lt;p&gt;The HTTP 100 status is supposed to work like this. When a client has to send some data, instead of sending it upfront, it can send some headers along with the &amp;ldquo;Expect:100-Continue&amp;rdquo; header. The server responds with a 100 if it is willing to accept the request or send a final status. The spec is &lt;a href=&#34;http://www.w3.org/Protocols/rfc2616/rfc2616-sec8.html#sec8.2.3&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;We are using nginx as a proxy. The specification says that the proxy should forward the request if it knows that the next-hop server is HTTP/1.1 compliant. The proxy is supposed to ignore the &amp;ldquo;Expect:100-Continue&amp;rdquo; header, if the request came from a client using HTTP/1.0.&lt;/p&gt;
 &lt;p&gt;In our case, the default behavior of the .Net HTTP client library is to set &amp;ldquo;Expect:100-Continue&amp;rdquo; header on every request for HTTP/1.1. So the client sends only some headers and waits for the 100 response from nginx. Nginx sees the request, knows that Mongrel supports HTTP/1.1 and just forwards the request. The app sends a 401 because it could not authenticate. The client is expecting a 100 and gets a 401. It thinks the server committed a protocol violation.&lt;/p&gt;
 &lt;p&gt;When we ask the client to use HTTP/1.0, the .Net library does not use the Expect header, sends all the headers and nginx forwards the request to Mongrel. The authentication goes through.&lt;/p&gt;
 &lt;p&gt;When we explicitly set the Expect 100 property of the library to false, it sends all the headers at once and the authentication goes through fine.&lt;/p&gt;
 &lt;p&gt;Looks like there is a way to tell .Net not to expect 100 from the server through configuration, by putting this in &lt;app&gt;.exe.conf&lt;/app&gt;&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-xml&#34; data-lang=&#34;xml&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;lt;system.net&amp;gt;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;lt;settings&amp;gt;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;lt;servicePointManager&lt;/span&gt; &lt;span style=&#34;color:#309&#34;&gt;expect100Continue=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;false&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;/&amp;gt;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;lt;/settings&amp;gt;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#309;font-weight:bold&#34;&gt;&amp;lt;/system.net&amp;gt;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ol&gt;
+&lt;pre&gt;&lt;code class=&#34;language-xml&#34;&gt;&amp;lt;system.net&amp;gt;
+  &amp;lt;settings&amp;gt;
+    &amp;lt;servicePointManager expect100Continue=&amp;quot;false&amp;quot;/&amp;gt;
+  &amp;lt;/settings&amp;gt;
+&amp;lt;/system.net&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ol&gt;
 &lt;li&gt;&lt;a href=&#34;http://stackoverflow.com/questions/2482715/the-server-committed-a-protocol-violation-section-responsestatusline-error&#34;&gt;http://stackoverflow.com/questions/2482715/the-server-committed-a-protocol-violation-section-responsestatusline-error&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;http://www.w3.org/Protocols/rfc2616/rfc2616-sec8.html#sec8.2.3&#34;&gt;http://www.w3.org/Protocols/rfc2616/rfc2616-sec8.html#sec8.2.3&lt;/a&gt;&lt;/li&gt;
 &lt;/ol&gt;

@@ -1,166 +1,175 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tomcat on {code that works}</title>
-    <link>http://localhost:1313/tags/tomcat/?utm_source=site&amp;utm_medium=feed</link>
+    <link>https://sadique.io/tags/tomcat/?utm_source=site&amp;utm_medium=feed</link>
     <description>Recent content in Tomcat on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Tue, 09 Jun 2015 05:11:05 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1313/tags/tomcat/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    <atom:link href="https://sadique.io/tags/tomcat/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
     
     <item>
       <title>Running multiple applications in the same Tomcat installation</title>
-      <link>http://localhost:1313/blog/2015/06/09/running-multiple-applications-in-the-same-tomcat-installation/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sadique.io/blog/2015/06/09/running-multiple-applications-in-the-same-tomcat-installation/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Tue, 09 Jun 2015 05:11:05 +0000</pubDate>
       
-      <guid>http://localhost:1313/blog/2015/06/09/running-multiple-applications-in-the-same-tomcat-installation/?utm_source=site&amp;utm_medium=feed</guid>
+      <guid>https://sadique.io/blog/2015/06/09/running-multiple-applications-in-the-same-tomcat-installation/?utm_source=site&amp;utm_medium=feed</guid>
       <description>&lt;p&gt;This blog post describes how to set up Tomcat to run multiple applications running as separate JVM processes, using the same Tomcat installation. This method utilizes the &lt;code&gt;CATALINA_HOME&lt;/code&gt; and &lt;code&gt;CATALINA_BASE&lt;/code&gt; environment variables used by Tomcat. I have verified this method against Tomcat versions &lt;code&gt;8.0.x&lt;/code&gt;; other versions should work the same way.&lt;/p&gt;
 &lt;h2 id=&#34;a-typical-tomcat-installation&#34;&gt;A typical Tomcat installation&lt;/h2&gt;
 &lt;p&gt;If we explode the Tomcat 8.0.23 &lt;a href=&#34;http://mirrors.sonic.net/apache/tomcat/tomcat-8/v8.0.23/bin/apache-tomcat-8.0.23.tar.gz&#34;&gt;tarball&lt;/a&gt;, we get the following directory structure:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ tar apache-tomcat-8.0.23.tar.gz
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ ls apache-tomcat-8.0.23/
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;LICENSE		RELEASE-NOTES	bin		lib		temp		work
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;NOTICE		RUNNING.txt	conf		logs		webapps
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This distribution, by default runs applications in a single JVM. How does it do this?&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;$ tar apache-tomcat-8.0.23.tar.gz
+
+$ ls apache-tomcat-8.0.23/
+LICENSE		RELEASE-NOTES	bin		lib		temp		work
+NOTICE		RUNNING.txt	conf		logs		webapps
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This distribution, by default runs applications in a single JVM. How does it do this?&lt;/p&gt;
 &lt;p&gt;Tomcat control scripts - &lt;code&gt;startup.sh&lt;/code&gt;, &lt;code&gt;shutdown.sh&lt;/code&gt;, &lt;code&gt;catalina.sh&lt;/code&gt; uses the environment variables &lt;code&gt;CATALINA_HOME&lt;/code&gt; and &lt;code&gt;CATALINA_BASE&lt;/code&gt; to locate binaries and configuration files.&lt;/p&gt;
 &lt;p&gt;From the documentaion inside &lt;code&gt;catalina.sh&lt;/code&gt; under &lt;code&gt;apache-tomcat-8.0.23/bin/&lt;/code&gt; we can see that:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;#   CATALINA_HOME   May point at your Catalina &amp;#34;build&amp;#34; directory.&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;#&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;#   CATALINA_BASE   (Optional) Base directory for resolving dynamic portions&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;#                   of a Catalina installation.  If not present, resolves to&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;#                   the same directory that CATALINA_HOME points to.&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This allows us to separate the &lt;code&gt;CATALINA_HOME&lt;/code&gt; and &lt;code&gt;CATALINA_BASE&lt;/code&gt; directories. The Tomcat binaries and scripts need to be inside &lt;code&gt;CATALINA_HOME&lt;/code&gt; and our first application can deploy itself to &lt;code&gt;CATALINA_BASE&lt;/code&gt;.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;#   CATALINA_HOME   May point at your Catalina &amp;quot;build&amp;quot; directory.
+#
+#   CATALINA_BASE   (Optional) Base directory for resolving dynamic portions
+#                   of a Catalina installation.  If not present, resolves to
+#                   the same directory that CATALINA_HOME points to.
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This allows us to separate the &lt;code&gt;CATALINA_HOME&lt;/code&gt; and &lt;code&gt;CATALINA_BASE&lt;/code&gt; directories. The Tomcat binaries and scripts need to be inside &lt;code&gt;CATALINA_HOME&lt;/code&gt; and our first application can deploy itself to &lt;code&gt;CATALINA_BASE&lt;/code&gt;.&lt;/p&gt;
 &lt;h2 id=&#34;separating-catalina_home-and-catalina_base&#34;&gt;Separating CATALINA_HOME and CATALINA_BASE&lt;/h2&gt;
 &lt;p&gt;The &lt;code&gt;app1&lt;/code&gt; directory will have the following directories:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ ls -a app1/
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;.	..	bin	conf	logs	temp	webapps	work
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The &lt;code&gt;bin&lt;/code&gt; directory will have the &lt;code&gt;setenv.sh&lt;/code&gt; script used to set additional environment variables for the application.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;$ ls -a app1/
+.	..	bin	conf	logs	temp	webapps	work
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The &lt;code&gt;bin&lt;/code&gt; directory will have the &lt;code&gt;setenv.sh&lt;/code&gt; script used to set additional environment variables for the application.&lt;/p&gt;
 &lt;p&gt;The &lt;code&gt;tomcat&lt;/code&gt; directory will have the following directories:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ ls tomcat/
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;LICENSE		NOTICE		RELEASE-NOTES	RUNNING.txt	bin		lib
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The &lt;code&gt;bin&lt;/code&gt; directory will have the Tomcat management scripts like &lt;code&gt;startup.sh&lt;/code&gt;, &lt;code&gt;shutdown.sh&lt;/code&gt;, &lt;code&gt;catalina.sh&lt;/code&gt; etc.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;
+$ ls tomcat/
+LICENSE		NOTICE		RELEASE-NOTES	RUNNING.txt	bin		lib
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The &lt;code&gt;bin&lt;/code&gt; directory will have the Tomcat management scripts like &lt;code&gt;startup.sh&lt;/code&gt;, &lt;code&gt;shutdown.sh&lt;/code&gt;, &lt;code&gt;catalina.sh&lt;/code&gt; etc.&lt;/p&gt;
 &lt;p&gt;Now we can start &lt;code&gt;app1&lt;/code&gt; by pointing &lt;code&gt;CATALINA_BASE&lt;/code&gt; to &lt;code&gt;app1&lt;/code&gt; and &lt;code&gt;CATALINA_HOME&lt;/code&gt; to &lt;code&gt;tomcat&lt;/code&gt;.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ &lt;span style=&#34;color:#366&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;CATALINA_HOME&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;/Users/sdqali/src/sandbox/tomcat
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ &lt;span style=&#34;color:#366&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;CATALINA_BASE&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;/Users/sdqali/src/sandbox/app1
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ &lt;span style=&#34;color:#033&#34;&gt;$CATALINA_HOME&lt;/span&gt;/bin/startup.sh
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ &lt;span style=&#34;color:#033&#34;&gt;$CATALINA_HOME&lt;/span&gt;/bin/startup.sh
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Using CATALINA_BASE:   /Users/sdqali/src/sandbox/app1
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Using CATALINA_HOME:   /Users/sdqali/src/sandbox/tomcat
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Using CATALINA_TMPDIR: /Users/sdqali/src/sandbox/app1/temp
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Using JRE_HOME:        /Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Using CLASSPATH:       /Users/sdqali/src/sandbox/tomcat/bin/bootstrap.jar:/Users/sdqali/src/sandbox/tomcat/bin/tomcat-juli.jar
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Tomcat started.
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ curl -s -D - -o /dev/null http://127.0.0.1:8080
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;HTTP/1.1 &lt;span style=&#34;color:#f60&#34;&gt;200&lt;/span&gt; OK
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Server: Apache-Coyote/1.1
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Content-Type: text/html;&lt;span style=&#34;color:#033&#34;&gt;charset&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;UTF-8
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Transfer-Encoding: chunked
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Date: Tue, &lt;span style=&#34;color:#f60&#34;&gt;09&lt;/span&gt; Jun &lt;span style=&#34;color:#f60&#34;&gt;2015&lt;/span&gt; 07:37:43 GMT
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Let&amp;rsquo;s try and deploy a second application &lt;code&gt;app2&lt;/code&gt; running on port &lt;code&gt;9090&lt;/code&gt;.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ &lt;span style=&#34;color:#366&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;CATALINA_HOME&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;/Users/sdqali/src/sandbox/tomcat
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ &lt;span style=&#34;color:#366&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;CATALINA_BASE&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;/Users/sdqali/src/sandbox/app2
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ &lt;span style=&#34;color:#033&#34;&gt;$CATALINA_HOME&lt;/span&gt;/bin/startup.sh
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Using CATALINA_BASE:   /Users/sdqali/src/sandbox/app2
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Using CATALINA_HOME:   /Users/sdqali/src/sandbox/tomcat
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Using CATALINA_TMPDIR: /Users/sdqali/src/sandbox/app2/temp
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Using JRE_HOME:        /Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Using CLASSPATH:       /Users/sdqali/src/sandbox/tomcat/bin/bootstrap.jar:/Users/sdqali/src/sandbox/tomcat/bin/tomcat-juli.jar
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Tomcat started.
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ curl -s -D - -o /dev/null http://127.0.0.1:9090
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;HTTP/1.1 &lt;span style=&#34;color:#f60&#34;&gt;200&lt;/span&gt; OK
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Server: Apache-Coyote/1.1
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Content-Type: text/html;&lt;span style=&#34;color:#033&#34;&gt;charset&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;UTF-8
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Transfer-Encoding: chunked
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Date: Tue, &lt;span style=&#34;color:#f60&#34;&gt;09&lt;/span&gt; Jun &lt;span style=&#34;color:#f60&#34;&gt;2015&lt;/span&gt; 07:41:02 GMT
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;tying-it-all-together&#34;&gt;Tying it all together&lt;/h2&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;
+$ export CATALINA_HOME=/Users/sdqali/src/sandbox/tomcat
+
+$ export CATALINA_BASE=/Users/sdqali/src/sandbox/app1
+
+$ $CATALINA_HOME/bin/startup.sh
+
+$ $CATALINA_HOME/bin/startup.sh
+Using CATALINA_BASE:   /Users/sdqali/src/sandbox/app1
+Using CATALINA_HOME:   /Users/sdqali/src/sandbox/tomcat
+Using CATALINA_TMPDIR: /Users/sdqali/src/sandbox/app1/temp
+Using JRE_HOME:        /Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home
+Using CLASSPATH:       /Users/sdqali/src/sandbox/tomcat/bin/bootstrap.jar:/Users/sdqali/src/sandbox/tomcat/bin/tomcat-juli.jar
+Tomcat started.
+
+$ curl -s -D - -o /dev/null http://127.0.0.1:8080
+HTTP/1.1 200 OK
+Server: Apache-Coyote/1.1
+Content-Type: text/html;charset=UTF-8
+Transfer-Encoding: chunked
+Date: Tue, 09 Jun 2015 07:37:43 GMT
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Let&amp;rsquo;s try and deploy a second application &lt;code&gt;app2&lt;/code&gt; running on port &lt;code&gt;9090&lt;/code&gt;.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;
+$ export CATALINA_HOME=/Users/sdqali/src/sandbox/tomcat
+
+$ export CATALINA_BASE=/Users/sdqali/src/sandbox/app2
+
+$ $CATALINA_HOME/bin/startup.sh
+Using CATALINA_BASE:   /Users/sdqali/src/sandbox/app2
+Using CATALINA_HOME:   /Users/sdqali/src/sandbox/tomcat
+Using CATALINA_TMPDIR: /Users/sdqali/src/sandbox/app2/temp
+Using JRE_HOME:        /Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home
+Using CLASSPATH:       /Users/sdqali/src/sandbox/tomcat/bin/bootstrap.jar:/Users/sdqali/src/sandbox/tomcat/bin/tomcat-juli.jar
+Tomcat started.
+
+$ curl -s -D - -o /dev/null http://127.0.0.1:9090
+HTTP/1.1 200 OK
+Server: Apache-Coyote/1.1
+Content-Type: text/html;charset=UTF-8
+Transfer-Encoding: chunked
+Date: Tue, 09 Jun 2015 07:41:02 GMT
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id=&#34;tying-it-all-together&#34;&gt;Tying it all together&lt;/h2&gt;
 &lt;p&gt;At this point, it is useful to create management scripts that abstract away the environment variables and allows for starting up and shutting down applications individually. The &lt;code&gt;start.sh&lt;/code&gt; script will be as follows.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#099&#34;&gt;#!/usr/bin/env sh
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#099&#34;&gt;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# start.sh&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# Script to start a Tomcat application&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;show_usage&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#366&#34;&gt;echo&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Usage: ./start.sh &amp;lt;app-name&amp;gt;&amp;#34;&lt;/span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#366&#34;&gt;exit&lt;/span&gt; 1;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;declare&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;app_name&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#033&#34;&gt;$1&lt;/span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#555&#34;&gt;[[&lt;/span&gt; -z &lt;span style=&#34;color:#033&#34;&gt;$app_name&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;]]&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; show_usage;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;declare&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;INSTALL_BASE&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;/Users/sdqali/src/sandbox
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;CATALINA_HOME&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#033&#34;&gt;$INSTALL_BASE&lt;/span&gt;/tomcat
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;CATALINA_BASE&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#033&#34;&gt;$INSTALL_BASE&lt;/span&gt;/&lt;span style=&#34;color:#033&#34;&gt;$app_name&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#033&#34;&gt;$CATALINA_HOME&lt;/span&gt;/bin/startup.sh
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Similarly, the &lt;code&gt;stop.sh&lt;/code&gt; script will be:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#099&#34;&gt;#!/usr/bin/env sh
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#099&#34;&gt;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# stop.sh&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# Script to stop a Tomcat application&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;show_usage&lt;span style=&#34;color:#555&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#366&#34;&gt;echo&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Usage: ./stop.sh &amp;lt;app-name&amp;gt;&amp;#34;&lt;/span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#366&#34;&gt;exit&lt;/span&gt; 1;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;declare&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;app_name&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#033&#34;&gt;$1&lt;/span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#555&#34;&gt;[[&lt;/span&gt; -z &lt;span style=&#34;color:#033&#34;&gt;$app_name&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;]]&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; show_usage;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;declare&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;INSTALL_BASE&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;/Users/sdqali/src/sandbox
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;CATALINA_HOME&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#033&#34;&gt;$INSTALL_BASE&lt;/span&gt;/tomcat
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;CATALINA_BASE&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#033&#34;&gt;$INSTALL_BASE&lt;/span&gt;/&lt;span style=&#34;color:#033&#34;&gt;$app_name&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#033&#34;&gt;$CATALINA_HOME&lt;/span&gt;/bin/shutdown.sh
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;We can manage individual applications using these scripts:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ ./management/start.sh app2
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Using CATALINA_BASE:   /Users/sdqali/src/sandbox/app2
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Using CATALINA_HOME:   /Users/sdqali/src/sandbox/tomcat
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Using CATALINA_TMPDIR: /Users/sdqali/src/sandbox/app2/temp
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Using JRE_HOME:        /Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Using CLASSPATH:       /Users/sdqali/src/sandbox/tomcat/bin/bootstrap.jar:/Users/sdqali/src/sandbox/tomcat/bin/tomcat-juli.jar
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Tomcat started.
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ nc -z  127.0.0.1 &lt;span style=&#34;color:#f60&#34;&gt;9090&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Connection to 127.0.0.1 port &lt;span style=&#34;color:#f60&#34;&gt;9090&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;tcp/websm&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; succeeded!
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ curl -s -D - -o /dev/null http://127.0.0.1:9090
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;HTTP/1.1 &lt;span style=&#34;color:#f60&#34;&gt;200&lt;/span&gt; OK
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Server: Apache-Coyote/1.1
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Content-Type: text/html;&lt;span style=&#34;color:#033&#34;&gt;charset&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;UTF-8
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Transfer-Encoding: chunked
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Date: Tue, &lt;span style=&#34;color:#f60&#34;&gt;09&lt;/span&gt; Jun &lt;span style=&#34;color:#f60&#34;&gt;2015&lt;/span&gt; 08:16:05 GMT
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ ./management/stop.sh app2
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Using CATALINA_BASE:   /Users/sdqali/src/sandbox/app2
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Using CATALINA_HOME:   /Users/sdqali/src/sandbox/tomcat
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Using CATALINA_TMPDIR: /Users/sdqali/src/sandbox/app2/temp
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Using JRE_HOME:        /Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Using CLASSPATH:       /Users/sdqali/src/sandbox/tomcat/bin/bootstrap.jar:/Users/sdqali/src/sandbox/tomcat/bin/tomcat-juli.jar
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ nc -z  127.0.0.1 &lt;span style=&#34;color:#f60&#34;&gt;9090&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ curl -v http://127.0.0.1:9090
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;* Rebuilt URL to: http://127.0.0.1:9090/
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;* Hostname was NOT found in DNS cache
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;*   Trying 127.0.0.1...
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;* connect to 127.0.0.1 port &lt;span style=&#34;color:#f60&#34;&gt;9090&lt;/span&gt; failed: Connection refused
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description>
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;#!/usr/bin/env sh
+
+# start.sh
+# Script to start a Tomcat application
+
+show_usage() {
+    echo &amp;quot;Usage: ./start.sh &amp;lt;app-name&amp;gt;&amp;quot;;
+    exit 1;
+}
+
+declare app_name=$1;
+[[ -z $app_name ]] &amp;amp;&amp;amp; show_usage;
+
+
+declare INSTALL_BASE=/Users/sdqali/src/sandbox
+
+export CATALINA_HOME=$INSTALL_BASE/tomcat
+export CATALINA_BASE=$INSTALL_BASE/$app_name
+
+$CATALINA_HOME/bin/startup.sh
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Similarly, the &lt;code&gt;stop.sh&lt;/code&gt; script will be:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;#!/usr/bin/env sh
+
+# stop.sh
+# Script to stop a Tomcat application
+
+show_usage() {
+    echo &amp;quot;Usage: ./stop.sh &amp;lt;app-name&amp;gt;&amp;quot;;
+    exit 1;
+}
+
+declare app_name=$1;
+[[ -z $app_name ]] &amp;amp;&amp;amp; show_usage;
+
+
+declare INSTALL_BASE=/Users/sdqali/src/sandbox
+
+export CATALINA_HOME=$INSTALL_BASE/tomcat
+export CATALINA_BASE=$INSTALL_BASE/$app_name
+
+$CATALINA_HOME/bin/shutdown.sh
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We can manage individual applications using these scripts:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;$ ./management/start.sh app2
+Using CATALINA_BASE:   /Users/sdqali/src/sandbox/app2
+Using CATALINA_HOME:   /Users/sdqali/src/sandbox/tomcat
+Using CATALINA_TMPDIR: /Users/sdqali/src/sandbox/app2/temp
+Using JRE_HOME:        /Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home
+Using CLASSPATH:       /Users/sdqali/src/sandbox/tomcat/bin/bootstrap.jar:/Users/sdqali/src/sandbox/tomcat/bin/tomcat-juli.jar
+Tomcat started.
+
+$ nc -z  127.0.0.1 9090
+Connection to 127.0.0.1 port 9090 [tcp/websm] succeeded!
+
+$ curl -s -D - -o /dev/null http://127.0.0.1:9090
+HTTP/1.1 200 OK
+Server: Apache-Coyote/1.1
+Content-Type: text/html;charset=UTF-8
+Transfer-Encoding: chunked
+Date: Tue, 09 Jun 2015 08:16:05 GMT
+
+
+$ ./management/stop.sh app2
+Using CATALINA_BASE:   /Users/sdqali/src/sandbox/app2
+Using CATALINA_HOME:   /Users/sdqali/src/sandbox/tomcat
+Using CATALINA_TMPDIR: /Users/sdqali/src/sandbox/app2/temp
+Using JRE_HOME:        /Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home
+Using CLASSPATH:       /Users/sdqali/src/sandbox/tomcat/bin/bootstrap.jar:/Users/sdqali/src/sandbox/tomcat/bin/tomcat-juli.jar
+
+$ nc -z  127.0.0.1 9090
+
+$ curl -v http://127.0.0.1:9090
+* Rebuilt URL to: http://127.0.0.1:9090/
+* Hostname was NOT found in DNS cache
+*   Trying 127.0.0.1...
+* connect to 127.0.0.1 port 9090 failed: Connection refused
+&lt;/code&gt;&lt;/pre&gt;</description>
     </item>
     
   </channel>

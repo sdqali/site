@@ -1,6 +1,6 @@
 <!DOCTYPE html5>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us" prefix="og: http://ogp.me/ns#">
-  <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <head>
 
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -33,13 +33,13 @@
   <meta name="twitter:creator" content="@sdqali">
   <meta name="twitter:title" content="Implementing feature toggles for a Spring Boot application - Part 1">
   <meta name="twitter:description" content="In one of our recent projects at work, we implemented feature toggles for a Spring MVC / Angular JS code base and this series of blog posts discusses our motivations and requirements, the approach we took and what we learned from it.">
-  <meta name="twitter:image" content="http://localhost:1313//images/feature-toggles.png">
+  <meta name="twitter:image" content="https://sadique.io//images/feature-toggles.png">
 
   <meta property="og:title" content="Implementing feature toggles for a Spring Boot application - Part 1" />
   <meta property="og:description" content="In one of our recent projects at work, we implemented feature toggles for a Spring MVC / Angular JS code base and this series of blog posts discusses our motivations and requirements, the approach we took and what we learned from it." itemprop="description"/>
-  <meta property="og:url" content="http://localhost:1313/blog/2016/11/22/implementing-feature-toggles-for-a-spring-boot-application-part-1/" />
-  <meta property="og:image" content="http://localhost:1313//images/feature-toggles.png" />
-  <meta name="hugo:permalink" content="http://localhost:1313/blog/2016/11/22/implementing-feature-toggles-for-a-spring-boot-application-part-1/">
+  <meta property="og:url" content="https://sadique.io/blog/2016/11/22/implementing-feature-toggles-for-a-spring-boot-application-part-1/" />
+  <meta property="og:image" content="https://sadique.io//images/feature-toggles.png" />
+  <meta name="hugo:permalink" content="https://sadique.io/blog/2016/11/22/implementing-feature-toggles-for-a-spring-boot-application-part-1/">
   <meta name="hugo:filepath" content="content/blog/2016-11-21-learnings-from-implementing-feature-toggles.markdown">
   <body>
     <script>
@@ -110,180 +110,190 @@
 <h2 id="our-initial-approach">Our initial approach</h2>
 <h3 id="toggling-dependency-injection">Toggling dependency injection.</h3>
 <p>We started by using configuration parameters with the <code>feature</code> prefix to toggle features. With this convention in place, we started using the <code>@ConditionalOnProperty</code> annotation in our configuration classes to toggle the beans that got wired up. For example, to toggle between Redis and in-memory store for sessions, we ended up with the following configuration:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Configuration</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">AppConfig</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@Bean</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@ConditionalOnProperty</span>(value<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;feature.redis.session.store&#34;</span>,<span style="color:#bbb"> </span>havingValue<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;false&#34;</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>SessionRepository<span style="color:#bbb"> </span><span style="color:#c0f">mapSessionRepository</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>MapSessionRepository();<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@Bean</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@ConditionalOnProperty</span>(value<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;feature.redis.session.store&#34;</span>,<span style="color:#bbb"> </span>havingValue<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;true&#34;</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>SessionRepository<span style="color:#bbb"> </span><span style="color:#c0f">redisSessionRepository</span>(RedisConnectionFactory<span style="color:#bbb"> </span>factory)<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>RedisOperationsSessionRepository(factory);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><h3 id="toggling-individual-controller-methods">Toggling individual controller methods</h3>
+<pre><code class="language-java">@Configuration
+public class AppConfig {
+  @Bean
+  @ConditionalOnProperty(value = &quot;feature.redis.session.store&quot;, havingValue = &quot;false&quot;)
+  public SessionRepository mapSessionRepository() {
+    return new MapSessionRepository();
+  }
+
+  @Bean
+  @ConditionalOnProperty(value = &quot;feature.redis.session.store&quot;, havingValue = &quot;true&quot;)
+  public SessionRepository redisSessionRepository(RedisConnectionFactory factory) {
+    return new RedisOperationsSessionRepository(factory);
+  }
+}
+</code></pre>
+<h3 id="toggling-individual-controller-methods">Toggling individual controller methods</h3>
 <p>In order to prevent end points defined by controllers and controller methods that are toggled off from being accessed, we decided to configure a <code>HandlerInterceptor</code> <sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup> to intercept requests to these end points.</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">FeatureInterceptor</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">implements</span><span style="color:#bbb"> </span>HandlerInterceptor<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">final</span><span style="color:#bbb"> </span>FeatureRepository<span style="color:#bbb"> </span>featureRepository;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#c0f">FeatureInterceptor</span>(FeatureRepository<span style="color:#bbb"> </span>featureRepository)<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">this</span>.<span style="color:#309">featureRepository</span><span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>featureRepository;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@Override</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">boolean</span><span style="color:#bbb"> </span><span style="color:#c0f">preHandle</span>(HttpServletRequest<span style="color:#bbb"> </span>httpServletRequest,<span style="color:#bbb"> </span>HttpServletResponse<span style="color:#bbb"> </span>httpServletResponse,<span style="color:#bbb"> </span>Object<span style="color:#bbb"> </span>handler)<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>HandlerMethod<span style="color:#bbb"> </span>handlerMethod<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>(HandlerMethod)<span style="color:#bbb"> </span>handler;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>FeatureToggle<span style="color:#bbb"> </span>methodAnnotation<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>handlerMethod.<span style="color:#309">getMethodAnnotation</span>(FeatureToggle.<span style="color:#309">class</span>);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(methodAnnotation<span style="color:#bbb"> </span><span style="color:#555">==</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>)<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">true</span>;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">if</span>(featureRepository.<span style="color:#309">isOn</span>(methodAnnotation.<span style="color:#309">feature</span>())<span style="color:#bbb"> </span><span style="color:#555">==</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>)<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">true</span>;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">if</span>(methodAnnotation.<span style="color:#309">expectedToBeOn</span>()<span style="color:#bbb"> </span><span style="color:#555">==</span><span style="color:#bbb"> </span>featureRepository.<span style="color:#309">isOn</span>(methodAnnotation.<span style="color:#309">feature</span>()))<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">true</span>;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>httpServletResponse.<span style="color:#309">setStatus</span>(HttpServletResponse.<span style="color:#309">SC_NOT_FOUND</span>);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">false</span>;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@Override</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">postHandle</span>(HttpServletRequest<span style="color:#bbb"> </span>httpServletRequest,<span style="color:#bbb"> </span>HttpServletResponse<span style="color:#bbb"> </span>httpServletResponse,<span style="color:#bbb"> </span>Object<span style="color:#bbb"> </span>o,<span style="color:#bbb"> </span>ModelAndView<span style="color:#bbb"> </span>modelAndView)<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@Override</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">afterCompletion</span>(HttpServletRequest<span style="color:#bbb"> </span>httpServletRequest,<span style="color:#bbb"> </span>HttpServletResponse<span style="color:#bbb"> </span>httpServletResponse,<span style="color:#bbb"> </span>Object<span style="color:#bbb"> </span>o,<span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>e)<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><p>This feature interceptor uses the <code>FeatureToggle</code> looks for the annotation, and the looks at a feature repository to see if the state of the feature flag is set to what the annotation expects and if it does not, returns a 404. The annotation has two attributes - <code>isOn</code> and <code>feature</code>.</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Target</span>({ElementType.<span style="color:#309">TYPE</span>,<span style="color:#bbb"> </span>ElementType.<span style="color:#309">METHOD</span>})<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@Retention</span>(RetentionPolicy.<span style="color:#309">RUNTIME</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@Documented</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#99f">@interface</span><span style="color:#bbb"> </span>FeatureToggle<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>String<span style="color:#bbb"> </span><span style="color:#c0f">feature</span>();<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#078;font-weight:bold">boolean</span><span style="color:#bbb"> </span><span style="color:#c0f">expectedToBeOn</span>()<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">default</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">true</span>;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><p>This annotation can be used on a controller method as follows:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@RestController</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@RequestMapping</span>(<span style="color:#c30">&#34;/hello&#34;</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">MessageController</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@RequestMapping</span>(<span style="color:#c30">&#34;&#34;</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@FeatureToggle</span>(feature<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;feature.hello&#34;</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>Map<span style="color:#bbb"> </span><span style="color:#c0f">hello</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>Collections.<span style="color:#309">singletonMap</span>(<span style="color:#c30">&#34;message&#34;</span>,<span style="color:#bbb"> </span><span style="color:#c30">&#34;hello world!&#34;</span>);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><p>The <code>FeatureRepository</code> has to look at all the properties that are available in the applications environment and filter out the ones that start with <code>feature.</code>.</p>
+<pre><code class="language-java">public class FeatureInterceptor implements HandlerInterceptor {
+  private final FeatureRepository featureRepository;
+
+  public FeatureInterceptor(FeatureRepository featureRepository) {
+    this.featureRepository = featureRepository;
+  }
+
+  @Override
+  public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object handler) throws Exception {
+    HandlerMethod handlerMethod = (HandlerMethod) handler;
+    FeatureToggle methodAnnotation = handlerMethod.getMethodAnnotation(FeatureToggle.class);
+    if (methodAnnotation == null) {
+      return true;
+    }
+
+    if(featureRepository.isOn(methodAnnotation.feature()) == null) {
+      return true;
+    }
+
+    if(methodAnnotation.expectedToBeOn() == featureRepository.isOn(methodAnnotation.feature())) {
+      return true;
+    }
+
+    httpServletResponse.setStatus(HttpServletResponse.SC_NOT_FOUND);
+    return false;
+  }
+
+  @Override
+  public void postHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, ModelAndView modelAndView) throws Exception {
+
+  }
+
+  @Override
+  public void afterCompletion(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, Exception e) throws Exception {
+
+  }
+}
+</code></pre>
+<p>This feature interceptor uses the <code>FeatureToggle</code> looks for the annotation, and the looks at a feature repository to see if the state of the feature flag is set to what the annotation expects and if it does not, returns a 404. The annotation has two attributes - <code>isOn</code> and <code>feature</code>.</p>
+<pre><code class="language-java">@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface FeatureToggle {
+  String feature();
+
+  boolean expectedToBeOn() default true;
+}
+</code></pre>
+<p>This annotation can be used on a controller method as follows:</p>
+<pre><code class="language-java">@RestController
+@RequestMapping(&quot;/hello&quot;)
+public class MessageController {
+  @RequestMapping(&quot;&quot;)
+  @FeatureToggle(feature = &quot;feature.hello&quot;)
+  public Map hello() {
+    return Collections.singletonMap(&quot;message&quot;, &quot;hello world!&quot;);
+  }
+}
+</code></pre>
+<p>The <code>FeatureRepository</code> has to look at all the properties that are available in the applications environment and filter out the ones that start with <code>feature.</code>.</p>
 <p>Collecting all the properties available in an environment is <a href="https://stackoverflow.com/questions/23506471/spring-access-all-environment-properties-as-a-map-or-properties-object">surprisingly complex</a>, owing to the number of ways properties can be injected. Based on the approach discussed in that question, we can create a <code>FeatureRepository</code> as follows:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">FeatureRepository</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">static</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">final</span><span style="color:#bbb"> </span>String<span style="color:#bbb"> </span>FEATURE_PREFIX<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;feature.&#34;</span>;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">final</span><span style="color:#bbb"> </span>Environment<span style="color:#bbb"> </span>env;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#c0f">FeatureRepository</span>(Environment<span style="color:#bbb"> </span>env)<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">this</span>.<span style="color:#309">env</span><span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>env;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>Set<span style="color:#555">&lt;</span>String<span style="color:#555">&gt;</span><span style="color:#bbb"> </span><span style="color:#c0f">featureKeys</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>Map<span style="color:#555">&lt;</span>String,<span style="color:#bbb"> </span>Object<span style="color:#555">&gt;</span><span style="color:#bbb"> </span>map<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>HashMap();<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">for</span>(Iterator<span style="color:#bbb"> </span>it<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>((AbstractEnvironment)<span style="color:#bbb"> </span>env).<span style="color:#309">getPropertySources</span>().<span style="color:#309">iterator</span>();<span style="color:#bbb"> </span>it.<span style="color:#309">hasNext</span>();<span style="color:#bbb"> </span>)<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span>PropertySource<span style="color:#bbb"> </span>propertySource<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>(PropertySource)<span style="color:#bbb"> </span>it.<span style="color:#309">next</span>();<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(propertySource<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">instanceof</span><span style="color:#bbb"> </span>MapPropertySource)<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>map.<span style="color:#309">putAll</span>(((MapPropertySource)<span style="color:#bbb"> </span>propertySource).<span style="color:#309">getSource</span>());<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>map.<span style="color:#309">keySet</span>().<span style="color:#309">stream</span>()<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>.<span style="color:#309">filter</span>(k<span style="color:#bbb"> </span><span style="color:#555">-&gt;</span><span style="color:#bbb"> </span>k.<span style="color:#309">startsWith</span>(FEATURE_PREFIX))<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>.<span style="color:#309">collect</span>(Collectors.<span style="color:#309">toSet</span>());<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>Boolean<span style="color:#bbb"> </span><span style="color:#c0f">isOn</span>(String<span style="color:#bbb"> </span>key)<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>allFeatures().<span style="color:#309">get</span>(key);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>Map<span style="color:#555">&lt;</span>String,<span style="color:#bbb"> </span>Boolean<span style="color:#555">&gt;</span><span style="color:#bbb"> </span><span style="color:#c0f">allFeatures</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>featureKeys().<span style="color:#309">stream</span>().<span style="color:#309">collect</span>(Collectors.<span style="color:#309">toMap</span>(k<span style="color:#bbb"> </span><span style="color:#555">-&gt;</span><span style="color:#bbb"> </span>k,<span style="color:#bbb"> </span>k<span style="color:#bbb"> </span><span style="color:#555">-&gt;</span><span style="color:#bbb"> </span>Boolean.<span style="color:#309">parseBoolean</span>(env.<span style="color:#309">getProperty</span>(k))));<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><h3 id="toggling-entire-controllers">Toggling entire controllers</h3>
+<pre><code class="language-java">public class FeatureRepository {
+  private static final String FEATURE_PREFIX = &quot;feature.&quot;;
+  private final Environment env;
+
+  public FeatureRepository(Environment env) {
+    this.env = env;
+  }
+
+  public Set&lt;String&gt; featureKeys() {
+    Map&lt;String, Object&gt; map = new HashMap();
+    for(Iterator it = ((AbstractEnvironment) env).getPropertySources().iterator(); it.hasNext(); ) {
+      PropertySource propertySource = (PropertySource) it.next();
+      if (propertySource instanceof MapPropertySource) {
+        map.putAll(((MapPropertySource) propertySource).getSource());
+      }
+    }
+    return map.keySet().stream()
+        .filter(k -&gt; k.startsWith(FEATURE_PREFIX))
+        .collect(Collectors.toSet());
+  }
+
+  public Boolean isOn(String key) {
+    return allFeatures().get(key);
+  }
+
+  public Map&lt;String, Boolean&gt; allFeatures() {
+    return featureKeys().stream().collect(Collectors.toMap(k -&gt; k, k -&gt; Boolean.parseBoolean(env.getProperty(k))));
+  }
+}
+</code></pre>
+<h3 id="toggling-entire-controllers">Toggling entire controllers</h3>
 <p>Since Spring controllers are wired up as beans, the <code>ConditionalOnProperty</code> annotation can be used to toggle on entire controllers.</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@RestController</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@RequestMapping</span>(<span style="color:#c30">&#34;/foo&#34;</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@ConditionalOnProperty</span>(value<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;feature.foo&#34;</span>,<span style="color:#bbb"> </span>havingValue<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;true&#34;</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">FooController</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@RequestMapping</span>(<span style="color:#c30">&#34;&#34;</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>Map<span style="color:#bbb"> </span><span style="color:#c0f">hello</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>Collections.<span style="color:#309">singletonMap</span>(<span style="color:#c30">&#34;message&#34;</span>,<span style="color:#bbb"> </span><span style="color:#c30">&#34;hello foo!&#34;</span>);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><p>However, now we have two different mechanisms to toggle methods and controllers. It will be nice to consolidate them and doing so will allow us to use the same mechanism for toggling beans. This can be done by annotating <code>FeatureToggle</code> with the <a href="/blog/2015/12/06/implementing-custom-annotations-for-spring-mvc/">meta annotation</a> <code>Conditional</code> that looks up the state of feature toggles using the custom condition <code>FeatureCondition</code>. This will change <code>FeatureToggle</code> to:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Target</span>({ElementType.<span style="color:#309">TYPE</span>,<span style="color:#bbb"> </span>ElementType.<span style="color:#309">METHOD</span>})<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@Retention</span>(RetentionPolicy.<span style="color:#309">RUNTIME</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@Documented</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@Conditional</span>(FeatureCondition.<span style="color:#309">class</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#99f">@interface</span><span style="color:#bbb"> </span>FeatureToggle<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>String<span style="color:#bbb"> </span><span style="color:#c0f">feature</span>();<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#078;font-weight:bold">boolean</span><span style="color:#bbb"> </span><span style="color:#c0f">expectedToBeOn</span>()<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">default</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">true</span>;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><p>The <code>FeatureCondition</code> uses the meta annotation attributes provided to it and the environment to decide the state to be returned:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">FeatureCondition</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">implements</span><span style="color:#bbb"> </span>Condition<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@Override</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">boolean</span><span style="color:#bbb"> </span><span style="color:#c0f">matches</span>(ConditionContext<span style="color:#bbb"> </span>conditionContext,<span style="color:#bbb"> </span>AnnotatedTypeMetadata<span style="color:#bbb"> </span>annotatedTypeMetadata)<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">if</span>(annotatedTypeMetadata.<span style="color:#309">isAnnotated</span>(FeatureToggle.<span style="color:#309">class</span>.<span style="color:#309">getCanonicalName</span>()))<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span>Map<span style="color:#555">&lt;</span>String,<span style="color:#bbb"> </span>Object<span style="color:#555">&gt;</span><span style="color:#bbb"> </span>annotationAttributes<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>annotatedTypeMetadata<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">          </span>.<span style="color:#309">getAnnotationAttributes</span>(FeatureToggle.<span style="color:#309">class</span>.<span style="color:#309">getCanonicalName</span>());<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span>String<span style="color:#bbb"> </span>feature<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>(String)<span style="color:#bbb"> </span>annotationAttributes.<span style="color:#309">get</span>(<span style="color:#c30">&#34;feature&#34;</span>);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span><span style="color:#078;font-weight:bold">boolean</span><span style="color:#bbb"> </span>expectedToBeOn<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>Boolean.<span style="color:#309">parseBoolean</span>(String.<span style="color:#309">valueOf</span>(annotationAttributes.<span style="color:#309">get</span>(<span style="color:#c30">&#34;expectedToBeOn&#34;</span>)));<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span><span style="color:#078;font-weight:bold">boolean</span><span style="color:#bbb"> </span>isOn<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>Boolean.<span style="color:#309">parseBoolean</span>(conditionContext.<span style="color:#309">getEnvironment</span>().<span style="color:#309">getProperty</span>(feature));<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>expectedToBeOn<span style="color:#bbb"> </span><span style="color:#555">==</span><span style="color:#bbb"> </span>isOn;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">true</span>;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><p>Now that we have a unified mechanism to toggle controllers, beans and controller methods, we can use this annotation. The <code>FooController</code> would now look like this:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@RestController</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@RequestMapping</span>(<span style="color:#c30">&#34;/foo&#34;</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@FeatureToggle</span>(feature<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;feature.foo&#34;</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">FooController</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@RequestMapping</span>(<span style="color:#c30">&#34;&#34;</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>Map<span style="color:#bbb"> </span><span style="color:#c0f">hello</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>Collections.<span style="color:#309">singletonMap</span>(<span style="color:#c30">&#34;message&#34;</span>,<span style="color:#bbb"> </span><span style="color:#c30">&#34;hello foo!&#34;</span>);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><p>And our <code>AppConfig</code> will be like this:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Configuration</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">AppConfig</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">extends</span><span style="color:#bbb"> </span>WebMvcConfigurerAdapter<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@Autowired</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>Environment<span style="color:#bbb"> </span>env;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@Bean</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@FeatureToggle</span>(feature<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;feature.redis.session.store&#34;</span>,<span style="color:#bbb"> </span>expectedToBeOn<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">false</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>SessionRepository<span style="color:#bbb"> </span><span style="color:#c0f">mapSessionRepository</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>MapSessionRepository();<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@Bean</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@FeatureToggle</span>(feature<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;feature.redis.session.store&#34;</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>SessionRepository<span style="color:#bbb"> </span><span style="color:#c0f">redisSessionRepository</span>(RedisConnectionFactory<span style="color:#bbb"> </span>factory)<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>RedisOperationsSessionRepository(factory);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@Override</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">addInterceptors</span>(InterceptorRegistry<span style="color:#bbb"> </span>registry)<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>registry.<span style="color:#309">addInterceptor</span>(<span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>FeatureInterceptor(<span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>FeatureRepository(env)));<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">super</span>.<span style="color:#309">addInterceptors</span>(registry);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><p>In the second part of <a href="/series/feature-toggles">this series</a>, we will explore how the feature toggle can be exposed to the front end and how to consume this and use it for toggling features in the Angular components.</p>
+<pre><code class="language-java">@RestController
+@RequestMapping(&quot;/foo&quot;)
+@ConditionalOnProperty(value = &quot;feature.foo&quot;, havingValue = &quot;true&quot;)
+public class FooController {
+  @RequestMapping(&quot;&quot;)
+  public Map hello() {
+    return Collections.singletonMap(&quot;message&quot;, &quot;hello foo!&quot;);
+  }
+}
+</code></pre>
+<p>However, now we have two different mechanisms to toggle methods and controllers. It will be nice to consolidate them and doing so will allow us to use the same mechanism for toggling beans. This can be done by annotating <code>FeatureToggle</code> with the <a href="/blog/2015/12/06/implementing-custom-annotations-for-spring-mvc/">meta annotation</a> <code>Conditional</code> that looks up the state of feature toggles using the custom condition <code>FeatureCondition</code>. This will change <code>FeatureToggle</code> to:</p>
+<pre><code class="language-java">@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Conditional(FeatureCondition.class)
+public @interface FeatureToggle {
+  String feature();
+
+  boolean expectedToBeOn() default true;
+}
+</code></pre>
+<p>The <code>FeatureCondition</code> uses the meta annotation attributes provided to it and the environment to decide the state to be returned:</p>
+<pre><code class="language-java">public class FeatureCondition implements Condition {
+  @Override
+  public boolean matches(ConditionContext conditionContext, AnnotatedTypeMetadata annotatedTypeMetadata) {
+    if(annotatedTypeMetadata.isAnnotated(FeatureToggle.class.getCanonicalName())) {
+      Map&lt;String, Object&gt; annotationAttributes = annotatedTypeMetadata
+          .getAnnotationAttributes(FeatureToggle.class.getCanonicalName());
+      String feature = (String) annotationAttributes.get(&quot;feature&quot;);
+      boolean expectedToBeOn = Boolean.parseBoolean(String.valueOf(annotationAttributes.get(&quot;expectedToBeOn&quot;)));
+      boolean isOn = Boolean.parseBoolean(conditionContext.getEnvironment().getProperty(feature));
+      return expectedToBeOn == isOn;
+    }
+    return true;
+  }
+}
+</code></pre>
+<p>Now that we have a unified mechanism to toggle controllers, beans and controller methods, we can use this annotation. The <code>FooController</code> would now look like this:</p>
+<pre><code class="language-java">@RestController
+@RequestMapping(&quot;/foo&quot;)
+@FeatureToggle(feature = &quot;feature.foo&quot;)
+public class FooController {
+  @RequestMapping(&quot;&quot;)
+  public Map hello() {
+    return Collections.singletonMap(&quot;message&quot;, &quot;hello foo!&quot;);
+  }
+}
+</code></pre>
+<p>And our <code>AppConfig</code> will be like this:</p>
+<pre><code class="language-java">@Configuration
+public class AppConfig extends WebMvcConfigurerAdapter {
+  @Autowired
+  Environment env;
+
+  @Bean
+  @FeatureToggle(feature = &quot;feature.redis.session.store&quot;, expectedToBeOn = false)
+  public SessionRepository mapSessionRepository() {
+    return new MapSessionRepository();
+  }
+
+  @Bean
+  @FeatureToggle(feature = &quot;feature.redis.session.store&quot;)
+  public SessionRepository redisSessionRepository(RedisConnectionFactory factory) {
+    return new RedisOperationsSessionRepository(factory);
+  }
+
+  @Override
+  public void addInterceptors(InterceptorRegistry registry) {
+    registry.addInterceptor(new FeatureInterceptor(new FeatureRepository(env)));
+    super.addInterceptors(registry);
+  }
+}
+</code></pre>
+<p>In the second part of <a href="/series/feature-toggles">this series</a>, we will explore how the feature toggle can be exposed to the front end and how to consume this and use it for toggling features in the Angular components.</p>
 <div class="footnotes" role="doc-endnotes">
 <hr>
 <ol>
@@ -440,7 +450,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2019/08/02/flushing-metrics-in-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Flushing Metrics in Dropwizard Commands</a></li>
+            <li><a href="https://sadique.io/blog/2019/08/02/flushing-metrics-in-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Flushing Metrics in Dropwizard Commands</a></li>
             
             
             
@@ -454,7 +464,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2019/07/28/managing-environment-lifecycles-for-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Managing environment lifecycles for Dropwizard Commands</a></li>
+            <li><a href="https://sadique.io/blog/2019/07/28/managing-environment-lifecycles-for-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Managing environment lifecycles for Dropwizard Commands</a></li>
             
             
             
@@ -488,13 +498,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2019/03/23/understanding-trailing-@-processing-in-sas-input/?utm_source=site&amp;utm_medium=related">Understanding trailing @ processing in SAS input</a></li>
+            <li><a href="https://sadique.io/blog/2019/03/23/understanding-trailing-@-processing-in-sas-input/?utm_source=site&amp;utm_medium=related">Understanding trailing @ processing in SAS input</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2019/03/23/importing-the-sasuser-datasets-in-sas-studio/?utm_source=site&amp;utm_medium=related">Importing the SASUSER datasets in SAS Studio</a></li>
+            <li><a href="https://sadique.io/blog/2019/03/23/importing-the-sasuser-datasets-in-sas-studio/?utm_source=site&amp;utm_medium=related">Importing the SASUSER datasets in SAS Studio</a></li>
             
             
             
@@ -512,7 +522,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2018/06/09/formatting-java-instant-for-resolutions/?utm_source=site&amp;utm_medium=related">Formatting Java Instant for resolutions</a></li>
+            <li><a href="https://sadique.io/blog/2018/06/09/formatting-java-instant-for-resolutions/?utm_source=site&amp;utm_medium=related">Formatting Java Instant for resolutions</a></li>
             
             
             
@@ -526,7 +536,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2018/05/05/freebuilder-plugin-for-intellij/?utm_source=site&amp;utm_medium=related">FreeBuilder plugin for IntelliJ</a></li>
+            <li><a href="https://sadique.io/blog/2018/05/05/freebuilder-plugin-for-intellij/?utm_source=site&amp;utm_medium=related">FreeBuilder plugin for IntelliJ</a></li>
             
             
             
@@ -556,7 +566,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2018/03/23/a-jackson-and-freebuilder-quirk/?utm_source=site&amp;utm_medium=related">A Jackson and FreeBuilder quirk</a></li>
+            <li><a href="https://sadique.io/blog/2018/03/23/a-jackson-and-freebuilder-quirk/?utm_source=site&amp;utm_medium=related">A Jackson and FreeBuilder quirk</a></li>
             
             
             
@@ -594,7 +604,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2017/08/18/uploading-a-standalone-artifact-to-nexus-3/?utm_source=site&amp;utm_medium=related">Uploading a standalone artifact to Nexus 3</a></li>
+            <li><a href="https://sadique.io/blog/2017/08/18/uploading-a-standalone-artifact-to-nexus-3/?utm_source=site&amp;utm_medium=related">Uploading a standalone artifact to Nexus 3</a></li>
             
             
             
@@ -628,7 +638,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/30/implementing-feature-toggles-for-a-spring-boot-application-part-4/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 4</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/30/implementing-feature-toggles-for-a-spring-boot-application-part-4/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 4</a></li>
             
             
             
@@ -650,13 +660,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/29/implementing-feature-toggles-for-a-spring-boot-application-part-3/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 3</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/29/implementing-feature-toggles-for-a-spring-boot-application-part-3/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 3</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/27/implementing-feature-toggles-for-a-spring-boot-application-part-2/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 2</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/27/implementing-feature-toggles-for-a-spring-boot-application-part-2/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 2</a></li>
             
             
             
@@ -694,13 +704,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/11/setting-up-a-secure-etcd-cluster-behind-a-proxy/?utm_source=site&amp;utm_medium=related">Setting up a secure etcd cluster behind a proxy</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/11/setting-up-a-secure-etcd-cluster-behind-a-proxy/?utm_source=site&amp;utm_medium=related">Setting up a secure etcd cluster behind a proxy</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/05/a-very-basic-introduction-to-deploying-a-java-application-using-kubernetes/?utm_source=site&amp;utm_medium=related">A very basic introduction to deploying a Java application using Kubernetes</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/05/a-very-basic-introduction-to-deploying-a-java-application-using-kubernetes/?utm_source=site&amp;utm_medium=related">A very basic introduction to deploying a Java application using Kubernetes</a></li>
             
             
             
@@ -718,7 +728,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/02/handling-deserialization-errors-in-spring-redis-sessions/?utm_source=site&amp;utm_medium=related">Handling Deserialization errors in Spring Redis Sessions</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/02/handling-deserialization-errors-in-spring-redis-sessions/?utm_source=site&amp;utm_medium=related">Handling Deserialization errors in Spring Redis Sessions</a></li>
             
             
             
@@ -732,13 +742,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/21/csrf-protection-with-spring-security-and-angular-js/?utm_source=site&amp;utm_medium=related">CSRF Protection with Spring Security and Angular JS</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/21/csrf-protection-with-spring-security-and-angular-js/?utm_source=site&amp;utm_medium=related">CSRF Protection with Spring Security and Angular JS</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/16/controlling-redis-auto-configuration-for-spring-boot-session/?utm_source=site&amp;utm_medium=related">Controlling Redis auto-configuration for Spring Boot Session</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/16/controlling-redis-auto-configuration-for-spring-boot-session/?utm_source=site&amp;utm_medium=related">Controlling Redis auto-configuration for Spring Boot Session</a></li>
             
             
             
@@ -752,7 +762,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/14/jwt-authentication-with-spring-web-part-5/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 5</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/14/jwt-authentication-with-spring-web-part-5/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 5</a></li>
             
             
             
@@ -770,19 +780,19 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/08/jwt-authentication-with-spring-web-part-4/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 4</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/08/jwt-authentication-with-spring-web-part-4/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 4</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/06/jwt-authentication-with-spring-web-part-3/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 3</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/06/jwt-authentication-with-spring-web-part-3/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 3</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/03/jwt-authentication-with-spring-web-part-2/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 2</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/03/jwt-authentication-with-spring-web-part-2/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 2</a></li>
             
             
             
@@ -792,13 +802,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/03/jwt-authentication-with-spring-web-part-1/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 1</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/03/jwt-authentication-with-spring-web-part-1/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 1</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/06/30/json-logging-for-spring-applications/?utm_source=site&amp;utm_medium=related">JSON logging for Spring applications</a></li>
+            <li><a href="https://sadique.io/blog/2016/06/30/json-logging-for-spring-applications/?utm_source=site&amp;utm_medium=related">JSON logging for Spring applications</a></li>
             
             
             
@@ -808,13 +818,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/06/29/injecting-dependencies-into-a-spring-@configuration/?utm_source=site&amp;utm_medium=related">Injecting dependencies into a Spring @Configuration</a></li>
+            <li><a href="https://sadique.io/blog/2016/06/29/injecting-dependencies-into-a-spring-@configuration/?utm_source=site&amp;utm_medium=related">Injecting dependencies into a Spring @Configuration</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/06/08/filtering-responses-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Filtering responses in Spring MVC</a></li>
+            <li><a href="https://sadique.io/blog/2016/06/08/filtering-responses-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Filtering responses in Spring MVC</a></li>
             
             
             
@@ -856,31 +866,31 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/04/24/deprecating-domain-events-in-axon/?utm_source=site&amp;utm_medium=related">Deprecating domain events in Axon</a></li>
+            <li><a href="https://sadique.io/blog/2016/04/24/deprecating-domain-events-in-axon/?utm_source=site&amp;utm_medium=related">Deprecating domain events in Axon</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/04/20/programmable-exit-codes-for-spring-command-line-applications-2/?utm_source=site&amp;utm_medium=related">Programmable exit codes for spring command line applications - 2</a></li>
+            <li><a href="https://sadique.io/blog/2016/04/20/programmable-exit-codes-for-spring-command-line-applications-2/?utm_source=site&amp;utm_medium=related">Programmable exit codes for spring command line applications - 2</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/04/18/programmable-exit-codes-for-spring-command-line-applications/?utm_source=site&amp;utm_medium=related">Programmable exit codes for Spring command line applications</a></li>
+            <li><a href="https://sadique.io/blog/2016/04/18/programmable-exit-codes-for-spring-command-line-applications/?utm_source=site&amp;utm_medium=related">Programmable exit codes for Spring command line applications</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/01/30/using-custom-arguments-in-spring-mvc-controllers/?utm_source=site&amp;utm_medium=related">Using custom arguments in Spring MVC controllers</a></li>
+            <li><a href="https://sadique.io/blog/2016/01/30/using-custom-arguments-in-spring-mvc-controllers/?utm_source=site&amp;utm_medium=related">Using custom arguments in Spring MVC controllers</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/16/authentication-for-apache-camel-http-components/?utm_source=site&amp;utm_medium=related">Authentication for Apache Camel HTTP components</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/16/authentication-for-apache-camel-http-components/?utm_source=site&amp;utm_medium=related">Authentication for Apache Camel HTTP components</a></li>
             
             
             
@@ -902,31 +912,31 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/15/thoughts-on-open-graph-tags/?utm_source=site&amp;utm_medium=related">Thoughts on Open Graph tags</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/15/thoughts-on-open-graph-tags/?utm_source=site&amp;utm_medium=related">Thoughts on Open Graph tags</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/11/integration-testing-spring-command-line-applications/?utm_source=site&amp;utm_medium=related">Integration testing Spring command line applications</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/11/integration-testing-spring-command-line-applications/?utm_source=site&amp;utm_medium=related">Integration testing Spring command line applications</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/11/integration-testing-challenges-for-non-web-spring-applications/?utm_source=site&amp;utm_medium=related">Integration testing challenges for non-web Spring applications</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/11/integration-testing-challenges-for-non-web-spring-applications/?utm_source=site&amp;utm_medium=related">Integration testing challenges for non-web Spring applications</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/08/how-thinking-of-documentation-as-legislation-helped-me-become-a-better-programmer/?utm_source=site&amp;utm_medium=related">How thinking of Documentation as Legislation helped me become a better programmer</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/08/how-thinking-of-documentation-as-legislation-helped-me-become-a-better-programmer/?utm_source=site&amp;utm_medium=related">How thinking of Documentation as Legislation helped me become a better programmer</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/06/implementing-custom-annotations-for-spring-mvc/?utm_source=site&amp;utm_medium=related">Implementing custom annotations for Spring MVC</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/06/implementing-custom-annotations-for-spring-mvc/?utm_source=site&amp;utm_medium=related">Implementing custom annotations for Spring MVC</a></li>
             
             
             
@@ -940,7 +950,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/05/validating-requestparams-and-pathvariables-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Validating RequestParams and PathVariables in Spring MVC</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/05/validating-requestparams-and-pathvariables-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Validating RequestParams and PathVariables in Spring MVC</a></li>
             
             
             
@@ -954,13 +964,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/11/24/testing-async-responses-using-mockmvc/?utm_source=site&amp;utm_medium=related">Testing async responses using MockMvc</a></li>
+            <li><a href="https://sadique.io/blog/2015/11/24/testing-async-responses-using-mockmvc/?utm_source=site&amp;utm_medium=related">Testing async responses using MockMvc</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/06/09/running-multiple-applications-in-the-same-tomcat-installation/?utm_source=site&amp;utm_medium=related">Running multiple applications in the same Tomcat installation</a></li>
+            <li><a href="https://sadique.io/blog/2015/06/09/running-multiple-applications-in-the-same-tomcat-installation/?utm_source=site&amp;utm_medium=related">Running multiple applications in the same Tomcat installation</a></li>
             
             
             
@@ -990,7 +1000,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/05/22/making-sense-of-cloud-foundry-security-group-declarations/?utm_source=site&amp;utm_medium=related">Making sense of Cloud Foundry security group declarations</a></li>
+            <li><a href="https://sadique.io/blog/2015/05/22/making-sense-of-cloud-foundry-security-group-declarations/?utm_source=site&amp;utm_medium=related">Making sense of Cloud Foundry security group declarations</a></li>
             
             
             
@@ -1000,7 +1010,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/05/21/configuring-cloud-foundry-java-memory-parameters/?utm_source=site&amp;utm_medium=related">Configuring Cloud Foundry Java Memory Parameters</a></li>
+            <li><a href="https://sadique.io/blog/2015/05/21/configuring-cloud-foundry-java-memory-parameters/?utm_source=site&amp;utm_medium=related">Configuring Cloud Foundry Java Memory Parameters</a></li>
             
             
             
@@ -1062,7 +1072,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2014/08/02/importing-the-yelp-dataset-into-mongodb/?utm_source=site&amp;utm_medium=related">Importing the Yelp dataset into MongoDB</a></li>
+            <li><a href="https://sadique.io/blog/2014/08/02/importing-the-yelp-dataset-into-mongodb/?utm_source=site&amp;utm_medium=related">Importing the Yelp dataset into MongoDB</a></li>
             
             
             
@@ -1104,13 +1114,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2014/03/20/clojure-dojo-levenshtein-edit-distance/?utm_source=site&amp;utm_medium=related">Clojure Dojo - Levenshtein edit distance</a></li>
+            <li><a href="https://sadique.io/blog/2014/03/20/clojure-dojo-levenshtein-edit-distance/?utm_source=site&amp;utm_medium=related">Clojure Dojo - Levenshtein edit distance</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2014/02/17/a-simple-jmeter-test-with-login/?utm_source=site&amp;utm_medium=related">A simple JMeter test with login</a></li>
+            <li><a href="https://sadique.io/blog/2014/02/17/a-simple-jmeter-test-with-login/?utm_source=site&amp;utm_medium=related">A simple JMeter test with login</a></li>
             
             
             
@@ -1204,7 +1214,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/10/13/implementing-rate-limiting-in-rails-part-2/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 2</a></li>
+            <li><a href="https://sadique.io/blog/2013/10/13/implementing-rate-limiting-in-rails-part-2/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 2</a></li>
             
             
             
@@ -1226,7 +1236,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/10/12/implementing-rate-limiting-in-rails-part-1/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 1</a></li>
+            <li><a href="https://sadique.io/blog/2013/10/12/implementing-rate-limiting-in-rails-part-1/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 1</a></li>
             
             
             
@@ -1236,7 +1246,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/10/07/python-hack-dynamically-override-an-objects-attribute/?utm_source=site&amp;utm_medium=related">Python Hack - Dynamically override an object&#39;s attribute</a></li>
+            <li><a href="https://sadique.io/blog/2013/10/07/python-hack-dynamically-override-an-objects-attribute/?utm_source=site&amp;utm_medium=related">Python Hack - Dynamically override an object&#39;s attribute</a></li>
             
             
             
@@ -1250,13 +1260,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/10/03/fitting-an-image-in-to-a-canvas-object/?utm_source=site&amp;utm_medium=related">Fitting an Image in to a Canvas object</a></li>
+            <li><a href="https://sadique.io/blog/2013/10/03/fitting-an-image-in-to-a-canvas-object/?utm_source=site&amp;utm_medium=related">Fitting an Image in to a Canvas object</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/10/01/accessing-environment-variables-in-gradle/?utm_source=site&amp;utm_medium=related">Accessing Environment Variables in Gradle</a></li>
+            <li><a href="https://sadique.io/blog/2013/10/01/accessing-environment-variables-in-gradle/?utm_source=site&amp;utm_medium=related">Accessing Environment Variables in Gradle</a></li>
             
             
             
@@ -1286,7 +1296,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/10/01/reading-user-input-in-gradle-scripts/?utm_source=site&amp;utm_medium=related">Reading user input in Gradle scripts</a></li>
+            <li><a href="https://sadique.io/blog/2013/10/01/reading-user-input-in-gradle-scripts/?utm_source=site&amp;utm_medium=related">Reading user input in Gradle scripts</a></li>
             
             
             
@@ -1300,19 +1310,19 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/10/01/ruby-named-capture-groups-and-local-variables/?utm_source=site&amp;utm_medium=related">Ruby, Named Capture Groups and Local Variables</a></li>
+            <li><a href="https://sadique.io/blog/2013/10/01/ruby-named-capture-groups-and-local-variables/?utm_source=site&amp;utm_medium=related">Ruby, Named Capture Groups and Local Variables</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/09/29/named-capture-groups-in-regular-expressions/?utm_source=site&amp;utm_medium=related">Named Capture Groups in Regular Expressions</a></li>
+            <li><a href="https://sadique.io/blog/2013/09/29/named-capture-groups-in-regular-expressions/?utm_source=site&amp;utm_medium=related">Named Capture Groups in Regular Expressions</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/09/26/decomposing-urls-in-python/?utm_source=site&amp;utm_medium=related">Decomposing URLs in Python</a></li>
+            <li><a href="https://sadique.io/blog/2013/09/26/decomposing-urls-in-python/?utm_source=site&amp;utm_medium=related">Decomposing URLs in Python</a></li>
             
             
             
@@ -1354,7 +1364,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/09/15/shared-history-in-bash/?utm_source=site&amp;utm_medium=related">Shared history in Bash</a></li>
+            <li><a href="https://sadique.io/blog/2013/09/15/shared-history-in-bash/?utm_source=site&amp;utm_medium=related">Shared history in Bash</a></li>
             
             
             
@@ -1368,7 +1378,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/09/12/managing-gemsets-in-rbenv/?utm_source=site&amp;utm_medium=related">Managing Gemsets in Rbenv</a></li>
+            <li><a href="https://sadique.io/blog/2013/09/12/managing-gemsets-in-rbenv/?utm_source=site&amp;utm_medium=related">Managing Gemsets in Rbenv</a></li>
             
             
             
@@ -1382,7 +1392,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/09/08/looking-up-compiler-params-used-to-compile-a-ruby-version/?utm_source=site&amp;utm_medium=related">Looking up Compiler params used to compile a Ruby version</a></li>
+            <li><a href="https://sadique.io/blog/2013/09/08/looking-up-compiler-params-used-to-compile-a-ruby-version/?utm_source=site&amp;utm_medium=related">Looking up Compiler params used to compile a Ruby version</a></li>
             
             
             
@@ -1396,7 +1406,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/08/22/navigating-stacktraces-in-emacs/?utm_source=site&amp;utm_medium=related">Navigating Stacktraces in Emacs</a></li>
+            <li><a href="https://sadique.io/blog/2013/08/22/navigating-stacktraces-in-emacs/?utm_source=site&amp;utm_medium=related">Navigating Stacktraces in Emacs</a></li>
             
             
             
@@ -1434,7 +1444,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/08/15/pythons-bool-type/?utm_source=site&amp;utm_medium=related">Python&#39;s bool type</a></li>
+            <li><a href="https://sadique.io/blog/2013/08/15/pythons-bool-type/?utm_source=site&amp;utm_medium=related">Python&#39;s bool type</a></li>
             
             
             
@@ -1524,7 +1534,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/08/02/graph-databases-1-modeling/?utm_source=site&amp;utm_medium=related">Graph databases 1 - Modeling</a></li>
+            <li><a href="https://sadique.io/blog/2013/08/02/graph-databases-1-modeling/?utm_source=site&amp;utm_medium=related">Graph databases 1 - Modeling</a></li>
             
             
             
@@ -1550,7 +1560,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/07/31/validating-json-in-emacs/?utm_source=site&amp;utm_medium=related">Validating JSON in Emacs</a></li>
+            <li><a href="https://sadique.io/blog/2013/07/31/validating-json-in-emacs/?utm_source=site&amp;utm_medium=related">Validating JSON in Emacs</a></li>
             
             
             
@@ -1576,7 +1586,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/04/29/emacs-hack-viewing-git-logs-while-composing-commit-messages/?utm_source=site&amp;utm_medium=related">Emacs hack: Viewing Git logs while composing commit messages</a></li>
+            <li><a href="https://sadique.io/blog/2013/04/29/emacs-hack-viewing-git-logs-while-composing-commit-messages/?utm_source=site&amp;utm_medium=related">Emacs hack: Viewing Git logs while composing commit messages</a></li>
             
             
             
@@ -1590,7 +1600,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/04/14/configure-gits-comment-character/?utm_source=site&amp;utm_medium=related">Configure Git&#39;s comment character</a></li>
+            <li><a href="https://sadique.io/blog/2013/04/14/configure-gits-comment-character/?utm_source=site&amp;utm_medium=related">Configure Git&#39;s comment character</a></li>
             
             
             
@@ -1604,7 +1614,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/04/11/my-experience-working-remotely/?utm_source=site&amp;utm_medium=related">My experience working remotely</a></li>
+            <li><a href="https://sadique.io/blog/2013/04/11/my-experience-working-remotely/?utm_source=site&amp;utm_medium=related">My experience working remotely</a></li>
             
             
             
@@ -1626,7 +1636,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
+            <li><a href="https://sadique.io/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
             
             
             
@@ -1656,7 +1666,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/04/05/javascript-clipboard-access-and-hidden-flash-widgets/?utm_source=site&amp;utm_medium=related">JavaScript, clipboard access and hidden flash widgets</a></li>
+            <li><a href="https://sadique.io/blog/2013/04/05/javascript-clipboard-access-and-hidden-flash-widgets/?utm_source=site&amp;utm_medium=related">JavaScript, clipboard access and hidden flash widgets</a></li>
             
             
             
@@ -1670,7 +1680,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/01/22/reducing-emacs-startup-time-while-committing/?utm_source=site&amp;utm_medium=related">Reducing Emacs startup time while committing</a></li>
+            <li><a href="https://sadique.io/blog/2013/01/22/reducing-emacs-startup-time-while-committing/?utm_source=site&amp;utm_medium=related">Reducing Emacs startup time while committing</a></li>
             
             
             
@@ -1700,7 +1710,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/11/29/my-first-firefox-plugin-getcache-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">My first Firefox plugin: GetCache - View cached version of the current page</a></li>
+            <li><a href="https://sadique.io/blog/2012/11/29/my-first-firefox-plugin-getcache-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">My first Firefox plugin: GetCache - View cached version of the current page</a></li>
             
             
             
@@ -1714,7 +1724,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/11/28/getcache-a-chrome-plugin-to-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">GetCache - A Chrome plugin to view cached version of the current page</a></li>
+            <li><a href="https://sadique.io/blog/2012/11/28/getcache-a-chrome-plugin-to-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">GetCache - A Chrome plugin to view cached version of the current page</a></li>
             
             
             
@@ -1744,7 +1754,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/11/27/on-rest-content-type-google-chrome-and-caching/?utm_source=site&amp;utm_medium=related">On REST, Content-Type, Google Chrome and Caching</a></li>
+            <li><a href="https://sadique.io/blog/2012/11/27/on-rest-content-type-google-chrome-and-caching/?utm_source=site&amp;utm_medium=related">On REST, Content-Type, Google Chrome and Caching</a></li>
             
             
             
@@ -1758,7 +1768,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/11/22/how-browsers-detect-if-you-are-offline/?utm_source=site&amp;utm_medium=related">How Browsers Detect If You Are Offline</a></li>
+            <li><a href="https://sadique.io/blog/2012/11/22/how-browsers-detect-if-you-are-offline/?utm_source=site&amp;utm_medium=related">How Browsers Detect If You Are Offline</a></li>
             
             
             
@@ -1812,7 +1822,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/08/01/d3.js-workshop/?utm_source=site&amp;utm_medium=related">D3.js Workshop</a></li>
+            <li><a href="https://sadique.io/blog/2012/08/01/d3.js-workshop/?utm_source=site&amp;utm_medium=related">D3.js Workshop</a></li>
             
             
             
@@ -1826,7 +1836,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/07/21/visualisation-how-european-clubs-dominate-their-leagues/?utm_source=site&amp;utm_medium=related">Visualisation - How European clubs dominate their leagues</a></li>
+            <li><a href="https://sadique.io/blog/2012/07/21/visualisation-how-european-clubs-dominate-their-leagues/?utm_source=site&amp;utm_medium=related">Visualisation - How European clubs dominate their leagues</a></li>
             
             
             
@@ -1856,7 +1866,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/07/09/understanding-pythons-with-statement/?utm_source=site&amp;utm_medium=related">Understanding Python&#39;s &#34;with&#34; statement</a></li>
+            <li><a href="https://sadique.io/blog/2012/07/09/understanding-pythons-with-statement/?utm_source=site&amp;utm_medium=related">Understanding Python&#39;s &#34;with&#34; statement</a></li>
             
             
             
@@ -1870,13 +1880,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/07/04/heredocs-in-ruby-and-python/?utm_source=site&amp;utm_medium=related">Heredocs in Ruby and Python</a></li>
+            <li><a href="https://sadique.io/blog/2012/07/04/heredocs-in-ruby-and-python/?utm_source=site&amp;utm_medium=related">Heredocs in Ruby and Python</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/06/25/micro-journal-simple-git-backed-journal-in-python/?utm_source=site&amp;utm_medium=related">Micro Journal - simple Git-backed journal in Python</a></li>
+            <li><a href="https://sadique.io/blog/2012/06/25/micro-journal-simple-git-backed-journal-in-python/?utm_source=site&amp;utm_medium=related">Micro Journal - simple Git-backed journal in Python</a></li>
             
             
             
@@ -1914,13 +1924,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/06/24/vodqa-ncr-maintaining-large-test-suites/?utm_source=site&amp;utm_medium=related">VodQA NCR: Maintaining Large Test Suites</a></li>
+            <li><a href="https://sadique.io/blog/2012/06/24/vodqa-ncr-maintaining-large-test-suites/?utm_source=site&amp;utm_medium=related">VodQA NCR: Maintaining Large Test Suites</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/06/06/know-your-tools-dont-shoot-yourself-in-the-foot/?utm_source=site&amp;utm_medium=related">Know Your Tools - Don&#39;t Shoot Yourself in the Foot</a></li>
+            <li><a href="https://sadique.io/blog/2012/06/06/know-your-tools-dont-shoot-yourself-in-the-foot/?utm_source=site&amp;utm_medium=related">Know Your Tools - Don&#39;t Shoot Yourself in the Foot</a></li>
             
             
             
@@ -1966,7 +1976,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/06/05/managing-security-certificates-from-the-console-on-windows-mac-os-x-and-linux/?utm_source=site&amp;utm_medium=related">Managing security certificates from the console - on Windows, Mac OS X and Linux</a></li>
+            <li><a href="https://sadique.io/blog/2012/06/05/managing-security-certificates-from-the-console-on-windows-mac-os-x-and-linux/?utm_source=site&amp;utm_medium=related">Managing security certificates from the console - on Windows, Mac OS X and Linux</a></li>
             
             
             
@@ -2012,7 +2022,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/05/11/indian-and-pakistani-cricketers-who-make-better-debuts/?utm_source=site&amp;utm_medium=related">Indian and Pakistani cricketers - who make better debuts?</a></li>
+            <li><a href="https://sadique.io/blog/2012/05/11/indian-and-pakistani-cricketers-who-make-better-debuts/?utm_source=site&amp;utm_medium=related">Indian and Pakistani cricketers - who make better debuts?</a></li>
             
             
             
@@ -2026,7 +2036,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/05/04/fixing-flyspell-for-emacs-in-mac-os-x/?utm_source=site&amp;utm_medium=related">Fixing Flyspell for Emacs in Mac OS X</a></li>
+            <li><a href="https://sadique.io/blog/2012/05/04/fixing-flyspell-for-emacs-in-mac-os-x/?utm_source=site&amp;utm_medium=related">Fixing Flyspell for Emacs in Mac OS X</a></li>
             
             
             
@@ -2040,7 +2050,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/04/29/finding-un-merged-commits-with-git-cherry/?utm_source=site&amp;utm_medium=related">Finding un-merged commits with git cherry</a></li>
+            <li><a href="https://sadique.io/blog/2012/04/29/finding-un-merged-commits-with-git-cherry/?utm_source=site&amp;utm_medium=related">Finding un-merged commits with git cherry</a></li>
             
             
             
@@ -2070,7 +2080,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/02/03/bullet-proof-jenkins-setup/?utm_source=site&amp;utm_medium=related">Bullet proof Jenkins setup</a></li>
+            <li><a href="https://sadique.io/blog/2012/02/03/bullet-proof-jenkins-setup/?utm_source=site&amp;utm_medium=related">Bullet proof Jenkins setup</a></li>
             
             
             
@@ -2100,7 +2110,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/01/17/why-your-project-should-have-a-getting-started-guide./?utm_source=site&amp;utm_medium=related">Why your project should have a Getting Started guide.</a></li>
+            <li><a href="https://sadique.io/blog/2012/01/17/why-your-project-should-have-a-getting-started-guide./?utm_source=site&amp;utm_medium=related">Why your project should have a Getting Started guide.</a></li>
             
             
             
@@ -2122,7 +2132,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/01/16/debugging-c-sharps-httpwebrequest-100-continue-and-nginx/?utm_source=site&amp;utm_medium=related">Debugging: C Sharp&#39;s HttpWebRequest, 100-Continue and nginx</a></li>
+            <li><a href="https://sadique.io/blog/2012/01/16/debugging-c-sharps-httpwebrequest-100-continue-and-nginx/?utm_source=site&amp;utm_medium=related">Debugging: C Sharp&#39;s HttpWebRequest, 100-Continue and nginx</a></li>
             
             
             
@@ -2148,7 +2158,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2011/05/17/wikipedia-page-hopping/?utm_source=site&amp;utm_medium=related">Wikipedia Page Hopping</a></li>
+            <li><a href="https://sadique.io/blog/2011/05/17/wikipedia-page-hopping/?utm_source=site&amp;utm_medium=related">Wikipedia Page Hopping</a></li>
             
             
             
@@ -2170,13 +2180,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2011/03/24/empathy-log-parser/?utm_source=site&amp;utm_medium=related">Empathy Log Parser</a></li>
+            <li><a href="https://sadique.io/blog/2011/03/24/empathy-log-parser/?utm_source=site&amp;utm_medium=related">Empathy Log Parser</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2011/03/23/binary-signature-art/?utm_source=site&amp;utm_medium=related">Binary Signature Art</a></li>
+            <li><a href="https://sadique.io/blog/2011/03/23/binary-signature-art/?utm_source=site&amp;utm_medium=related">Binary Signature Art</a></li>
             
             
             
@@ -2186,7 +2196,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2010/03/16/java-arrays-in-jruby/?utm_source=site&amp;utm_medium=related">Java Arrays in JRuby</a></li>
+            <li><a href="https://sadique.io/blog/2010/03/16/java-arrays-in-jruby/?utm_source=site&amp;utm_medium=related">Java Arrays in JRuby</a></li>
             
             
             
@@ -2224,7 +2234,11 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2010/01/09/autorun.py-execute-stuff-on-file-change/?utm_source=site&amp;utm_medium=related">Autorun.py - Execute stuff on file change</a></li>
+            <li><a href="https://sadique.io/blog/2010/01/09/autorun.py-execute-stuff-on-file-change/?utm_source=site&amp;utm_medium=related">Autorun.py - Execute stuff on file change</a></li>
+            
+            
+            
+            
             
             
             

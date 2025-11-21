@@ -1,19 +1,19 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Data on {code that works}</title>
-    <link>http://localhost:1313/tags/data/?utm_source=site&amp;utm_medium=feed</link>
+    <link>https://sadique.io/tags/data/?utm_source=site&amp;utm_medium=feed</link>
     <description>Recent content in Data on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Sat, 02 Aug 2014 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1313/tags/data/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    <atom:link href="https://sadique.io/tags/data/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
     
     <item>
       <title>Importing the Yelp dataset into MongoDB</title>
-      <link>http://localhost:1313/blog/2014/08/02/importing-the-yelp-dataset-into-mongodb/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sadique.io/blog/2014/08/02/importing-the-yelp-dataset-into-mongodb/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Sat, 02 Aug 2014 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/blog/2014/08/02/importing-the-yelp-dataset-into-mongodb/?utm_source=site&amp;utm_medium=feed</guid>
+      <guid>https://sadique.io/blog/2014/08/02/importing-the-yelp-dataset-into-mongodb/?utm_source=site&amp;utm_medium=feed</guid>
       <description>&lt;p&gt;Today Yelp announced their dataset challenge &lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt;. The dataset they released includes data from 5 cities (Phoenix, Las Vegas, Madison, Waterloo and Edinburgh) and consists of&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;42,153 businesses&lt;/li&gt;
@@ -27,37 +27,41 @@
 &lt;p&gt;The data is available for public consumption, although Yelp owns any derivative dataset you create from the original &lt;sup id=&#34;fnref:2&#34;&gt;&lt;a href=&#34;#fn:2&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;2&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
 &lt;p&gt;The data is available as files with each line representing a JSON object. Since I am using MongoDB these days to analyze geospatial data, I wanted to convert this into an easy format that I could import into Mongo. Mongo puts a strict constraint on how a location needs to be specified - It expects a location field in a document to be an array in the format &lt;code&gt;[longitude, latitude]&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;With this in mind, the first step is to convert and transform the objects into objects that Mongo can make sense of. The following Ruby script does the job:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;#!/usr/bin/env ruby&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;require&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;json&amp;#34;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;businesses &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;IO&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;readlines(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;yelp.business.json&amp;#34;&lt;/span&gt;)&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;map &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;do&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;line&lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  b &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;JSON&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;parse(line)
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  b&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;location&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; {
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;type&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Point&amp;#34;&lt;/span&gt;,
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;coordinates&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;b&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;longitude&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;, b&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;latitude&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;]]&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  }
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  b
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#360&#34;&gt;IO&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;write &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;businesses.mongo.json&amp;#34;&lt;/span&gt;, businesses&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;to_json
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The next step is to import this data into Mongo using the &lt;code&gt;mongoimport&lt;/code&gt; tool.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;mongoimport --collection businesses --file businesses.mongo.json --jsonArray
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;We need the &lt;code&gt;--jsonArray&lt;/code&gt; parameter because our data is an array.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-ruby&#34;&gt;#!/usr/bin/env ruby
+
+require &amp;quot;json&amp;quot;
+
+businesses = IO.readlines(&amp;quot;yelp.business.json&amp;quot;).map do |line|
+  b = JSON.parse(line)
+  b[&amp;quot;location&amp;quot;] = {
+    &amp;quot;type&amp;quot; =&amp;gt; &amp;quot;Point&amp;quot;,
+    &amp;quot;coordinates&amp;quot; =&amp;gt; [b[&amp;quot;longitude&amp;quot;], b[&amp;quot;latitude&amp;quot;]]
+  }
+  b
+end
+IO.write &amp;quot;businesses.mongo.json&amp;quot;, businesses.to_json
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The next step is to import this data into Mongo using the &lt;code&gt;mongoimport&lt;/code&gt; tool.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;mongoimport --collection businesses --file businesses.mongo.json --jsonArray
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We need the &lt;code&gt;--jsonArray&lt;/code&gt; parameter because our data is an array.&lt;/p&gt;
 &lt;p&gt;Since there are 42153 businesses, it will take some time. On my Macbook Pro, it took around 2 minutes, 10 seconds. Once the import is done, make sure that we have a Geospatial index on the &lt;code&gt;location&lt;/code&gt; field.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;db.businesses.ensureIndex({location&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;2dsphere&amp;#34;&lt;/span&gt;})
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Once the indexing is done, we can use Mongo&amp;rsquo;s Geospatial queries to find interesting things. As an example, here we look up all the restaurants within 1 kilometer distance from downtown Phoenix.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;db.businesses.find({
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  location&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; {
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    $near&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; {
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      $geometry&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; {
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	type&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Point&amp;#34;&lt;/span&gt;,
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	coordinates&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; [&lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;112.0667&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;33.4500&lt;/span&gt;]
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      },
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      $maxDistance&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;1000&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  }
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;})
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Happy hacking.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;db.businesses.ensureIndex({location: &amp;quot;2dsphere&amp;quot;})
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Once the indexing is done, we can use Mongo&amp;rsquo;s Geospatial queries to find interesting things. As an example, here we look up all the restaurants within 1 kilometer distance from downtown Phoenix.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;db.businesses.find({
+  location: {
+    $near: {
+      $geometry: {
+	type: &amp;quot;Point&amp;quot;,
+	coordinates: [-112.0667, 33.4500]
+      },
+      $maxDistance: 1000
+    }
+  }
+})
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Happy hacking.&lt;/p&gt;
 &lt;div class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
 &lt;hr&gt;
 &lt;ol&gt;
@@ -74,12 +78,12 @@
     
     <item>
       <title>Curse of the Community Shield?</title>
-      <link>http://localhost:1313/blog/2012/08/15/curse-of-the-community-shield/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sadique.io/blog/2012/08/15/curse-of-the-community-shield/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Wed, 15 Aug 2012 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/blog/2012/08/15/curse-of-the-community-shield/?utm_source=site&amp;utm_medium=feed</guid>
+      <guid>https://sadique.io/blog/2012/08/15/curse-of-the-community-shield/?utm_source=site&amp;utm_medium=feed</guid>
       <description>&lt;p&gt;Click on the image to see the visualisation:
-&lt;a href=&#34;http://localhost:1313/visualizations/community_shield/index.html&#34;&gt;&lt;img src=&#34;http://localhost:1313/images/community_shield.png&#34; alt=&#34;Community Shield visualisation&#34; title=&#34;Community Shield Visualisation&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;a href=&#34;https://sadique.io/visualizations/community_shield/index.html&#34;&gt;&lt;img src=&#34;https://sadique.io/images/community_shield.png&#34; alt=&#34;Community Shield visualisation&#34; title=&#34;Community Shield Visualisation&#34;&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;h2 id=&#34;context&#34;&gt;Context&lt;/h2&gt;
 &lt;p&gt;The football season in Europe began this weekend with countries hosting
 their equivalents of the &lt;em&gt;Super Cup&lt;/em&gt;. For those confused as to what a
@@ -109,7 +113,7 @@ Super Cup and the team&amp;rsquo;s performance in the subsequent season?&lt;/p&g
 &lt;p&gt;I wanted to see this and decided to create this visualisation. It shows
 teams that won the Community Shield since 1908 and their position in the
 table for the ensuing season.&lt;/p&gt;
-&lt;p&gt;The visualisation is &lt;a href=&#34;http://localhost:1313/visualizations/community_shield/index.html&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;The visualisation is &lt;a href=&#34;https://sadique.io/visualizations/community_shield/index.html&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
 &lt;h2 id=&#34;winners&#34;&gt;Winners&lt;/h2&gt;
 &lt;p&gt;If you observe the visualisation, there are a lot of seasons for which
 there are no winners. These seasons fall in to two sets. The first set
@@ -152,11 +156,11 @@ feedback on this.&lt;/p&gt;</description>
     
     <item>
       <title>Visualisation - How European clubs dominate their leagues</title>
-      <link>http://localhost:1313/blog/2012/07/21/visualisation-how-european-clubs-dominate-their-leagues/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sadique.io/blog/2012/07/21/visualisation-how-european-clubs-dominate-their-leagues/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Sat, 21 Jul 2012 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/blog/2012/07/21/visualisation-how-european-clubs-dominate-their-leagues/?utm_source=site&amp;utm_medium=feed</guid>
-      <description>&lt;p&gt;&lt;em&gt;Click &lt;a href=&#34;http://localhost:1313/visualizations/league_champions/index.html&#34;&gt;here&lt;/a&gt; to see the visualisation.&lt;/em&gt;&lt;/p&gt;
+      <guid>https://sadique.io/blog/2012/07/21/visualisation-how-european-clubs-dominate-their-leagues/?utm_source=site&amp;utm_medium=feed</guid>
+      <description>&lt;p&gt;&lt;em&gt;Click &lt;a href=&#34;https://sadique.io/visualizations/league_champions/index.html&#34;&gt;here&lt;/a&gt; to see the visualisation.&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;This is a visualization showing how various European football clubs have
 dominated their respective national leagues over various time
 periods. The visualization shows data for England, France, Germany,
@@ -220,36 +224,36 @@ to take the data and code and make more awesome visualizations.&lt;/p&gt;
     
     <item>
       <title>XConf 6 - Data, My Heart!</title>
-      <link>http://localhost:1313/blog/2012/07/16/xconf-6-data-my-heart/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sadique.io/blog/2012/07/16/xconf-6-data-my-heart/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Mon, 16 Jul 2012 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/blog/2012/07/16/xconf-6-data-my-heart/?utm_source=site&amp;utm_medium=feed</guid>
+      <guid>https://sadique.io/blog/2012/07/16/xconf-6-data-my-heart/?utm_source=site&amp;utm_medium=feed</guid>
       <description>&lt;p&gt;Last Saturday,  Srijayanth Sridhar (&lt;a href=&#34;https://twitter.com/craftybones&#34;&gt;@craftybones&lt;/a&gt;) and I gave a talk at XConf, ThoughtWorks India&amp;rsquo;s internal conference series.&lt;/p&gt;
 &lt;p&gt;We talked about visualising data, and the various visualisations that one could use to answer questions about the dataset you have. We looked at two particular datasets -  one showing the consumption of juice at the fresh juice counter in office and one about Indian and Pakistani players. We looked at various visualizations like Area charts, Box Plots, Chord Diagrams, Line Charts, Pie Charts, Donut Charts, Small Multiples, Spark Lines, Stack Charts and Treemaps.&lt;/p&gt;
 &lt;p&gt;The talk went well and we got a lot of good feedback. I thought it was an engaging session for the audience because the visualisations we showed revealed a great deal about juice consumption in the office.&lt;/p&gt;
 &lt;p&gt;I am waiting for the video of our talk to be made available. Last time I gave a talk at XConf, I made a lot of stupid mistakes like saying &amp;ldquo;Right&amp;rdquo; a many many times. I believe I did not make the same mistake this time. But I will have to wait and see.&lt;/p&gt;
 &lt;p&gt;Putting together this talk took a lot of effort, the biggest of them being the process of typing out large number of ledgers. We had planned to visualise about 6 months worth of data, but ended up using only 1 month&amp;rsquo;s worth. We learned a lot of things in the process.&lt;/p&gt;
 &lt;p&gt;As usual, Srijayanth did most of the hardwork, while I helped put together the visualisations and the presentation, which incidentally used &lt;a href=&#34;http://imakewebthings.com/deck.js/&#34;&gt;deck.js&lt;/a&gt;. Thanks, man!&lt;/p&gt;
-&lt;p&gt;You can take a look at the presentation &lt;a href=&#34;http://localhost:1313/visualizations/datamyheart/presentation/index.html&#34;&gt;here&lt;/a&gt;. The code for the whole thing can be found &lt;a href=&#34;https://github.com/sdqali/datamyheart&#34;&gt;here&lt;/a&gt; on Github.&lt;/p&gt;</description>
+&lt;p&gt;You can take a look at the presentation &lt;a href=&#34;https://sadique.io/visualizations/datamyheart/presentation/index.html&#34;&gt;here&lt;/a&gt;. The code for the whole thing can be found &lt;a href=&#34;https://github.com/sdqali/datamyheart&#34;&gt;here&lt;/a&gt; on Github.&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Indian and Pakistani cricketers - who make better debuts?</title>
-      <link>http://localhost:1313/blog/2012/05/11/indian-and-pakistani-cricketers-who-make-better-debuts/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sadique.io/blog/2012/05/11/indian-and-pakistani-cricketers-who-make-better-debuts/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Fri, 11 May 2012 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/blog/2012/05/11/indian-and-pakistani-cricketers-who-make-better-debuts/?utm_source=site&amp;utm_medium=feed</guid>
+      <guid>https://sadique.io/blog/2012/05/11/indian-and-pakistani-cricketers-who-make-better-debuts/?utm_source=site&amp;utm_medium=feed</guid>
       <description>&lt;p&gt;Recently a friend and I had an argument about who makes better debuts among Indian and Pakistani cricket players. Now, I am not into cricket. But I do watch the odd matches here and there and am generally aware of what is going on in the game. My stand was that Pakistani players make better debuts compared to Indian players, while my friend was adamant that Indian players make better debuts. My friend is more of a cricket guy than I ever was and he asked me what is the basis of my stand. It was just a gut feel for me and I had to leave it as there was no way for me to prove that my gut feel was correct. But I did want to try, though.&lt;/p&gt;
 &lt;p&gt;I decided to see if I could prove my theory. Luckily, Cricinfo has all this data, although they dont make it easy for you to get it. I wrote some scripts to pull this data and decided to visualise this using the awesome d3 library. In the end, this became more about figuring out d3 than winning the argument, but doing this was fun.&lt;/p&gt;
 &lt;h2 id=&#34;batsmen&#34;&gt;Batsmen&lt;/h2&gt;
-&lt;p&gt;&lt;a href=&#34;http://localhost:1313/visualizations/debuts/batsmen.html&#34;&gt;This scatter-plot&lt;/a&gt; shows debut batting performances by all the test players to have ever played for India and Paskistan (Except those players whose batting averages were not computed). As you would have guessed, the blue bubbles are Indian players and the green ones are Pakistanis. The number of runs scored by the each batsman is on the x-axis and batting average in the debut series is on the y-axis. The size of the bubble is representative of the highest score the player scored in the debut series.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://sadique.io/visualizations/debuts/batsmen.html&#34;&gt;This scatter-plot&lt;/a&gt; shows debut batting performances by all the test players to have ever played for India and Paskistan (Except those players whose batting averages were not computed). As you would have guessed, the blue bubbles are Indian players and the green ones are Pakistanis. The number of runs scored by the each batsman is on the x-axis and batting average in the debut series is on the y-axis. The size of the bubble is representative of the highest score the player scored in the debut series.&lt;/p&gt;
 &lt;p&gt;I learned some interesting things from this graph:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Sunil Gavaskar made an amazing debut. His score card for his debut series in 1971 against the might West Indies of 1970&amp;rsquo;s read like this - Matches: 4, Total Runs: 774, High Score: 220, Batting Average: 154.80, 100s: 4, 50s: 3. That is incredible and adding him to this plot would have totally skewed this plot. So technically, I did not learn about Gavaskar&amp;rsquo;s amazing debut from this plot, but from the process of plotting it. But you get the idea.&lt;/li&gt;
 &lt;li&gt;It looks like Indian batsmen have historically made slightly better debuts. From my not-so-keen-cricket-lover point of view, anybody who scored 150 runs at an average of 40 had a good debut series. (I chose that arbitrarily, but if you are more of a cricket fan than me, you would have better scales to spot a good debut, and you can draw your own conclusions :-)&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id=&#34;bowlers&#34;&gt;Bowlers&lt;/h2&gt;
-&lt;p&gt;&lt;a href=&#34;http://localhost:1313/visualizations/debuts/bowlers.html&#34;&gt;This scatter-plot&lt;/a&gt; shows debut bowling performances by all the test players to have ever played for India and Paskistan (Except those players who took no wickets and hence is not of interest to us). The X-axis shows bowling average and the Y-axis shows number of wickets. The size of the bubble is representative of the number of wickets the bowler had in his best bowling performance in the debut series. Since it is indicative of only the wickets, players with best performances of 2/12 and 2/76 would be shown with bubbles of same size.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://sadique.io/visualizations/debuts/bowlers.html&#34;&gt;This scatter-plot&lt;/a&gt; shows debut bowling performances by all the test players to have ever played for India and Paskistan (Except those players who took no wickets and hence is not of interest to us). The X-axis shows bowling average and the Y-axis shows number of wickets. The size of the bubble is representative of the number of wickets the bowler had in his best bowling performance in the debut series. Since it is indicative of only the wickets, players with best performances of 2/12 and 2/76 would be shown with bubbles of same size.&lt;/p&gt;
 &lt;p&gt;Interesting bits:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Pakistani bowlers make better debuts than Indian bowlers. In the crowd of players with a bowling average of less than 35 and 5 wickets of above, Pakistani players dominate. (Again, disclaimer about arbitrary scales to measure a good performance :-)&lt;/li&gt;

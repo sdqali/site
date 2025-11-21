@@ -1,6 +1,6 @@
 <!DOCTYPE html5>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us" prefix="og: http://ogp.me/ns#">
-  <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <head>
 
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -33,13 +33,13 @@
   <meta name="twitter:creator" content="@sdqali">
   <meta name="twitter:title" content="Fitting an Image in to a Canvas object">
   <meta name="twitter:description" content="I have been playing around with Canvas objects and images for a side project I am doing. One of the first things I had to figure out for this project was how to fit an image of arbitrary height and width on to a Canvas object of arbitrary, but known dimensions while preserving the aspect ratios of the image. This blog post is an explanation of the solution I came up with for this.">
-  <meta name="twitter:image" content="http://localhost:1313///images/threaded-blue-on-black-cropped.jpg">
+  <meta name="twitter:image" content="https://sadique.io///images/threaded-blue-on-black-cropped.jpg">
 
   <meta property="og:title" content="Fitting an Image in to a Canvas object" />
   <meta property="og:description" content="I have been playing around with Canvas objects and images for a side project I am doing. One of the first things I had to figure out for this project was how to fit an image of arbitrary height and width on to a Canvas object of arbitrary, but known dimensions while preserving the aspect ratios of the image. This blog post is an explanation of the solution I came up with for this." itemprop="description"/>
-  <meta property="og:url" content="http://localhost:1313/blog/2013/10/03/fitting-an-image-in-to-a-canvas-object/" />
-  <meta property="og:image" content="http://localhost:1313///images/threaded-blue-on-black-cropped.jpg" />
-  <meta name="hugo:permalink" content="http://localhost:1313/blog/2013/10/03/fitting-an-image-in-to-a-canvas-object/">
+  <meta property="og:url" content="https://sadique.io/blog/2013/10/03/fitting-an-image-in-to-a-canvas-object/" />
+  <meta property="og:image" content="https://sadique.io///images/threaded-blue-on-black-cropped.jpg" />
+  <meta name="hugo:permalink" content="https://sadique.io/blog/2013/10/03/fitting-an-image-in-to-a-canvas-object/">
   <meta name="hugo:filepath" content="content/blog/2013-10-03-fitting-an-image-in-to-a-canvas-object.markdown">
   <body>
     <script>
@@ -93,56 +93,59 @@
           <p>I have been playing around with Canvas objects and images for a side project I am doing. One of the first things I had to figure out for this project was how to fit an image of arbitrary height and width on to a Canvas object of arbitrary, but known dimensions while preserving the aspect ratios of the image. This blog post is an explanation of the solution I came up with for this.</p>
 <h3 id="the-problem">The problem</h3>
 <p>The application has a Canvas object on which it needs to draw arbitrary images. The Canvas&rsquo;s dimensions are set to <strong>450px</strong> by <strong>300px</strong>. The image that needs to be drawn will have unknown aspect ratio. The ideal case will be when the image&rsquo;s aspect ratio is <strong>3:2</strong>, just like the canvas. In this case, there is no need for any adjustments to be made and the image can be drawn like this:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">var</span> canvas <span style="color:#555">=</span> <span style="color:#366">document</span>.getElementById(<span style="color:#c30">&#39;canvas&#39;</span>);
-</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">var</span> context <span style="color:#555">=</span> canvas.getContext(<span style="color:#c30">&#39;2d&#39;</span>);
-</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">var</span> imageObj <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">new</span> Image();
-</span></span><span style="display:flex;"><span>imageObj.onload <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">function</span>() {
-</span></span><span style="display:flex;"><span>	context.drawImage(imageObj, <span style="color:#f60">0</span>, <span style="color:#f60">0</span>, canvas.width, canvas.height);
-</span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><p>But fitting images with aspect ratios different from the Canvas can be a little tricky. The fundamental problem here is that when aspect ratio is different, there is only one pair of edges-either vertical or horizontal-that can be fitted on to the canvas. The image will have to be placed in the center along the other axis. The following diagram illustrates this.</p>
+<pre><code class="language-javascript">var canvas = document.getElementById('canvas');
+var context = canvas.getContext('2d');
+var imageObj = new Image();
+imageObj.onload = function() {
+	context.drawImage(imageObj, 0, 0, canvas.width, canvas.height);
+}
+</code></pre>
+<p>But fitting images with aspect ratios different from the Canvas can be a little tricky. The fundamental problem here is that when aspect ratio is different, there is only one pair of edges-either vertical or horizontal-that can be fitted on to the canvas. The image will have to be placed in the center along the other axis. The following diagram illustrates this.</p>
 <p><img src="/images/canvas_fitting.png" alt="Canvas fitting" title="Canvas fitting"></p>
 <p>Since fitting depends on the aspect ratio, the code should take it into consideration. The following code compares the ratios and chooses to fit the image horizontally or vertically.</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">var</span> canvas <span style="color:#555">=</span> <span style="color:#366">document</span>.getElementById(<span style="color:#c30">&#39;canvas&#39;</span>);
-</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">var</span> context <span style="color:#555">=</span> canvas.getContext(<span style="color:#c30">&#39;2d&#39;</span>);
-</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">var</span> imageObj <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">new</span> Image();
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">var</span> fitImageOn <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">function</span>(canvas, imageObj) {
-</span></span><span style="display:flex;"><span>	<span style="color:#069;font-weight:bold">var</span> imageAspectRatio <span style="color:#555">=</span> imageObj.width <span style="color:#555">/</span> imageObj.height;
-</span></span><span style="display:flex;"><span>	<span style="color:#069;font-weight:bold">var</span> canvasAspectRatio <span style="color:#555">=</span> canvas.width <span style="color:#555">/</span> canvas.height;
-</span></span><span style="display:flex;"><span>	<span style="color:#069;font-weight:bold">var</span> renderableHeight, renderableWidth, xStart, yStart;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#09f;font-style:italic">// If image&#39;s aspect ratio is less than canvas&#39;s we fit on height
-</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"></span>	<span style="color:#09f;font-style:italic">// and place the image centrally along width
-</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"></span>	<span style="color:#069;font-weight:bold">if</span>(imageAspectRatio <span style="color:#555">&lt;</span> canvasAspectRatio) {
-</span></span><span style="display:flex;"><span>		renderableHeight <span style="color:#555">=</span> canvas.height;
-</span></span><span style="display:flex;"><span>		renderableWidth <span style="color:#555">=</span> imageObj.width <span style="color:#555">*</span> (renderableHeight <span style="color:#555">/</span> imageObj.height);
-</span></span><span style="display:flex;"><span>		xStart <span style="color:#555">=</span> (canvas.width <span style="color:#555">-</span> renderableWidth) <span style="color:#555">/</span> <span style="color:#f60">2</span>;
-</span></span><span style="display:flex;"><span>		yStart <span style="color:#555">=</span> <span style="color:#f60">0</span>;
-</span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#09f;font-style:italic">// If image&#39;s aspect ratio is greater than canvas&#39;s we fit on width
-</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"></span>	<span style="color:#09f;font-style:italic">// and place the image centrally along height
-</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"></span>	<span style="color:#069;font-weight:bold">else</span> <span style="color:#069;font-weight:bold">if</span>(imageAspectRatio <span style="color:#555">&gt;</span> canvasAspectRatio) {
-</span></span><span style="display:flex;"><span>		renderableWidth <span style="color:#555">=</span> canvas.width
-</span></span><span style="display:flex;"><span>		renderableHeight <span style="color:#555">=</span> imageObj.height <span style="color:#555">*</span> (renderableWidth <span style="color:#555">/</span> imageObj.width);
-</span></span><span style="display:flex;"><span>		xStart <span style="color:#555">=</span> <span style="color:#f60">0</span>;
-</span></span><span style="display:flex;"><span>		yStart <span style="color:#555">=</span> (canvas.height <span style="color:#555">-</span> renderableHeight) <span style="color:#555">/</span> <span style="color:#f60">2</span>;
-</span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#09f;font-style:italic">// Happy path - keep aspect ratio
-</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"></span>	<span style="color:#069;font-weight:bold">else</span> {
-</span></span><span style="display:flex;"><span>		renderableHeight <span style="color:#555">=</span> canvas.height;
-</span></span><span style="display:flex;"><span>		renderableWidth <span style="color:#555">=</span> canvas.width;
-</span></span><span style="display:flex;"><span>		xStart <span style="color:#555">=</span> <span style="color:#f60">0</span>;
-</span></span><span style="display:flex;"><span>		yStart <span style="color:#555">=</span> <span style="color:#f60">0</span>;
-</span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	context.drawImage(imageObj, xStart, yStart, renderableWidth, renderableHeight);
-</span></span><span style="display:flex;"><span>};
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>imageObj.onload <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">function</span>() {
-</span></span><span style="display:flex;"><span>	fitImageOn(canvas, imageObj)
-</span></span><span style="display:flex;"><span>};
-</span></span></code></pre></div><p>A demo of this code in action can be found <a href="/demos/canvas_fitting.html">here</a>.</p>
+<pre><code class="language-javascript">var canvas = document.getElementById('canvas');
+var context = canvas.getContext('2d');
+var imageObj = new Image();
+
+var fitImageOn = function(canvas, imageObj) {
+	var imageAspectRatio = imageObj.width / imageObj.height;
+	var canvasAspectRatio = canvas.width / canvas.height;
+	var renderableHeight, renderableWidth, xStart, yStart;
+
+	// If image's aspect ratio is less than canvas's we fit on height
+	// and place the image centrally along width
+	if(imageAspectRatio &lt; canvasAspectRatio) {
+		renderableHeight = canvas.height;
+		renderableWidth = imageObj.width * (renderableHeight / imageObj.height);
+		xStart = (canvas.width - renderableWidth) / 2;
+		yStart = 0;
+	}
+
+	// If image's aspect ratio is greater than canvas's we fit on width
+	// and place the image centrally along height
+	else if(imageAspectRatio &gt; canvasAspectRatio) {
+		renderableWidth = canvas.width
+		renderableHeight = imageObj.height * (renderableWidth / imageObj.width);
+		xStart = 0;
+		yStart = (canvas.height - renderableHeight) / 2;
+	}
+
+	// Happy path - keep aspect ratio
+	else {
+		renderableHeight = canvas.height;
+		renderableWidth = canvas.width;
+		xStart = 0;
+		yStart = 0;
+	}
+	context.drawImage(imageObj, xStart, yStart, renderableWidth, renderableHeight);
+};
+
+imageObj.onload = function() {
+	fitImageOn(canvas, imageObj)
+};
+
+</code></pre>
+<p>A demo of this code in action can be found <a href="/demos/canvas_fitting.html">here</a>.</p>
 
         </div>
         <aside id="gh-comments-list">
@@ -461,7 +464,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/30/implementing-feature-toggles-for-a-spring-boot-application-part-4/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 4</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/30/implementing-feature-toggles-for-a-spring-boot-application-part-4/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 4</a></li>
             
             
             
@@ -483,19 +486,19 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/29/implementing-feature-toggles-for-a-spring-boot-application-part-3/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 3</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/29/implementing-feature-toggles-for-a-spring-boot-application-part-3/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 3</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/27/implementing-feature-toggles-for-a-spring-boot-application-part-2/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 2</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/27/implementing-feature-toggles-for-a-spring-boot-application-part-2/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 2</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/22/implementing-feature-toggles-for-a-spring-boot-application-part-1/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 1</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/22/implementing-feature-toggles-for-a-spring-boot-application-part-1/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 1</a></li>
             
             
             
@@ -785,7 +788,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2014/08/08/disputed-territories-and-merging-shapes-and-features/?utm_source=site&amp;utm_medium=related">Disputed territories and merging shapes and features</a></li>
+            <li><a href="https://sadique.io/blog/2014/08/08/disputed-territories-and-merging-shapes-and-features/?utm_source=site&amp;utm_medium=related">Disputed territories and merging shapes and features</a></li>
             
             
             
@@ -831,7 +834,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2014/08/03/a-list-of-gis-tools/?utm_source=site&amp;utm_medium=related">A list of GIS tools</a></li>
+            <li><a href="https://sadique.io/blog/2014/08/03/a-list-of-gis-tools/?utm_source=site&amp;utm_medium=related">A list of GIS tools</a></li>
             
             
             
@@ -845,7 +848,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2014/08/02/importing-the-yelp-dataset-into-mongodb/?utm_source=site&amp;utm_medium=related">Importing the Yelp dataset into MongoDB</a></li>
+            <li><a href="https://sadique.io/blog/2014/08/02/importing-the-yelp-dataset-into-mongodb/?utm_source=site&amp;utm_medium=related">Importing the Yelp dataset into MongoDB</a></li>
             
             
             
@@ -887,13 +890,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2014/03/20/clojure-dojo-levenshtein-edit-distance/?utm_source=site&amp;utm_medium=related">Clojure Dojo - Levenshtein edit distance</a></li>
+            <li><a href="https://sadique.io/blog/2014/03/20/clojure-dojo-levenshtein-edit-distance/?utm_source=site&amp;utm_medium=related">Clojure Dojo - Levenshtein edit distance</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2014/02/17/a-simple-jmeter-test-with-login/?utm_source=site&amp;utm_medium=related">A simple JMeter test with login</a></li>
+            <li><a href="https://sadique.io/blog/2014/02/17/a-simple-jmeter-test-with-login/?utm_source=site&amp;utm_medium=related">A simple JMeter test with login</a></li>
             
             
             
@@ -987,7 +990,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/10/13/implementing-rate-limiting-in-rails-part-2/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 2</a></li>
+            <li><a href="https://sadique.io/blog/2013/10/13/implementing-rate-limiting-in-rails-part-2/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 2</a></li>
             
             
             
@@ -1009,7 +1012,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/10/12/implementing-rate-limiting-in-rails-part-1/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 1</a></li>
+            <li><a href="https://sadique.io/blog/2013/10/12/implementing-rate-limiting-in-rails-part-1/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 1</a></li>
             
             
             
@@ -1019,7 +1022,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/10/07/python-hack-dynamically-override-an-objects-attribute/?utm_source=site&amp;utm_medium=related">Python Hack - Dynamically override an object&#39;s attribute</a></li>
+            <li><a href="https://sadique.io/blog/2013/10/07/python-hack-dynamically-override-an-objects-attribute/?utm_source=site&amp;utm_medium=related">Python Hack - Dynamically override an object&#39;s attribute</a></li>
             
             
             
@@ -1037,7 +1040,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/10/01/accessing-environment-variables-in-gradle/?utm_source=site&amp;utm_medium=related">Accessing Environment Variables in Gradle</a></li>
+            <li><a href="https://sadique.io/blog/2013/10/01/accessing-environment-variables-in-gradle/?utm_source=site&amp;utm_medium=related">Accessing Environment Variables in Gradle</a></li>
             
             
             
@@ -1067,7 +1070,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/10/01/reading-user-input-in-gradle-scripts/?utm_source=site&amp;utm_medium=related">Reading user input in Gradle scripts</a></li>
+            <li><a href="https://sadique.io/blog/2013/10/01/reading-user-input-in-gradle-scripts/?utm_source=site&amp;utm_medium=related">Reading user input in Gradle scripts</a></li>
             
             
             
@@ -1081,19 +1084,19 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/10/01/ruby-named-capture-groups-and-local-variables/?utm_source=site&amp;utm_medium=related">Ruby, Named Capture Groups and Local Variables</a></li>
+            <li><a href="https://sadique.io/blog/2013/10/01/ruby-named-capture-groups-and-local-variables/?utm_source=site&amp;utm_medium=related">Ruby, Named Capture Groups and Local Variables</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/09/29/named-capture-groups-in-regular-expressions/?utm_source=site&amp;utm_medium=related">Named Capture Groups in Regular Expressions</a></li>
+            <li><a href="https://sadique.io/blog/2013/09/29/named-capture-groups-in-regular-expressions/?utm_source=site&amp;utm_medium=related">Named Capture Groups in Regular Expressions</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/09/26/decomposing-urls-in-python/?utm_source=site&amp;utm_medium=related">Decomposing URLs in Python</a></li>
+            <li><a href="https://sadique.io/blog/2013/09/26/decomposing-urls-in-python/?utm_source=site&amp;utm_medium=related">Decomposing URLs in Python</a></li>
             
             
             
@@ -1135,7 +1138,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/09/15/shared-history-in-bash/?utm_source=site&amp;utm_medium=related">Shared history in Bash</a></li>
+            <li><a href="https://sadique.io/blog/2013/09/15/shared-history-in-bash/?utm_source=site&amp;utm_medium=related">Shared history in Bash</a></li>
             
             
             
@@ -1149,7 +1152,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/09/12/managing-gemsets-in-rbenv/?utm_source=site&amp;utm_medium=related">Managing Gemsets in Rbenv</a></li>
+            <li><a href="https://sadique.io/blog/2013/09/12/managing-gemsets-in-rbenv/?utm_source=site&amp;utm_medium=related">Managing Gemsets in Rbenv</a></li>
             
             
             
@@ -1163,7 +1166,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/09/08/looking-up-compiler-params-used-to-compile-a-ruby-version/?utm_source=site&amp;utm_medium=related">Looking up Compiler params used to compile a Ruby version</a></li>
+            <li><a href="https://sadique.io/blog/2013/09/08/looking-up-compiler-params-used-to-compile-a-ruby-version/?utm_source=site&amp;utm_medium=related">Looking up Compiler params used to compile a Ruby version</a></li>
             
             
             
@@ -1177,7 +1180,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/08/22/navigating-stacktraces-in-emacs/?utm_source=site&amp;utm_medium=related">Navigating Stacktraces in Emacs</a></li>
+            <li><a href="https://sadique.io/blog/2013/08/22/navigating-stacktraces-in-emacs/?utm_source=site&amp;utm_medium=related">Navigating Stacktraces in Emacs</a></li>
             
             
             
@@ -1215,7 +1218,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/08/15/pythons-bool-type/?utm_source=site&amp;utm_medium=related">Python&#39;s bool type</a></li>
+            <li><a href="https://sadique.io/blog/2013/08/15/pythons-bool-type/?utm_source=site&amp;utm_medium=related">Python&#39;s bool type</a></li>
             
             
             
@@ -1305,7 +1308,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/08/02/graph-databases-1-modeling/?utm_source=site&amp;utm_medium=related">Graph databases 1 - Modeling</a></li>
+            <li><a href="https://sadique.io/blog/2013/08/02/graph-databases-1-modeling/?utm_source=site&amp;utm_medium=related">Graph databases 1 - Modeling</a></li>
             
             
             
@@ -1331,7 +1334,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/07/31/validating-json-in-emacs/?utm_source=site&amp;utm_medium=related">Validating JSON in Emacs</a></li>
+            <li><a href="https://sadique.io/blog/2013/07/31/validating-json-in-emacs/?utm_source=site&amp;utm_medium=related">Validating JSON in Emacs</a></li>
             
             
             
@@ -1357,7 +1360,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/04/29/emacs-hack-viewing-git-logs-while-composing-commit-messages/?utm_source=site&amp;utm_medium=related">Emacs hack: Viewing Git logs while composing commit messages</a></li>
+            <li><a href="https://sadique.io/blog/2013/04/29/emacs-hack-viewing-git-logs-while-composing-commit-messages/?utm_source=site&amp;utm_medium=related">Emacs hack: Viewing Git logs while composing commit messages</a></li>
             
             
             
@@ -1371,7 +1374,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/04/14/configure-gits-comment-character/?utm_source=site&amp;utm_medium=related">Configure Git&#39;s comment character</a></li>
+            <li><a href="https://sadique.io/blog/2013/04/14/configure-gits-comment-character/?utm_source=site&amp;utm_medium=related">Configure Git&#39;s comment character</a></li>
             
             
             
@@ -1405,7 +1408,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
+            <li><a href="https://sadique.io/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
             
             
             
@@ -1435,7 +1438,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/04/05/javascript-clipboard-access-and-hidden-flash-widgets/?utm_source=site&amp;utm_medium=related">JavaScript, clipboard access and hidden flash widgets</a></li>
+            <li><a href="https://sadique.io/blog/2013/04/05/javascript-clipboard-access-and-hidden-flash-widgets/?utm_source=site&amp;utm_medium=related">JavaScript, clipboard access and hidden flash widgets</a></li>
             
             
             
@@ -1449,7 +1452,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/01/22/reducing-emacs-startup-time-while-committing/?utm_source=site&amp;utm_medium=related">Reducing Emacs startup time while committing</a></li>
+            <li><a href="https://sadique.io/blog/2013/01/22/reducing-emacs-startup-time-while-committing/?utm_source=site&amp;utm_medium=related">Reducing Emacs startup time while committing</a></li>
             
             
             
@@ -1479,7 +1482,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/11/29/my-first-firefox-plugin-getcache-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">My first Firefox plugin: GetCache - View cached version of the current page</a></li>
+            <li><a href="https://sadique.io/blog/2012/11/29/my-first-firefox-plugin-getcache-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">My first Firefox plugin: GetCache - View cached version of the current page</a></li>
             
             
             
@@ -1493,7 +1496,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/11/28/getcache-a-chrome-plugin-to-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">GetCache - A Chrome plugin to view cached version of the current page</a></li>
+            <li><a href="https://sadique.io/blog/2012/11/28/getcache-a-chrome-plugin-to-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">GetCache - A Chrome plugin to view cached version of the current page</a></li>
             
             
             
@@ -1523,7 +1526,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/11/27/on-rest-content-type-google-chrome-and-caching/?utm_source=site&amp;utm_medium=related">On REST, Content-Type, Google Chrome and Caching</a></li>
+            <li><a href="https://sadique.io/blog/2012/11/27/on-rest-content-type-google-chrome-and-caching/?utm_source=site&amp;utm_medium=related">On REST, Content-Type, Google Chrome and Caching</a></li>
             
             
             
@@ -1537,7 +1540,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/11/22/how-browsers-detect-if-you-are-offline/?utm_source=site&amp;utm_medium=related">How Browsers Detect If You Are Offline</a></li>
+            <li><a href="https://sadique.io/blog/2012/11/22/how-browsers-detect-if-you-are-offline/?utm_source=site&amp;utm_medium=related">How Browsers Detect If You Are Offline</a></li>
             
             
             
@@ -1591,7 +1594,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/08/01/d3.js-workshop/?utm_source=site&amp;utm_medium=related">D3.js Workshop</a></li>
+            <li><a href="https://sadique.io/blog/2012/08/01/d3.js-workshop/?utm_source=site&amp;utm_medium=related">D3.js Workshop</a></li>
             
             
             
@@ -1605,7 +1608,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/07/21/visualisation-how-european-clubs-dominate-their-leagues/?utm_source=site&amp;utm_medium=related">Visualisation - How European clubs dominate their leagues</a></li>
+            <li><a href="https://sadique.io/blog/2012/07/21/visualisation-how-european-clubs-dominate-their-leagues/?utm_source=site&amp;utm_medium=related">Visualisation - How European clubs dominate their leagues</a></li>
             
             
             
@@ -1631,13 +1634,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/07/16/xconf-6-data-my-heart/?utm_source=site&amp;utm_medium=related">XConf 6 - Data, My Heart!</a></li>
+            <li><a href="https://sadique.io/blog/2012/07/16/xconf-6-data-my-heart/?utm_source=site&amp;utm_medium=related">XConf 6 - Data, My Heart!</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/07/09/understanding-pythons-with-statement/?utm_source=site&amp;utm_medium=related">Understanding Python&#39;s &#34;with&#34; statement</a></li>
+            <li><a href="https://sadique.io/blog/2012/07/09/understanding-pythons-with-statement/?utm_source=site&amp;utm_medium=related">Understanding Python&#39;s &#34;with&#34; statement</a></li>
             
             
             
@@ -1651,13 +1654,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/07/04/heredocs-in-ruby-and-python/?utm_source=site&amp;utm_medium=related">Heredocs in Ruby and Python</a></li>
+            <li><a href="https://sadique.io/blog/2012/07/04/heredocs-in-ruby-and-python/?utm_source=site&amp;utm_medium=related">Heredocs in Ruby and Python</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/06/25/micro-journal-simple-git-backed-journal-in-python/?utm_source=site&amp;utm_medium=related">Micro Journal - simple Git-backed journal in Python</a></li>
+            <li><a href="https://sadique.io/blog/2012/06/25/micro-journal-simple-git-backed-journal-in-python/?utm_source=site&amp;utm_medium=related">Micro Journal - simple Git-backed journal in Python</a></li>
             
             
             
@@ -1695,13 +1698,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/06/24/vodqa-ncr-maintaining-large-test-suites/?utm_source=site&amp;utm_medium=related">VodQA NCR: Maintaining Large Test Suites</a></li>
+            <li><a href="https://sadique.io/blog/2012/06/24/vodqa-ncr-maintaining-large-test-suites/?utm_source=site&amp;utm_medium=related">VodQA NCR: Maintaining Large Test Suites</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/06/06/know-your-tools-dont-shoot-yourself-in-the-foot/?utm_source=site&amp;utm_medium=related">Know Your Tools - Don&#39;t Shoot Yourself in the Foot</a></li>
+            <li><a href="https://sadique.io/blog/2012/06/06/know-your-tools-dont-shoot-yourself-in-the-foot/?utm_source=site&amp;utm_medium=related">Know Your Tools - Don&#39;t Shoot Yourself in the Foot</a></li>
             
             
             
@@ -1747,7 +1750,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/06/05/managing-security-certificates-from-the-console-on-windows-mac-os-x-and-linux/?utm_source=site&amp;utm_medium=related">Managing security certificates from the console - on Windows, Mac OS X and Linux</a></li>
+            <li><a href="https://sadique.io/blog/2012/06/05/managing-security-certificates-from-the-console-on-windows-mac-os-x-and-linux/?utm_source=site&amp;utm_medium=related">Managing security certificates from the console - on Windows, Mac OS X and Linux</a></li>
             
             
             
@@ -1793,7 +1796,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/05/11/indian-and-pakistani-cricketers-who-make-better-debuts/?utm_source=site&amp;utm_medium=related">Indian and Pakistani cricketers - who make better debuts?</a></li>
+            <li><a href="https://sadique.io/blog/2012/05/11/indian-and-pakistani-cricketers-who-make-better-debuts/?utm_source=site&amp;utm_medium=related">Indian and Pakistani cricketers - who make better debuts?</a></li>
             
             
             
@@ -1819,7 +1822,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/04/29/finding-un-merged-commits-with-git-cherry/?utm_source=site&amp;utm_medium=related">Finding un-merged commits with git cherry</a></li>
+            <li><a href="https://sadique.io/blog/2012/04/29/finding-un-merged-commits-with-git-cherry/?utm_source=site&amp;utm_medium=related">Finding un-merged commits with git cherry</a></li>
             
             
             
@@ -1849,7 +1852,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/02/03/bullet-proof-jenkins-setup/?utm_source=site&amp;utm_medium=related">Bullet proof Jenkins setup</a></li>
+            <li><a href="https://sadique.io/blog/2012/02/03/bullet-proof-jenkins-setup/?utm_source=site&amp;utm_medium=related">Bullet proof Jenkins setup</a></li>
             
             
             
@@ -1879,7 +1882,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/01/17/why-your-project-should-have-a-getting-started-guide./?utm_source=site&amp;utm_medium=related">Why your project should have a Getting Started guide.</a></li>
+            <li><a href="https://sadique.io/blog/2012/01/17/why-your-project-should-have-a-getting-started-guide./?utm_source=site&amp;utm_medium=related">Why your project should have a Getting Started guide.</a></li>
             
             
             
@@ -1901,7 +1904,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/01/16/debugging-c-sharps-httpwebrequest-100-continue-and-nginx/?utm_source=site&amp;utm_medium=related">Debugging: C Sharp&#39;s HttpWebRequest, 100-Continue and nginx</a></li>
+            <li><a href="https://sadique.io/blog/2012/01/16/debugging-c-sharps-httpwebrequest-100-continue-and-nginx/?utm_source=site&amp;utm_medium=related">Debugging: C Sharp&#39;s HttpWebRequest, 100-Continue and nginx</a></li>
             
             
             
@@ -1927,7 +1930,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2011/05/17/wikipedia-page-hopping/?utm_source=site&amp;utm_medium=related">Wikipedia Page Hopping</a></li>
+            <li><a href="https://sadique.io/blog/2011/05/17/wikipedia-page-hopping/?utm_source=site&amp;utm_medium=related">Wikipedia Page Hopping</a></li>
             
             
             
@@ -1949,13 +1952,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2011/03/24/empathy-log-parser/?utm_source=site&amp;utm_medium=related">Empathy Log Parser</a></li>
+            <li><a href="https://sadique.io/blog/2011/03/24/empathy-log-parser/?utm_source=site&amp;utm_medium=related">Empathy Log Parser</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2011/03/23/binary-signature-art/?utm_source=site&amp;utm_medium=related">Binary Signature Art</a></li>
+            <li><a href="https://sadique.io/blog/2011/03/23/binary-signature-art/?utm_source=site&amp;utm_medium=related">Binary Signature Art</a></li>
             
             
             
@@ -1965,7 +1968,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2010/03/16/java-arrays-in-jruby/?utm_source=site&amp;utm_medium=related">Java Arrays in JRuby</a></li>
+            <li><a href="https://sadique.io/blog/2010/03/16/java-arrays-in-jruby/?utm_source=site&amp;utm_medium=related">Java Arrays in JRuby</a></li>
             
             
             
@@ -2003,7 +2006,11 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2010/01/09/autorun.py-execute-stuff-on-file-change/?utm_source=site&amp;utm_medium=related">Autorun.py - Execute stuff on file change</a></li>
+            <li><a href="https://sadique.io/blog/2010/01/09/autorun.py-execute-stuff-on-file-change/?utm_source=site&amp;utm_medium=related">Autorun.py - Execute stuff on file change</a></li>
+            
+            
+            
+            
             
             
             

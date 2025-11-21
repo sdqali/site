@@ -1,34 +1,36 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Json on {code that works}</title>
-    <link>http://localhost:1313/categories/json/?utm_source=site&amp;utm_medium=feed</link>
+    <link>https://sadique.io/categories/json/?utm_source=site&amp;utm_medium=feed</link>
     <description>Recent content in Json on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Wed, 31 Jul 2013 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1313/categories/json/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    <atom:link href="https://sadique.io/categories/json/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
     
     <item>
       <title>Validating JSON in Emacs</title>
-      <link>http://localhost:1313/blog/2013/07/31/validating-json-in-emacs/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sadique.io/blog/2013/07/31/validating-json-in-emacs/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Wed, 31 Jul 2013 00:00:00 +0000</pubDate>
       
-      <guid>http://localhost:1313/blog/2013/07/31/validating-json-in-emacs/?utm_source=site&amp;utm_medium=feed</guid>
+      <guid>https://sadique.io/blog/2013/07/31/validating-json-in-emacs/?utm_source=site&amp;utm_medium=feed</guid>
       <description>&lt;meta content=&#34;validate&#34; name=&#34;keywords&#34;&gt;
 At work, I have to deal with Amazon CloudFormation [^1] templates a fair bit. These templates are JSON files. More and more members of our team are moving away from TextMate to Emacs which makes me really happy. We would like to validate these CloudFormation templates in Emacs. Today we set this up and I hope this turns out to be of help to some one else trying to do the same.
 &lt;ul&gt;
 &lt;li&gt;Grab jsonlint. It is a command line utility that validates JSON. There seems to be two flavors of jsonlint available. A pure JavaScript implementation &lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; that runs on the Node.js runtime and a native Mac OS X &lt;sup id=&#34;fnref:2&#34;&gt;&lt;a href=&#34;#fn:2&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;2&lt;/a&gt;&lt;/sup&gt; version. We use the Node.js version.&lt;/li&gt;
 &lt;li&gt;Ensure that your Emacs can find the jsonlint binary. This can be done by adding the following snippet in your Emacs configuration:&lt;/li&gt;
 &lt;/ul&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-cl&#34; data-lang=&#34;cl&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;(&lt;span style=&#34;color:#033&#34;&gt;setenv&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;PATH&amp;#34;&lt;/span&gt; (&lt;span style=&#34;color:#033&#34;&gt;concat&lt;/span&gt; (&lt;span style=&#34;color:#033&#34;&gt;getenv&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;PATH&amp;#34;&lt;/span&gt;) &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;:/usr/local/share/npm/bin&amp;#34;&lt;/span&gt;))
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;(&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;setq&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;exec-path&lt;/span&gt; (&lt;span style=&#34;color:#c0f&#34;&gt;append&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;exec-path&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;&amp;#39;&lt;/span&gt;(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/usr/local/share/npm/bin&amp;#34;&lt;/span&gt;)))
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Of course, the path you add will depend on where your installation process put the binary.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-cl&#34;&gt;(setenv &amp;quot;PATH&amp;quot; (concat (getenv &amp;quot;PATH&amp;quot;) &amp;quot;:/usr/local/share/npm/bin&amp;quot;))
+(setq exec-path (append exec-path &#39;(&amp;quot;/usr/local/share/npm/bin&amp;quot;)))
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Of course, the path you add will depend on where your installation process put the binary.&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Install &lt;code&gt;flymake-json&lt;/code&gt; &lt;sup id=&#34;fnref:3&#34;&gt;&lt;a href=&#34;#fn:3&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;3&lt;/a&gt;&lt;/sup&gt;, using your Emacs package manager.&lt;/li&gt;
 &lt;li&gt;Bind a key to &lt;code&gt;flymake-json-load&lt;/code&gt; which is the command to perform jsonlint on the current file. This can be done with the following snippet:&lt;/li&gt;
 &lt;/ul&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-cl&#34; data-lang=&#34;cl&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;(&lt;span style=&#34;color:#033&#34;&gt;global-set-key&lt;/span&gt; (&lt;span style=&#34;color:#033&#34;&gt;kbd&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;C-c j v&amp;#34;&lt;/span&gt;) &lt;span style=&#34;color:#fc3&#34;&gt;&amp;#39;flymake-json-load&lt;/span&gt;)
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Enjoy!&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-cl&#34;&gt;(global-set-key (kbd &amp;quot;C-c j v&amp;quot;) &#39;flymake-json-load)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Enjoy!&lt;/p&gt;
 &lt;div class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
 &lt;hr&gt;
 &lt;ol&gt;

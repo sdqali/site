@@ -1,6 +1,6 @@
 <!DOCTYPE html5>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us" prefix="og: http://ogp.me/ns#">
-  <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <head>
 
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -33,13 +33,13 @@
   <meta name="twitter:creator" content="@sdqali">
   <meta name="twitter:title" content="Running multiple applications in the same Tomcat installation">
   <meta name="twitter:description" content="This blog post describes how to set up Tomcat to run multiple applications running as separate JVM processes, using the same Tomcat installation. This method utilizes the CATALINA_HOME and CATALINA_BASE environment variables used by Tomcat. I have verified this method against Tomcat versions 8.0.x; other versions should work the same way.">
-  <meta name="twitter:image" content="http://localhost:1313//images/1280px-Tomcat-logo.svg.png">
+  <meta name="twitter:image" content="https://sadique.io//images/1280px-Tomcat-logo.svg.png">
 
   <meta property="og:title" content="Running multiple applications in the same Tomcat installation" />
   <meta property="og:description" content="This blog post describes how to set up Tomcat to run multiple applications running as separate JVM processes, using the same Tomcat installation. This method utilizes the CATALINA_HOME and CATALINA_BASE environment variables used by Tomcat. I have verified this method against Tomcat versions 8.0.x; other versions should work the same way." itemprop="description"/>
-  <meta property="og:url" content="http://localhost:1313/blog/2015/06/09/running-multiple-applications-in-the-same-tomcat-installation/" />
-  <meta property="og:image" content="http://localhost:1313//images/1280px-Tomcat-logo.svg.png" />
-  <meta name="hugo:permalink" content="http://localhost:1313/blog/2015/06/09/running-multiple-applications-in-the-same-tomcat-installation/">
+  <meta property="og:url" content="https://sadique.io/blog/2015/06/09/running-multiple-applications-in-the-same-tomcat-installation/" />
+  <meta property="og:image" content="https://sadique.io//images/1280px-Tomcat-logo.svg.png" />
+  <meta name="hugo:permalink" content="https://sadique.io/blog/2015/06/09/running-multiple-applications-in-the-same-tomcat-installation/">
   <meta name="hugo:filepath" content="content/blog/2015-06-09-running-multiple-applications-in-the-same-tomcat-installation.markdown">
   <body>
     <script>
@@ -91,150 +91,159 @@
           <p>This blog post describes how to set up Tomcat to run multiple applications running as separate JVM processes, using the same Tomcat installation. This method utilizes the <code>CATALINA_HOME</code> and <code>CATALINA_BASE</code> environment variables used by Tomcat. I have verified this method against Tomcat versions <code>8.0.x</code>; other versions should work the same way.</p>
 <h2 id="a-typical-tomcat-installation">A typical Tomcat installation</h2>
 <p>If we explode the Tomcat 8.0.23 <a href="http://mirrors.sonic.net/apache/tomcat/tomcat-8/v8.0.23/bin/apache-tomcat-8.0.23.tar.gz">tarball</a>, we get the following directory structure:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ tar apache-tomcat-8.0.23.tar.gz
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>$ ls apache-tomcat-8.0.23/
-</span></span><span style="display:flex;"><span>LICENSE		RELEASE-NOTES	bin		lib		temp		work
-</span></span><span style="display:flex;"><span>NOTICE		RUNNING.txt	conf		logs		webapps
-</span></span></code></pre></div><p>This distribution, by default runs applications in a single JVM. How does it do this?</p>
+<pre><code class="language-bash">$ tar apache-tomcat-8.0.23.tar.gz
+
+$ ls apache-tomcat-8.0.23/
+LICENSE		RELEASE-NOTES	bin		lib		temp		work
+NOTICE		RUNNING.txt	conf		logs		webapps
+</code></pre>
+<p>This distribution, by default runs applications in a single JVM. How does it do this?</p>
 <p>Tomcat control scripts - <code>startup.sh</code>, <code>shutdown.sh</code>, <code>catalina.sh</code> uses the environment variables <code>CATALINA_HOME</code> and <code>CATALINA_BASE</code> to locate binaries and configuration files.</p>
 <p>From the documentaion inside <code>catalina.sh</code> under <code>apache-tomcat-8.0.23/bin/</code> we can see that:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#09f;font-style:italic">#   CATALINA_HOME   May point at your Catalina &#34;build&#34; directory.</span>
-</span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic">#</span>
-</span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic">#   CATALINA_BASE   (Optional) Base directory for resolving dynamic portions</span>
-</span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic">#                   of a Catalina installation.  If not present, resolves to</span>
-</span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic">#                   the same directory that CATALINA_HOME points to.</span>
-</span></span></code></pre></div><p>This allows us to separate the <code>CATALINA_HOME</code> and <code>CATALINA_BASE</code> directories. The Tomcat binaries and scripts need to be inside <code>CATALINA_HOME</code> and our first application can deploy itself to <code>CATALINA_BASE</code>.</p>
+<pre><code class="language-bash">#   CATALINA_HOME   May point at your Catalina &quot;build&quot; directory.
+#
+#   CATALINA_BASE   (Optional) Base directory for resolving dynamic portions
+#                   of a Catalina installation.  If not present, resolves to
+#                   the same directory that CATALINA_HOME points to.
+
+</code></pre>
+<p>This allows us to separate the <code>CATALINA_HOME</code> and <code>CATALINA_BASE</code> directories. The Tomcat binaries and scripts need to be inside <code>CATALINA_HOME</code> and our first application can deploy itself to <code>CATALINA_BASE</code>.</p>
 <h2 id="separating-catalina_home-and-catalina_base">Separating CATALINA_HOME and CATALINA_BASE</h2>
 <p>The <code>app1</code> directory will have the following directories:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ ls -a app1/
-</span></span><span style="display:flex;"><span>.	..	bin	conf	logs	temp	webapps	work
-</span></span></code></pre></div><p>The <code>bin</code> directory will have the <code>setenv.sh</code> script used to set additional environment variables for the application.</p>
+<pre><code class="language-bash">$ ls -a app1/
+.	..	bin	conf	logs	temp	webapps	work
+</code></pre>
+<p>The <code>bin</code> directory will have the <code>setenv.sh</code> script used to set additional environment variables for the application.</p>
 <p>The <code>tomcat</code> directory will have the following directories:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>$ ls tomcat/
-</span></span><span style="display:flex;"><span>LICENSE		NOTICE		RELEASE-NOTES	RUNNING.txt	bin		lib
-</span></span></code></pre></div><p>The <code>bin</code> directory will have the Tomcat management scripts like <code>startup.sh</code>, <code>shutdown.sh</code>, <code>catalina.sh</code> etc.</p>
+<pre><code class="language-bash">
+$ ls tomcat/
+LICENSE		NOTICE		RELEASE-NOTES	RUNNING.txt	bin		lib
+</code></pre>
+<p>The <code>bin</code> directory will have the Tomcat management scripts like <code>startup.sh</code>, <code>shutdown.sh</code>, <code>catalina.sh</code> etc.</p>
 <p>Now we can start <code>app1</code> by pointing <code>CATALINA_BASE</code> to <code>app1</code> and <code>CATALINA_HOME</code> to <code>tomcat</code>.</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>$ <span style="color:#366">export</span> <span style="color:#033">CATALINA_HOME</span><span style="color:#555">=</span>/Users/sdqali/src/sandbox/tomcat
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>$ <span style="color:#366">export</span> <span style="color:#033">CATALINA_BASE</span><span style="color:#555">=</span>/Users/sdqali/src/sandbox/app1
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>$ <span style="color:#033">$CATALINA_HOME</span>/bin/startup.sh
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>$ <span style="color:#033">$CATALINA_HOME</span>/bin/startup.sh
-</span></span><span style="display:flex;"><span>Using CATALINA_BASE:   /Users/sdqali/src/sandbox/app1
-</span></span><span style="display:flex;"><span>Using CATALINA_HOME:   /Users/sdqali/src/sandbox/tomcat
-</span></span><span style="display:flex;"><span>Using CATALINA_TMPDIR: /Users/sdqali/src/sandbox/app1/temp
-</span></span><span style="display:flex;"><span>Using JRE_HOME:        /Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home
-</span></span><span style="display:flex;"><span>Using CLASSPATH:       /Users/sdqali/src/sandbox/tomcat/bin/bootstrap.jar:/Users/sdqali/src/sandbox/tomcat/bin/tomcat-juli.jar
-</span></span><span style="display:flex;"><span>Tomcat started.
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>$ curl -s -D - -o /dev/null http://127.0.0.1:8080
-</span></span><span style="display:flex;"><span>HTTP/1.1 <span style="color:#f60">200</span> OK
-</span></span><span style="display:flex;"><span>Server: Apache-Coyote/1.1
-</span></span><span style="display:flex;"><span>Content-Type: text/html;<span style="color:#033">charset</span><span style="color:#555">=</span>UTF-8
-</span></span><span style="display:flex;"><span>Transfer-Encoding: chunked
-</span></span><span style="display:flex;"><span>Date: Tue, <span style="color:#f60">09</span> Jun <span style="color:#f60">2015</span> 07:37:43 GMT
-</span></span></code></pre></div><p>Let&rsquo;s try and deploy a second application <code>app2</code> running on port <code>9090</code>.</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>$ <span style="color:#366">export</span> <span style="color:#033">CATALINA_HOME</span><span style="color:#555">=</span>/Users/sdqali/src/sandbox/tomcat
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>$ <span style="color:#366">export</span> <span style="color:#033">CATALINA_BASE</span><span style="color:#555">=</span>/Users/sdqali/src/sandbox/app2
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>$ <span style="color:#033">$CATALINA_HOME</span>/bin/startup.sh
-</span></span><span style="display:flex;"><span>Using CATALINA_BASE:   /Users/sdqali/src/sandbox/app2
-</span></span><span style="display:flex;"><span>Using CATALINA_HOME:   /Users/sdqali/src/sandbox/tomcat
-</span></span><span style="display:flex;"><span>Using CATALINA_TMPDIR: /Users/sdqali/src/sandbox/app2/temp
-</span></span><span style="display:flex;"><span>Using JRE_HOME:        /Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home
-</span></span><span style="display:flex;"><span>Using CLASSPATH:       /Users/sdqali/src/sandbox/tomcat/bin/bootstrap.jar:/Users/sdqali/src/sandbox/tomcat/bin/tomcat-juli.jar
-</span></span><span style="display:flex;"><span>Tomcat started.
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>$ curl -s -D - -o /dev/null http://127.0.0.1:9090
-</span></span><span style="display:flex;"><span>HTTP/1.1 <span style="color:#f60">200</span> OK
-</span></span><span style="display:flex;"><span>Server: Apache-Coyote/1.1
-</span></span><span style="display:flex;"><span>Content-Type: text/html;<span style="color:#033">charset</span><span style="color:#555">=</span>UTF-8
-</span></span><span style="display:flex;"><span>Transfer-Encoding: chunked
-</span></span><span style="display:flex;"><span>Date: Tue, <span style="color:#f60">09</span> Jun <span style="color:#f60">2015</span> 07:41:02 GMT
-</span></span></code></pre></div><h2 id="tying-it-all-together">Tying it all together</h2>
+<pre><code class="language-bash">
+$ export CATALINA_HOME=/Users/sdqali/src/sandbox/tomcat
+
+$ export CATALINA_BASE=/Users/sdqali/src/sandbox/app1
+
+$ $CATALINA_HOME/bin/startup.sh
+
+$ $CATALINA_HOME/bin/startup.sh
+Using CATALINA_BASE:   /Users/sdqali/src/sandbox/app1
+Using CATALINA_HOME:   /Users/sdqali/src/sandbox/tomcat
+Using CATALINA_TMPDIR: /Users/sdqali/src/sandbox/app1/temp
+Using JRE_HOME:        /Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home
+Using CLASSPATH:       /Users/sdqali/src/sandbox/tomcat/bin/bootstrap.jar:/Users/sdqali/src/sandbox/tomcat/bin/tomcat-juli.jar
+Tomcat started.
+
+$ curl -s -D - -o /dev/null http://127.0.0.1:8080
+HTTP/1.1 200 OK
+Server: Apache-Coyote/1.1
+Content-Type: text/html;charset=UTF-8
+Transfer-Encoding: chunked
+Date: Tue, 09 Jun 2015 07:37:43 GMT
+</code></pre>
+<p>Let&rsquo;s try and deploy a second application <code>app2</code> running on port <code>9090</code>.</p>
+<pre><code class="language-bash">
+$ export CATALINA_HOME=/Users/sdqali/src/sandbox/tomcat
+
+$ export CATALINA_BASE=/Users/sdqali/src/sandbox/app2
+
+$ $CATALINA_HOME/bin/startup.sh
+Using CATALINA_BASE:   /Users/sdqali/src/sandbox/app2
+Using CATALINA_HOME:   /Users/sdqali/src/sandbox/tomcat
+Using CATALINA_TMPDIR: /Users/sdqali/src/sandbox/app2/temp
+Using JRE_HOME:        /Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home
+Using CLASSPATH:       /Users/sdqali/src/sandbox/tomcat/bin/bootstrap.jar:/Users/sdqali/src/sandbox/tomcat/bin/tomcat-juli.jar
+Tomcat started.
+
+$ curl -s -D - -o /dev/null http://127.0.0.1:9090
+HTTP/1.1 200 OK
+Server: Apache-Coyote/1.1
+Content-Type: text/html;charset=UTF-8
+Transfer-Encoding: chunked
+Date: Tue, 09 Jun 2015 07:41:02 GMT
+</code></pre>
+<h2 id="tying-it-all-together">Tying it all together</h2>
 <p>At this point, it is useful to create management scripts that abstract away the environment variables and allows for starting up and shutting down applications individually. The <code>start.sh</code> script will be as follows.</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#099">#!/usr/bin/env sh
-</span></span></span><span style="display:flex;"><span><span style="color:#099"></span>
-</span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"># start.sh</span>
-</span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"># Script to start a Tomcat application</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>show_usage<span style="color:#555">()</span> <span style="color:#555">{</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#366">echo</span> <span style="color:#c30">&#34;Usage: ./start.sh &lt;app-name&gt;&#34;</span>;
-</span></span><span style="display:flex;"><span>    <span style="color:#366">exit</span> 1;
-</span></span><span style="display:flex;"><span><span style="color:#555">}</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#366">declare</span> <span style="color:#033">app_name</span><span style="color:#555">=</span><span style="color:#033">$1</span>;
-</span></span><span style="display:flex;"><span><span style="color:#555">[[</span> -z <span style="color:#033">$app_name</span> <span style="color:#555">]]</span> <span style="color:#555">&amp;&amp;</span> show_usage;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#366">declare</span> <span style="color:#033">INSTALL_BASE</span><span style="color:#555">=</span>/Users/sdqali/src/sandbox
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#366">export</span> <span style="color:#033">CATALINA_HOME</span><span style="color:#555">=</span><span style="color:#033">$INSTALL_BASE</span>/tomcat
-</span></span><span style="display:flex;"><span><span style="color:#366">export</span> <span style="color:#033">CATALINA_BASE</span><span style="color:#555">=</span><span style="color:#033">$INSTALL_BASE</span>/<span style="color:#033">$app_name</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#033">$CATALINA_HOME</span>/bin/startup.sh
-</span></span></code></pre></div><p>Similarly, the <code>stop.sh</code> script will be:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#099">#!/usr/bin/env sh
-</span></span></span><span style="display:flex;"><span><span style="color:#099"></span>
-</span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"># stop.sh</span>
-</span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"># Script to stop a Tomcat application</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>show_usage<span style="color:#555">()</span> <span style="color:#555">{</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#366">echo</span> <span style="color:#c30">&#34;Usage: ./stop.sh &lt;app-name&gt;&#34;</span>;
-</span></span><span style="display:flex;"><span>    <span style="color:#366">exit</span> 1;
-</span></span><span style="display:flex;"><span><span style="color:#555">}</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#366">declare</span> <span style="color:#033">app_name</span><span style="color:#555">=</span><span style="color:#033">$1</span>;
-</span></span><span style="display:flex;"><span><span style="color:#555">[[</span> -z <span style="color:#033">$app_name</span> <span style="color:#555">]]</span> <span style="color:#555">&amp;&amp;</span> show_usage;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#366">declare</span> <span style="color:#033">INSTALL_BASE</span><span style="color:#555">=</span>/Users/sdqali/src/sandbox
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#366">export</span> <span style="color:#033">CATALINA_HOME</span><span style="color:#555">=</span><span style="color:#033">$INSTALL_BASE</span>/tomcat
-</span></span><span style="display:flex;"><span><span style="color:#366">export</span> <span style="color:#033">CATALINA_BASE</span><span style="color:#555">=</span><span style="color:#033">$INSTALL_BASE</span>/<span style="color:#033">$app_name</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#033">$CATALINA_HOME</span>/bin/shutdown.sh
-</span></span></code></pre></div><p>We can manage individual applications using these scripts:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ ./management/start.sh app2
-</span></span><span style="display:flex;"><span>Using CATALINA_BASE:   /Users/sdqali/src/sandbox/app2
-</span></span><span style="display:flex;"><span>Using CATALINA_HOME:   /Users/sdqali/src/sandbox/tomcat
-</span></span><span style="display:flex;"><span>Using CATALINA_TMPDIR: /Users/sdqali/src/sandbox/app2/temp
-</span></span><span style="display:flex;"><span>Using JRE_HOME:        /Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home
-</span></span><span style="display:flex;"><span>Using CLASSPATH:       /Users/sdqali/src/sandbox/tomcat/bin/bootstrap.jar:/Users/sdqali/src/sandbox/tomcat/bin/tomcat-juli.jar
-</span></span><span style="display:flex;"><span>Tomcat started.
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>$ nc -z  127.0.0.1 <span style="color:#f60">9090</span>
-</span></span><span style="display:flex;"><span>Connection to 127.0.0.1 port <span style="color:#f60">9090</span> <span style="color:#555">[</span>tcp/websm<span style="color:#555">]</span> succeeded!
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>$ curl -s -D - -o /dev/null http://127.0.0.1:9090
-</span></span><span style="display:flex;"><span>HTTP/1.1 <span style="color:#f60">200</span> OK
-</span></span><span style="display:flex;"><span>Server: Apache-Coyote/1.1
-</span></span><span style="display:flex;"><span>Content-Type: text/html;<span style="color:#033">charset</span><span style="color:#555">=</span>UTF-8
-</span></span><span style="display:flex;"><span>Transfer-Encoding: chunked
-</span></span><span style="display:flex;"><span>Date: Tue, <span style="color:#f60">09</span> Jun <span style="color:#f60">2015</span> 08:16:05 GMT
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>$ ./management/stop.sh app2
-</span></span><span style="display:flex;"><span>Using CATALINA_BASE:   /Users/sdqali/src/sandbox/app2
-</span></span><span style="display:flex;"><span>Using CATALINA_HOME:   /Users/sdqali/src/sandbox/tomcat
-</span></span><span style="display:flex;"><span>Using CATALINA_TMPDIR: /Users/sdqali/src/sandbox/app2/temp
-</span></span><span style="display:flex;"><span>Using JRE_HOME:        /Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home
-</span></span><span style="display:flex;"><span>Using CLASSPATH:       /Users/sdqali/src/sandbox/tomcat/bin/bootstrap.jar:/Users/sdqali/src/sandbox/tomcat/bin/tomcat-juli.jar
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>$ nc -z  127.0.0.1 <span style="color:#f60">9090</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>$ curl -v http://127.0.0.1:9090
-</span></span><span style="display:flex;"><span>* Rebuilt URL to: http://127.0.0.1:9090/
-</span></span><span style="display:flex;"><span>* Hostname was NOT found in DNS cache
-</span></span><span style="display:flex;"><span>*   Trying 127.0.0.1...
-</span></span><span style="display:flex;"><span>* connect to 127.0.0.1 port <span style="color:#f60">9090</span> failed: Connection refused
-</span></span></code></pre></div>
+<pre><code class="language-bash">#!/usr/bin/env sh
+
+# start.sh
+# Script to start a Tomcat application
+
+show_usage() {
+    echo &quot;Usage: ./start.sh &lt;app-name&gt;&quot;;
+    exit 1;
+}
+
+declare app_name=$1;
+[[ -z $app_name ]] &amp;&amp; show_usage;
+
+
+declare INSTALL_BASE=/Users/sdqali/src/sandbox
+
+export CATALINA_HOME=$INSTALL_BASE/tomcat
+export CATALINA_BASE=$INSTALL_BASE/$app_name
+
+$CATALINA_HOME/bin/startup.sh
+</code></pre>
+<p>Similarly, the <code>stop.sh</code> script will be:</p>
+<pre><code class="language-bash">#!/usr/bin/env sh
+
+# stop.sh
+# Script to stop a Tomcat application
+
+show_usage() {
+    echo &quot;Usage: ./stop.sh &lt;app-name&gt;&quot;;
+    exit 1;
+}
+
+declare app_name=$1;
+[[ -z $app_name ]] &amp;&amp; show_usage;
+
+
+declare INSTALL_BASE=/Users/sdqali/src/sandbox
+
+export CATALINA_HOME=$INSTALL_BASE/tomcat
+export CATALINA_BASE=$INSTALL_BASE/$app_name
+
+$CATALINA_HOME/bin/shutdown.sh
+</code></pre>
+<p>We can manage individual applications using these scripts:</p>
+<pre><code class="language-bash">$ ./management/start.sh app2
+Using CATALINA_BASE:   /Users/sdqali/src/sandbox/app2
+Using CATALINA_HOME:   /Users/sdqali/src/sandbox/tomcat
+Using CATALINA_TMPDIR: /Users/sdqali/src/sandbox/app2/temp
+Using JRE_HOME:        /Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home
+Using CLASSPATH:       /Users/sdqali/src/sandbox/tomcat/bin/bootstrap.jar:/Users/sdqali/src/sandbox/tomcat/bin/tomcat-juli.jar
+Tomcat started.
+
+$ nc -z  127.0.0.1 9090
+Connection to 127.0.0.1 port 9090 [tcp/websm] succeeded!
+
+$ curl -s -D - -o /dev/null http://127.0.0.1:9090
+HTTP/1.1 200 OK
+Server: Apache-Coyote/1.1
+Content-Type: text/html;charset=UTF-8
+Transfer-Encoding: chunked
+Date: Tue, 09 Jun 2015 08:16:05 GMT
+
+
+$ ./management/stop.sh app2
+Using CATALINA_BASE:   /Users/sdqali/src/sandbox/app2
+Using CATALINA_HOME:   /Users/sdqali/src/sandbox/tomcat
+Using CATALINA_TMPDIR: /Users/sdqali/src/sandbox/app2/temp
+Using JRE_HOME:        /Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home
+Using CLASSPATH:       /Users/sdqali/src/sandbox/tomcat/bin/bootstrap.jar:/Users/sdqali/src/sandbox/tomcat/bin/tomcat-juli.jar
+
+$ nc -z  127.0.0.1 9090
+
+$ curl -v http://127.0.0.1:9090
+* Rebuilt URL to: http://127.0.0.1:9090/
+* Hostname was NOT found in DNS cache
+*   Trying 127.0.0.1...
+* connect to 127.0.0.1 port 9090 failed: Connection refused
+</code></pre>
         </div>
         <aside id="gh-comments-list">
           <script>
@@ -380,7 +389,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2019/08/02/flushing-metrics-in-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Flushing Metrics in Dropwizard Commands</a></li>
+            <li><a href="https://sadique.io/blog/2019/08/02/flushing-metrics-in-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Flushing Metrics in Dropwizard Commands</a></li>
             
             
             
@@ -394,7 +403,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2019/07/28/managing-environment-lifecycles-for-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Managing environment lifecycles for Dropwizard Commands</a></li>
+            <li><a href="https://sadique.io/blog/2019/07/28/managing-environment-lifecycles-for-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Managing environment lifecycles for Dropwizard Commands</a></li>
             
             
             
@@ -428,13 +437,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2019/03/23/understanding-trailing-@-processing-in-sas-input/?utm_source=site&amp;utm_medium=related">Understanding trailing @ processing in SAS input</a></li>
+            <li><a href="https://sadique.io/blog/2019/03/23/understanding-trailing-@-processing-in-sas-input/?utm_source=site&amp;utm_medium=related">Understanding trailing @ processing in SAS input</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2019/03/23/importing-the-sasuser-datasets-in-sas-studio/?utm_source=site&amp;utm_medium=related">Importing the SASUSER datasets in SAS Studio</a></li>
+            <li><a href="https://sadique.io/blog/2019/03/23/importing-the-sasuser-datasets-in-sas-studio/?utm_source=site&amp;utm_medium=related">Importing the SASUSER datasets in SAS Studio</a></li>
             
             
             
@@ -452,7 +461,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2018/06/09/formatting-java-instant-for-resolutions/?utm_source=site&amp;utm_medium=related">Formatting Java Instant for resolutions</a></li>
+            <li><a href="https://sadique.io/blog/2018/06/09/formatting-java-instant-for-resolutions/?utm_source=site&amp;utm_medium=related">Formatting Java Instant for resolutions</a></li>
             
             
             
@@ -466,7 +475,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2018/05/05/freebuilder-plugin-for-intellij/?utm_source=site&amp;utm_medium=related">FreeBuilder plugin for IntelliJ</a></li>
+            <li><a href="https://sadique.io/blog/2018/05/05/freebuilder-plugin-for-intellij/?utm_source=site&amp;utm_medium=related">FreeBuilder plugin for IntelliJ</a></li>
             
             
             
@@ -496,7 +505,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2018/03/23/a-jackson-and-freebuilder-quirk/?utm_source=site&amp;utm_medium=related">A Jackson and FreeBuilder quirk</a></li>
+            <li><a href="https://sadique.io/blog/2018/03/23/a-jackson-and-freebuilder-quirk/?utm_source=site&amp;utm_medium=related">A Jackson and FreeBuilder quirk</a></li>
             
             
             
@@ -534,7 +543,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2017/08/18/uploading-a-standalone-artifact-to-nexus-3/?utm_source=site&amp;utm_medium=related">Uploading a standalone artifact to Nexus 3</a></li>
+            <li><a href="https://sadique.io/blog/2017/08/18/uploading-a-standalone-artifact-to-nexus-3/?utm_source=site&amp;utm_medium=related">Uploading a standalone artifact to Nexus 3</a></li>
             
             
             
@@ -568,7 +577,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/30/implementing-feature-toggles-for-a-spring-boot-application-part-4/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 4</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/30/implementing-feature-toggles-for-a-spring-boot-application-part-4/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 4</a></li>
             
             
             
@@ -590,19 +599,19 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/29/implementing-feature-toggles-for-a-spring-boot-application-part-3/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 3</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/29/implementing-feature-toggles-for-a-spring-boot-application-part-3/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 3</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/27/implementing-feature-toggles-for-a-spring-boot-application-part-2/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 2</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/27/implementing-feature-toggles-for-a-spring-boot-application-part-2/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 2</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/22/implementing-feature-toggles-for-a-spring-boot-application-part-1/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 1</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/22/implementing-feature-toggles-for-a-spring-boot-application-part-1/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 1</a></li>
             
             
             
@@ -636,13 +645,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/11/setting-up-a-secure-etcd-cluster-behind-a-proxy/?utm_source=site&amp;utm_medium=related">Setting up a secure etcd cluster behind a proxy</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/11/setting-up-a-secure-etcd-cluster-behind-a-proxy/?utm_source=site&amp;utm_medium=related">Setting up a secure etcd cluster behind a proxy</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/05/a-very-basic-introduction-to-deploying-a-java-application-using-kubernetes/?utm_source=site&amp;utm_medium=related">A very basic introduction to deploying a Java application using Kubernetes</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/05/a-very-basic-introduction-to-deploying-a-java-application-using-kubernetes/?utm_source=site&amp;utm_medium=related">A very basic introduction to deploying a Java application using Kubernetes</a></li>
             
             
             
@@ -660,7 +669,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/02/handling-deserialization-errors-in-spring-redis-sessions/?utm_source=site&amp;utm_medium=related">Handling Deserialization errors in Spring Redis Sessions</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/02/handling-deserialization-errors-in-spring-redis-sessions/?utm_source=site&amp;utm_medium=related">Handling Deserialization errors in Spring Redis Sessions</a></li>
             
             
             
@@ -674,13 +683,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/21/csrf-protection-with-spring-security-and-angular-js/?utm_source=site&amp;utm_medium=related">CSRF Protection with Spring Security and Angular JS</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/21/csrf-protection-with-spring-security-and-angular-js/?utm_source=site&amp;utm_medium=related">CSRF Protection with Spring Security and Angular JS</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/16/controlling-redis-auto-configuration-for-spring-boot-session/?utm_source=site&amp;utm_medium=related">Controlling Redis auto-configuration for Spring Boot Session</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/16/controlling-redis-auto-configuration-for-spring-boot-session/?utm_source=site&amp;utm_medium=related">Controlling Redis auto-configuration for Spring Boot Session</a></li>
             
             
             
@@ -694,7 +703,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/14/jwt-authentication-with-spring-web-part-5/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 5</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/14/jwt-authentication-with-spring-web-part-5/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 5</a></li>
             
             
             
@@ -712,19 +721,19 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/08/jwt-authentication-with-spring-web-part-4/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 4</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/08/jwt-authentication-with-spring-web-part-4/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 4</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/06/jwt-authentication-with-spring-web-part-3/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 3</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/06/jwt-authentication-with-spring-web-part-3/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 3</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/03/jwt-authentication-with-spring-web-part-2/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 2</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/03/jwt-authentication-with-spring-web-part-2/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 2</a></li>
             
             
             
@@ -734,13 +743,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/03/jwt-authentication-with-spring-web-part-1/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 1</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/03/jwt-authentication-with-spring-web-part-1/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 1</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/06/30/json-logging-for-spring-applications/?utm_source=site&amp;utm_medium=related">JSON logging for Spring applications</a></li>
+            <li><a href="https://sadique.io/blog/2016/06/30/json-logging-for-spring-applications/?utm_source=site&amp;utm_medium=related">JSON logging for Spring applications</a></li>
             
             
             
@@ -750,13 +759,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/06/29/injecting-dependencies-into-a-spring-@configuration/?utm_source=site&amp;utm_medium=related">Injecting dependencies into a Spring @Configuration</a></li>
+            <li><a href="https://sadique.io/blog/2016/06/29/injecting-dependencies-into-a-spring-@configuration/?utm_source=site&amp;utm_medium=related">Injecting dependencies into a Spring @Configuration</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/06/08/filtering-responses-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Filtering responses in Spring MVC</a></li>
+            <li><a href="https://sadique.io/blog/2016/06/08/filtering-responses-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Filtering responses in Spring MVC</a></li>
             
             
             
@@ -798,31 +807,31 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/04/24/deprecating-domain-events-in-axon/?utm_source=site&amp;utm_medium=related">Deprecating domain events in Axon</a></li>
+            <li><a href="https://sadique.io/blog/2016/04/24/deprecating-domain-events-in-axon/?utm_source=site&amp;utm_medium=related">Deprecating domain events in Axon</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/04/20/programmable-exit-codes-for-spring-command-line-applications-2/?utm_source=site&amp;utm_medium=related">Programmable exit codes for spring command line applications - 2</a></li>
+            <li><a href="https://sadique.io/blog/2016/04/20/programmable-exit-codes-for-spring-command-line-applications-2/?utm_source=site&amp;utm_medium=related">Programmable exit codes for spring command line applications - 2</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/04/18/programmable-exit-codes-for-spring-command-line-applications/?utm_source=site&amp;utm_medium=related">Programmable exit codes for Spring command line applications</a></li>
+            <li><a href="https://sadique.io/blog/2016/04/18/programmable-exit-codes-for-spring-command-line-applications/?utm_source=site&amp;utm_medium=related">Programmable exit codes for Spring command line applications</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/01/30/using-custom-arguments-in-spring-mvc-controllers/?utm_source=site&amp;utm_medium=related">Using custom arguments in Spring MVC controllers</a></li>
+            <li><a href="https://sadique.io/blog/2016/01/30/using-custom-arguments-in-spring-mvc-controllers/?utm_source=site&amp;utm_medium=related">Using custom arguments in Spring MVC controllers</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/16/authentication-for-apache-camel-http-components/?utm_source=site&amp;utm_medium=related">Authentication for Apache Camel HTTP components</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/16/authentication-for-apache-camel-http-components/?utm_source=site&amp;utm_medium=related">Authentication for Apache Camel HTTP components</a></li>
             
             
             
@@ -844,31 +853,31 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/15/thoughts-on-open-graph-tags/?utm_source=site&amp;utm_medium=related">Thoughts on Open Graph tags</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/15/thoughts-on-open-graph-tags/?utm_source=site&amp;utm_medium=related">Thoughts on Open Graph tags</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/11/integration-testing-spring-command-line-applications/?utm_source=site&amp;utm_medium=related">Integration testing Spring command line applications</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/11/integration-testing-spring-command-line-applications/?utm_source=site&amp;utm_medium=related">Integration testing Spring command line applications</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/11/integration-testing-challenges-for-non-web-spring-applications/?utm_source=site&amp;utm_medium=related">Integration testing challenges for non-web Spring applications</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/11/integration-testing-challenges-for-non-web-spring-applications/?utm_source=site&amp;utm_medium=related">Integration testing challenges for non-web Spring applications</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/08/how-thinking-of-documentation-as-legislation-helped-me-become-a-better-programmer/?utm_source=site&amp;utm_medium=related">How thinking of Documentation as Legislation helped me become a better programmer</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/08/how-thinking-of-documentation-as-legislation-helped-me-become-a-better-programmer/?utm_source=site&amp;utm_medium=related">How thinking of Documentation as Legislation helped me become a better programmer</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/06/implementing-custom-annotations-for-spring-mvc/?utm_source=site&amp;utm_medium=related">Implementing custom annotations for Spring MVC</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/06/implementing-custom-annotations-for-spring-mvc/?utm_source=site&amp;utm_medium=related">Implementing custom annotations for Spring MVC</a></li>
             
             
             
@@ -882,7 +891,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/05/validating-requestparams-and-pathvariables-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Validating RequestParams and PathVariables in Spring MVC</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/05/validating-requestparams-and-pathvariables-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Validating RequestParams and PathVariables in Spring MVC</a></li>
             
             
             
@@ -896,7 +905,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/11/24/testing-async-responses-using-mockmvc/?utm_source=site&amp;utm_medium=related">Testing async responses using MockMvc</a></li>
+            <li><a href="https://sadique.io/blog/2015/11/24/testing-async-responses-using-mockmvc/?utm_source=site&amp;utm_medium=related">Testing async responses using MockMvc</a></li>
             
             
             
@@ -930,7 +939,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/05/22/making-sense-of-cloud-foundry-security-group-declarations/?utm_source=site&amp;utm_medium=related">Making sense of Cloud Foundry security group declarations</a></li>
+            <li><a href="https://sadique.io/blog/2015/05/22/making-sense-of-cloud-foundry-security-group-declarations/?utm_source=site&amp;utm_medium=related">Making sense of Cloud Foundry security group declarations</a></li>
             
             
             
@@ -940,7 +949,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/05/21/configuring-cloud-foundry-java-memory-parameters/?utm_source=site&amp;utm_medium=related">Configuring Cloud Foundry Java Memory Parameters</a></li>
+            <li><a href="https://sadique.io/blog/2015/05/21/configuring-cloud-foundry-java-memory-parameters/?utm_source=site&amp;utm_medium=related">Configuring Cloud Foundry Java Memory Parameters</a></li>
             
             
             
@@ -1042,13 +1051,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2014/03/20/clojure-dojo-levenshtein-edit-distance/?utm_source=site&amp;utm_medium=related">Clojure Dojo - Levenshtein edit distance</a></li>
+            <li><a href="https://sadique.io/blog/2014/03/20/clojure-dojo-levenshtein-edit-distance/?utm_source=site&amp;utm_medium=related">Clojure Dojo - Levenshtein edit distance</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2014/02/17/a-simple-jmeter-test-with-login/?utm_source=site&amp;utm_medium=related">A simple JMeter test with login</a></li>
+            <li><a href="https://sadique.io/blog/2014/02/17/a-simple-jmeter-test-with-login/?utm_source=site&amp;utm_medium=related">A simple JMeter test with login</a></li>
             
             
             
@@ -1142,7 +1151,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/10/13/implementing-rate-limiting-in-rails-part-2/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 2</a></li>
+            <li><a href="https://sadique.io/blog/2013/10/13/implementing-rate-limiting-in-rails-part-2/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 2</a></li>
             
             
             
@@ -1164,7 +1173,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/10/12/implementing-rate-limiting-in-rails-part-1/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 1</a></li>
+            <li><a href="https://sadique.io/blog/2013/10/12/implementing-rate-limiting-in-rails-part-1/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 1</a></li>
             
             
             
@@ -1174,7 +1183,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/10/07/python-hack-dynamically-override-an-objects-attribute/?utm_source=site&amp;utm_medium=related">Python Hack - Dynamically override an object&#39;s attribute</a></li>
+            <li><a href="https://sadique.io/blog/2013/10/07/python-hack-dynamically-override-an-objects-attribute/?utm_source=site&amp;utm_medium=related">Python Hack - Dynamically override an object&#39;s attribute</a></li>
             
             
             
@@ -1292,7 +1301,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/09/12/managing-gemsets-in-rbenv/?utm_source=site&amp;utm_medium=related">Managing Gemsets in Rbenv</a></li>
+            <li><a href="https://sadique.io/blog/2013/09/12/managing-gemsets-in-rbenv/?utm_source=site&amp;utm_medium=related">Managing Gemsets in Rbenv</a></li>
             
             
             
@@ -1306,7 +1315,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/09/08/looking-up-compiler-params-used-to-compile-a-ruby-version/?utm_source=site&amp;utm_medium=related">Looking up Compiler params used to compile a Ruby version</a></li>
+            <li><a href="https://sadique.io/blog/2013/09/08/looking-up-compiler-params-used-to-compile-a-ruby-version/?utm_source=site&amp;utm_medium=related">Looking up Compiler params used to compile a Ruby version</a></li>
             
             
             
@@ -1356,7 +1365,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/08/15/pythons-bool-type/?utm_source=site&amp;utm_medium=related">Python&#39;s bool type</a></li>
+            <li><a href="https://sadique.io/blog/2013/08/15/pythons-bool-type/?utm_source=site&amp;utm_medium=related">Python&#39;s bool type</a></li>
             
             
             
@@ -1470,7 +1479,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/07/31/validating-json-in-emacs/?utm_source=site&amp;utm_medium=related">Validating JSON in Emacs</a></li>
+            <li><a href="https://sadique.io/blog/2013/07/31/validating-json-in-emacs/?utm_source=site&amp;utm_medium=related">Validating JSON in Emacs</a></li>
             
             
             
@@ -1496,7 +1505,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/04/29/emacs-hack-viewing-git-logs-while-composing-commit-messages/?utm_source=site&amp;utm_medium=related">Emacs hack: Viewing Git logs while composing commit messages</a></li>
+            <li><a href="https://sadique.io/blog/2013/04/29/emacs-hack-viewing-git-logs-while-composing-commit-messages/?utm_source=site&amp;utm_medium=related">Emacs hack: Viewing Git logs while composing commit messages</a></li>
             
             
             
@@ -1510,7 +1519,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/04/14/configure-gits-comment-character/?utm_source=site&amp;utm_medium=related">Configure Git&#39;s comment character</a></li>
+            <li><a href="https://sadique.io/blog/2013/04/14/configure-gits-comment-character/?utm_source=site&amp;utm_medium=related">Configure Git&#39;s comment character</a></li>
             
             
             
@@ -1524,7 +1533,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/04/11/my-experience-working-remotely/?utm_source=site&amp;utm_medium=related">My experience working remotely</a></li>
+            <li><a href="https://sadique.io/blog/2013/04/11/my-experience-working-remotely/?utm_source=site&amp;utm_medium=related">My experience working remotely</a></li>
             
             
             
@@ -1546,7 +1555,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
+            <li><a href="https://sadique.io/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
             
             
             
@@ -1576,7 +1585,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/04/05/javascript-clipboard-access-and-hidden-flash-widgets/?utm_source=site&amp;utm_medium=related">JavaScript, clipboard access and hidden flash widgets</a></li>
+            <li><a href="https://sadique.io/blog/2013/04/05/javascript-clipboard-access-and-hidden-flash-widgets/?utm_source=site&amp;utm_medium=related">JavaScript, clipboard access and hidden flash widgets</a></li>
             
             
             
@@ -1590,7 +1599,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/01/22/reducing-emacs-startup-time-while-committing/?utm_source=site&amp;utm_medium=related">Reducing Emacs startup time while committing</a></li>
+            <li><a href="https://sadique.io/blog/2013/01/22/reducing-emacs-startup-time-while-committing/?utm_source=site&amp;utm_medium=related">Reducing Emacs startup time while committing</a></li>
             
             
             
@@ -1620,7 +1629,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/11/29/my-first-firefox-plugin-getcache-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">My first Firefox plugin: GetCache - View cached version of the current page</a></li>
+            <li><a href="https://sadique.io/blog/2012/11/29/my-first-firefox-plugin-getcache-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">My first Firefox plugin: GetCache - View cached version of the current page</a></li>
             
             
             
@@ -1634,7 +1643,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/11/28/getcache-a-chrome-plugin-to-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">GetCache - A Chrome plugin to view cached version of the current page</a></li>
+            <li><a href="https://sadique.io/blog/2012/11/28/getcache-a-chrome-plugin-to-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">GetCache - A Chrome plugin to view cached version of the current page</a></li>
             
             
             
@@ -1664,7 +1673,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/11/27/on-rest-content-type-google-chrome-and-caching/?utm_source=site&amp;utm_medium=related">On REST, Content-Type, Google Chrome and Caching</a></li>
+            <li><a href="https://sadique.io/blog/2012/11/27/on-rest-content-type-google-chrome-and-caching/?utm_source=site&amp;utm_medium=related">On REST, Content-Type, Google Chrome and Caching</a></li>
             
             
             
@@ -1770,7 +1779,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/07/09/understanding-pythons-with-statement/?utm_source=site&amp;utm_medium=related">Understanding Python&#39;s &#34;with&#34; statement</a></li>
+            <li><a href="https://sadique.io/blog/2012/07/09/understanding-pythons-with-statement/?utm_source=site&amp;utm_medium=related">Understanding Python&#39;s &#34;with&#34; statement</a></li>
             
             
             
@@ -1784,13 +1793,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/07/04/heredocs-in-ruby-and-python/?utm_source=site&amp;utm_medium=related">Heredocs in Ruby and Python</a></li>
+            <li><a href="https://sadique.io/blog/2012/07/04/heredocs-in-ruby-and-python/?utm_source=site&amp;utm_medium=related">Heredocs in Ruby and Python</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/06/25/micro-journal-simple-git-backed-journal-in-python/?utm_source=site&amp;utm_medium=related">Micro Journal - simple Git-backed journal in Python</a></li>
+            <li><a href="https://sadique.io/blog/2012/06/25/micro-journal-simple-git-backed-journal-in-python/?utm_source=site&amp;utm_medium=related">Micro Journal - simple Git-backed journal in Python</a></li>
             
             
             
@@ -1828,13 +1837,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/06/24/vodqa-ncr-maintaining-large-test-suites/?utm_source=site&amp;utm_medium=related">VodQA NCR: Maintaining Large Test Suites</a></li>
+            <li><a href="https://sadique.io/blog/2012/06/24/vodqa-ncr-maintaining-large-test-suites/?utm_source=site&amp;utm_medium=related">VodQA NCR: Maintaining Large Test Suites</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/06/06/know-your-tools-dont-shoot-yourself-in-the-foot/?utm_source=site&amp;utm_medium=related">Know Your Tools - Don&#39;t Shoot Yourself in the Foot</a></li>
+            <li><a href="https://sadique.io/blog/2012/06/06/know-your-tools-dont-shoot-yourself-in-the-foot/?utm_source=site&amp;utm_medium=related">Know Your Tools - Don&#39;t Shoot Yourself in the Foot</a></li>
             
             
             
@@ -1880,7 +1889,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/06/05/managing-security-certificates-from-the-console-on-windows-mac-os-x-and-linux/?utm_source=site&amp;utm_medium=related">Managing security certificates from the console - on Windows, Mac OS X and Linux</a></li>
+            <li><a href="https://sadique.io/blog/2012/06/05/managing-security-certificates-from-the-console-on-windows-mac-os-x-and-linux/?utm_source=site&amp;utm_medium=related">Managing security certificates from the console - on Windows, Mac OS X and Linux</a></li>
             
             
             
@@ -1926,7 +1935,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/05/11/indian-and-pakistani-cricketers-who-make-better-debuts/?utm_source=site&amp;utm_medium=related">Indian and Pakistani cricketers - who make better debuts?</a></li>
+            <li><a href="https://sadique.io/blog/2012/05/11/indian-and-pakistani-cricketers-who-make-better-debuts/?utm_source=site&amp;utm_medium=related">Indian and Pakistani cricketers - who make better debuts?</a></li>
             
             
             
@@ -1940,7 +1949,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/05/04/fixing-flyspell-for-emacs-in-mac-os-x/?utm_source=site&amp;utm_medium=related">Fixing Flyspell for Emacs in Mac OS X</a></li>
+            <li><a href="https://sadique.io/blog/2012/05/04/fixing-flyspell-for-emacs-in-mac-os-x/?utm_source=site&amp;utm_medium=related">Fixing Flyspell for Emacs in Mac OS X</a></li>
             
             
             
@@ -1954,7 +1963,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/04/29/finding-un-merged-commits-with-git-cherry/?utm_source=site&amp;utm_medium=related">Finding un-merged commits with git cherry</a></li>
+            <li><a href="https://sadique.io/blog/2012/04/29/finding-un-merged-commits-with-git-cherry/?utm_source=site&amp;utm_medium=related">Finding un-merged commits with git cherry</a></li>
             
             
             
@@ -1984,7 +1993,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/02/03/bullet-proof-jenkins-setup/?utm_source=site&amp;utm_medium=related">Bullet proof Jenkins setup</a></li>
+            <li><a href="https://sadique.io/blog/2012/02/03/bullet-proof-jenkins-setup/?utm_source=site&amp;utm_medium=related">Bullet proof Jenkins setup</a></li>
             
             
             
@@ -2014,7 +2023,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/01/17/why-your-project-should-have-a-getting-started-guide./?utm_source=site&amp;utm_medium=related">Why your project should have a Getting Started guide.</a></li>
+            <li><a href="https://sadique.io/blog/2012/01/17/why-your-project-should-have-a-getting-started-guide./?utm_source=site&amp;utm_medium=related">Why your project should have a Getting Started guide.</a></li>
             
             
             
@@ -2036,7 +2045,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/01/16/debugging-c-sharps-httpwebrequest-100-continue-and-nginx/?utm_source=site&amp;utm_medium=related">Debugging: C Sharp&#39;s HttpWebRequest, 100-Continue and nginx</a></li>
+            <li><a href="https://sadique.io/blog/2012/01/16/debugging-c-sharps-httpwebrequest-100-continue-and-nginx/?utm_source=site&amp;utm_medium=related">Debugging: C Sharp&#39;s HttpWebRequest, 100-Continue and nginx</a></li>
             
             
             
@@ -2062,7 +2071,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2011/05/17/wikipedia-page-hopping/?utm_source=site&amp;utm_medium=related">Wikipedia Page Hopping</a></li>
+            <li><a href="https://sadique.io/blog/2011/05/17/wikipedia-page-hopping/?utm_source=site&amp;utm_medium=related">Wikipedia Page Hopping</a></li>
             
             
             
@@ -2084,13 +2093,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2011/03/24/empathy-log-parser/?utm_source=site&amp;utm_medium=related">Empathy Log Parser</a></li>
+            <li><a href="https://sadique.io/blog/2011/03/24/empathy-log-parser/?utm_source=site&amp;utm_medium=related">Empathy Log Parser</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2011/03/23/binary-signature-art/?utm_source=site&amp;utm_medium=related">Binary Signature Art</a></li>
+            <li><a href="https://sadique.io/blog/2011/03/23/binary-signature-art/?utm_source=site&amp;utm_medium=related">Binary Signature Art</a></li>
             
             
             
@@ -2100,7 +2109,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2010/03/16/java-arrays-in-jruby/?utm_source=site&amp;utm_medium=related">Java Arrays in JRuby</a></li>
+            <li><a href="https://sadique.io/blog/2010/03/16/java-arrays-in-jruby/?utm_source=site&amp;utm_medium=related">Java Arrays in JRuby</a></li>
             
             
             
@@ -2138,7 +2147,11 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2010/01/09/autorun.py-execute-stuff-on-file-change/?utm_source=site&amp;utm_medium=related">Autorun.py - Execute stuff on file change</a></li>
+            <li><a href="https://sadique.io/blog/2010/01/09/autorun.py-execute-stuff-on-file-change/?utm_source=site&amp;utm_medium=related">Autorun.py - Execute stuff on file change</a></li>
+            
+            
+            
+            
             
             
             

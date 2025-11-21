@@ -1,48 +1,51 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>SAS on {code that works}</title>
-    <link>http://localhost:1313/tags/sas/?utm_source=site&amp;utm_medium=feed</link>
+    <link>https://sadique.io/tags/sas/?utm_source=site&amp;utm_medium=feed</link>
     <description>Recent content in SAS on {code that works}</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Sat, 23 Mar 2019 19:46:08 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1313/tags/sas/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
+    <atom:link href="https://sadique.io/tags/sas/?utm_source=site&amp;utm_medium=feed" rel="self" type="application/rss+xml" />
     
     <item>
       <title>Understanding trailing @ processing in SAS input</title>
-      <link>http://localhost:1313/blog/2019/03/23/understanding-trailing-@-processing-in-sas-input/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sadique.io/blog/2019/03/23/understanding-trailing-@-processing-in-sas-input/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Sat, 23 Mar 2019 19:46:08 +0000</pubDate>
       
-      <guid>http://localhost:1313/blog/2019/03/23/understanding-trailing-@-processing-in-sas-input/?utm_source=site&amp;utm_medium=feed</guid>
+      <guid>https://sadique.io/blog/2019/03/23/understanding-trailing-@-processing-in-sas-input/?utm_source=site&amp;utm_medium=feed</guid>
       <description>&lt;p&gt;One of the first things I noticed when I started poking around in SAS code is that the &lt;code&gt;input&lt;/code&gt; statement is very powerful, flexible and hence sometimes hard to understand. It can read pretty much anything in to a dataset as long as you tell it what to do.&lt;/p&gt;
 &lt;p&gt;The use of trailing &lt;code&gt;@&lt;/code&gt;s to take control of how SAS advances the input pointer is a powerful technique to read from input files where the data is laid out in non-standard formats. In this blog post, we will try to understand how trailing &lt;code&gt;@&lt;/code&gt; processing works with the help of some &lt;code&gt;infile&lt;/code&gt; statement options and the &lt;code&gt;putlog&lt;/code&gt; statement to write to the SAS log.&lt;/p&gt;
 &lt;p&gt;Let&amp;rsquo;s take this example from the excellent paper &lt;em&gt;The Input Statement: Where It&amp;rsquo;s @&lt;/em&gt; &lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; - given an put file where the first variable has to be read beginning from a particular column in the input line based on the value of the second variable.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-sas&#34; data-lang=&#34;sas&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Age  Type
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f60&#34;&gt;23&lt;/span&gt;   &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f60&#34;&gt;44&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;A first pass at trying to do this will result in code like this:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-sas&#34; data-lang=&#34;sas&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;data &lt;/span&gt;ages;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;input&lt;/span&gt; @&lt;span style=&#34;color:#f60&#34;&gt;6&lt;/span&gt; type $&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;.;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; type=&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;1&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;then&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;input&lt;/span&gt; @&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt; age &lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;.;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;else&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; type=&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;2&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;then&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;input&lt;/span&gt; @&lt;span style=&#34;color:#f60&#34;&gt;3&lt;/span&gt; age &lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;.;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;drop&lt;/span&gt; type;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;  datalines;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;23   1
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  44 2
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;run;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proc print &lt;/span&gt;data=ages;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;title&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Age read without trailing @&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;run;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The result we get is not what we expect.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-sas&#34; data-lang=&#34;sas&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;| Obs | Age |
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|-----|-----|
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;| &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;   | .   |
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;We can understand how SAS read this input using the &lt;code&gt;line=&lt;/code&gt; and &lt;code&gt;column=&lt;/code&gt; options of the &lt;code&gt;infile&lt;/code&gt; statement. While the code in the above listing does not explicitly use &lt;code&gt;infile&lt;/code&gt; to point at the &lt;code&gt;datalines&lt;/code&gt;, this can be done when we want to use &lt;code&gt;infile&lt;/code&gt;&amp;rsquo;s options with &lt;code&gt;datalines&lt;/code&gt;.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-sas&#34;&gt;Age  Type
+23   1
+  44 2
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;A first pass at trying to do this will result in code like this:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-sas&#34;&gt;data ages;
+  input @6 type $1.;
+
+  if type=&#39;1&#39; then
+    input @1 age 2.;
+  else if type=&#39;2&#39; then
+    input @3 age 2.;
+  drop type;
+  datalines;
+23   1
+  44 2
+;
+run;
+
+proc print data=ages;
+  title &amp;quot;Age read without trailing @&amp;quot;;
+run;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The result we get is not what we expect.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-sas&#34;&gt;| Obs | Age |
+|-----|-----|
+| 1   | .   |
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We can understand how SAS read this input using the &lt;code&gt;line=&lt;/code&gt; and &lt;code&gt;column=&lt;/code&gt; options of the &lt;code&gt;infile&lt;/code&gt; statement. While the code in the above listing does not explicitly use &lt;code&gt;infile&lt;/code&gt; to point at the &lt;code&gt;datalines&lt;/code&gt;, this can be done when we want to use &lt;code&gt;infile&lt;/code&gt;&amp;rsquo;s options with &lt;code&gt;datalines&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;This is a good time to remind us what the &lt;code&gt;line=&lt;/code&gt; and &lt;code&gt;column=&lt;/code&gt; options of &lt;code&gt;infile&lt;/code&gt; does. From the &lt;a href=&#34;https://documentation.sas.com/?docsetId=lestmtsref&amp;amp;docsetTarget=n1rill4udj0tfun1fvce3j401plo.htm&amp;amp;docsetVersion=9.4&amp;amp;locale=en&#34;&gt;documentation&lt;/a&gt;:&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;LINE=variable&lt;/p&gt;
@@ -57,88 +60,95 @@
 &lt;p&gt;names a variable that SAS uses to assign the current column location of the input pointer. As with automatic variables, the COLUMN= variable is not written to the data set.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;We can modify our code to set these options and then print the value of all variables including these options using the &lt;code&gt;_all_&lt;/code&gt; variable that prints the &lt;em&gt;Program Data Vector (PDV)&lt;/em&gt;.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-sas&#34; data-lang=&#34;sas&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;data &lt;/span&gt;ages;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;infile&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;datalines&lt;/span&gt; line=line column=col;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;input&lt;/span&gt; @&lt;span style=&#34;color:#f60&#34;&gt;6&lt;/span&gt; type $&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;.;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  putlog &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;After reading type, before reading age: &amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;_all_&lt;/span&gt; ;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; type=&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;1&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;then&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;input&lt;/span&gt; @&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt; age &lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;.;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;else&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; type=&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;2&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;then&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;input&lt;/span&gt; @&lt;span style=&#34;color:#f60&#34;&gt;3&lt;/span&gt; age &lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;.;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  putlog &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;After reading age: &amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;_all_&lt;/span&gt; ;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  putlog &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;drop&lt;/span&gt; type;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;  datalines;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;23   1
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  44 2
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;run;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;When the code runs, the following can be seen in the SAS logs:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-sas&#34; data-lang=&#34;sas&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt; After reading type, before reading age: line=&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt; col=&lt;span style=&#34;color:#f60&#34;&gt;7&lt;/span&gt; type=&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt; age=. _ERROR_=&lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;_N_&lt;/span&gt;=&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt; After reading age: line=&lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt; col=&lt;span style=&#34;color:#f60&#34;&gt;3&lt;/span&gt; type=&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt; age=. _ERROR_=&lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;_N_&lt;/span&gt;=&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;After &lt;code&gt;type&lt;/code&gt; is read, we can see that the pointer is at line &lt;code&gt;1&lt;/code&gt; and column &lt;code&gt;7&lt;/code&gt;, which makes sense considering that the code instructs SAS to go to column &lt;code&gt;6&lt;/code&gt; and read &lt;code&gt;1&lt;/code&gt; character. But then we notice that when &lt;code&gt;age&lt;/code&gt; is read, the pointer has moved to &lt;code&gt;2&lt;/code&gt; and column &lt;code&gt;3&lt;/code&gt; as instructed in the first branch of the &lt;code&gt;if else&lt;/code&gt; condition. Since there is nothing at column &lt;code&gt;1-2&lt;/code&gt; of line &lt;code&gt;2&lt;/code&gt; in the input, a missing value is stored in &lt;code&gt;age&lt;/code&gt;.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-sas&#34;&gt;data ages;
+  infile datalines line=line column=col;
+
+  input @6 type $1.;
+  putlog &amp;quot;After reading type, before reading age: &amp;quot; _all_ ;
+
+  if type=&#39;1&#39; then
+    input @1 age 2.;
+  else if type=&#39;2&#39; then
+    input @3 age 2.;
+  putlog &amp;quot;After reading age: &amp;quot; _all_ ;
+  putlog &amp;quot;&amp;quot;;
+
+  drop type;
+  datalines;
+23   1
+  44 2
+;
+run;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;When the code runs, the following can be seen in the SAS logs:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-sas&#34;&gt; After reading type, before reading age: line=1 col=7 type=1 age=. _ERROR_=0 _N_=1
+ After reading age: line=2 col=3 type=1 age=. _ERROR_=0 _N_=1
+ &amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;After &lt;code&gt;type&lt;/code&gt; is read, we can see that the pointer is at line &lt;code&gt;1&lt;/code&gt; and column &lt;code&gt;7&lt;/code&gt;, which makes sense considering that the code instructs SAS to go to column &lt;code&gt;6&lt;/code&gt; and read &lt;code&gt;1&lt;/code&gt; character. But then we notice that when &lt;code&gt;age&lt;/code&gt; is read, the pointer has moved to &lt;code&gt;2&lt;/code&gt; and column &lt;code&gt;3&lt;/code&gt; as instructed in the first branch of the &lt;code&gt;if else&lt;/code&gt; condition. Since there is nothing at column &lt;code&gt;1-2&lt;/code&gt; of line &lt;code&gt;2&lt;/code&gt; in the input, a missing value is stored in &lt;code&gt;age&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;What we want is some way to tell &lt;code&gt;input&lt;/code&gt; to ot move the pointer after the first input statement. This is where the single trailing &lt;code&gt;@&lt;/code&gt; comes in. It intructs &lt;code&gt;input&lt;/code&gt; to stay on the same line for the next &lt;code&gt;input&lt;/code&gt; statement in the &lt;code&gt;data&lt;/code&gt; step. The above listing modified to use trailing &lt;code&gt;@&lt;/code&gt; is as follows:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-sas&#34; data-lang=&#34;sas&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;data &lt;/span&gt;trailing;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;infile&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;datalines&lt;/span&gt; line=line column=col;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;input&lt;/span&gt; @&lt;span style=&#34;color:#f60&#34;&gt;6&lt;/span&gt; type $&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;. @;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  putlog &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;After reading type, before reading age: &amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;_all_&lt;/span&gt; ;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; type=&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;1&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;then&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;input&lt;/span&gt; @&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt; age &lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;.;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;else&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; type=&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;2&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;then&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;input&lt;/span&gt; @&lt;span style=&#34;color:#f60&#34;&gt;3&lt;/span&gt; age &lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;.;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  putlog &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;After reading age: &amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;_all_&lt;/span&gt; ;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  putlog &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;drop&lt;/span&gt; type;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;  datalines;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;23   1
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  44 2
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;run;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The following log lines are written:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-sas&#34; data-lang=&#34;sas&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt; After reading type, before reading age: line=&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt; col=&lt;span style=&#34;color:#f60&#34;&gt;7&lt;/span&gt; type=&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt; age=. _ERROR_=&lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;_N_&lt;/span&gt;=&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt; After reading age: line=&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt; col=&lt;span style=&#34;color:#f60&#34;&gt;3&lt;/span&gt; type=&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt; age=&lt;span style=&#34;color:#f60&#34;&gt;23&lt;/span&gt; _ERROR_=&lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;_N_&lt;/span&gt;=&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt; After reading type, before reading age: line=1 col=7 type=2 age=. _ERROR_=0 _N_=2
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt; After reading age: line=1 col=5 type=2 age=44 _ERROR_=0 _N_=2
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt; &amp;#34;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The log shows that &lt;code&gt;input&lt;/code&gt; stayed on line &lt;code&gt;1&lt;/code&gt; even after reading the &lt;code&gt;type&lt;/code&gt; variable.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-sas&#34;&gt;data trailing;
+  infile datalines line=line column=col;
+
+  input @6 type $1. @;
+  putlog &amp;quot;After reading type, before reading age: &amp;quot; _all_ ;
+
+  if type=&#39;1&#39; then
+    input @1 age 2.;
+  else if type=&#39;2&#39; then
+    input @3 age 2.;
+  putlog &amp;quot;After reading age: &amp;quot; _all_ ;
+  putlog &amp;quot;&amp;quot;;
+
+  drop type;
+  datalines;
+23   1
+  44 2
+;
+run;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The following log lines are written:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-sas&#34;&gt; After reading type, before reading age: line=1 col=7 type=1 age=. _ERROR_=0 _N_=1
+ After reading age: line=1 col=3 type=1 age=23 _ERROR_=0 _N_=1
+ &amp;quot;
+ After reading type, before reading age: line=1 col=7 type=2 age=. _ERROR_=0 _N_=2
+ After reading age: line=1 col=5 type=2 age=44 _ERROR_=0 _N_=2
+ &amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The log shows that &lt;code&gt;input&lt;/code&gt; stayed on line &lt;code&gt;1&lt;/code&gt; even after reading the &lt;code&gt;type&lt;/code&gt; variable.&lt;/p&gt;
 &lt;p&gt;The new dataset has the expected values:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-sas&#34; data-lang=&#34;sas&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;| Obs | Age |
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|-----|-----|
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;| &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;   | &lt;span style=&#34;color:#f60&#34;&gt;23&lt;/span&gt;  |
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;| &lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;   | &lt;span style=&#34;color:#f60&#34;&gt;44&lt;/span&gt;  |
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Here is another example that you often run in to on the internet when discussing trailing &lt;code&gt;@&lt;/code&gt;:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-sas&#34; data-lang=&#34;sas&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;data &lt;/span&gt; colors;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;infile&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;datalines&lt;/span&gt; line=linenum column=col;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;input&lt;/span&gt; @&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt; Var1 $ @&lt;span style=&#34;color:#f60&#34;&gt;8&lt;/span&gt; Var2 $ @;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  putlog &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;After reading Var1 and Var2: &amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;_all_&lt;/span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;input&lt;/span&gt; @&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt; Var3 $ @&lt;span style=&#34;color:#f60&#34;&gt;8&lt;/span&gt; Var4 $ ;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  putlog &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;After reading Var3 and Var4: &amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;_all_&lt;/span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  putlog &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;  datalines;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;RED    ORANGE  YELLOW  GREEN
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;BLUE   INDIGO  PURPLE  VIOLET
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;CYAN   WHITE   FUCSIA  BLACK
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;GRAY   BROWN   PINK    MAGENTA
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;run;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This results in the following dataset:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-sas&#34; data-lang=&#34;sas&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|Obs  | Var1 | Var2   | Var3 | Var4   |
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;|-----|------|--------|------|--------|
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;| &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;   | RED  | ORANGE | RED  | ORANGE |
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;| &lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;   | BLUE | INDIGO | BLUE | INDIGO |
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;| &lt;span style=&#34;color:#f60&#34;&gt;3&lt;/span&gt;   | CYAN | WHITE  | CYAN | WHITE  |
-&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;| &lt;span style=&#34;color:#f60&#34;&gt;4&lt;/span&gt;   | GRAY | BROWN  | GRAY | BROWN  |
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Because of the trailing &lt;code&gt;@&lt;/code&gt; in the first &lt;code&gt;input&lt;/code&gt; statement, the values of &lt;code&gt;Var1&lt;/code&gt; and &lt;code&gt;Var3&lt;/code&gt; for all the observations are the same, as both are read from column &lt;code&gt;1&lt;/code&gt;. Similarly &lt;code&gt;Var2&lt;/code&gt; and &lt;code&gt;Var4&lt;/code&gt; are the same as they are read from column &lt;code&gt;8&lt;/code&gt;.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-sas&#34;&gt;| Obs | Age |
+|-----|-----|
+| 1   | 23  |
+| 2   | 44  |
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here is another example that you often run in to on the internet when discussing trailing &lt;code&gt;@&lt;/code&gt;:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-sas&#34;&gt;data  colors;
+  infile datalines line=linenum column=col;
+  input @1 Var1 $ @8 Var2 $ @;
+  putlog &amp;quot;After reading Var1 and Var2: &amp;quot; _all_;
+
+  input @1 Var3 $ @8 Var4 $ ;
+  putlog &amp;quot;After reading Var3 and Var4: &amp;quot; _all_;
+  putlog &amp;quot;&amp;quot;;
+
+  datalines;
+RED    ORANGE  YELLOW  GREEN
+BLUE   INDIGO  PURPLE  VIOLET
+CYAN   WHITE   FUCSIA  BLACK
+GRAY   BROWN   PINK    MAGENTA
+;
+run;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This results in the following dataset:&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-sas&#34;&gt;|Obs  | Var1 | Var2   | Var3 | Var4   |
+|-----|------|--------|------|--------|
+| 1   | RED  | ORANGE | RED  | ORANGE |
+| 2   | BLUE | INDIGO | BLUE | INDIGO |
+| 3   | CYAN | WHITE  | CYAN | WHITE  |
+| 4   | GRAY | BROWN  | GRAY | BROWN  |
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Because of the trailing &lt;code&gt;@&lt;/code&gt; in the first &lt;code&gt;input&lt;/code&gt; statement, the values of &lt;code&gt;Var1&lt;/code&gt; and &lt;code&gt;Var3&lt;/code&gt; for all the observations are the same, as both are read from column &lt;code&gt;1&lt;/code&gt;. Similarly &lt;code&gt;Var2&lt;/code&gt; and &lt;code&gt;Var4&lt;/code&gt; are the same as they are read from column &lt;code&gt;8&lt;/code&gt;.&lt;/p&gt;
 &lt;div class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
 &lt;hr&gt;
 &lt;ol&gt;
@@ -152,10 +162,10 @@
     
     <item>
       <title>Importing the SASUSER datasets in SAS Studio</title>
-      <link>http://localhost:1313/blog/2019/03/23/importing-the-sasuser-datasets-in-sas-studio/?utm_source=site&amp;utm_medium=feed</link>
+      <link>https://sadique.io/blog/2019/03/23/importing-the-sasuser-datasets-in-sas-studio/?utm_source=site&amp;utm_medium=feed</link>
       <pubDate>Sat, 23 Mar 2019 18:14:06 +0000</pubDate>
       
-      <guid>http://localhost:1313/blog/2019/03/23/importing-the-sasuser-datasets-in-sas-studio/?utm_source=site&amp;utm_medium=feed</guid>
+      <guid>https://sadique.io/blog/2019/03/23/importing-the-sasuser-datasets-in-sas-studio/?utm_source=site&amp;utm_medium=feed</guid>
       <description>&lt;p&gt;I have been playing around with SAS for the last two weeks. I started with a SAS University Edition running on a VirtualBox instance on my MacBook, but soon realized that it was way more convenient to use a SAS OnDemand account. Having made the switch, I realized that all learning materials made references to and used examples with datsets from a library named &lt;code&gt;SASUSER&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;It was not clear how to get these datasets and use them in SAS Studio. After a bunch of searches, I found &lt;a href=&#34;https://communities.sas.com/t5/SAS-Certification/How-to-get-SASUSER-library-s-data-sets/m-p/306631/highlight/true#M124&#34;&gt;this page&lt;/a&gt; that pointed at data set up scripts for these datasets. The URL it pointed to had of course been repurposed and now redirected to a marketing page. After going back through multiple versions of the page on Internet Archive, I finally managed to find a &lt;a href=&#34;https://web.archive.org/web/20151005165134/http://support.sas.com:80/publishing/cert/basecertguide3.html&#34;&gt;snapshot&lt;/a&gt; that linked to a set up file that worked.&lt;/p&gt;
 &lt;p&gt;Here are the steps to use the setup script:&lt;/p&gt;
@@ -166,15 +176,17 @@
 &lt;li&gt;Upload the sample data script from step 1 to this folder, using the web interface.&lt;/li&gt;
 &lt;li&gt;Create a new SAS source file named &lt;code&gt;libname.sas&lt;/code&gt; with the following content:&lt;/li&gt;
 &lt;/ul&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-sas&#34; data-lang=&#34;sas&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;libname&lt;/span&gt; sasuser &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;~/sasuser&amp;#34;&lt;/span&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ul&gt;
+&lt;pre&gt;&lt;code class=&#34;language-sas&#34;&gt;libname sasuser &amp;quot;~/sasuser&amp;quot;;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
 &lt;li&gt;Execute this script.&lt;/li&gt;
 &lt;li&gt;Now execute the sample data script.&lt;/li&gt;
 &lt;li&gt;It should create all the datsets you need in the library named &lt;code&gt;sasuser&lt;/code&gt;. You can verify this using the following script:&lt;/li&gt;
 &lt;/ul&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-sas&#34; data-lang=&#34;sas&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;proc contents &lt;/span&gt;data=sasuser&lt;span style=&#34;color:#f60&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;_all_&lt;/span&gt; nods&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;run;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description>
+&lt;pre&gt;&lt;code class=&#34;language-sas&#34;&gt;proc contents data=sasuser._all_ nods;
+run;
+&lt;/code&gt;&lt;/pre&gt;
+</description>
     </item>
     
   </channel>

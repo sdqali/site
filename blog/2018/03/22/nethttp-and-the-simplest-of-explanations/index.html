@@ -1,6 +1,6 @@
 <!DOCTYPE html5>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us" prefix="og: http://ogp.me/ns#">
-  <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <head>
 
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -35,14 +35,14 @@ This is a story about how many layers of abstractions and indirections one works
   <meta name="twitter:title" content="Net::HTTP and the simplest of explanations">
   <meta name="twitter:description" content="This blog post exists purely to remind myself that Ruby&rsquo;s Net::HTTP expects a host and a port as parameters when creating a new connection and not a url string.
 This is a story about how many layers of abstractions and indirections one works through on a daily basis as a developer and the effort required to dive through these layers, all the while ignoring the simplest of explanations of why things may have gone wrong in the first place.">
-  <meta name="twitter:image" content="http://localhost:1313//">
+  <meta name="twitter:image" content="https://sadique.io//">
 
   <meta property="og:title" content="Net::HTTP and the simplest of explanations" />
   <meta property="og:description" content="This blog post exists purely to remind myself that Ruby&rsquo;s Net::HTTP expects a host and a port as parameters when creating a new connection and not a url string.
 This is a story about how many layers of abstractions and indirections one works through on a daily basis as a developer and the effort required to dive through these layers, all the while ignoring the simplest of explanations of why things may have gone wrong in the first place." itemprop="description"/>
-  <meta property="og:url" content="http://localhost:1313/blog/2018/03/22/nethttp-and-the-simplest-of-explanations/" />
-  <meta property="og:image" content="http://localhost:1313//" />
-  <meta name="hugo:permalink" content="http://localhost:1313/blog/2018/03/22/nethttp-and-the-simplest-of-explanations/">
+  <meta property="og:url" content="https://sadique.io/blog/2018/03/22/nethttp-and-the-simplest-of-explanations/" />
+  <meta property="og:image" content="https://sadique.io//" />
+  <meta name="hugo:permalink" content="https://sadique.io/blog/2018/03/22/nethttp-and-the-simplest-of-explanations/">
   <meta name="hugo:filepath" content="content/blog/2018-03-21-net::http-and-the-simplest-of-explanations.markdown">
   <body>
     <script>
@@ -99,60 +99,69 @@ This is a story about how many layers of abstractions and indirections one works
 <li>Tell the test container, through environment variables the <code>host</code> and the <code>port</code> of the new component.</li>
 </ol>
 <p>So, off we went and configured everything:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>env.NEWAPP_HOST<span style="color:#555">=</span>http://new-app.local
-</span></span><span style="display:flex;"><span>env.NEWAPP_PORT<span style="color:#555">=</span><span style="color:#f60">1313</span>
-</span></span></code></pre></div><p>We ran the tests and boom:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>SocketError <span style="color:#555">(</span>Failed to open TCP connection to http://new-app.local:1313 <span style="color:#555">(</span>getaddrinfo: nodename nor servname provided, or not known<span style="color:#555">))</span>
-</span></span></code></pre></div><p>Well, that does not look right. We double check all the configurations and run the test again. Same result. May be we should be using a Ruby <code>Symbol</code> instead of a <code>String</code> in that particular config? May be. We try that, same result.</p>
+<pre><code class="language-bash">env.NEWAPP_HOST=http://new-app.local
+env.NEWAPP_PORT=1313
+</code></pre>
+<p>We ran the tests and boom:</p>
+<pre><code class="language-bash">SocketError (Failed to open TCP connection to http://new-app.local:1313 (getaddrinfo: nodename nor servname provided, or not known))
+</code></pre>
+<p>Well, that does not look right. We double check all the configurations and run the test again. Same result. May be we should be using a Ruby <code>Symbol</code> instead of a <code>String</code> in that particular config? May be. We try that, same result.</p>
 <p>At this point, we hop on to the test container and ping <code>new-app.local</code>. It can connect.
 What if the app is not available? We should totally <code>telnet</code> it. Well, this container does not have <code>telnet</code>. We can totally install it, right? Right. What kind of distro is this running? Well <code>cat /etc/*release*</code>. Debian, huh? <code>apt-get install telnet</code>. Wooh. Back to <code>telnet</code> then. That looks good.</p>
 <p>At this point, the attention turns to the RSpec tests. What if the tests have some environment variables? Let&rsquo;s debug it and look for things in Ruby&rsquo;s <code>ENV</code>. Hmmm, nothing interesting there. Can the Ruby process even connect to <code>new-app</code>? We have <code>Faraday</code>, let&rsquo;s try that:</p>
-<pre tabindex="0"><code class="language-irb" data-lang="irb">&gt; require &#39;faraday&#39;
+<pre><code class="language-irb">&gt; require 'faraday'
 =&gt; true
-&gt; resp = Faraday.get &#34;http://google.com&#34;
+&gt; resp = Faraday.get &quot;http://google.com&quot;
 &gt; resp.status
 200
-</code></pre><p>Okay, does the library we use for the test even use <code>Faraday</code>? Let&rsquo;s open the source code for that and poke around. Nah, it uses <code>Net::Http</code>. Let&rsquo;s try the example from <a href="https://ruby-doc.org/stdlib-2.5.0/libdoc/net/http/rdoc/Net/HTTP.html">it&rsquo;s documentation</a>:</p>
-<pre tabindex="0"><code class="language-irb" data-lang="irb">&gt; require &#39;net/http&#39;
+</code></pre>
+<p>Okay, does the library we use for the test even use <code>Faraday</code>? Let&rsquo;s open the source code for that and poke around. Nah, it uses <code>Net::Http</code>. Let&rsquo;s try the example from <a href="https://ruby-doc.org/stdlib-2.5.0/libdoc/net/http/rdoc/Net/HTTP.html">it&rsquo;s documentation</a>:</p>
+<pre><code class="language-irb">&gt; require 'net/http'
 =&gt; true
-&gt; Net::HTTP.get_response(URI(&#34;http://new-app.local:1313&#34;))
+&gt; Net::HTTP.get_response(URI(&quot;http://new-app.local:1313&quot;))
 =&gt; #&lt;Net::HTTPOK 200 OK readbody=true&gt;
-</code></pre><p>Looks good. Well, wait! Our library uses <code>Net::HTTP.new</code> to create a connection. Let&rsquo;s try that:</p>
-<pre tabindex="0"><code class="language-irb" data-lang="irb">&gt; conn = Net::HTTP.new(&#34;http://new-app.local&#34;, 1313)
+</code></pre>
+<p>Looks good. Well, wait! Our library uses <code>Net::HTTP.new</code> to create a connection. Let&rsquo;s try that:</p>
+<pre><code class="language-irb">&gt; conn = Net::HTTP.new(&quot;http://new-app.local&quot;, 1313)
 =&gt; #&lt;Net::HTTP http://new-app.local:1313 open=false&gt;
-&gt; conn.get(&#34;/&#34;)
+&gt; conn.get(&quot;/&quot;)
 Traceback (most recent call last):
 .
 .
 .
 SocketError (Failed to open TCP connection to http://new-app.local:1313 (getaddrinfo: nodename nor servname provided, or not known))
-</code></pre><p>At this point, we are covered in a mix of disappointment and excitement. We are annoyed that things are not working. But, may be, may be we have uncovered some obscure bug somewhere in the toolset? We would learn later that this is the point where we should have known what&rsquo;s up? But we didn&rsquo;t and the story continues.</p>
+</code></pre>
+<p>At this point, we are covered in a mix of disappointment and excitement. We are annoyed that things are not working. But, may be, may be we have uncovered some obscure bug somewhere in the toolset? We would learn later that this is the point where we should have known what&rsquo;s up? But we didn&rsquo;t and the story continues.</p>
 <p>At this point, we ping the Slack channels of the teams involved in building the library we consume. They have not seen this before. Someone suggests that they have had issues with Ruby inside Docker containers. We finally find a GitHub issue for a different project where someone encountered their container setting the <code>HTTP_PROXY</code> env variable and that causing <code>Net::HTTP</code> to fail. We pore over everything to make sure that there is no proxy set. What now?</p>
 <p>What if we attempt to connect to the new app from a Ruby process running on one of the other 10 containers we run?</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>&gt; docker <span style="color:#366">exec</span> -it 51dbf9f75ca8 ruby -e <span style="color:#c30">&#39;require &#34;net/http&#34;; conn = Net::HTTP.new(&#34;http://new-app.local&#34;, 1313); conn.get(&#34;/&#34;)&#39;</span>
-</span></span><span style="display:flex;"><span>Traceback <span style="color:#555">(</span>most recent call last<span style="color:#555">)</span>:
-</span></span><span style="display:flex;"><span>.
-</span></span><span style="display:flex;"><span>.
-</span></span><span style="display:flex;"><span>.
-</span></span><span style="display:flex;"><span>SocketError <span style="color:#555">(</span>Failed to open TCP connection to http://new-app.local:1313 <span style="color:#555">(</span>getaddrinfo: nodename nor servname provided, or not known<span style="color:#555">))</span>
-</span></span></code></pre></div><p>That is interesting, isn&rsquo;t it? Is it happening to only our systems? What if we just tried to hit Google?</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>&gt; docker <span style="color:#366">exec</span> -it 51dbf9f75ca8 ruby -e <span style="color:#c30">&#39;require &#34;net/http&#34;; conn = Net::HTTP.new(&#34;http://google.com&#34;, 80); conn.get(&#34;/&#34;)&#39;</span>
-</span></span><span style="display:flex;"><span>Traceback <span style="color:#555">(</span>most recent call last<span style="color:#555">)</span>:
-</span></span><span style="display:flex;"><span>.
-</span></span><span style="display:flex;"><span>.
-</span></span><span style="display:flex;"><span>.
-</span></span><span style="display:flex;"><span>SocketError <span style="color:#555">(</span>Failed to open TCP connection to http://google.com:80 <span style="color:#555">(</span>getaddrinfo: nodename nor servname provided, or not known<span style="color:#555">))</span>
-</span></span></code></pre></div><p>What if somehow our orchestration tool or containers created by us are causing it? Let&rsquo;s try a random container from DockerHub:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>&gt; docker run -it ruby:2.5-slim ruby -e <span style="color:#c30">&#39;require &#34;net/http&#34;; conn = Net::HTTP.new(&#34;http://google.com&#34;,80); conn.get(&#34;/&#34;)&#39;</span>
-</span></span><span style="display:flex;"><span>Traceback <span style="color:#555">(</span>most recent call last<span style="color:#555">)</span>:
-</span></span><span style="display:flex;"><span>.
-</span></span><span style="display:flex;"><span>.
-</span></span><span style="display:flex;"><span>.
-</span></span><span style="display:flex;"><span>SocketError <span style="color:#555">(</span>Failed to open TCP connection to http://google.com:80 <span style="color:#555">(</span>getaddrinfo: nodename nor servname provided, or not known<span style="color:#555">))</span>
-</span></span></code></pre></div><p>At this point, light bulbs are beginning to go off. Let&rsquo;s try this on our laptops? Same result. And then it struck us. It says it can&rsquo;t open a TCP connection to a URL with <code>http</code> in it.  Of course, it cant. It should be looking for <code>google.com</code>, should not it? Yes:</p>
-<pre tabindex="0"><code class="language-irb" data-lang="irb">&gt; docker run -it ruby:2.5-slim ruby -e &#39;require &#34;net/http&#34;; conn = Net::HTTP.new(&#34;google.com&#34;, 80); res = conn.get(&#34;/&#34;); puts res.code&#39;
+<pre><code class="language-bash">&gt; docker exec -it 51dbf9f75ca8 ruby -e 'require &quot;net/http&quot;; conn = Net::HTTP.new(&quot;http://new-app.local&quot;, 1313); conn.get(&quot;/&quot;)'
+Traceback (most recent call last):
+.
+.
+.
+SocketError (Failed to open TCP connection to http://new-app.local:1313 (getaddrinfo: nodename nor servname provided, or not known))
+</code></pre>
+<p>That is interesting, isn&rsquo;t it? Is it happening to only our systems? What if we just tried to hit Google?</p>
+<pre><code class="language-bash">&gt; docker exec -it 51dbf9f75ca8 ruby -e 'require &quot;net/http&quot;; conn = Net::HTTP.new(&quot;http://google.com&quot;, 80); conn.get(&quot;/&quot;)'
+Traceback (most recent call last):
+.
+.
+.
+SocketError (Failed to open TCP connection to http://google.com:80 (getaddrinfo: nodename nor servname provided, or not known))
+</code></pre>
+<p>What if somehow our orchestration tool or containers created by us are causing it? Let&rsquo;s try a random container from DockerHub:</p>
+<pre><code class="language-bash">&gt; docker run -it ruby:2.5-slim ruby -e 'require &quot;net/http&quot;; conn = Net::HTTP.new(&quot;http://google.com&quot;,80); conn.get(&quot;/&quot;)'
+Traceback (most recent call last):
+.
+.
+.
+SocketError (Failed to open TCP connection to http://google.com:80 (getaddrinfo: nodename nor servname provided, or not known))
+</code></pre>
+<p>At this point, light bulbs are beginning to go off. Let&rsquo;s try this on our laptops? Same result. And then it struck us. It says it can&rsquo;t open a TCP connection to a URL with <code>http</code> in it.  Of course, it cant. It should be looking for <code>google.com</code>, should not it? Yes:</p>
+<pre><code class="language-irb">&gt; docker run -it ruby:2.5-slim ruby -e 'require &quot;net/http&quot;; conn = Net::HTTP.new(&quot;google.com&quot;, 80); res = conn.get(&quot;/&quot;); puts res.code'
 301
-</code></pre><p>And with a lot of excitement and some shame, we realize that the library really meant <code>host</code> when it asked for the <code>NEWAPP_HOST</code> environment variable.</p>
+</code></pre>
+<p>And with a lot of excitement and some shame, we realize that the library really meant <code>host</code> when it asked for the <code>NEWAPP_HOST</code> environment variable.</p>
 <p>I don&rsquo;t think there are any big lessons in this story other than that, sometimes the simplest explanation of a problems makes a lot more sense than you would think it does. Also, if you ever use <code>Net::HTTP.new</code>, remember that it expects you to provide a <code>host</code> as the first param, not a URL.</p>
 
         </div>
@@ -536,7 +545,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/05/a-very-basic-introduction-to-deploying-a-java-application-using-kubernetes/?utm_source=site&amp;utm_medium=related">A very basic introduction to deploying a Java application using Kubernetes</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/05/a-very-basic-introduction-to-deploying-a-java-application-using-kubernetes/?utm_source=site&amp;utm_medium=related">A very basic introduction to deploying a Java application using Kubernetes</a></li>
             
             
             
@@ -846,7 +855,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2014/08/02/importing-the-yelp-dataset-into-mongodb/?utm_source=site&amp;utm_medium=related">Importing the Yelp dataset into MongoDB</a></li>
+            <li><a href="https://sadique.io/blog/2014/08/02/importing-the-yelp-dataset-into-mongodb/?utm_source=site&amp;utm_medium=related">Importing the Yelp dataset into MongoDB</a></li>
             
             
             
@@ -984,7 +993,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/10/13/implementing-rate-limiting-in-rails-part-2/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 2</a></li>
+            <li><a href="https://sadique.io/blog/2013/10/13/implementing-rate-limiting-in-rails-part-2/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 2</a></li>
             
             
             
@@ -1006,7 +1015,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/10/12/implementing-rate-limiting-in-rails-part-1/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 1</a></li>
+            <li><a href="https://sadique.io/blog/2013/10/12/implementing-rate-limiting-in-rails-part-1/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 1</a></li>
             
             
             
@@ -1072,13 +1081,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/10/01/ruby-named-capture-groups-and-local-variables/?utm_source=site&amp;utm_medium=related">Ruby, Named Capture Groups and Local Variables</a></li>
+            <li><a href="https://sadique.io/blog/2013/10/01/ruby-named-capture-groups-and-local-variables/?utm_source=site&amp;utm_medium=related">Ruby, Named Capture Groups and Local Variables</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/09/29/named-capture-groups-in-regular-expressions/?utm_source=site&amp;utm_medium=related">Named Capture Groups in Regular Expressions</a></li>
+            <li><a href="https://sadique.io/blog/2013/09/29/named-capture-groups-in-regular-expressions/?utm_source=site&amp;utm_medium=related">Named Capture Groups in Regular Expressions</a></li>
             
             
             
@@ -1136,7 +1145,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/09/12/managing-gemsets-in-rbenv/?utm_source=site&amp;utm_medium=related">Managing Gemsets in Rbenv</a></li>
+            <li><a href="https://sadique.io/blog/2013/09/12/managing-gemsets-in-rbenv/?utm_source=site&amp;utm_medium=related">Managing Gemsets in Rbenv</a></li>
             
             
             
@@ -1150,7 +1159,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/09/08/looking-up-compiler-params-used-to-compile-a-ruby-version/?utm_source=site&amp;utm_medium=related">Looking up Compiler params used to compile a Ruby version</a></li>
+            <li><a href="https://sadique.io/blog/2013/09/08/looking-up-compiler-params-used-to-compile-a-ruby-version/?utm_source=site&amp;utm_medium=related">Looking up Compiler params used to compile a Ruby version</a></li>
             
             
             
@@ -1604,7 +1613,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/07/04/heredocs-in-ruby-and-python/?utm_source=site&amp;utm_medium=related">Heredocs in Ruby and Python</a></li>
+            <li><a href="https://sadique.io/blog/2012/07/04/heredocs-in-ruby-and-python/?utm_source=site&amp;utm_medium=related">Heredocs in Ruby and Python</a></li>
             
             
             
@@ -1650,7 +1659,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/06/06/know-your-tools-dont-shoot-yourself-in-the-foot/?utm_source=site&amp;utm_medium=related">Know Your Tools - Don&#39;t Shoot Yourself in the Foot</a></li>
+            <li><a href="https://sadique.io/blog/2012/06/06/know-your-tools-dont-shoot-yourself-in-the-foot/?utm_source=site&amp;utm_medium=related">Know Your Tools - Don&#39;t Shoot Yourself in the Foot</a></li>
             
             
             
@@ -1864,7 +1873,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2011/05/17/wikipedia-page-hopping/?utm_source=site&amp;utm_medium=related">Wikipedia Page Hopping</a></li>
+            <li><a href="https://sadique.io/blog/2011/05/17/wikipedia-page-hopping/?utm_source=site&amp;utm_medium=related">Wikipedia Page Hopping</a></li>
             
             
             
@@ -1886,13 +1895,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2011/03/24/empathy-log-parser/?utm_source=site&amp;utm_medium=related">Empathy Log Parser</a></li>
+            <li><a href="https://sadique.io/blog/2011/03/24/empathy-log-parser/?utm_source=site&amp;utm_medium=related">Empathy Log Parser</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2011/03/23/binary-signature-art/?utm_source=site&amp;utm_medium=related">Binary Signature Art</a></li>
+            <li><a href="https://sadique.io/blog/2011/03/23/binary-signature-art/?utm_source=site&amp;utm_medium=related">Binary Signature Art</a></li>
             
             
             
@@ -1902,7 +1911,11 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2010/03/16/java-arrays-in-jruby/?utm_source=site&amp;utm_medium=related">Java Arrays in JRuby</a></li>
+            <li><a href="https://sadique.io/blog/2010/03/16/java-arrays-in-jruby/?utm_source=site&amp;utm_medium=related">Java Arrays in JRuby</a></li>
+            
+            
+            
+            
             
             
             

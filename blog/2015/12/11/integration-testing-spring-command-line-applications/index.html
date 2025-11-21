@@ -1,6 +1,6 @@
 <!DOCTYPE html5>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us" prefix="og: http://ogp.me/ns#">
-  <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <head>
 
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -33,13 +33,13 @@
   <meta name="twitter:creator" content="@sdqali">
   <meta name="twitter:title" content="Integration testing Spring command line applications">
   <meta name="twitter:description" content="In the last blog post, I wrote about the challenges of writing an integration test for a Spring command line application. One of the solutions for this issue discussed in the blog post was to use the @IntegrationTest annotations to inject Java system properties and use that to run the application instead of the normal command line arguments. This blog post describes how to perform this.">
-  <meta name="twitter:image" content="http://localhost:1313//images/spring-by-pivotal.png">
+  <meta name="twitter:image" content="https://sadique.io//images/spring-by-pivotal.png">
 
   <meta property="og:title" content="Integration testing Spring command line applications" />
   <meta property="og:description" content="In the last blog post, I wrote about the challenges of writing an integration test for a Spring command line application. One of the solutions for this issue discussed in the blog post was to use the @IntegrationTest annotations to inject Java system properties and use that to run the application instead of the normal command line arguments. This blog post describes how to perform this." itemprop="description"/>
-  <meta property="og:url" content="http://localhost:1313/blog/2015/12/11/integration-testing-spring-command-line-applications/" />
-  <meta property="og:image" content="http://localhost:1313//images/spring-by-pivotal.png" />
-  <meta name="hugo:permalink" content="http://localhost:1313/blog/2015/12/11/integration-testing-spring-command-line-applications/">
+  <meta property="og:url" content="https://sadique.io/blog/2015/12/11/integration-testing-spring-command-line-applications/" />
+  <meta property="og:image" content="https://sadique.io//images/spring-by-pivotal.png" />
+  <meta name="hugo:permalink" content="https://sadique.io/blog/2015/12/11/integration-testing-spring-command-line-applications/">
   <meta name="hugo:filepath" content="content/blog/2015-12-11-integration-testing-spring-command-line-applications.markdown">
   <body>
     <script>
@@ -86,70 +86,74 @@
         <div>
           <p>In the <a href="/blog/2015/12/10/integration-testing-challenges-for-non-web-spring-applications/">last blog post</a>, I wrote about the challenges of writing an integration test for a Spring command line application. One of the solutions for this issue discussed in the blog post was to use the <code>@IntegrationTest</code> annotations to inject Java system properties and use that to run the application instead of the normal command line arguments. This blog post describes how to perform this.</p>
 <p>The first step is to rewrite our test to use the <code>@IntegrationTest</code> annotations. This will result in a test that looks as follows:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@RunWith</span>(SpringJUnit4ClassRunner.<span style="color:#309">class</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@SpringApplicationConfiguration</span>(classes<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>{Application.<span style="color:#309">class</span>})<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@IntegrationTest</span>(value<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;input:expectedOutput&#34;</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">ApplicationIntegrationTest</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Autowired</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span>Application<span style="color:#bbb"> </span>application;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Rule</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>OutputCapture<span style="color:#bbb"> </span>outputCapture<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>OutputCapture();<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Test</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">shouldGenerateResultFiles</span>()<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>application.<span style="color:#309">run</span>();<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>assertTrue(outputCapture.<span style="color:#309">toString</span>().<span style="color:#309">contains</span>(<span style="color:#c30">&#34;expectedOutput&#34;</span>));<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><p>At this point, it is worth taking a look at what the <code>@IntegrationTest</code> annotation causes Spring to do. This is a meta-annotation <sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> that specifies a number of test listeners including <code>IntegrationTestPropertiesListener</code>.</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Documented</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@Inherited</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@Retention</span>(RetentionPolicy.<span style="color:#309">RUNTIME</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@Target</span>(ElementType.<span style="color:#309">TYPE</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@TestExecutionListeners</span>(listeners<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>{<span style="color:#bbb"> </span>IntegrationTestPropertiesListener.<span style="color:#309">class</span>,<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>DirtiesContextBeforeModesTestExecutionListener.<span style="color:#309">class</span>,<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>DependencyInjectionTestExecutionListener.<span style="color:#309">class</span>,<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>DirtiesContextTestExecutionListener.<span style="color:#309">class</span>,<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>TransactionalTestExecutionListener.<span style="color:#309">class</span>,<span style="color:#bbb"> </span>SqlScriptsTestExecutionListener.<span style="color:#309">class</span><span style="color:#bbb"> </span>})<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#99f">@interface</span><span style="color:#bbb"> </span>IntegrationTest<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>String<span style="color:#555">[]</span><span style="color:#bbb"> </span><span style="color:#c0f">value</span>()<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">default</span><span style="color:#bbb"> </span>{};<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><p><code>IntegrationTestPropertiesListener</code> is an implementation of <code>TestExecutionListener</code> which is a mechanism used by Spring to react to test execution events like <code>beforeTestClass</code>, <code>prepareTestInstance</code>, <code>beforeTestMethod</code>, <code>beforeTestMethod</code> and <code>afterTestClass</code>.</p>
+<pre><code class="language-java">@RunWith(SpringJUnit4ClassRunner.class)
+@SpringApplicationConfiguration(classes = {Application.class})
+@IntegrationTest(value = &quot;input:expectedOutput&quot;)
+public class ApplicationIntegrationTest {
+    @Autowired
+    private Application application;
+
+    @Rule
+    public OutputCapture outputCapture = new OutputCapture();
+
+    @Test
+    public void shouldGenerateResultFiles() throws Exception {
+        application.run();
+        assertTrue(outputCapture.toString().contains(&quot;expectedOutput&quot;));
+    }
+}
+</code></pre>
+<p>At this point, it is worth taking a look at what the <code>@IntegrationTest</code> annotation causes Spring to do. This is a meta-annotation <sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> that specifies a number of test listeners including <code>IntegrationTestPropertiesListener</code>.</p>
+<pre><code class="language-java">@Documented
+@Inherited
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+@TestExecutionListeners(listeners = { IntegrationTestPropertiesListener.class,
+        DirtiesContextBeforeModesTestExecutionListener.class,
+        DependencyInjectionTestExecutionListener.class,
+        DirtiesContextTestExecutionListener.class,
+        TransactionalTestExecutionListener.class, SqlScriptsTestExecutionListener.class })
+public @interface IntegrationTest {
+    String[] value() default {};
+}
+</code></pre>
+<p><code>IntegrationTestPropertiesListener</code> is an implementation of <code>TestExecutionListener</code> which is a mechanism used by Spring to react to test execution events like <code>beforeTestClass</code>, <code>prepareTestInstance</code>, <code>beforeTestMethod</code>, <code>beforeTestMethod</code> and <code>afterTestClass</code>.</p>
 <p>For the purposes of what we are trying to achieve, the listener we are really interested in is the <code>beforeTestClass</code> of <code>IntegrationTestPropertiesListener</code>.</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">prepareTestInstance</span>(TestContext<span style="color:#bbb"> </span>testContext)<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Class<span style="color:#555">&lt;?&gt;</span><span style="color:#bbb"> </span>testClass<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>testContext.<span style="color:#309">getTestClass</span>();<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>AnnotationAttributes<span style="color:#bbb"> </span>annotationAttributes<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>AnnotatedElementUtils<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">getMergedAnnotationAttributes</span>(testClass,<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                        </span>IntegrationTest.<span style="color:#309">class</span>.<span style="color:#309">getName</span>());<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(annotationAttributes<span style="color:#bbb"> </span><span style="color:#555">!=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>)<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>addPropertySourceProperties(testContext,<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                    </span>annotationAttributes.<span style="color:#309">getStringArray</span>(<span style="color:#c30">&#34;value&#34;</span>));<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><p>As we can see, the value of the <code>value</code> element <sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup> of our <code>@IntegrationTest</code> gets injected to the configuration of the test context.</p>
+<pre><code class="language-java">    @Override
+    public void prepareTestInstance(TestContext testContext) throws Exception {
+        Class&lt;?&gt; testClass = testContext.getTestClass();
+        AnnotationAttributes annotationAttributes = AnnotatedElementUtils
+                .getMergedAnnotationAttributes(testClass,
+                        IntegrationTest.class.getName());
+        if (annotationAttributes != null) {
+            addPropertySourceProperties(testContext,
+                    annotationAttributes.getStringArray(&quot;value&quot;));
+        }
+    }
+</code></pre>
+<p>As we can see, the value of the <code>value</code> element <sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup> of our <code>@IntegrationTest</code> gets injected to the configuration of the test context.</p>
 <p>Now that we have understood and used the <code>@IntegrationTest</code> annotation to push in configuration, it is time to make our application consume this configuration.</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Configuration</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@EnableAutoConfiguration</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@ComponentScan</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">Application</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">implements</span><span style="color:#bbb"> </span>CommandLineRunner<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Autowired</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>DataService<span style="color:#bbb"> </span>dataService;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Value</span>(<span style="color:#c30">&#34;${input}&#34;</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>String<span style="color:#bbb"> </span>input;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">static</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">main</span>(String<span style="color:#555">[]</span><span style="color:#bbb"> </span>args)<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>SpringApplication.<span style="color:#309">run</span>(Application.<span style="color:#309">class</span>,<span style="color:#bbb"> </span>args);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">run</span>(String...<span style="color:#bbb"> </span>args)<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>dataService.<span style="color:#309">perform</span>(input);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><p>An added benefit of this approach is that this forces us to use named parameter arguments when running the application as opposed to the position based command line arguments. This of course does not solve the problem of testing if you absolutely have to use position based arguments for your application. It would be nice Spring provided a mechanism to inject the command line arguments in a test before <code>SpringApplicationContextLoader</code> <sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup> took over. But I suspect that this is not a common enough use case of Spring that users have asked the Spring team to implement it.</p>
+<pre><code class="language-java">@Configuration
+@EnableAutoConfiguration
+@ComponentScan
+public class Application implements CommandLineRunner {
+    @Autowired
+    DataService dataService;
+
+    @Value(&quot;${input}&quot;)
+    String input;
+
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
+
+    @Override
+    public void run(String... args) {
+        dataService.perform(input);
+    }
+}
+</code></pre>
+<p>An added benefit of this approach is that this forces us to use named parameter arguments when running the application as opposed to the position based command line arguments. This of course does not solve the problem of testing if you absolutely have to use position based arguments for your application. It would be nice Spring provided a mechanism to inject the command line arguments in a test before <code>SpringApplicationContextLoader</code> <sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup> took over. But I suspect that this is not a common enough use case of Spring that users have asked the Spring team to implement it.</p>
 <div class="footnotes" role="doc-endnotes">
 <hr>
 <ol>
@@ -309,7 +313,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2019/08/02/flushing-metrics-in-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Flushing Metrics in Dropwizard Commands</a></li>
+            <li><a href="https://sadique.io/blog/2019/08/02/flushing-metrics-in-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Flushing Metrics in Dropwizard Commands</a></li>
             
             
             
@@ -323,7 +327,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2019/07/28/managing-environment-lifecycles-for-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Managing environment lifecycles for Dropwizard Commands</a></li>
+            <li><a href="https://sadique.io/blog/2019/07/28/managing-environment-lifecycles-for-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Managing environment lifecycles for Dropwizard Commands</a></li>
             
             
             
@@ -357,13 +361,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2019/03/23/understanding-trailing-@-processing-in-sas-input/?utm_source=site&amp;utm_medium=related">Understanding trailing @ processing in SAS input</a></li>
+            <li><a href="https://sadique.io/blog/2019/03/23/understanding-trailing-@-processing-in-sas-input/?utm_source=site&amp;utm_medium=related">Understanding trailing @ processing in SAS input</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2019/03/23/importing-the-sasuser-datasets-in-sas-studio/?utm_source=site&amp;utm_medium=related">Importing the SASUSER datasets in SAS Studio</a></li>
+            <li><a href="https://sadique.io/blog/2019/03/23/importing-the-sasuser-datasets-in-sas-studio/?utm_source=site&amp;utm_medium=related">Importing the SASUSER datasets in SAS Studio</a></li>
             
             
             
@@ -381,7 +385,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2018/06/09/formatting-java-instant-for-resolutions/?utm_source=site&amp;utm_medium=related">Formatting Java Instant for resolutions</a></li>
+            <li><a href="https://sadique.io/blog/2018/06/09/formatting-java-instant-for-resolutions/?utm_source=site&amp;utm_medium=related">Formatting Java Instant for resolutions</a></li>
             
             
             
@@ -395,7 +399,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2018/05/05/freebuilder-plugin-for-intellij/?utm_source=site&amp;utm_medium=related">FreeBuilder plugin for IntelliJ</a></li>
+            <li><a href="https://sadique.io/blog/2018/05/05/freebuilder-plugin-for-intellij/?utm_source=site&amp;utm_medium=related">FreeBuilder plugin for IntelliJ</a></li>
             
             
             
@@ -425,7 +429,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2018/03/23/a-jackson-and-freebuilder-quirk/?utm_source=site&amp;utm_medium=related">A Jackson and FreeBuilder quirk</a></li>
+            <li><a href="https://sadique.io/blog/2018/03/23/a-jackson-and-freebuilder-quirk/?utm_source=site&amp;utm_medium=related">A Jackson and FreeBuilder quirk</a></li>
             
             
             
@@ -463,7 +467,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2017/08/18/uploading-a-standalone-artifact-to-nexus-3/?utm_source=site&amp;utm_medium=related">Uploading a standalone artifact to Nexus 3</a></li>
+            <li><a href="https://sadique.io/blog/2017/08/18/uploading-a-standalone-artifact-to-nexus-3/?utm_source=site&amp;utm_medium=related">Uploading a standalone artifact to Nexus 3</a></li>
             
             
             
@@ -497,7 +501,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/30/implementing-feature-toggles-for-a-spring-boot-application-part-4/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 4</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/30/implementing-feature-toggles-for-a-spring-boot-application-part-4/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 4</a></li>
             
             
             
@@ -519,19 +523,19 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/29/implementing-feature-toggles-for-a-spring-boot-application-part-3/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 3</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/29/implementing-feature-toggles-for-a-spring-boot-application-part-3/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 3</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/27/implementing-feature-toggles-for-a-spring-boot-application-part-2/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 2</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/27/implementing-feature-toggles-for-a-spring-boot-application-part-2/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 2</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/22/implementing-feature-toggles-for-a-spring-boot-application-part-1/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 1</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/22/implementing-feature-toggles-for-a-spring-boot-application-part-1/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 1</a></li>
             
             
             
@@ -565,13 +569,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/11/setting-up-a-secure-etcd-cluster-behind-a-proxy/?utm_source=site&amp;utm_medium=related">Setting up a secure etcd cluster behind a proxy</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/11/setting-up-a-secure-etcd-cluster-behind-a-proxy/?utm_source=site&amp;utm_medium=related">Setting up a secure etcd cluster behind a proxy</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/05/a-very-basic-introduction-to-deploying-a-java-application-using-kubernetes/?utm_source=site&amp;utm_medium=related">A very basic introduction to deploying a Java application using Kubernetes</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/05/a-very-basic-introduction-to-deploying-a-java-application-using-kubernetes/?utm_source=site&amp;utm_medium=related">A very basic introduction to deploying a Java application using Kubernetes</a></li>
             
             
             
@@ -589,7 +593,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/02/handling-deserialization-errors-in-spring-redis-sessions/?utm_source=site&amp;utm_medium=related">Handling Deserialization errors in Spring Redis Sessions</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/02/handling-deserialization-errors-in-spring-redis-sessions/?utm_source=site&amp;utm_medium=related">Handling Deserialization errors in Spring Redis Sessions</a></li>
             
             
             
@@ -603,13 +607,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/21/csrf-protection-with-spring-security-and-angular-js/?utm_source=site&amp;utm_medium=related">CSRF Protection with Spring Security and Angular JS</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/21/csrf-protection-with-spring-security-and-angular-js/?utm_source=site&amp;utm_medium=related">CSRF Protection with Spring Security and Angular JS</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/16/controlling-redis-auto-configuration-for-spring-boot-session/?utm_source=site&amp;utm_medium=related">Controlling Redis auto-configuration for Spring Boot Session</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/16/controlling-redis-auto-configuration-for-spring-boot-session/?utm_source=site&amp;utm_medium=related">Controlling Redis auto-configuration for Spring Boot Session</a></li>
             
             
             
@@ -623,7 +627,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/14/jwt-authentication-with-spring-web-part-5/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 5</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/14/jwt-authentication-with-spring-web-part-5/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 5</a></li>
             
             
             
@@ -641,19 +645,19 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/08/jwt-authentication-with-spring-web-part-4/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 4</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/08/jwt-authentication-with-spring-web-part-4/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 4</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/06/jwt-authentication-with-spring-web-part-3/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 3</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/06/jwt-authentication-with-spring-web-part-3/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 3</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/03/jwt-authentication-with-spring-web-part-2/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 2</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/03/jwt-authentication-with-spring-web-part-2/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 2</a></li>
             
             
             
@@ -663,13 +667,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/03/jwt-authentication-with-spring-web-part-1/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 1</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/03/jwt-authentication-with-spring-web-part-1/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 1</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/06/30/json-logging-for-spring-applications/?utm_source=site&amp;utm_medium=related">JSON logging for Spring applications</a></li>
+            <li><a href="https://sadique.io/blog/2016/06/30/json-logging-for-spring-applications/?utm_source=site&amp;utm_medium=related">JSON logging for Spring applications</a></li>
             
             
             
@@ -679,13 +683,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/06/29/injecting-dependencies-into-a-spring-@configuration/?utm_source=site&amp;utm_medium=related">Injecting dependencies into a Spring @Configuration</a></li>
+            <li><a href="https://sadique.io/blog/2016/06/29/injecting-dependencies-into-a-spring-@configuration/?utm_source=site&amp;utm_medium=related">Injecting dependencies into a Spring @Configuration</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/06/08/filtering-responses-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Filtering responses in Spring MVC</a></li>
+            <li><a href="https://sadique.io/blog/2016/06/08/filtering-responses-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Filtering responses in Spring MVC</a></li>
             
             
             
@@ -727,31 +731,31 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/04/24/deprecating-domain-events-in-axon/?utm_source=site&amp;utm_medium=related">Deprecating domain events in Axon</a></li>
+            <li><a href="https://sadique.io/blog/2016/04/24/deprecating-domain-events-in-axon/?utm_source=site&amp;utm_medium=related">Deprecating domain events in Axon</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/04/20/programmable-exit-codes-for-spring-command-line-applications-2/?utm_source=site&amp;utm_medium=related">Programmable exit codes for spring command line applications - 2</a></li>
+            <li><a href="https://sadique.io/blog/2016/04/20/programmable-exit-codes-for-spring-command-line-applications-2/?utm_source=site&amp;utm_medium=related">Programmable exit codes for spring command line applications - 2</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/04/18/programmable-exit-codes-for-spring-command-line-applications/?utm_source=site&amp;utm_medium=related">Programmable exit codes for Spring command line applications</a></li>
+            <li><a href="https://sadique.io/blog/2016/04/18/programmable-exit-codes-for-spring-command-line-applications/?utm_source=site&amp;utm_medium=related">Programmable exit codes for Spring command line applications</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/01/30/using-custom-arguments-in-spring-mvc-controllers/?utm_source=site&amp;utm_medium=related">Using custom arguments in Spring MVC controllers</a></li>
+            <li><a href="https://sadique.io/blog/2016/01/30/using-custom-arguments-in-spring-mvc-controllers/?utm_source=site&amp;utm_medium=related">Using custom arguments in Spring MVC controllers</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/16/authentication-for-apache-camel-http-components/?utm_source=site&amp;utm_medium=related">Authentication for Apache Camel HTTP components</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/16/authentication-for-apache-camel-http-components/?utm_source=site&amp;utm_medium=related">Authentication for Apache Camel HTTP components</a></li>
             
             
             
@@ -773,7 +777,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/15/thoughts-on-open-graph-tags/?utm_source=site&amp;utm_medium=related">Thoughts on Open Graph tags</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/15/thoughts-on-open-graph-tags/?utm_source=site&amp;utm_medium=related">Thoughts on Open Graph tags</a></li>
             
             
             
@@ -783,19 +787,19 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/11/integration-testing-challenges-for-non-web-spring-applications/?utm_source=site&amp;utm_medium=related">Integration testing challenges for non-web Spring applications</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/11/integration-testing-challenges-for-non-web-spring-applications/?utm_source=site&amp;utm_medium=related">Integration testing challenges for non-web Spring applications</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/08/how-thinking-of-documentation-as-legislation-helped-me-become-a-better-programmer/?utm_source=site&amp;utm_medium=related">How thinking of Documentation as Legislation helped me become a better programmer</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/08/how-thinking-of-documentation-as-legislation-helped-me-become-a-better-programmer/?utm_source=site&amp;utm_medium=related">How thinking of Documentation as Legislation helped me become a better programmer</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/06/implementing-custom-annotations-for-spring-mvc/?utm_source=site&amp;utm_medium=related">Implementing custom annotations for Spring MVC</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/06/implementing-custom-annotations-for-spring-mvc/?utm_source=site&amp;utm_medium=related">Implementing custom annotations for Spring MVC</a></li>
             
             
             
@@ -809,7 +813,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/05/validating-requestparams-and-pathvariables-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Validating RequestParams and PathVariables in Spring MVC</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/05/validating-requestparams-and-pathvariables-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Validating RequestParams and PathVariables in Spring MVC</a></li>
             
             
             
@@ -823,13 +827,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/11/24/testing-async-responses-using-mockmvc/?utm_source=site&amp;utm_medium=related">Testing async responses using MockMvc</a></li>
+            <li><a href="https://sadique.io/blog/2015/11/24/testing-async-responses-using-mockmvc/?utm_source=site&amp;utm_medium=related">Testing async responses using MockMvc</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/06/09/running-multiple-applications-in-the-same-tomcat-installation/?utm_source=site&amp;utm_medium=related">Running multiple applications in the same Tomcat installation</a></li>
+            <li><a href="https://sadique.io/blog/2015/06/09/running-multiple-applications-in-the-same-tomcat-installation/?utm_source=site&amp;utm_medium=related">Running multiple applications in the same Tomcat installation</a></li>
             
             
             
@@ -859,7 +863,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/05/22/making-sense-of-cloud-foundry-security-group-declarations/?utm_source=site&amp;utm_medium=related">Making sense of Cloud Foundry security group declarations</a></li>
+            <li><a href="https://sadique.io/blog/2015/05/22/making-sense-of-cloud-foundry-security-group-declarations/?utm_source=site&amp;utm_medium=related">Making sense of Cloud Foundry security group declarations</a></li>
             
             
             
@@ -869,7 +873,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/05/21/configuring-cloud-foundry-java-memory-parameters/?utm_source=site&amp;utm_medium=related">Configuring Cloud Foundry Java Memory Parameters</a></li>
+            <li><a href="https://sadique.io/blog/2015/05/21/configuring-cloud-foundry-java-memory-parameters/?utm_source=site&amp;utm_medium=related">Configuring Cloud Foundry Java Memory Parameters</a></li>
             
             
             
@@ -971,13 +975,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2014/03/20/clojure-dojo-levenshtein-edit-distance/?utm_source=site&amp;utm_medium=related">Clojure Dojo - Levenshtein edit distance</a></li>
+            <li><a href="https://sadique.io/blog/2014/03/20/clojure-dojo-levenshtein-edit-distance/?utm_source=site&amp;utm_medium=related">Clojure Dojo - Levenshtein edit distance</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2014/02/17/a-simple-jmeter-test-with-login/?utm_source=site&amp;utm_medium=related">A simple JMeter test with login</a></li>
+            <li><a href="https://sadique.io/blog/2014/02/17/a-simple-jmeter-test-with-login/?utm_source=site&amp;utm_medium=related">A simple JMeter test with login</a></li>
             
             
             
@@ -1071,7 +1075,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/10/13/implementing-rate-limiting-in-rails-part-2/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 2</a></li>
+            <li><a href="https://sadique.io/blog/2013/10/13/implementing-rate-limiting-in-rails-part-2/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 2</a></li>
             
             
             
@@ -1093,7 +1097,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/10/12/implementing-rate-limiting-in-rails-part-1/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 1</a></li>
+            <li><a href="https://sadique.io/blog/2013/10/12/implementing-rate-limiting-in-rails-part-1/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 1</a></li>
             
             
             
@@ -1103,7 +1107,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/10/07/python-hack-dynamically-override-an-objects-attribute/?utm_source=site&amp;utm_medium=related">Python Hack - Dynamically override an object&#39;s attribute</a></li>
+            <li><a href="https://sadique.io/blog/2013/10/07/python-hack-dynamically-override-an-objects-attribute/?utm_source=site&amp;utm_medium=related">Python Hack - Dynamically override an object&#39;s attribute</a></li>
             
             
             
@@ -1221,7 +1225,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/09/12/managing-gemsets-in-rbenv/?utm_source=site&amp;utm_medium=related">Managing Gemsets in Rbenv</a></li>
+            <li><a href="https://sadique.io/blog/2013/09/12/managing-gemsets-in-rbenv/?utm_source=site&amp;utm_medium=related">Managing Gemsets in Rbenv</a></li>
             
             
             
@@ -1235,7 +1239,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/09/08/looking-up-compiler-params-used-to-compile-a-ruby-version/?utm_source=site&amp;utm_medium=related">Looking up Compiler params used to compile a Ruby version</a></li>
+            <li><a href="https://sadique.io/blog/2013/09/08/looking-up-compiler-params-used-to-compile-a-ruby-version/?utm_source=site&amp;utm_medium=related">Looking up Compiler params used to compile a Ruby version</a></li>
             
             
             
@@ -1285,7 +1289,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/08/15/pythons-bool-type/?utm_source=site&amp;utm_medium=related">Python&#39;s bool type</a></li>
+            <li><a href="https://sadique.io/blog/2013/08/15/pythons-bool-type/?utm_source=site&amp;utm_medium=related">Python&#39;s bool type</a></li>
             
             
             
@@ -1399,7 +1403,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/07/31/validating-json-in-emacs/?utm_source=site&amp;utm_medium=related">Validating JSON in Emacs</a></li>
+            <li><a href="https://sadique.io/blog/2013/07/31/validating-json-in-emacs/?utm_source=site&amp;utm_medium=related">Validating JSON in Emacs</a></li>
             
             
             
@@ -1425,7 +1429,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/04/29/emacs-hack-viewing-git-logs-while-composing-commit-messages/?utm_source=site&amp;utm_medium=related">Emacs hack: Viewing Git logs while composing commit messages</a></li>
+            <li><a href="https://sadique.io/blog/2013/04/29/emacs-hack-viewing-git-logs-while-composing-commit-messages/?utm_source=site&amp;utm_medium=related">Emacs hack: Viewing Git logs while composing commit messages</a></li>
             
             
             
@@ -1439,7 +1443,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/04/14/configure-gits-comment-character/?utm_source=site&amp;utm_medium=related">Configure Git&#39;s comment character</a></li>
+            <li><a href="https://sadique.io/blog/2013/04/14/configure-gits-comment-character/?utm_source=site&amp;utm_medium=related">Configure Git&#39;s comment character</a></li>
             
             
             
@@ -1453,7 +1457,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/04/11/my-experience-working-remotely/?utm_source=site&amp;utm_medium=related">My experience working remotely</a></li>
+            <li><a href="https://sadique.io/blog/2013/04/11/my-experience-working-remotely/?utm_source=site&amp;utm_medium=related">My experience working remotely</a></li>
             
             
             
@@ -1475,7 +1479,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
+            <li><a href="https://sadique.io/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
             
             
             
@@ -1505,7 +1509,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/04/05/javascript-clipboard-access-and-hidden-flash-widgets/?utm_source=site&amp;utm_medium=related">JavaScript, clipboard access and hidden flash widgets</a></li>
+            <li><a href="https://sadique.io/blog/2013/04/05/javascript-clipboard-access-and-hidden-flash-widgets/?utm_source=site&amp;utm_medium=related">JavaScript, clipboard access and hidden flash widgets</a></li>
             
             
             
@@ -1519,7 +1523,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/01/22/reducing-emacs-startup-time-while-committing/?utm_source=site&amp;utm_medium=related">Reducing Emacs startup time while committing</a></li>
+            <li><a href="https://sadique.io/blog/2013/01/22/reducing-emacs-startup-time-while-committing/?utm_source=site&amp;utm_medium=related">Reducing Emacs startup time while committing</a></li>
             
             
             
@@ -1549,7 +1553,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/11/29/my-first-firefox-plugin-getcache-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">My first Firefox plugin: GetCache - View cached version of the current page</a></li>
+            <li><a href="https://sadique.io/blog/2012/11/29/my-first-firefox-plugin-getcache-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">My first Firefox plugin: GetCache - View cached version of the current page</a></li>
             
             
             
@@ -1563,7 +1567,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/11/28/getcache-a-chrome-plugin-to-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">GetCache - A Chrome plugin to view cached version of the current page</a></li>
+            <li><a href="https://sadique.io/blog/2012/11/28/getcache-a-chrome-plugin-to-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">GetCache - A Chrome plugin to view cached version of the current page</a></li>
             
             
             
@@ -1593,7 +1597,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/11/27/on-rest-content-type-google-chrome-and-caching/?utm_source=site&amp;utm_medium=related">On REST, Content-Type, Google Chrome and Caching</a></li>
+            <li><a href="https://sadique.io/blog/2012/11/27/on-rest-content-type-google-chrome-and-caching/?utm_source=site&amp;utm_medium=related">On REST, Content-Type, Google Chrome and Caching</a></li>
             
             
             
@@ -1699,7 +1703,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/07/09/understanding-pythons-with-statement/?utm_source=site&amp;utm_medium=related">Understanding Python&#39;s &#34;with&#34; statement</a></li>
+            <li><a href="https://sadique.io/blog/2012/07/09/understanding-pythons-with-statement/?utm_source=site&amp;utm_medium=related">Understanding Python&#39;s &#34;with&#34; statement</a></li>
             
             
             
@@ -1713,13 +1717,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/07/04/heredocs-in-ruby-and-python/?utm_source=site&amp;utm_medium=related">Heredocs in Ruby and Python</a></li>
+            <li><a href="https://sadique.io/blog/2012/07/04/heredocs-in-ruby-and-python/?utm_source=site&amp;utm_medium=related">Heredocs in Ruby and Python</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/06/25/micro-journal-simple-git-backed-journal-in-python/?utm_source=site&amp;utm_medium=related">Micro Journal - simple Git-backed journal in Python</a></li>
+            <li><a href="https://sadique.io/blog/2012/06/25/micro-journal-simple-git-backed-journal-in-python/?utm_source=site&amp;utm_medium=related">Micro Journal - simple Git-backed journal in Python</a></li>
             
             
             
@@ -1757,13 +1761,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/06/24/vodqa-ncr-maintaining-large-test-suites/?utm_source=site&amp;utm_medium=related">VodQA NCR: Maintaining Large Test Suites</a></li>
+            <li><a href="https://sadique.io/blog/2012/06/24/vodqa-ncr-maintaining-large-test-suites/?utm_source=site&amp;utm_medium=related">VodQA NCR: Maintaining Large Test Suites</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/06/06/know-your-tools-dont-shoot-yourself-in-the-foot/?utm_source=site&amp;utm_medium=related">Know Your Tools - Don&#39;t Shoot Yourself in the Foot</a></li>
+            <li><a href="https://sadique.io/blog/2012/06/06/know-your-tools-dont-shoot-yourself-in-the-foot/?utm_source=site&amp;utm_medium=related">Know Your Tools - Don&#39;t Shoot Yourself in the Foot</a></li>
             
             
             
@@ -1809,7 +1813,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/06/05/managing-security-certificates-from-the-console-on-windows-mac-os-x-and-linux/?utm_source=site&amp;utm_medium=related">Managing security certificates from the console - on Windows, Mac OS X and Linux</a></li>
+            <li><a href="https://sadique.io/blog/2012/06/05/managing-security-certificates-from-the-console-on-windows-mac-os-x-and-linux/?utm_source=site&amp;utm_medium=related">Managing security certificates from the console - on Windows, Mac OS X and Linux</a></li>
             
             
             
@@ -1855,7 +1859,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/05/11/indian-and-pakistani-cricketers-who-make-better-debuts/?utm_source=site&amp;utm_medium=related">Indian and Pakistani cricketers - who make better debuts?</a></li>
+            <li><a href="https://sadique.io/blog/2012/05/11/indian-and-pakistani-cricketers-who-make-better-debuts/?utm_source=site&amp;utm_medium=related">Indian and Pakistani cricketers - who make better debuts?</a></li>
             
             
             
@@ -1869,7 +1873,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/05/04/fixing-flyspell-for-emacs-in-mac-os-x/?utm_source=site&amp;utm_medium=related">Fixing Flyspell for Emacs in Mac OS X</a></li>
+            <li><a href="https://sadique.io/blog/2012/05/04/fixing-flyspell-for-emacs-in-mac-os-x/?utm_source=site&amp;utm_medium=related">Fixing Flyspell for Emacs in Mac OS X</a></li>
             
             
             
@@ -1883,7 +1887,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/04/29/finding-un-merged-commits-with-git-cherry/?utm_source=site&amp;utm_medium=related">Finding un-merged commits with git cherry</a></li>
+            <li><a href="https://sadique.io/blog/2012/04/29/finding-un-merged-commits-with-git-cherry/?utm_source=site&amp;utm_medium=related">Finding un-merged commits with git cherry</a></li>
             
             
             
@@ -1913,7 +1917,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/02/03/bullet-proof-jenkins-setup/?utm_source=site&amp;utm_medium=related">Bullet proof Jenkins setup</a></li>
+            <li><a href="https://sadique.io/blog/2012/02/03/bullet-proof-jenkins-setup/?utm_source=site&amp;utm_medium=related">Bullet proof Jenkins setup</a></li>
             
             
             
@@ -1943,7 +1947,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/01/17/why-your-project-should-have-a-getting-started-guide./?utm_source=site&amp;utm_medium=related">Why your project should have a Getting Started guide.</a></li>
+            <li><a href="https://sadique.io/blog/2012/01/17/why-your-project-should-have-a-getting-started-guide./?utm_source=site&amp;utm_medium=related">Why your project should have a Getting Started guide.</a></li>
             
             
             
@@ -1965,7 +1969,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/01/16/debugging-c-sharps-httpwebrequest-100-continue-and-nginx/?utm_source=site&amp;utm_medium=related">Debugging: C Sharp&#39;s HttpWebRequest, 100-Continue and nginx</a></li>
+            <li><a href="https://sadique.io/blog/2012/01/16/debugging-c-sharps-httpwebrequest-100-continue-and-nginx/?utm_source=site&amp;utm_medium=related">Debugging: C Sharp&#39;s HttpWebRequest, 100-Continue and nginx</a></li>
             
             
             
@@ -1991,7 +1995,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2011/05/17/wikipedia-page-hopping/?utm_source=site&amp;utm_medium=related">Wikipedia Page Hopping</a></li>
+            <li><a href="https://sadique.io/blog/2011/05/17/wikipedia-page-hopping/?utm_source=site&amp;utm_medium=related">Wikipedia Page Hopping</a></li>
             
             
             
@@ -2013,13 +2017,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2011/03/24/empathy-log-parser/?utm_source=site&amp;utm_medium=related">Empathy Log Parser</a></li>
+            <li><a href="https://sadique.io/blog/2011/03/24/empathy-log-parser/?utm_source=site&amp;utm_medium=related">Empathy Log Parser</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2011/03/23/binary-signature-art/?utm_source=site&amp;utm_medium=related">Binary Signature Art</a></li>
+            <li><a href="https://sadique.io/blog/2011/03/23/binary-signature-art/?utm_source=site&amp;utm_medium=related">Binary Signature Art</a></li>
             
             
             
@@ -2029,7 +2033,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2010/03/16/java-arrays-in-jruby/?utm_source=site&amp;utm_medium=related">Java Arrays in JRuby</a></li>
+            <li><a href="https://sadique.io/blog/2010/03/16/java-arrays-in-jruby/?utm_source=site&amp;utm_medium=related">Java Arrays in JRuby</a></li>
             
             
             
@@ -2067,7 +2071,11 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2010/01/09/autorun.py-execute-stuff-on-file-change/?utm_source=site&amp;utm_medium=related">Autorun.py - Execute stuff on file change</a></li>
+            <li><a href="https://sadique.io/blog/2010/01/09/autorun.py-execute-stuff-on-file-change/?utm_source=site&amp;utm_medium=related">Autorun.py - Execute stuff on file change</a></li>
+            
+            
+            
+            
             
             
             

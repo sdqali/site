@@ -1,6 +1,6 @@
 <!DOCTYPE html5>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us" prefix="og: http://ogp.me/ns#">
-  <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <head>
 
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -33,13 +33,13 @@
   <meta name="twitter:creator" content="@sdqali">
   <meta name="twitter:title" content="Testing async responses using MockMvc">
   <meta name="twitter:description" content="There are times when a Spring MVC end point performs asynchronous operations. Testing these end points using MockMvc can be tricky because of the asynchronous nature in which the result of the operation is eventually returned. This blog post describes how to write tests in such scenarios.">
-  <meta name="twitter:image" content="http://localhost:1313//images/spring-by-pivotal.png">
+  <meta name="twitter:image" content="https://sadique.io//images/spring-by-pivotal.png">
 
   <meta property="og:title" content="Testing async responses using MockMvc" />
   <meta property="og:description" content="There are times when a Spring MVC end point performs asynchronous operations. Testing these end points using MockMvc can be tricky because of the asynchronous nature in which the result of the operation is eventually returned. This blog post describes how to write tests in such scenarios." itemprop="description"/>
-  <meta property="og:url" content="http://localhost:1313/blog/2015/11/24/testing-async-responses-using-mockmvc/" />
-  <meta property="og:image" content="http://localhost:1313//images/spring-by-pivotal.png" />
-  <meta name="hugo:permalink" content="http://localhost:1313/blog/2015/11/24/testing-async-responses-using-mockmvc/">
+  <meta property="og:url" content="https://sadique.io/blog/2015/11/24/testing-async-responses-using-mockmvc/" />
+  <meta property="og:image" content="https://sadique.io//images/spring-by-pivotal.png" />
+  <meta name="hugo:permalink" content="https://sadique.io/blog/2015/11/24/testing-async-responses-using-mockmvc/">
   <meta name="hugo:filepath" content="content/blog/2015-11-24-testing-async-responses-using-mockmvc.markdown">
   <body>
     <script>
@@ -94,93 +94,100 @@
         <div>
           <p>There are times when a Spring MVC end point performs asynchronous operations. Testing these end points using MockMvc can be tricky because of the asynchronous nature in which the result of the operation is eventually returned. This blog post describes how to write tests in such scenarios.</p>
 <p>Let&rsquo;s take a look at the following example. In this example, we have a simple end point that responds with a JSON object when invoked.</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@RestController</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@RequestMapping</span>(<span style="color:#c30">&#34;/test&#34;</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">ExampleController</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@RequestMapping</span>(value<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;/hello&#34;</span>,<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>method<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>GET,<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>consumes<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>APPLICATION_JSON_VALUE,<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>produces<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>APPLICATION_JSON_VALUE)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@ResponseStatus</span>(OK)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>Map<span style="color:#555">&lt;</span>String,<span style="color:#bbb"> </span>Object<span style="color:#555">&gt;</span><span style="color:#bbb"> </span><span style="color:#c0f">hello</span>(){<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>helloMessage();<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span>Map<span style="color:#555">&lt;</span>String,<span style="color:#bbb"> </span>Object<span style="color:#555">&gt;</span><span style="color:#bbb"> </span><span style="color:#c0f">helloMessage</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>Collections.<span style="color:#309">singletonMap</span>(<span style="color:#c30">&#34;message&#34;</span>,<span style="color:#bbb"> </span><span style="color:#c30">&#34;hello&#34;</span>);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><p>Writing a MockMvc test for this controller is fairly simple. The following test invokes the end point and asserts that the end point returns:</p>
+<pre><code class="language-java">@RestController
+@RequestMapping(&quot;/test&quot;)
+class ExampleController {
+    @RequestMapping(value = &quot;/hello&quot;,
+            method = GET,
+            consumes = APPLICATION_JSON_VALUE,
+            produces = APPLICATION_JSON_VALUE)
+    @ResponseStatus(OK)
+    public Map&lt;String, Object&gt; hello(){
+        return helloMessage();
+    }
+
+    private Map&lt;String, Object&gt; helloMessage() {
+        return Collections.singletonMap(&quot;message&quot;, &quot;hello&quot;);
+    }
+}
+</code></pre>
+<p>Writing a MockMvc test for this controller is fairly simple. The following test invokes the end point and asserts that the end point returns:</p>
 <ul>
 <li>The right HTTP response code <code>200</code></li>
 <li>The right Content-Type <code>application/json</code></li>
 <li>The right JSON message</li>
 </ul>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@RunWith</span>(MockitoJUnitRunner.<span style="color:#309">class</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">ExampleControllerTest</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">static</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">final</span><span style="color:#bbb"> </span>String<span style="color:#bbb"> </span>CONTENT_TYPE<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;Content-Type&#34;</span>;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span>ExampleController<span style="color:#bbb"> </span>controller;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span>MockMvc<span style="color:#bbb"> </span>mockMvc;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Before</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">setUp</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>controller<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>ExampleController();<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>mockMvc<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>MockMvcBuilders<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">standaloneSetup</span>(controller)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">build</span>();<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Test</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">shouldHaveAMessageInResponse</span>()<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>mockMvc<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">perform</span>(get(<span style="color:#c30">&#34;/test/hello&#34;</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                        </span>.<span style="color:#309">contentType</span>(APPLICATION_JSON))<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">andDo</span>(print())<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">andExpect</span>(status().<span style="color:#309">isOk</span>())<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">andExpect</span>(header().<span style="color:#309">string</span>(CONTENT_TYPE,<span style="color:#bbb"> </span>APPLICATION_JSON_VALUE))<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">andExpect</span>(jsonPath(<span style="color:#c30">&#34;message&#34;</span>).<span style="color:#309">value</span>(<span style="color:#c30">&#34;hello&#34;</span>));<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><p>Now, lets try and write a similar test for an end point uses <code>DeferredResult</code> to do asynchronous request processing. The end point in this example just wraps the JSON structure in <code>DeferredResult</code> and returns, whereas there will be a long running asynchronous process in a more useful case. But the idea remains the same.</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@RequestMapping</span>(value<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;/deferred&#34;</span>,<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>method<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>GET,<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>consumes<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>APPLICATION_JSON_VALUE,<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>produces<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>APPLICATION_JSON_VALUE<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@ResponseStatus</span>(OK)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>DeferredResult<span style="color:#555">&lt;</span>Map<span style="color:#555">&gt;</span><span style="color:#bbb"> </span><span style="color:#c0f">deferred</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>DeferredResult<span style="color:#555">&lt;</span>Map<span style="color:#555">&gt;</span><span style="color:#bbb"> </span>deferredResult<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>DeferredResult<span style="color:#555">&lt;&gt;</span>();<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>deferredResult.<span style="color:#309">setResult</span>(helloMessage());<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>deferredResult;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><p>If our test for this end point were to use the same mechanism as the previous test, we will start observing an interesting error.</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Test</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">shouldHaveAMessageInDeferredResponse</span>()<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>mockMvc<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">perform</span>(get(<span style="color:#c30">&#34;/test/deferred&#34;</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                        </span>.<span style="color:#309">contentType</span>(APPLICATION_JSON))<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">andExpect</span>(status().<span style="color:#309">isOk</span>())<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">andExpect</span>(header().<span style="color:#309">string</span>(CONTENT_TYPE,<span style="color:#bbb"> </span>APPLICATION_JSON_VALUE))<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">andExpect</span>(jsonPath(<span style="color:#c30">&#34;message&#34;</span>).<span style="color:#309">value</span>(<span style="color:#c30">&#34;hello&#34;</span>));<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>Response header Content-Type expected:&lt;application/json&gt; but was:&lt;null&gt;
-</span></span></code></pre></div><p>This happened because MockMvc did not wait for the asynchronous process to finish. The solution to this involves using MockMvc&rsquo;s <code>asyncDispatch</code>. AsyncDispatch creates a new request that continues from the result of a previous MockMvc request that started the asynchronous process.
+<pre><code class="language-java">@RunWith(MockitoJUnitRunner.class)
+public class ExampleControllerTest {
+
+    public static final String CONTENT_TYPE = &quot;Content-Type&quot;;
+    private ExampleController controller;
+    private MockMvc mockMvc;
+
+    @Before
+    public void setUp() {
+        controller = new ExampleController();
+        mockMvc = MockMvcBuilders
+                .standaloneSetup(controller)
+                .build();
+    }
+
+    @Test
+    public void shouldHaveAMessageInResponse() throws Exception {
+        mockMvc
+                .perform(get(&quot;/test/hello&quot;)
+                        .contentType(APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath(&quot;message&quot;).value(&quot;hello&quot;));
+    }
+}
+
+</code></pre>
+<p>Now, lets try and write a similar test for an end point uses <code>DeferredResult</code> to do asynchronous request processing. The end point in this example just wraps the JSON structure in <code>DeferredResult</code> and returns, whereas there will be a long running asynchronous process in a more useful case. But the idea remains the same.</p>
+<pre><code class="language-java">    @RequestMapping(value = &quot;/deferred&quot;,
+            method = GET,
+            consumes = APPLICATION_JSON_VALUE,
+            produces = APPLICATION_JSON_VALUE
+    )
+    @ResponseStatus(OK)
+    public DeferredResult&lt;Map&gt; deferred() {
+        DeferredResult&lt;Map&gt; deferredResult = new DeferredResult&lt;&gt;();
+        deferredResult.setResult(helloMessage());
+        return deferredResult;
+    }
+</code></pre>
+<p>If our test for this end point were to use the same mechanism as the previous test, we will start observing an interesting error.</p>
+<pre><code class="language-java">    @Test
+    public void shouldHaveAMessageInDeferredResponse() throws Exception {
+        mockMvc
+                .perform(get(&quot;/test/deferred&quot;)
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath(&quot;message&quot;).value(&quot;hello&quot;));
+    }
+</code></pre>
+<pre><code class="language-bash">Response header Content-Type expected:&lt;application/json&gt; but was:&lt;null&gt;
+</code></pre>
+<p>This happened because MockMvc did not wait for the asynchronous process to finish. The solution to this involves using MockMvc&rsquo;s <code>asyncDispatch</code>. AsyncDispatch creates a new request that continues from the result of a previous MockMvc request that started the asynchronous process.
 The test re-written using <code>asyncDispatch</code> would be as follows:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Test</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">shouldHaveAMessageInDeferredResponseWithAsyncDispatch</span>()<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>MvcResult<span style="color:#bbb"> </span>result<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>mockMvc<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">perform</span>(get(<span style="color:#c30">&#34;/test/deferred&#34;</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                        </span>.<span style="color:#309">contentType</span>(APPLICATION_JSON))<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">andReturn</span>();<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>mockMvc<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">perform</span>(asyncDispatch(result))<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">andExpect</span>(status().<span style="color:#309">isOk</span>())<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">andExpect</span>(header().<span style="color:#309">string</span>(CONTENT_TYPE,<span style="color:#bbb"> </span>APPLICATION_JSON_VALUE))<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">andExpect</span>(jsonPath(<span style="color:#c30">&#34;message&#34;</span>).<span style="color:#309">value</span>(<span style="color:#c30">&#34;hello&#34;</span>));<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><p>The same approach can be employed to test when controllers use Java 8&rsquo;s <code>CompletableFuture</code>.</p>
+<pre><code class="language-java">    @Test
+    public void shouldHaveAMessageInDeferredResponseWithAsyncDispatch() throws Exception {
+        MvcResult result = mockMvc
+                .perform(get(&quot;/test/deferred&quot;)
+                        .contentType(APPLICATION_JSON))
+                .andReturn();
+
+        mockMvc
+                .perform(asyncDispatch(result))
+                .andExpect(status().isOk())
+                .andExpect(header().string(CONTENT_TYPE, APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath(&quot;message&quot;).value(&quot;hello&quot;));
+    }
+</code></pre>
+<p>The same approach can be employed to test when controllers use Java 8&rsquo;s <code>CompletableFuture</code>.</p>
         </div>
         <aside id="gh-comments-list">
           <script>
@@ -326,7 +333,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2019/08/02/flushing-metrics-in-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Flushing Metrics in Dropwizard Commands</a></li>
+            <li><a href="https://sadique.io/blog/2019/08/02/flushing-metrics-in-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Flushing Metrics in Dropwizard Commands</a></li>
             
             
             
@@ -340,7 +347,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2019/07/28/managing-environment-lifecycles-for-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Managing environment lifecycles for Dropwizard Commands</a></li>
+            <li><a href="https://sadique.io/blog/2019/07/28/managing-environment-lifecycles-for-dropwizard-commands/?utm_source=site&amp;utm_medium=related">Managing environment lifecycles for Dropwizard Commands</a></li>
             
             
             
@@ -374,13 +381,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2019/03/23/understanding-trailing-@-processing-in-sas-input/?utm_source=site&amp;utm_medium=related">Understanding trailing @ processing in SAS input</a></li>
+            <li><a href="https://sadique.io/blog/2019/03/23/understanding-trailing-@-processing-in-sas-input/?utm_source=site&amp;utm_medium=related">Understanding trailing @ processing in SAS input</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2019/03/23/importing-the-sasuser-datasets-in-sas-studio/?utm_source=site&amp;utm_medium=related">Importing the SASUSER datasets in SAS Studio</a></li>
+            <li><a href="https://sadique.io/blog/2019/03/23/importing-the-sasuser-datasets-in-sas-studio/?utm_source=site&amp;utm_medium=related">Importing the SASUSER datasets in SAS Studio</a></li>
             
             
             
@@ -398,7 +405,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2018/06/09/formatting-java-instant-for-resolutions/?utm_source=site&amp;utm_medium=related">Formatting Java Instant for resolutions</a></li>
+            <li><a href="https://sadique.io/blog/2018/06/09/formatting-java-instant-for-resolutions/?utm_source=site&amp;utm_medium=related">Formatting Java Instant for resolutions</a></li>
             
             
             
@@ -412,7 +419,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2018/05/05/freebuilder-plugin-for-intellij/?utm_source=site&amp;utm_medium=related">FreeBuilder plugin for IntelliJ</a></li>
+            <li><a href="https://sadique.io/blog/2018/05/05/freebuilder-plugin-for-intellij/?utm_source=site&amp;utm_medium=related">FreeBuilder plugin for IntelliJ</a></li>
             
             
             
@@ -442,7 +449,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2018/03/23/a-jackson-and-freebuilder-quirk/?utm_source=site&amp;utm_medium=related">A Jackson and FreeBuilder quirk</a></li>
+            <li><a href="https://sadique.io/blog/2018/03/23/a-jackson-and-freebuilder-quirk/?utm_source=site&amp;utm_medium=related">A Jackson and FreeBuilder quirk</a></li>
             
             
             
@@ -480,7 +487,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2017/08/18/uploading-a-standalone-artifact-to-nexus-3/?utm_source=site&amp;utm_medium=related">Uploading a standalone artifact to Nexus 3</a></li>
+            <li><a href="https://sadique.io/blog/2017/08/18/uploading-a-standalone-artifact-to-nexus-3/?utm_source=site&amp;utm_medium=related">Uploading a standalone artifact to Nexus 3</a></li>
             
             
             
@@ -514,7 +521,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/30/implementing-feature-toggles-for-a-spring-boot-application-part-4/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 4</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/30/implementing-feature-toggles-for-a-spring-boot-application-part-4/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 4</a></li>
             
             
             
@@ -536,19 +543,19 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/29/implementing-feature-toggles-for-a-spring-boot-application-part-3/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 3</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/29/implementing-feature-toggles-for-a-spring-boot-application-part-3/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 3</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/27/implementing-feature-toggles-for-a-spring-boot-application-part-2/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 2</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/27/implementing-feature-toggles-for-a-spring-boot-application-part-2/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 2</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/22/implementing-feature-toggles-for-a-spring-boot-application-part-1/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 1</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/22/implementing-feature-toggles-for-a-spring-boot-application-part-1/?utm_source=site&amp;utm_medium=related">Implementing feature toggles for a Spring Boot application - Part 1</a></li>
             
             
             
@@ -582,13 +589,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/11/setting-up-a-secure-etcd-cluster-behind-a-proxy/?utm_source=site&amp;utm_medium=related">Setting up a secure etcd cluster behind a proxy</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/11/setting-up-a-secure-etcd-cluster-behind-a-proxy/?utm_source=site&amp;utm_medium=related">Setting up a secure etcd cluster behind a proxy</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/05/a-very-basic-introduction-to-deploying-a-java-application-using-kubernetes/?utm_source=site&amp;utm_medium=related">A very basic introduction to deploying a Java application using Kubernetes</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/05/a-very-basic-introduction-to-deploying-a-java-application-using-kubernetes/?utm_source=site&amp;utm_medium=related">A very basic introduction to deploying a Java application using Kubernetes</a></li>
             
             
             
@@ -606,7 +613,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/11/02/handling-deserialization-errors-in-spring-redis-sessions/?utm_source=site&amp;utm_medium=related">Handling Deserialization errors in Spring Redis Sessions</a></li>
+            <li><a href="https://sadique.io/blog/2016/11/02/handling-deserialization-errors-in-spring-redis-sessions/?utm_source=site&amp;utm_medium=related">Handling Deserialization errors in Spring Redis Sessions</a></li>
             
             
             
@@ -620,13 +627,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/21/csrf-protection-with-spring-security-and-angular-js/?utm_source=site&amp;utm_medium=related">CSRF Protection with Spring Security and Angular JS</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/21/csrf-protection-with-spring-security-and-angular-js/?utm_source=site&amp;utm_medium=related">CSRF Protection with Spring Security and Angular JS</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/16/controlling-redis-auto-configuration-for-spring-boot-session/?utm_source=site&amp;utm_medium=related">Controlling Redis auto-configuration for Spring Boot Session</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/16/controlling-redis-auto-configuration-for-spring-boot-session/?utm_source=site&amp;utm_medium=related">Controlling Redis auto-configuration for Spring Boot Session</a></li>
             
             
             
@@ -640,7 +647,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/14/jwt-authentication-with-spring-web-part-5/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 5</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/14/jwt-authentication-with-spring-web-part-5/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 5</a></li>
             
             
             
@@ -658,19 +665,19 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/08/jwt-authentication-with-spring-web-part-4/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 4</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/08/jwt-authentication-with-spring-web-part-4/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 4</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/06/jwt-authentication-with-spring-web-part-3/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 3</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/06/jwt-authentication-with-spring-web-part-3/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 3</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/03/jwt-authentication-with-spring-web-part-2/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 2</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/03/jwt-authentication-with-spring-web-part-2/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 2</a></li>
             
             
             
@@ -680,13 +687,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/07/03/jwt-authentication-with-spring-web-part-1/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 1</a></li>
+            <li><a href="https://sadique.io/blog/2016/07/03/jwt-authentication-with-spring-web-part-1/?utm_source=site&amp;utm_medium=related">JWT authentication with Spring Web - Part 1</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/06/30/json-logging-for-spring-applications/?utm_source=site&amp;utm_medium=related">JSON logging for Spring applications</a></li>
+            <li><a href="https://sadique.io/blog/2016/06/30/json-logging-for-spring-applications/?utm_source=site&amp;utm_medium=related">JSON logging for Spring applications</a></li>
             
             
             
@@ -696,13 +703,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/06/29/injecting-dependencies-into-a-spring-@configuration/?utm_source=site&amp;utm_medium=related">Injecting dependencies into a Spring @Configuration</a></li>
+            <li><a href="https://sadique.io/blog/2016/06/29/injecting-dependencies-into-a-spring-@configuration/?utm_source=site&amp;utm_medium=related">Injecting dependencies into a Spring @Configuration</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/06/08/filtering-responses-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Filtering responses in Spring MVC</a></li>
+            <li><a href="https://sadique.io/blog/2016/06/08/filtering-responses-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Filtering responses in Spring MVC</a></li>
             
             
             
@@ -744,31 +751,31 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/04/24/deprecating-domain-events-in-axon/?utm_source=site&amp;utm_medium=related">Deprecating domain events in Axon</a></li>
+            <li><a href="https://sadique.io/blog/2016/04/24/deprecating-domain-events-in-axon/?utm_source=site&amp;utm_medium=related">Deprecating domain events in Axon</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/04/20/programmable-exit-codes-for-spring-command-line-applications-2/?utm_source=site&amp;utm_medium=related">Programmable exit codes for spring command line applications - 2</a></li>
+            <li><a href="https://sadique.io/blog/2016/04/20/programmable-exit-codes-for-spring-command-line-applications-2/?utm_source=site&amp;utm_medium=related">Programmable exit codes for spring command line applications - 2</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/04/18/programmable-exit-codes-for-spring-command-line-applications/?utm_source=site&amp;utm_medium=related">Programmable exit codes for Spring command line applications</a></li>
+            <li><a href="https://sadique.io/blog/2016/04/18/programmable-exit-codes-for-spring-command-line-applications/?utm_source=site&amp;utm_medium=related">Programmable exit codes for Spring command line applications</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2016/01/30/using-custom-arguments-in-spring-mvc-controllers/?utm_source=site&amp;utm_medium=related">Using custom arguments in Spring MVC controllers</a></li>
+            <li><a href="https://sadique.io/blog/2016/01/30/using-custom-arguments-in-spring-mvc-controllers/?utm_source=site&amp;utm_medium=related">Using custom arguments in Spring MVC controllers</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/16/authentication-for-apache-camel-http-components/?utm_source=site&amp;utm_medium=related">Authentication for Apache Camel HTTP components</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/16/authentication-for-apache-camel-http-components/?utm_source=site&amp;utm_medium=related">Authentication for Apache Camel HTTP components</a></li>
             
             
             
@@ -790,31 +797,31 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/15/thoughts-on-open-graph-tags/?utm_source=site&amp;utm_medium=related">Thoughts on Open Graph tags</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/15/thoughts-on-open-graph-tags/?utm_source=site&amp;utm_medium=related">Thoughts on Open Graph tags</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/11/integration-testing-spring-command-line-applications/?utm_source=site&amp;utm_medium=related">Integration testing Spring command line applications</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/11/integration-testing-spring-command-line-applications/?utm_source=site&amp;utm_medium=related">Integration testing Spring command line applications</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/11/integration-testing-challenges-for-non-web-spring-applications/?utm_source=site&amp;utm_medium=related">Integration testing challenges for non-web Spring applications</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/11/integration-testing-challenges-for-non-web-spring-applications/?utm_source=site&amp;utm_medium=related">Integration testing challenges for non-web Spring applications</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/08/how-thinking-of-documentation-as-legislation-helped-me-become-a-better-programmer/?utm_source=site&amp;utm_medium=related">How thinking of Documentation as Legislation helped me become a better programmer</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/08/how-thinking-of-documentation-as-legislation-helped-me-become-a-better-programmer/?utm_source=site&amp;utm_medium=related">How thinking of Documentation as Legislation helped me become a better programmer</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/06/implementing-custom-annotations-for-spring-mvc/?utm_source=site&amp;utm_medium=related">Implementing custom annotations for Spring MVC</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/06/implementing-custom-annotations-for-spring-mvc/?utm_source=site&amp;utm_medium=related">Implementing custom annotations for Spring MVC</a></li>
             
             
             
@@ -828,7 +835,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/12/05/validating-requestparams-and-pathvariables-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Validating RequestParams and PathVariables in Spring MVC</a></li>
+            <li><a href="https://sadique.io/blog/2015/12/05/validating-requestparams-and-pathvariables-in-spring-mvc/?utm_source=site&amp;utm_medium=related">Validating RequestParams and PathVariables in Spring MVC</a></li>
             
             
             
@@ -846,7 +853,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/06/09/running-multiple-applications-in-the-same-tomcat-installation/?utm_source=site&amp;utm_medium=related">Running multiple applications in the same Tomcat installation</a></li>
+            <li><a href="https://sadique.io/blog/2015/06/09/running-multiple-applications-in-the-same-tomcat-installation/?utm_source=site&amp;utm_medium=related">Running multiple applications in the same Tomcat installation</a></li>
             
             
             
@@ -876,7 +883,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/05/22/making-sense-of-cloud-foundry-security-group-declarations/?utm_source=site&amp;utm_medium=related">Making sense of Cloud Foundry security group declarations</a></li>
+            <li><a href="https://sadique.io/blog/2015/05/22/making-sense-of-cloud-foundry-security-group-declarations/?utm_source=site&amp;utm_medium=related">Making sense of Cloud Foundry security group declarations</a></li>
             
             
             
@@ -886,7 +893,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2015/05/21/configuring-cloud-foundry-java-memory-parameters/?utm_source=site&amp;utm_medium=related">Configuring Cloud Foundry Java Memory Parameters</a></li>
+            <li><a href="https://sadique.io/blog/2015/05/21/configuring-cloud-foundry-java-memory-parameters/?utm_source=site&amp;utm_medium=related">Configuring Cloud Foundry Java Memory Parameters</a></li>
             
             
             
@@ -988,13 +995,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2014/03/20/clojure-dojo-levenshtein-edit-distance/?utm_source=site&amp;utm_medium=related">Clojure Dojo - Levenshtein edit distance</a></li>
+            <li><a href="https://sadique.io/blog/2014/03/20/clojure-dojo-levenshtein-edit-distance/?utm_source=site&amp;utm_medium=related">Clojure Dojo - Levenshtein edit distance</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2014/02/17/a-simple-jmeter-test-with-login/?utm_source=site&amp;utm_medium=related">A simple JMeter test with login</a></li>
+            <li><a href="https://sadique.io/blog/2014/02/17/a-simple-jmeter-test-with-login/?utm_source=site&amp;utm_medium=related">A simple JMeter test with login</a></li>
             
             
             
@@ -1088,7 +1095,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/10/13/implementing-rate-limiting-in-rails-part-2/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 2</a></li>
+            <li><a href="https://sadique.io/blog/2013/10/13/implementing-rate-limiting-in-rails-part-2/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 2</a></li>
             
             
             
@@ -1110,7 +1117,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/10/12/implementing-rate-limiting-in-rails-part-1/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 1</a></li>
+            <li><a href="https://sadique.io/blog/2013/10/12/implementing-rate-limiting-in-rails-part-1/?utm_source=site&amp;utm_medium=related">Implementing Rate Limiting in Rails - Part 1</a></li>
             
             
             
@@ -1120,7 +1127,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/10/07/python-hack-dynamically-override-an-objects-attribute/?utm_source=site&amp;utm_medium=related">Python Hack - Dynamically override an object&#39;s attribute</a></li>
+            <li><a href="https://sadique.io/blog/2013/10/07/python-hack-dynamically-override-an-objects-attribute/?utm_source=site&amp;utm_medium=related">Python Hack - Dynamically override an object&#39;s attribute</a></li>
             
             
             
@@ -1238,7 +1245,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/09/12/managing-gemsets-in-rbenv/?utm_source=site&amp;utm_medium=related">Managing Gemsets in Rbenv</a></li>
+            <li><a href="https://sadique.io/blog/2013/09/12/managing-gemsets-in-rbenv/?utm_source=site&amp;utm_medium=related">Managing Gemsets in Rbenv</a></li>
             
             
             
@@ -1252,7 +1259,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/09/08/looking-up-compiler-params-used-to-compile-a-ruby-version/?utm_source=site&amp;utm_medium=related">Looking up Compiler params used to compile a Ruby version</a></li>
+            <li><a href="https://sadique.io/blog/2013/09/08/looking-up-compiler-params-used-to-compile-a-ruby-version/?utm_source=site&amp;utm_medium=related">Looking up Compiler params used to compile a Ruby version</a></li>
             
             
             
@@ -1302,7 +1309,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/08/15/pythons-bool-type/?utm_source=site&amp;utm_medium=related">Python&#39;s bool type</a></li>
+            <li><a href="https://sadique.io/blog/2013/08/15/pythons-bool-type/?utm_source=site&amp;utm_medium=related">Python&#39;s bool type</a></li>
             
             
             
@@ -1416,7 +1423,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/07/31/validating-json-in-emacs/?utm_source=site&amp;utm_medium=related">Validating JSON in Emacs</a></li>
+            <li><a href="https://sadique.io/blog/2013/07/31/validating-json-in-emacs/?utm_source=site&amp;utm_medium=related">Validating JSON in Emacs</a></li>
             
             
             
@@ -1442,7 +1449,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/04/29/emacs-hack-viewing-git-logs-while-composing-commit-messages/?utm_source=site&amp;utm_medium=related">Emacs hack: Viewing Git logs while composing commit messages</a></li>
+            <li><a href="https://sadique.io/blog/2013/04/29/emacs-hack-viewing-git-logs-while-composing-commit-messages/?utm_source=site&amp;utm_medium=related">Emacs hack: Viewing Git logs while composing commit messages</a></li>
             
             
             
@@ -1456,7 +1463,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/04/14/configure-gits-comment-character/?utm_source=site&amp;utm_medium=related">Configure Git&#39;s comment character</a></li>
+            <li><a href="https://sadique.io/blog/2013/04/14/configure-gits-comment-character/?utm_source=site&amp;utm_medium=related">Configure Git&#39;s comment character</a></li>
             
             
             
@@ -1470,7 +1477,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/04/11/my-experience-working-remotely/?utm_source=site&amp;utm_medium=related">My experience working remotely</a></li>
+            <li><a href="https://sadique.io/blog/2013/04/11/my-experience-working-remotely/?utm_source=site&amp;utm_medium=related">My experience working remotely</a></li>
             
             
             
@@ -1492,7 +1499,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
+            <li><a href="https://sadique.io/blog/2013/04/08/oh-i-can-build-it-in.../?utm_source=site&amp;utm_medium=related">Oh I can build it in...</a></li>
             
             
             
@@ -1522,7 +1529,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/04/05/javascript-clipboard-access-and-hidden-flash-widgets/?utm_source=site&amp;utm_medium=related">JavaScript, clipboard access and hidden flash widgets</a></li>
+            <li><a href="https://sadique.io/blog/2013/04/05/javascript-clipboard-access-and-hidden-flash-widgets/?utm_source=site&amp;utm_medium=related">JavaScript, clipboard access and hidden flash widgets</a></li>
             
             
             
@@ -1536,7 +1543,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2013/01/22/reducing-emacs-startup-time-while-committing/?utm_source=site&amp;utm_medium=related">Reducing Emacs startup time while committing</a></li>
+            <li><a href="https://sadique.io/blog/2013/01/22/reducing-emacs-startup-time-while-committing/?utm_source=site&amp;utm_medium=related">Reducing Emacs startup time while committing</a></li>
             
             
             
@@ -1566,7 +1573,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/11/29/my-first-firefox-plugin-getcache-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">My first Firefox plugin: GetCache - View cached version of the current page</a></li>
+            <li><a href="https://sadique.io/blog/2012/11/29/my-first-firefox-plugin-getcache-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">My first Firefox plugin: GetCache - View cached version of the current page</a></li>
             
             
             
@@ -1580,7 +1587,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/11/28/getcache-a-chrome-plugin-to-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">GetCache - A Chrome plugin to view cached version of the current page</a></li>
+            <li><a href="https://sadique.io/blog/2012/11/28/getcache-a-chrome-plugin-to-view-cached-version-of-the-current-page/?utm_source=site&amp;utm_medium=related">GetCache - A Chrome plugin to view cached version of the current page</a></li>
             
             
             
@@ -1610,7 +1617,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/11/27/on-rest-content-type-google-chrome-and-caching/?utm_source=site&amp;utm_medium=related">On REST, Content-Type, Google Chrome and Caching</a></li>
+            <li><a href="https://sadique.io/blog/2012/11/27/on-rest-content-type-google-chrome-and-caching/?utm_source=site&amp;utm_medium=related">On REST, Content-Type, Google Chrome and Caching</a></li>
             
             
             
@@ -1716,7 +1723,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/07/09/understanding-pythons-with-statement/?utm_source=site&amp;utm_medium=related">Understanding Python&#39;s &#34;with&#34; statement</a></li>
+            <li><a href="https://sadique.io/blog/2012/07/09/understanding-pythons-with-statement/?utm_source=site&amp;utm_medium=related">Understanding Python&#39;s &#34;with&#34; statement</a></li>
             
             
             
@@ -1730,13 +1737,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/07/04/heredocs-in-ruby-and-python/?utm_source=site&amp;utm_medium=related">Heredocs in Ruby and Python</a></li>
+            <li><a href="https://sadique.io/blog/2012/07/04/heredocs-in-ruby-and-python/?utm_source=site&amp;utm_medium=related">Heredocs in Ruby and Python</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/06/25/micro-journal-simple-git-backed-journal-in-python/?utm_source=site&amp;utm_medium=related">Micro Journal - simple Git-backed journal in Python</a></li>
+            <li><a href="https://sadique.io/blog/2012/06/25/micro-journal-simple-git-backed-journal-in-python/?utm_source=site&amp;utm_medium=related">Micro Journal - simple Git-backed journal in Python</a></li>
             
             
             
@@ -1774,13 +1781,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/06/24/vodqa-ncr-maintaining-large-test-suites/?utm_source=site&amp;utm_medium=related">VodQA NCR: Maintaining Large Test Suites</a></li>
+            <li><a href="https://sadique.io/blog/2012/06/24/vodqa-ncr-maintaining-large-test-suites/?utm_source=site&amp;utm_medium=related">VodQA NCR: Maintaining Large Test Suites</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/06/06/know-your-tools-dont-shoot-yourself-in-the-foot/?utm_source=site&amp;utm_medium=related">Know Your Tools - Don&#39;t Shoot Yourself in the Foot</a></li>
+            <li><a href="https://sadique.io/blog/2012/06/06/know-your-tools-dont-shoot-yourself-in-the-foot/?utm_source=site&amp;utm_medium=related">Know Your Tools - Don&#39;t Shoot Yourself in the Foot</a></li>
             
             
             
@@ -1826,7 +1833,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/06/05/managing-security-certificates-from-the-console-on-windows-mac-os-x-and-linux/?utm_source=site&amp;utm_medium=related">Managing security certificates from the console - on Windows, Mac OS X and Linux</a></li>
+            <li><a href="https://sadique.io/blog/2012/06/05/managing-security-certificates-from-the-console-on-windows-mac-os-x-and-linux/?utm_source=site&amp;utm_medium=related">Managing security certificates from the console - on Windows, Mac OS X and Linux</a></li>
             
             
             
@@ -1872,7 +1879,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/05/11/indian-and-pakistani-cricketers-who-make-better-debuts/?utm_source=site&amp;utm_medium=related">Indian and Pakistani cricketers - who make better debuts?</a></li>
+            <li><a href="https://sadique.io/blog/2012/05/11/indian-and-pakistani-cricketers-who-make-better-debuts/?utm_source=site&amp;utm_medium=related">Indian and Pakistani cricketers - who make better debuts?</a></li>
             
             
             
@@ -1886,7 +1893,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/05/04/fixing-flyspell-for-emacs-in-mac-os-x/?utm_source=site&amp;utm_medium=related">Fixing Flyspell for Emacs in Mac OS X</a></li>
+            <li><a href="https://sadique.io/blog/2012/05/04/fixing-flyspell-for-emacs-in-mac-os-x/?utm_source=site&amp;utm_medium=related">Fixing Flyspell for Emacs in Mac OS X</a></li>
             
             
             
@@ -1900,7 +1907,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/04/29/finding-un-merged-commits-with-git-cherry/?utm_source=site&amp;utm_medium=related">Finding un-merged commits with git cherry</a></li>
+            <li><a href="https://sadique.io/blog/2012/04/29/finding-un-merged-commits-with-git-cherry/?utm_source=site&amp;utm_medium=related">Finding un-merged commits with git cherry</a></li>
             
             
             
@@ -1930,7 +1937,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/02/03/bullet-proof-jenkins-setup/?utm_source=site&amp;utm_medium=related">Bullet proof Jenkins setup</a></li>
+            <li><a href="https://sadique.io/blog/2012/02/03/bullet-proof-jenkins-setup/?utm_source=site&amp;utm_medium=related">Bullet proof Jenkins setup</a></li>
             
             
             
@@ -1960,7 +1967,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/01/17/why-your-project-should-have-a-getting-started-guide./?utm_source=site&amp;utm_medium=related">Why your project should have a Getting Started guide.</a></li>
+            <li><a href="https://sadique.io/blog/2012/01/17/why-your-project-should-have-a-getting-started-guide./?utm_source=site&amp;utm_medium=related">Why your project should have a Getting Started guide.</a></li>
             
             
             
@@ -1982,7 +1989,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2012/01/16/debugging-c-sharps-httpwebrequest-100-continue-and-nginx/?utm_source=site&amp;utm_medium=related">Debugging: C Sharp&#39;s HttpWebRequest, 100-Continue and nginx</a></li>
+            <li><a href="https://sadique.io/blog/2012/01/16/debugging-c-sharps-httpwebrequest-100-continue-and-nginx/?utm_source=site&amp;utm_medium=related">Debugging: C Sharp&#39;s HttpWebRequest, 100-Continue and nginx</a></li>
             
             
             
@@ -2008,7 +2015,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2011/05/17/wikipedia-page-hopping/?utm_source=site&amp;utm_medium=related">Wikipedia Page Hopping</a></li>
+            <li><a href="https://sadique.io/blog/2011/05/17/wikipedia-page-hopping/?utm_source=site&amp;utm_medium=related">Wikipedia Page Hopping</a></li>
             
             
             
@@ -2030,13 +2037,13 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2011/03/24/empathy-log-parser/?utm_source=site&amp;utm_medium=related">Empathy Log Parser</a></li>
+            <li><a href="https://sadique.io/blog/2011/03/24/empathy-log-parser/?utm_source=site&amp;utm_medium=related">Empathy Log Parser</a></li>
             
             
             
             
             
-            <li><a href="http://localhost:1313/blog/2011/03/23/binary-signature-art/?utm_source=site&amp;utm_medium=related">Binary Signature Art</a></li>
+            <li><a href="https://sadique.io/blog/2011/03/23/binary-signature-art/?utm_source=site&amp;utm_medium=related">Binary Signature Art</a></li>
             
             
             
@@ -2046,7 +2053,7 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2010/03/16/java-arrays-in-jruby/?utm_source=site&amp;utm_medium=related">Java Arrays in JRuby</a></li>
+            <li><a href="https://sadique.io/blog/2010/03/16/java-arrays-in-jruby/?utm_source=site&amp;utm_medium=related">Java Arrays in JRuby</a></li>
             
             
             
@@ -2084,7 +2091,11 @@ $(document).ready(function () {
             
             
             
-            <li><a href="http://localhost:1313/blog/2010/01/09/autorun.py-execute-stuff-on-file-change/?utm_source=site&amp;utm_medium=related">Autorun.py - Execute stuff on file change</a></li>
+            <li><a href="https://sadique.io/blog/2010/01/09/autorun.py-execute-stuff-on-file-change/?utm_source=site&amp;utm_medium=related">Autorun.py - Execute stuff on file change</a></li>
+            
+            
+            
+            
             
             
             
