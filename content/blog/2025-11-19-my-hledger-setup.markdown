@@ -27,7 +27,7 @@ I set up an hledger-web instance and built an iOS app. Along the way, I realized
 
 I deployed the hledger-web instance on an EC2 instance; with a CloudFlare tunnel [^9], and CloudFlare Service Token verification [^8]. The iOS app would pass the token for every call and CloudFlare would verify it. The app was a delight to use and it did everything we needed to track transactions and our budget.
 
-```plantuml
+{{< plantuml id="eg" >}}
 @startuml
 skinparam BackGroundColor transparent
 skinparam SequenceBoxBackgroundColor transparent
@@ -46,7 +46,7 @@ directives
 ...
 end note
 @enduml
-```
+{{< /plantuml >}}
 
 But then I ran in to the inevitable Apple tax - my app would "expire" every week unless I push a new build to my phone or pay Apple for a Developer License. I didn't like paying $99 per year to run an app I built on a phone I paid for. So, I decided to rewrite it for the last remaining non-rent seeking platform - the web.
 

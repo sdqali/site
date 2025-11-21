@@ -1,0 +1,17 @@
+<p>
+  {{ .Inner }}
+</p>
+
+{{ $url := "http://workstation.local:9999/plantuml/svg/oqbDJyrBuGh8ISmh2VNrKGZ8JCuFJqqAJYqgIotY0aefG5G00000" }}
+{{ $class := "test" }}
+{{ with resources.GetRemote $url }}
+  {{ if $class }}
+    <div class="{{ $class }}">
+      {{ .Content | safeHTML }}
+    </div>
+  {{ else }}
+    {{ .Content | safeHTML }}
+  {{ end }}
+{{ else }}
+  <div class="error">Failed to fetch remote resource from {{ $url }}</div>
+{{ end }}
