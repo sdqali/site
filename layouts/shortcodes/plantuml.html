@@ -1,17 +1,25 @@
-<p>
-  {{ .Inner }}
-</p>
+{{ $baseUrl := site.Params.plantuml.baseUrl }}
+{{ $content := .Inner }}
 
-{{ $url := "http://workstation.local:9999/plantuml/svg/oqbDJyrBuGh8ISmh2VNrKGZ8JCuFJqqAJYqgIotY0aefG5G00000" }}
-{{ $class := "test" }}
-{{ with resources.GetRemote $url }}
-  {{ if $class }}
-    <div class="{{ $class }}">
+{{ $opts := dict
+  "method" "POST"
+  "body" $content
+  "headers" (dict "Content-Type" "text/plain; charset=utf-8")
+}}
+
+{{ with resources.GetRemote $baseUrl $opts }}
+  {{ $contentType := .MediaType.Type }}
+  {{ if or (eq $contentType "image/svg+xml") (strings.Contains $contentType "svg") }}
+    <div class="plantuml-svg">
       {{ .Content | safeHTML }}
     </div>
+  {{ else if or (eq $contentType "image/png") (strings.Contains $contentType "png") }}
+    <div class="plantuml-png">
+      <img src="data:image/png;base64,{{ .Content | base64Encode }}" alt="PlantUML Diagram" />
+    </div>
   {{ else }}
-    {{ .Content | safeHTML }}
+    <div class="error">Unexpected content type: {{ $contentType }}</div>
   {{ end }}
 {{ else }}
-  <div class="error">Failed to fetch remote resource from {{ $url }}</div>
+  <div class="error">Failed to fetch PlantUML diagram</div>
 {{ end }}

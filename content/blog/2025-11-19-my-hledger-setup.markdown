@@ -29,7 +29,7 @@ I deployed the hledger-web instance on an EC2 instance; with a CloudFlare tunnel
 
 {{< plantuml id="eg" >}}
 @startuml
-skinparam BackGroundColor transparent
+skinparam BackgroundColor transparent
 skinparam SequenceBoxBackgroundColor transparent
 participant "iOS app" as app
 box EC2 instance
