@@ -51,7 +51,7 @@ This is what I came up with:
 
 This allows the PlantUML API end point to be configurable via site params. The shortcode, when rendered uses `resources.GetRemote` to POST the contents of the shortcode invocation to the PlantUML API. It then renders the returned SVG directly, or adds an `img` tag to render PNG images. 
 
-For example, when invoked as:
+For example, the following declarion:
 
 ```
 {{</* plantuml */>}}
