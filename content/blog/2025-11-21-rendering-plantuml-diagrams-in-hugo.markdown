@@ -10,11 +10,11 @@ bbcommentid: 141
 
 This blog is generated using Hugo [^1]. I have always wished that it had a way to render PlantUML diagrams [^2]. I am not alone in wishing for this - this is a feature that people have requested for over 5 years for now [^3]. But because of the peculiarities of Hugo's opinionated security posture [^4] and how PlantUML requires starting a Java process [^5], it has always been rejected [^6]. People have found various workarounds:
 
+<!--more-->
+
 1. Render the diagram in the browser using JavaScript that uses the public PlantUML server. [^7]
 2. Adding a goldmark [^8] plugin that executes PlantUML commands [^9]. This is an approach that the Hugo team has explicitly rejected. [^10]
 3. A pre-processing step that executes PlantUML before Hugo builds the pages. [^11]
-
-<!--more-->
 
 After having to pre-generate the diagram images, I began wondering if this could be done at build time using a shortcode [^12] that called the PlantUML API. Hugo does expose a `resources.GetRemote` [^13] function to templates and shortcodes that can perform HTTP calls, as long as these calls are explicitly allowed in Hugo's security configuration. [^14]
 

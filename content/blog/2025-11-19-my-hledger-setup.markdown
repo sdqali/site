@@ -8,7 +8,11 @@ tags:
 ghcommentid: 149
 bbcommentid: 142
 ---
-From 2014 to 2023, I kept track of all our finances, in one way or another. I started out with Intuit's Mint - it did a good job of aggregating accounts and presenting consolidated views. At some point, I became weary of Intuit having passwords to all my financial accounts and decided to keep track of everything in a Google Sheet, fronted by a Google Form to enter data. This worked okay, but we noticed that the Google Form interface made it hard to enter transactions, and slowly we stopped entering transactions the day it happened - instead entering transactions once or twice a week. This eventually led us to YNAB [^1], but it's opinionated hyperfocus on budgeting felt restrictive. By this time, financial companies had started imlementing OAuth, and platforms like Plaid had increased their converage, and in most cases aggregators like Mint no longer needed to store passwords for accounts. So, we went back to Mint.
+From 2014 to 2023, I kept track of all our finances, in one way or another. I started out with Intuit's Mint - it did a good job of aggregating accounts and presenting consolidated views. At some point, I became weary of Intuit having passwords to all my financial accounts and decided to keep track of everything in a Google Sheet, fronted by a Google Form to enter data.
+
+<!--more-->
+
+This worked okay, but we noticed that the Google Form interface made it hard to enter transactions, and slowly we stopped entering transactions the day it happened - instead entering transactions once or twice a week. This eventually led us to YNAB [^1], but it's opinionated hyperfocus on budgeting felt restrictive. By this time, financial companies had started imlementing OAuth, and platforms like Plaid had increased their converage, and in most cases aggregators like Mint no longer needed to store passwords for accounts. So, we went back to Mint.
 
 At some point, Intuit acquired CreditKarma and slowly decided to strangle Mint, nudging (or dragging) their users to CreditKarma[^6] [^7]. With the degraded experience, we slowly stopped paying attention.
 
