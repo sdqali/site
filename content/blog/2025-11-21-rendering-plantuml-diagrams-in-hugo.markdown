@@ -115,6 +115,14 @@ security:
       - ^http://localhost:9999/svg/*
 ```
 
+I run a local PlantUML server.
+
+```
+docker run -d -p 9999:8080 plantuml/plantuml-server:jetty
+```
+
+In theory, you can point to the public PlantUML server. [^15]
+
 My preference is to use the SVG end point. The shortcode can be easily modified to always produce PNGs. Compared to the other approaches, this removes the need for any pre-processing, doesn't need to host a PlantUML server that the page can call from a browser, and the need to maintain a fork of Hugo.
 
 [^1]: [Hugo - The world’s fastest framework for building websites](https://gohugo.io/)
@@ -131,3 +139,5 @@ My preference is to use the SVG end point. The shortcode can be easily modified 
 [^12]: [Shorcodes are shorthands that can render content](https://gohugo.io/content-management/shortcodes/)
 [^13]: [Functions - resources.GetRemote](https://gohugo.io/functions/resources/getremote/)
 [^14]: [Configuration - Security](https://gohugo.io/configuration/security/)
+[^15]: [PlantUML Online Server](https://www.plantuml.com/plantuml)
+
