@@ -5,8 +5,8 @@ tags:
 - java
 - dropwizard
 - datadog
-ghcommentid: 145
-bbcommentid: 138
+ghcommentid: 147
+bbcommentid: 140
 ---
 Users of Dropwizard Metrics will be familiar with `ScheduledReporter`  - it is a nice pattern that allows metrics reporting to be off loaded to a different thread which periodically sends out the collected metrics instead of making a network call every time a metric is collected. In most use cases, this works great - especially if you are running a server.
 
