@@ -71,7 +71,7 @@ participant "hledger-web" as hlw
 participant "FileSytem" as fs
 end box
 app -> a0: Login
-a0 <- app: Callback {JWT}
+app <- a0: Callback {JWT}
 app -> cft : GET/PUT {JWT}
 cft -> ngnx: GET/PUT {JWT}
 ngnx -> validator: POST JWT
@@ -113,6 +113,36 @@ Here is a screencap of the application, running with a sample journal:
 This has helped us get back in to the habit of keeping track of budgeting and spending, without the data leaving our control. 
 
 After implementing this model, I realized that I don't really need to run the JWT validator and can instead configure the CloudFlare Tunnel to always expect authentication and configure Auth0 as in Identity Provider. This works well, albeit being less portable in case I decide to no longer serve this app through a CloudFlare Tunnel.
+
+{{< plantuml >}}
+@startuml
+skinparam BackgroundColor transparent
+skinparam SequenceBoxBackgroundColor transparent
+participant "SPA" as app
+participant "Auth0" as a0
+box EC2 instance
+participant "CF Tunnel" as cft
+participant "Nginx" as ngnx
+participant "hledger-web" as hlw
+participant "FileSytem" as fs
+end box
+app -> cft: Login
+cft -> a0: Trigger Login
+cft <- a0: Callback {JWT}
+app <- cft: Set Cookie {CF-Token...}
+app -> cft : GET/PUT {CF-Token...}
+cft -> cft: Verify
+cft -> ngnx: GET/PUT
+ngnx -> hlw : GET/PUT
+hlw -> fs: Read/Write Journal File
+note right #transparent
+transactions
+directives
+...
+end note
+@enduml
+{{< /plantuml >}}
+
 
 [^1]: [You Need A Budget](https://www.ynab.com/)
 [^2]: [Plain Text Accounting](https://plaintextaccounting.org/)
