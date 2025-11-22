@@ -56,7 +56,10 @@ For example, the following declarion:
 ```
 {{</* plantuml */>}}
 @startuml
-participant Participant as Foo
+skinparam svgDimensionStyle false
+skinparam BackgroundColor transparent
+skinparam SequenceBoxBackgroundColor transparent
+pparticipant Participant as Foo
 actor       Actor       as Foo1
 boundary    Boundary    as Foo2
 control     Control     as Foo3
@@ -78,6 +81,7 @@ Foo -> Foo7: To queue
 will render:
 {{< plantuml>}}
 @startuml
+skinparam svgDimensionStyle false
 skinparam BackgroundColor transparent
 skinparam SequenceBoxBackgroundColor transparent
 participant Participant as Foo
@@ -115,7 +119,18 @@ security:
       - ^http://localhost:9999/svg/*
 ```
 
-I run a local PlantUML server.
+It is important to note that the `skinparam svgDimensionStyle false` is important here to ensure that the SVG produced doesn't include `width` and `height` attributes [^16]. This allows finer control on how the SVG is displayed, especially on narrower screens.it's dimensions, with CSS that would look like this:
+
+```
+svg {
+  margin-top: 20px;
+  width: 100%;
+  height: auto;
+  display: block;
+}
+```
+
+My configuration points to a local PlantUML server.
 
 ```
 docker run -d -p 9999:8080 plantuml/plantuml-server:jetty
@@ -140,4 +155,4 @@ My preference is to use the SVG end point. The shortcode can be easily modified 
 [^13]: [Functions - resources.GetRemote](https://gohugo.io/functions/resources/getremote/)
 [^14]: [Configuration - Security](https://gohugo.io/configuration/security/)
 [^15]: [PlantUML Online Server](https://www.plantuml.com/plantuml)
-
+[^16]: [PlantUML SVG](https://plantuml.com/svg)

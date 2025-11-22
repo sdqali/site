@@ -32,6 +32,7 @@ I deployed the hledger-web instance on an EC2 instance; with a CloudFlare tunnel
 
 {{< plantuml id="eg" >}}
 @startuml
+skinparam svgDimensionStyle false
 skinparam BackgroundColor transparent
 skinparam SequenceBoxBackgroundColor transparent
 participant "iOS app" as app
@@ -59,6 +60,7 @@ In order to secure the end points, since I could no longer have the CloudFlare S
 
 {{< plantuml >}}
 @startuml
+skinparam svgDimensionStyle false
 skinparam BackgroundColor transparent
 skinparam SequenceBoxBackgroundColor transparent
 participant "SPA" as app
@@ -116,6 +118,7 @@ After implementing this model, I realized that I don't really need to run the JW
 
 {{< plantuml >}}
 @startuml
+skinparam svgDimensionStyle false
 skinparam BackgroundColor transparent
 skinparam SequenceBoxBackgroundColor transparent
 participant "SPA" as app
