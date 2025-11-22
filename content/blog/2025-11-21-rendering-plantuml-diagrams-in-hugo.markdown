@@ -1,7 +1,6 @@
 ---
 title: "Rendering PlantUML Diagrams in Hugo"
 date: 2025-11-20T19:45:44-08:00
-draft: true
 tags:
 - hugo
 - plantuml
@@ -15,6 +14,7 @@ This blog is generated using Hugo [^1]. I have always wished that it had a way t
 2. Adding a goldmark [^8] plugin that executes PlantUML commands [^9]. This is an approach that the Hugo team has explicitly rejected. [^10]
 3. A pre-processing step that executes PlantUML before Hugo builds the pages. [^11]
 
+<!--more-->
 
 After having to pre-generate the diagram images, I began wondering if this could be done at build time using a shortcode [^12] that called the PlantUML API. Hugo does expose a `resources.GetRemote` [^13] function to templates and shortcodes that can perform HTTP calls, as long as these calls are explicitly allowed in Hugo's security configuration. [^14]
 
