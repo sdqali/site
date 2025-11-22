@@ -1,7 +1,6 @@
 ---
 title: "My HLedger Setup"
 date: 2025-11-21T00:00:00-08:00
-draft: true
 tags:
 - hledger
 - nginx
