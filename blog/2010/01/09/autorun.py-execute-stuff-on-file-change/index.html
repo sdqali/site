@@ -96,55 +96,52 @@ Clearly, monitoring files for changes, shouldn&rsquo;t be big deal. I decided to
 <p>I named it <code>autorun.py</code>. If you want to run some task, depending on file changes in a directory, you navigate to that directory and start autorunner as:</p>
 <p><code>~/src/sdq/ocr$ ./autorun.py &quot;python Test*.py&quot;</code></p>
 <p>That would start <code>autorun.py</code> and every time I modify a file in the present directory the command  <code>python Test*.py</code> is executed. In my case, I am using the unittest framework that comes with Python. So everytime, a file is updates, it runs all my unit tests, as seen below:</p>
-<pre><code class="language-bash">sadiquea@sadiquea-laptop:~/src/sdq/ocr$ ./autorun.py &quot;python Test*.py&quot;
-Autorunner in action
-.............
-
-----------------------------------------------------------------------
-
-Ran 13 tests in 0.763s
-
-OK
-</code></pre>
-<p>If I were working with Ruby and wanted to run all my unit tests when I modify the files, I could start the tool like this: <code>./autorun.py &quot;rake spec&quot;</code></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sadiquea@sadiquea-laptop:~/src/sdq/ocr$ ./autorun.py <span style="color:#c30">&#34;python Test*.py&#34;</span>
+</span></span><span style="display:flex;"><span>Autorunner in action
+</span></span><span style="display:flex;"><span>.............
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>----------------------------------------------------------------------
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Ran <span style="color:#f60">13</span> tests in 0.763s
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>OK
+</span></span></code></pre></div><p>If I were working with Ruby and wanted to run all my unit tests when I modify the files, I could start the tool like this: <code>./autorun.py &quot;rake spec&quot;</code></p>
 <p>I would really like to add the ability to exclude some files/subdirectories from being watched for changes.</p>
 <p>Here is the code snippet that does the trick:</p>
-<pre><code class="language-python">#!/usr/bin/env python
-
-import sys
-import os
-import pyinotify
-
-if len(sys.argv)==1:
-    print &quot;Please pass a command to excute as a parameter&quot;
-    print &quot;For example autorun.py 'ruby foo.rb'&quot;
-    sys.exit()
-
-commandToRun = sys.argv[1]
-
-watchManager = pyinotify.WatchManager()
-mask = pyinotify.IN_MODIFY
-
-class ActionProcesser(pyinotify.ProcessEvent):
-    def process_IN_MODIFY(self, event):
-        print &quot;Autorunner in action&quot;
-        os.system(commandToRun)
-
-notifier = pyinotify.Notifier(watchManager, ActionProcesser())
-
-wdd = watchManager.add_watch(os.getcwd(), mask, rec=True)
-
-while True:
-    try:
-        notifier.process_events()
-        if notifier.check_events():
-            notifier.read_events()
-    except KeyboardInterrupt:
-        notifier.stop()
-        break
-
-</code></pre>
-
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#09f;font-style:italic">#!/usr/bin/env python</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">import</span> <span style="color:#0cf;font-weight:bold">sys</span>
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">import</span> <span style="color:#0cf;font-weight:bold">os</span>
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">import</span> <span style="color:#0cf;font-weight:bold">pyinotify</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">if</span> <span style="color:#366">len</span>(sys<span style="color:#555">.</span>argv)<span style="color:#555">==</span><span style="color:#f60">1</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#366">print</span> <span style="color:#c30">&#34;Please pass a command to excute as a parameter&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#366">print</span> <span style="color:#c30">&#34;For example autorun.py &#39;ruby foo.rb&#39;&#34;</span>
+</span></span><span style="display:flex;"><span>    sys<span style="color:#555">.</span>exit()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>commandToRun <span style="color:#555">=</span> sys<span style="color:#555">.</span>argv[<span style="color:#f60">1</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>watchManager <span style="color:#555">=</span> pyinotify<span style="color:#555">.</span>WatchManager()
+</span></span><span style="display:flex;"><span>mask <span style="color:#555">=</span> pyinotify<span style="color:#555">.</span>IN_MODIFY
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">ActionProcesser</span>(pyinotify<span style="color:#555">.</span>ProcessEvent):
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">def</span> <span style="color:#c0f">process_IN_MODIFY</span>(<span style="color:#366">self</span>, event):
+</span></span><span style="display:flex;"><span>        <span style="color:#366">print</span> <span style="color:#c30">&#34;Autorunner in action&#34;</span>
+</span></span><span style="display:flex;"><span>        os<span style="color:#555">.</span>system(commandToRun)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>notifier <span style="color:#555">=</span> pyinotify<span style="color:#555">.</span>Notifier(watchManager, ActionProcesser())
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>wdd <span style="color:#555">=</span> watchManager<span style="color:#555">.</span>add_watch(os<span style="color:#555">.</span>getcwd(), mask, rec<span style="color:#555">=</span><span style="color:#069;font-weight:bold">True</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">while</span> <span style="color:#069;font-weight:bold">True</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">try</span>:
+</span></span><span style="display:flex;"><span>        notifier<span style="color:#555">.</span>process_events()
+</span></span><span style="display:flex;"><span>        <span style="color:#069;font-weight:bold">if</span> notifier<span style="color:#555">.</span>check_events():
+</span></span><span style="display:flex;"><span>            notifier<span style="color:#555">.</span>read_events()
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">except</span> <span style="color:#c00;font-weight:bold">KeyboardInterrupt</span>:
+</span></span><span style="display:flex;"><span>        notifier<span style="color:#555">.</span>stop()
+</span></span><span style="display:flex;"><span>        <span style="color:#069;font-weight:bold">break</span>
+</span></span></code></pre></div>
         </div>
         <aside id="gh-comments-list">
           <script>

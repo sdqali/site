@@ -124,34 +124,28 @@ I grew up looking at maps in books printed by the Oxford Press, that came with a
 <ol>
 <li>Start by converting both shape Files to their GeoJSON representation.</li>
 </ol>
-<pre><code class="language-bash">&gt; ogr2ogr -f GeoJSON india.geo.json india.shp
-&gt; ogr2ogr -f GeoJSON kashmir.geo.json kashmir.shp
-</code></pre>
-<ol>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>&gt; ogr2ogr -f GeoJSON india.geo.json india.shp
+</span></span><span style="display:flex;"><span>&gt; ogr2ogr -f GeoJSON kashmir.geo.json kashmir.shp
+</span></span></code></pre></div><ol>
 <li>Load the two feature collections in to a JavaScript console. I tend to use Chromium&rsquo;s Developer Tools, but in this example I am using  Node.js&rsquo; REPL.</li>
 </ol>
-<pre><code class="language-javascript">kashmir = JSON.parse(fs.readFileSync(&quot;./kashmir.geo.json&quot;).toString());
-india = JSON.parse(fs.readFileSync(&quot;./india.geo.json&quot;).toString());
-</code></pre>
-<ol>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span>kashmir <span style="color:#555">=</span> JSON.parse(fs.readFileSync(<span style="color:#c30">&#34;./kashmir.geo.json&#34;</span>).toString());
+</span></span><span style="display:flex;"><span>india <span style="color:#555">=</span> JSON.parse(fs.readFileSync(<span style="color:#c30">&#34;./india.geo.json&#34;</span>).toString());
+</span></span></code></pre></div><ol>
 <li>Identify the Kashmir feature in the India feature collection.</li>
 </ol>
-<pre><code class="language-javascript">kin = india.features.filter(function(f) {return f.properties.NAME_1.match(&quot;Kashmir&quot;);})[0];
-</code></pre>
-<ol>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span>kin <span style="color:#555">=</span> india.features.filter(<span style="color:#069;font-weight:bold">function</span>(f) {<span style="color:#069;font-weight:bold">return</span> f.properties.NAME_1.match(<span style="color:#c30">&#34;Kashmir&#34;</span>);})[<span style="color:#f60">0</span>];
+</span></span></code></pre></div><ol>
 <li>Replace it&rsquo;s coordinates with the unified Kashmir we generated.</li>
 </ol>
-<pre><code class="language-javascript">kin.geometry.coordinates = kashmir.features[0].geometry.coordinates;
-</code></pre>
-<ol>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span>kin.geometry.coordinates <span style="color:#555">=</span> kashmir.features[<span style="color:#f60">0</span>].geometry.coordinates;
+</span></span></code></pre></div><ol>
 <li>Save it back to a GeoJSON file.</li>
 </ol>
-<pre><code class="language-javascript">fs.writeFileSync(&quot;full_india.geo.json&quot;, JSON.stringify(india));
-</code></pre>
-<p>Now the GeoJSON file can be transformed back in to a shape file.</p>
-<pre><code class="language-bash">ogr2ogr -f 'ESRI Shapefile' full_india.shp full_india.geo.json
-</code></pre>
-<p>Back to Kashmir and laws. Will this map save one from trouble? I am not sure, but this is an improvement on the omission of territories.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span>fs.writeFileSync(<span style="color:#c30">&#34;full_india.geo.json&#34;</span>, JSON.stringify(india));
+</span></span></code></pre></div><p>Now the GeoJSON file can be transformed back in to a shape file.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>ogr2ogr -f <span style="color:#c30">&#39;ESRI Shapefile&#39;</span> full_india.shp full_india.geo.json
+</span></span></code></pre></div><p>Back to Kashmir and laws. Will this map save one from trouble? I am not sure, but this is an improvement on the omission of territories.</p>
 <div class="footnotes" role="doc-endnotes">
 <hr>
 <ol>

@@ -91,90 +91,84 @@
            itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div>
           <p>Jackson is a great tool to have in your tool set if you deal with JSON or XML. It facilitates easy serialization and de-serialization to and from Java classes with a convenient annotation based interface. With the same set of annotations, we can achieve both XML and JSON serialization and de-serialization. With Jackson&rsquo;s <code>data-format-xml</code> it is even possible to give the same Class a different JSON and XML representation.</p>
-<pre><code class="language-java">@JacksonXmlRootElement(localName = &quot;user-account&quot;)
-@JsonRootName(&quot;user&quot;)
-public class Account {
-  private String name;
-  private String emailAddress;
-
-  @JsonProperty(&quot;name&quot;)
-  @JacksonXmlProperty(localName = &quot;name&quot;)
-  public String getName() {
-    return name;
-  }
-
-  @JsonProperty(&quot;email_address&quot;)
-  @JacksonXmlProperty(localName = &quot;email-address&quot;)
-  public String getEmailAddress() {
-    return emailAddress;
-  }
-
-  // ...
-}
-</code></pre>
-<p>When this gets used, it does the serialization and de-serializaion to and from XML and JSON in different forms:</p>
-<pre><code class="language-java">jsonMapper = new ObjectMapper();
-jsonMapper.configure(WRAP_ROOT_VALUE, true);
-jsonMapper.configure(UNWRAP_ROOT_VALUE, true);
-xmlMapper = new XmlMapper();
-
-// ...
-
-Account account = new Account(&quot;John Doe&quot;, &quot;john@example.com&quot;);
-
-String jsonString = jsonMapper.writeValueAsString(account);
-System.out.println(jsonString);
-Account deSerializedAccount = jsonMapper.readValue(jsonString, Account.class);
-assertEquals(account, deSerializedAccount);
-
-String xmlString = xmlMapper.writeValueAsString(account);
-System.out.println(xmlString);
-deSerializedAccount = xmlMapper.readValue(xmlString, Account.class);
-assertEquals(account, deSerializedAccount);
-</code></pre>
-<pre><code class="language-shell">{&quot;user&quot;:{&quot;name&quot;:&quot;John Doe&quot;,&quot;email_address&quot;:&quot;john@example.com&quot;}}
-&lt;user-account&gt;&lt;name&gt;John Doe&lt;/name&gt;&lt;email-address&gt;john@example.com&lt;/email-address&gt;&lt;/user-account&gt;
-</code></pre>
-<p>Things get really interesting when we introduce <a href="http://freebuilder.inferred.org/">FreeBuilder</a>. FreeBuilder supports Jackson and we will be able to do serialization correctly. However, XML de-serialization does not work as expected.</p>
-<pre><code class="language-java">cksonXmlRootElement(localName = &quot;user-account&quot;)
-@JsonRootName(&quot;user&quot;)
-@FreeBuilder
-@JsonDeserialize(builder = Account.Builder.class)
-public interface Account {
-  @JsonProperty(&quot;name&quot;)
-  @JacksonXmlProperty(localName = &quot;name&quot;)
-  String getName();
-
-  @JsonProperty(&quot;email_address&quot;)
-  @JacksonXmlProperty(localName = &quot;email-address&quot;)
-  String getEmailAddress();
-
-  class Builder extends Account_Builder {}
-}
-</code></pre>
-<pre><code class="language-java">Account account = new Account.Builder()
-    .setEmailAddress(&quot;john@example.com&quot;)
-    .setName(&quot;John Doe&quot;)
-    .build();
-
-String jsonString = jsonMapper.writeValueAsString(account);
-System.out.println(jsonString);
-Account deSerializedAccount = jsonMapper.readValue(jsonString, Account.class);
-assertEquals(account, deSerializedAccount);
-
-String xmlString = xmlMapper.writeValueAsString(account);
-System.out.println(xmlString);
-deSerializedAccount = xmlMapper.readValue(xmlString, Account.class);
-assertEquals(account, deSerializedAccount);
-</code></pre>
-<p>This will cause Jackson to throw an error while de-serializing XML, even though de-serializing to JSON works as expected.</p>
-<pre><code class="language-shell">{&quot;user&quot;:{&quot;name&quot;:&quot;John Doe&quot;,&quot;email_address&quot;:&quot;john@example.com&quot;}}
-&lt;user-account&gt;&lt;name&gt;John Doe&lt;/name&gt;&lt;email-address&gt;john@example.com&lt;/email-address&gt;&lt;/user-account&gt;
-
-com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException: Unrecognized field &quot;email-address&quot; (class in.sdqali.json.Account$Builder), not marked as ignorable (3 known properties: &quot;emailAddress&quot;, &quot;email_address&quot;, &quot;name&quot;])
- at [Source: (StringReader); line: 1, column: 83] (through reference chain: in.sdqali.json.Account$Builder[&quot;email-address&quot;])
-</code></pre>
-<p>After digging around, it turns out that FreeBuilder <a href="https://github.com/inferred/FreeBuilder/blob/master/src/main/java/org/inferred/freebuilder/processor/JacksonSupport.java#L40">keeps only</a> the <code>@JsonProperty</code> annotation on methods that it finds. This in turn causes the object created by the builder to have methods whose <code>@JacksonXmlProperty</code> annotations are stripped of, which in turn causes Jackson to look for the camel-cased versions of the attribute names. I have opened a new <a href="https://github.com/inferred/FreeBuilder/issues/294">GitHub issue</a> for this.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@JacksonXmlRootElement</span>(localName<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;user-account&#34;</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@JsonRootName</span>(<span style="color:#c30">&#34;user&#34;</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">Account</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span>String<span style="color:#bbb"> </span>name;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span>String<span style="color:#bbb"> </span>emailAddress;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@JsonProperty</span>(<span style="color:#c30">&#34;name&#34;</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@JacksonXmlProperty</span>(localName<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;name&#34;</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>String<span style="color:#bbb"> </span><span style="color:#c0f">getName</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>name;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@JsonProperty</span>(<span style="color:#c30">&#34;email_address&#34;</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@JacksonXmlProperty</span>(localName<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;email-address&#34;</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>String<span style="color:#bbb"> </span><span style="color:#c0f">getEmailAddress</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>emailAddress;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#09f;font-style:italic">// ...</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>When this gets used, it does the serialization and de-serializaion to and from XML and JSON in different forms:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>jsonMapper<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>ObjectMapper();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>jsonMapper.<span style="color:#309">configure</span>(WRAP_ROOT_VALUE,<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">true</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>jsonMapper.<span style="color:#309">configure</span>(UNWRAP_ROOT_VALUE,<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">true</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>xmlMapper<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>XmlMapper();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#09f;font-style:italic">// ...</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>Account<span style="color:#bbb"> </span>account<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>Account(<span style="color:#c30">&#34;John Doe&#34;</span>,<span style="color:#bbb"> </span><span style="color:#c30">&#34;john@example.com&#34;</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>String<span style="color:#bbb"> </span>jsonString<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>jsonMapper.<span style="color:#309">writeValueAsString</span>(account);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>System.<span style="color:#309">out</span>.<span style="color:#309">println</span>(jsonString);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>Account<span style="color:#bbb"> </span>deSerializedAccount<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>jsonMapper.<span style="color:#309">readValue</span>(jsonString,<span style="color:#bbb"> </span>Account.<span style="color:#309">class</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>assertEquals(account,<span style="color:#bbb"> </span>deSerializedAccount);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>String<span style="color:#bbb"> </span>xmlString<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>xmlMapper.<span style="color:#309">writeValueAsString</span>(account);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>System.<span style="color:#309">out</span>.<span style="color:#309">println</span>(xmlString);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>deSerializedAccount<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>xmlMapper.<span style="color:#309">readValue</span>(xmlString,<span style="color:#bbb"> </span>Account.<span style="color:#309">class</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>assertEquals(account,<span style="color:#bbb"> </span>deSerializedAccount);<span style="color:#bbb">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#555">{</span><span style="color:#c30">&#34;user&#34;</span>:<span style="color:#555">{</span><span style="color:#c30">&#34;name&#34;</span>:<span style="color:#c30">&#34;John Doe&#34;</span>,<span style="color:#c30">&#34;email_address&#34;</span>:<span style="color:#c30">&#34;john@example.com&#34;</span><span style="color:#555">}}</span>
+</span></span><span style="display:flex;"><span>&lt;user-account&gt;&lt;name&gt;John Doe&lt;/name&gt;&lt;email-address&gt;john@example.com&lt;/email-address&gt;&lt;/user-account&gt;
+</span></span></code></pre></div><p>Things get really interesting when we introduce <a href="http://freebuilder.inferred.org/">FreeBuilder</a>. FreeBuilder supports Jackson and we will be able to do serialization correctly. However, XML de-serialization does not work as expected.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>cksonXmlRootElement(localName<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;user-account&#34;</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@JsonRootName</span>(<span style="color:#c30">&#34;user&#34;</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@FreeBuilder</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@JsonDeserialize</span>(builder<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>Account.<span style="color:#309">Builder</span>.<span style="color:#309">class</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">interface</span> <span style="color:#0a8;font-weight:bold">Account</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@JsonProperty</span>(<span style="color:#c30">&#34;name&#34;</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@JacksonXmlProperty</span>(localName<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;name&#34;</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>String<span style="color:#bbb"> </span><span style="color:#c0f">getName</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@JsonProperty</span>(<span style="color:#c30">&#34;email_address&#34;</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@JacksonXmlProperty</span>(localName<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;email-address&#34;</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>String<span style="color:#bbb"> </span><span style="color:#c0f">getEmailAddress</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">Builder</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">extends</span><span style="color:#bbb"> </span>Account_Builder<span style="color:#bbb"> </span>{}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>Account<span style="color:#bbb"> </span>account<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>Account.<span style="color:#309">Builder</span>()<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>.<span style="color:#309">setEmailAddress</span>(<span style="color:#c30">&#34;john@example.com&#34;</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>.<span style="color:#309">setName</span>(<span style="color:#c30">&#34;John Doe&#34;</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>.<span style="color:#309">build</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>String<span style="color:#bbb"> </span>jsonString<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>jsonMapper.<span style="color:#309">writeValueAsString</span>(account);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>System.<span style="color:#309">out</span>.<span style="color:#309">println</span>(jsonString);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>Account<span style="color:#bbb"> </span>deSerializedAccount<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>jsonMapper.<span style="color:#309">readValue</span>(jsonString,<span style="color:#bbb"> </span>Account.<span style="color:#309">class</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>assertEquals(account,<span style="color:#bbb"> </span>deSerializedAccount);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>String<span style="color:#bbb"> </span>xmlString<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>xmlMapper.<span style="color:#309">writeValueAsString</span>(account);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>System.<span style="color:#309">out</span>.<span style="color:#309">println</span>(xmlString);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>deSerializedAccount<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>xmlMapper.<span style="color:#309">readValue</span>(xmlString,<span style="color:#bbb"> </span>Account.<span style="color:#309">class</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>assertEquals(account,<span style="color:#bbb"> </span>deSerializedAccount);<span style="color:#bbb">
+</span></span></span></code></pre></div><p>This will cause Jackson to throw an error while de-serializing XML, even though de-serializing to JSON works as expected.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#555">{</span><span style="color:#c30">&#34;user&#34;</span>:<span style="color:#555">{</span><span style="color:#c30">&#34;name&#34;</span>:<span style="color:#c30">&#34;John Doe&#34;</span>,<span style="color:#c30">&#34;email_address&#34;</span>:<span style="color:#c30">&#34;john@example.com&#34;</span><span style="color:#555">}}</span>
+</span></span><span style="display:flex;"><span>&lt;user-account&gt;&lt;name&gt;John Doe&lt;/name&gt;&lt;email-address&gt;john@example.com&lt;/email-address&gt;&lt;/user-account&gt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException: Unrecognized field <span style="color:#c30">&#34;email-address&#34;</span> <span style="color:#555">(</span>class in.sdqali.json.Account<span style="color:#033">$Builder</span><span style="color:#555">)</span>, not marked as ignorable <span style="color:#555">(</span><span style="color:#f60">3</span> known properties: <span style="color:#c30">&#34;emailAddress&#34;</span>, <span style="color:#c30">&#34;email_address&#34;</span>, <span style="color:#c30">&#34;name&#34;</span><span style="color:#555">])</span>
+</span></span><span style="display:flex;"><span> at <span style="color:#555">[</span>Source: <span style="color:#555">(</span>StringReader<span style="color:#555">)</span>; line: 1, column: 83<span style="color:#555">]</span> <span style="color:#555">(</span>through reference chain: in.sdqali.json.Account<span style="color:#033">$Builder</span><span style="color:#555">[</span><span style="color:#c30">&#34;email-address&#34;</span><span style="color:#555">])</span>
+</span></span></code></pre></div><p>After digging around, it turns out that FreeBuilder <a href="https://github.com/inferred/FreeBuilder/blob/master/src/main/java/org/inferred/freebuilder/processor/JacksonSupport.java#L40">keeps only</a> the <code>@JsonProperty</code> annotation on methods that it finds. This in turn causes the object created by the builder to have methods whose <code>@JacksonXmlProperty</code> annotations are stripped of, which in turn causes Jackson to look for the camel-cased versions of the attribute names. I have opened a new <a href="https://github.com/inferred/FreeBuilder/issues/294">GitHub issue</a> for this.</p>
 <p>Until this is resolved, if you use FreeBuilder and need to have different XML and JSON representation, you will have to write a custom Jackson <a href="https://github.com/FasterXML/jackson-docs/wiki/JacksonHowToCustomSerializers">Serializer</a> and Deserializer.</p>
         </div>
         <aside id="gh-comments-list">

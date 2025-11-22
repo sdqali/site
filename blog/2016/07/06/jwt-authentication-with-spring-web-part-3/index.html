@@ -106,121 +106,116 @@
 <li><a href="/blog/2016/07/13/jwt-authentication-with-spring-web-part-5/">Part 5</a> - Securing the front end</li>
 </ul>
 <p>Our fist step is to configure Spring Security to allow access to the login end point we will be building. This can be done as follows:</p>
-<pre><code class="language-java">@Configuration
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().ignoringAntMatchers(&quot;/login&quot;);
-
-        http.authorizeRequests()
-                .antMatchers(&quot;/login&quot;)
-                .permitAll()
-                .antMatchers(&quot;/**/*&quot;)
-                .denyAll();
-    }
-}
-</code></pre>
-<p>We are turning off authentication and CSRF token checking for the <code>/login</code> end point.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Configuration</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">SecurityConfig</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">extends</span><span style="color:#bbb"> </span>WebSecurityConfigurerAdapter<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">protected</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">configure</span>(HttpSecurity<span style="color:#bbb"> </span>http)<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>http.<span style="color:#309">csrf</span>().<span style="color:#309">ignoringAntMatchers</span>(<span style="color:#c30">&#34;/login&#34;</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>http.<span style="color:#309">authorizeRequests</span>()<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">antMatchers</span>(<span style="color:#c30">&#34;/login&#34;</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">permitAll</span>()<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">antMatchers</span>(<span style="color:#c30">&#34;/**/*&#34;</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">denyAll</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>We are turning off authentication and CSRF token checking for the <code>/login</code> end point.</p>
 <p>Next, we build a <code>LoginController</code> to issue tokens up on a user presenting valid credentials:</p>
-<pre><code class="language-java">@RestController
-@RequestMapping(path = &quot;/login&quot;)
-public class LoginController {
-
-    private final LoginService loginService;
-    private final JwtService jwtService;
-
-    @SuppressWarnings(&quot;unused&quot;)
-    public LoginController() {
-        this(null, null);
-    }
-
-    @Autowired
-    public LoginController(LoginService loginService, JwtService jwtService) {
-        this.loginService = loginService;
-        this.jwtService = jwtService;
-    }
-
-    @RequestMapping(path = &quot;&quot;,
-            method = POST,
-            produces = APPLICATION_JSON_VALUE)
-    public MinimalProfile login(@RequestBody LoginCredentials credentials,
-                                HttpServletResponse response) {
-        return loginService.login(credentials)
-                .map(minimalProfile -&gt; {
-                    try {
-                        response.setHeader(&quot;Token&quot;, jwtService.tokenFor(minimalProfile));
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                    return minimalProfile;
-                })
-                .orElseThrow(() -&gt; new FailedToLoginException(credentials.getUsername()));
-    }
-}
-</code></pre>
-<p>We use the login service to verify the credentials and it returns an <code>Optional&lt;MinimalProfile&gt;</code>. If there is a valid <code>MinimalProfile</code>, we ask the <code>JwtService</code> to issue a token.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@RestController</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@RequestMapping</span>(path<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;/login&#34;</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">LoginController</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">final</span><span style="color:#bbb"> </span>LoginService<span style="color:#bbb"> </span>loginService;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">final</span><span style="color:#bbb"> </span>JwtService<span style="color:#bbb"> </span>jwtService;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@SuppressWarnings</span>(<span style="color:#c30">&#34;unused&#34;</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#c0f">LoginController</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">this</span>(<span style="color:#069;font-weight:bold">null</span>,<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Autowired</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#c0f">LoginController</span>(LoginService<span style="color:#bbb"> </span>loginService,<span style="color:#bbb"> </span>JwtService<span style="color:#bbb"> </span>jwtService)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">this</span>.<span style="color:#309">loginService</span><span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>loginService;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">this</span>.<span style="color:#309">jwtService</span><span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>jwtService;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@RequestMapping</span>(path<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;&#34;</span>,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>method<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>POST,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>produces<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>APPLICATION_JSON_VALUE)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>MinimalProfile<span style="color:#bbb"> </span><span style="color:#c0f">login</span>(<span style="color:#99f">@RequestBody</span><span style="color:#bbb"> </span>LoginCredentials<span style="color:#bbb"> </span>credentials,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                                </span>HttpServletResponse<span style="color:#bbb"> </span>response)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>loginService.<span style="color:#309">login</span>(credentials)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">map</span>(minimalProfile<span style="color:#bbb"> </span><span style="color:#555">-&gt;</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                    </span><span style="color:#069;font-weight:bold">try</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                        </span>response.<span style="color:#309">setHeader</span>(<span style="color:#c30">&#34;Token&#34;</span>,<span style="color:#bbb"> </span>jwtService.<span style="color:#309">tokenFor</span>(minimalProfile));<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                    </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">catch</span><span style="color:#bbb"> </span>(Exception<span style="color:#bbb"> </span>e)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                        </span><span style="color:#069;font-weight:bold">throw</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>RuntimeException(e);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                    </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>minimalProfile;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>})<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">orElseThrow</span>(()<span style="color:#bbb"> </span><span style="color:#555">-&gt;</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>FailedToLoginException(credentials.<span style="color:#309">getUsername</span>()));<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>We use the login service to verify the credentials and it returns an <code>Optional&lt;MinimalProfile&gt;</code>. If there is a valid <code>MinimalProfile</code>, we ask the <code>JwtService</code> to issue a token.</p>
 <p>The <code>LoginService</code> uses the <code>ProfileService</code> to load a profile matching the user name and the password presented by the user.</p>
-<pre><code class="language-java">@Component
-public class LoginService {
-
-    private ProfileService profileService;
-
-    @SuppressWarnings(&quot;unused&quot;)
-    public LoginService() {
-        this(null);
-    }
-
-    @Autowired
-    public LoginService(ProfileService profileService) {
-        this.profileService = profileService;
-    }
-
-    public Optional&lt;MinimalProfile&gt; login(LoginCredentials credentials) {
-        return profileService.get(credentials.getUsername())
-                .filter(profile -&gt; profile.getLogin().getPassword().equals(credentials.getPassword()))
-                .map(profile -&gt; new MinimalProfile(profile));
-    }
-}
-</code></pre>
-<p>Please note that in real applications, you never want to do this. You should be comparing the hashed version of the password presented by the user with the hashed version of the password stored in the database.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Component</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">LoginService</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span>ProfileService<span style="color:#bbb"> </span>profileService;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@SuppressWarnings</span>(<span style="color:#c30">&#34;unused&#34;</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#c0f">LoginService</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">this</span>(<span style="color:#069;font-weight:bold">null</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Autowired</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#c0f">LoginService</span>(ProfileService<span style="color:#bbb"> </span>profileService)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">this</span>.<span style="color:#309">profileService</span><span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>profileService;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>Optional<span style="color:#555">&lt;</span>MinimalProfile<span style="color:#555">&gt;</span><span style="color:#bbb"> </span><span style="color:#c0f">login</span>(LoginCredentials<span style="color:#bbb"> </span>credentials)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>profileService.<span style="color:#309">get</span>(credentials.<span style="color:#309">getUsername</span>())<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">filter</span>(profile<span style="color:#bbb"> </span><span style="color:#555">-&gt;</span><span style="color:#bbb"> </span>profile.<span style="color:#309">getLogin</span>().<span style="color:#309">getPassword</span>().<span style="color:#309">equals</span>(credentials.<span style="color:#309">getPassword</span>()))<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">map</span>(profile<span style="color:#bbb"> </span><span style="color:#555">-&gt;</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>MinimalProfile(profile));<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>Please note that in real applications, you never want to do this. You should be comparing the hashed version of the password presented by the user with the hashed version of the password stored in the database.</p>
 <p>The <code>JwtService</code> creates a token using the profile information and an expiration date of 2 hours with the <code>HMASHA256</code> algorithm. It uses the key provided by <code>SecretKeyProvider</code>. For creating the JWT token, we use the excellent jjwt <sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> library we introduced in <a href="/blog/2016/07/02/jwt-authentication-with-spring-web-part-1/">part 1</a>.</p>
-<pre><code class="language-java">@Component
-public class JwtService {
-    private static final String ISSUER = &quot;in.sdqali.jwt&quot;;
-    private SecretKeyProvider secretKeyProvider;
-
-    @SuppressWarnings(&quot;unused&quot;)
-    public JwtService() {
-        this(null);
-    }
-
-    @Autowired
-    public JwtService(SecretKeyProvider secretKeyProvider) {
-        this.secretKeyProvider = secretKeyProvider;
-    }
-
-    public String tokenFor(MinimalProfile minimalProfile) throws IOException, URISyntaxException {
-        byte[] secretKey = secretKeyProvider.getKey();
-        Date expiration = Date.from(LocalDateTime.now().plusHours(2).toInstant(UTC));
-        return Jwts.builder()
-                .setSubject(minimalProfile.getUsername())
-                .setExpiration(expiration)
-                .setIssuer(ISSUER)
-                .signWith(SignatureAlgorithm.HS512, secretKey)
-                .compact();
-    }
-}
-</code></pre>
-<p>The <code>SecretKeyProvider</code> in this example will simply load the secret key from a file, where it is stored in plain text. In a real application, you may store and encrypted version of it and decrypt it when required.</p>
-<pre><code class="language-java">@Component
-public class SecretKeyProvider {
-    public byte[] getKey() throws URISyntaxException, IOException {
-        return Files.readAllBytes(Paths.get(this.getClass().getResource(&quot;/jwt.key&quot;).toURI()));
-    }
-}
-</code></pre>
-<p>With this code, a client can authenticate and receive a JWT. When request is made with correct username and password:</p>
-<pre><code>$ curl -v -X POST &quot;http://localhost:8080/login&quot; -d '{&quot;username&quot;:&quot;greenrabbit948&quot;, &quot;password&quot;:&quot;celeste&quot;}' --header &quot;Content-Type: application/json&quot;   | jq .
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Component</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">JwtService</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">static</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">final</span><span style="color:#bbb"> </span>String<span style="color:#bbb"> </span>ISSUER<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;in.sdqali.jwt&#34;</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span>SecretKeyProvider<span style="color:#bbb"> </span>secretKeyProvider;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@SuppressWarnings</span>(<span style="color:#c30">&#34;unused&#34;</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#c0f">JwtService</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">this</span>(<span style="color:#069;font-weight:bold">null</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Autowired</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#c0f">JwtService</span>(SecretKeyProvider<span style="color:#bbb"> </span>secretKeyProvider)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">this</span>.<span style="color:#309">secretKeyProvider</span><span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>secretKeyProvider;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>String<span style="color:#bbb"> </span><span style="color:#c0f">tokenFor</span>(MinimalProfile<span style="color:#bbb"> </span>minimalProfile)<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>IOException,<span style="color:#bbb"> </span>URISyntaxException<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#078;font-weight:bold">byte</span><span style="color:#555">[]</span><span style="color:#bbb"> </span>secretKey<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>secretKeyProvider.<span style="color:#309">getKey</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Date<span style="color:#bbb"> </span>expiration<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>Date.<span style="color:#309">from</span>(LocalDateTime.<span style="color:#309">now</span>().<span style="color:#309">plusHours</span>(2).<span style="color:#309">toInstant</span>(UTC));<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>Jwts.<span style="color:#309">builder</span>()<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">setSubject</span>(minimalProfile.<span style="color:#309">getUsername</span>())<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">setExpiration</span>(expiration)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">setIssuer</span>(ISSUER)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">signWith</span>(SignatureAlgorithm.<span style="color:#309">HS512</span>,<span style="color:#bbb"> </span>secretKey)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">compact</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>The <code>SecretKeyProvider</code> in this example will simply load the secret key from a file, where it is stored in plain text. In a real application, you may store and encrypted version of it and decrypt it when required.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Component</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">SecretKeyProvider</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">byte</span><span style="color:#555">[]</span><span style="color:#bbb"> </span><span style="color:#c0f">getKey</span>()<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>URISyntaxException,<span style="color:#bbb"> </span>IOException<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>Files.<span style="color:#309">readAllBytes</span>(Paths.<span style="color:#309">get</span>(<span style="color:#069;font-weight:bold">this</span>.<span style="color:#309">getClass</span>().<span style="color:#309">getResource</span>(<span style="color:#c30">&#34;/jwt.key&#34;</span>).<span style="color:#309">toURI</span>()));<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>With this code, a client can authenticate and receive a JWT. When request is made with correct username and password:</p>
+<pre tabindex="0"><code>$ curl -v -X POST &#34;http://localhost:8080/login&#34; -d &#39;{&#34;username&#34;:&#34;greenrabbit948&#34;, &#34;password&#34;:&#34;celeste&#34;}&#39; --header &#34;Content-Type: application/json&#34;   | jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0*   Trying ::1...
@@ -251,18 +246,17 @@ public class SecretKeyProvider {
 100   211    0   160  100    51  15071   4804 --:--:-- --:--:-- --:--:-- 16000
 * Connection #0 to host localhost left intact
 {
-  &quot;username&quot;: &quot;greenrabbit948&quot;,
-  &quot;name&quot;: {
-    &quot;title&quot;: &quot;miss&quot;,
-    &quot;first&quot;: &quot;dionaura&quot;,
-    &quot;last&quot;: &quot;rodrigues&quot;
+  &#34;username&#34;: &#34;greenrabbit948&#34;,
+  &#34;name&#34;: {
+    &#34;title&#34;: &#34;miss&#34;,
+    &#34;first&#34;: &#34;dionaura&#34;,
+    &#34;last&#34;: &#34;rodrigues&#34;
   },
-  &quot;thumbnail&quot;: &quot;https://randomuser.me/api/portraits/thumb/women/78.jpg&quot;
+  &#34;thumbnail&#34;: &#34;https://randomuser.me/api/portraits/thumb/women/78.jpg&#34;
 }
-</code></pre>
-<p>We can see the <code>Token</code> header has value <code>eyJhbGciOiJIUzUxMiJ9. eyJzdWIiOiJqd3QtZGVtbyIsImV4cCI6MTQ2Nzc2Njk3MSwiaXNzIjoiaW4uc2RxYWxpLmp3dCJ9. eu_OuBIkc4BfcTsTu4t_6TCwyLkH4HcuQzvWIMzNQYdxXiWA77SfvwCe4mdc7C17mXdtBAsvFGDj 7A9fzI0M1w</code>.</p>
+</code></pre><p>We can see the <code>Token</code> header has value <code>eyJhbGciOiJIUzUxMiJ9. eyJzdWIiOiJqd3QtZGVtbyIsImV4cCI6MTQ2Nzc2Njk3MSwiaXNzIjoiaW4uc2RxYWxpLmp3dCJ9. eu_OuBIkc4BfcTsTu4t_6TCwyLkH4HcuQzvWIMzNQYdxXiWA77SfvwCe4mdc7C17mXdtBAsvFGDj 7A9fzI0M1w</code>.</p>
 <p>If we were to present invalid credentials, the API will return a <code>401</code>:</p>
-<pre><code>$ curl -i -X POST &quot;http://localhost:8080/login&quot; -d '{&quot;username&quot;:&quot;greenrabbit948&quot;, &quot;password&quot;:&quot;wrongpassword&quot;}' --header &quot;Content-Type: application/json&quot;
+<pre tabindex="0"><code>$ curl -i -X POST &#34;http://localhost:8080/login&#34; -d &#39;{&#34;username&#34;:&#34;greenrabbit948&#34;, &#34;password&#34;:&#34;wrongpassword&#34;}&#39; --header &#34;Content-Type: application/json&#34;
 HTTP/1.1 401 Unauthorized
 Server: Apache-Coyote/1.1
 X-Content-Type-Options: nosniff
@@ -273,8 +267,7 @@ Expires: 0
 X-Frame-Options: DENY
 Content-Length: 0
 Date: Wed, 06 Jul 2016 06:05:46 GMT
-</code></pre>
-<p>In the next blog post, the fourth is this series, we will move on to verifying the token presented by the client for subsequent requests. The source code for this example for the progress made from part 1 through part 3 is available on <a href="https://github.com/sdqali/jwt-demo/tree/09b02336e4b7c746cb4c134dc020243aef827b66">GitHub</a>.</p>
+</code></pre><p>In the next blog post, the fourth is this series, we will move on to verifying the token presented by the client for subsequent requests. The source code for this example for the progress made from part 1 through part 3 is available on <a href="https://github.com/sdqali/jwt-demo/tree/09b02336e4b7c746cb4c134dc020243aef827b66">GitHub</a>.</p>
 <div class="footnotes" role="doc-endnotes">
 <hr>
 <ol>

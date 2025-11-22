@@ -116,7 +116,7 @@ One of the things I found very different from Go in Jenkins is the absence of th
 <li>Create a Git repository in Jenkins&rsquo; base directory - This is generally <code>/var/lib/jenkins</code></li>
 </ol>
 <p>2.Create a <code>.gitignore</code> file to exclude Jenkins workspaces. The Jenkins base directory is the home directory for the Jenkins user created to run Jenkins. This means that there will be a number ofLinux user specific files like <code>.ssh/</code> , <code>.gem</code> etc. These files need to be specified in the <code>.gitignore</code> file. A sample <code>.gitignore</code> file is listed below.</p>
-<pre><code># The following ignores...
+<pre tabindex="0"><code># The following ignores...
 # Miscellaneous Hudson litter
 *.log
 *.tmp
@@ -173,26 +173,24 @@ modules/
 custom_deps/
 slave/workspace/
 slave-slave.log.*
-</code></pre>
-<ol start="3">
+</code></pre><ol start="3">
 <li>Setup a Jenkins job to check in the changed configuration files every day at midnight. (Or whatever time interval you choose). Add a custom task with the following steps:</li>
 </ol>
-<pre><code class="language-bash">#/usr/bin/env bash
-JENKINS_HOME=/var/lib/jenkins
-cd $JENKINS_HOME
-
-git add *.xml jobs/*/config.xml users/*/config.xml userContent/*
-
-CHANGES_TO_BE_COMMITTED=$(git status | grep &quot;^# Changes to be committed:&quot; | wc -l)
-
-if [ $CHANGES_TO_BE_COMMITTED -eq 0 ]; then
-  echo &quot;Nothing to commit&quot;
-else
-  git commit -m &quot;Automated commit of Jenkins configuration at $(date)&quot;
-  git push origin master
-fi
-</code></pre>
-<p>While this ensures that the configuration is more or less tracked well, there are times when somebody makes a massive change in the configuration. This is where the most important piece of the bullet proof configuration comes in - team discipline. The team should ensure that big changes are checked in as soon add possible. This can be easily done by triggering the Jenkins job manually, without having to ssh in to the Jenkins box.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#09f;font-style:italic">#/usr/bin/env bash</span>
+</span></span><span style="display:flex;"><span><span style="color:#033">JENKINS_HOME</span><span style="color:#555">=</span>/var/lib/jenkins
+</span></span><span style="display:flex;"><span><span style="color:#366">cd</span> <span style="color:#033">$JENKINS_HOME</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>git add *.xml jobs/*/config.xml users/*/config.xml userContent/*
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#033">CHANGES_TO_BE_COMMITTED</span><span style="color:#555">=</span><span style="color:#069;font-weight:bold">$(</span>git status | grep <span style="color:#c30">&#34;^# Changes to be committed:&#34;</span> | wc -l<span style="color:#069;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">if</span> <span style="color:#555">[</span> <span style="color:#033">$CHANGES_TO_BE_COMMITTED</span> -eq <span style="color:#f60">0</span> <span style="color:#555">]</span>; <span style="color:#069;font-weight:bold">then</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#366">echo</span> <span style="color:#c30">&#34;Nothing to commit&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">else</span>
+</span></span><span style="display:flex;"><span>  git commit -m <span style="color:#c30">&#34;Automated commit of Jenkins configuration at </span><span style="color:#069;font-weight:bold">$(</span>date<span style="color:#069;font-weight:bold">)</span><span style="color:#c30">&#34;</span>
+</span></span><span style="display:flex;"><span>  git push origin master
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">fi</span>
+</span></span></code></pre></div><p>While this ensures that the configuration is more or less tracked well, there are times when somebody makes a massive change in the configuration. This is where the most important piece of the bullet proof configuration comes in - team discipline. The team should ensure that big changes are checked in as soon add possible. This can be easily done by triggering the Jenkins job manually, without having to ssh in to the Jenkins box.</p>
 <h3 id="credits">Credits:</h3>
 <ol>
 <li>The Jenkins community documentation provided a nice <a href="http://jenkins-ci.org/content/keeping-your-configuration-and-data-subversion" target="_blank">starting point</a> for this.</li>

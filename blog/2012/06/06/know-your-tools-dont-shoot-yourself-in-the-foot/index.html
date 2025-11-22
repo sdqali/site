@@ -104,82 +104,72 @@ This happened to us recently, and the subsequent debugging/postmortem revealed t
 <p>While debugging our build, our new developer discovered that certain tasks that take up 10 minutes to complete were being executed twice. We soon started trying to figure out where in the chain of Rake task calls did we end up repeating a task. There were none. After some time, we would learn that we did not know enough about Rake and Ruby 1.8.7</p>
 <h3 id="rakes-redefining-behavior">Rake&rsquo;s redefining behavior</h3>
 <p>Rake treats redefining a Task as akin to appending actions to the same Task. To see this in action, add the following to a Rakefile:</p>
-<pre><code class="language-ruby">task :foo do
-  puts &quot;foo &quot; * 10
-end
-
-task :foo do
-  puts &quot;bar &quot; * 10
-end
-</code></pre>
-<p>If you run the <code>foo</code> task, you would get:</p>
-<pre><code class="language-bash">$rake foo
-foo foo foo foo foo foo foo foo foo foo
-bar bar bar bar bar bar bar bar bar bar
-</code></pre>
-<p>This is far removed from behaviors of Ruby and <a href="http://www.gnu.org/software/make/" title="Make">Make</a>, the tools that inspired Rake. For clarity&rsquo;s sake, this is how Ruby treats redefinitions:</p>
-<pre><code class="language-ruby">#!/usr/bin/env ruby
-#example.rb
-
-def example
-  puts &quot;example &quot; * 10
-end
-
-def example
-  puts &quot;foobar &quot; * 10
-end
-
-example
-</code></pre>
-<p>When run:</p>
-<pre><code class="language-bash">$ruby example.rb
-foobar foobar foobar foobar foobar foobar foobar foobar foobar foobar
-</code></pre>
-<p>Lets take a look at Make&rsquo;s behavior. This is how Make treats redefinitions:</p>
-<pre><code class="language-make"># Example Makefile
-
-foo:
-    @echo Foo target
-foo:
-    @echo Redefined foo target
-</code></pre>
-<p>When run:</p>
-<pre><code class="language-bash">$make foo
-Makefile:6: warning: overriding commands for target `foo'
-Makefile:4: warning: ignoring old commands for target `foo'
-Redefined foo target
-</code></pre>
-<p>While this behavior of Rake may seem weird, there are some advantages to it like the ability to add custom behavior to third party Rake tasks. I asked <a href="https://twitter.com/#!/jimweirich">Jim Weirich</a>, the creator of Rake and he was <a href="http://www.quora.com/Ruby-programming-language/Why-did-Rake-choose-to-treat-a-re-definition-as-a-multiple-definition-instead-of-an-overwrite">of the opinion</a> that it was a useful choice. <em>We were <strong>not</strong> aware of this particular behavior of Rake.</em></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-ruby" data-lang="ruby"><span style="display:flex;"><span>task <span style="color:#fc3">:foo</span> <span style="color:#069;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#366">puts</span> <span style="color:#c30">&#34;foo &#34;</span> <span style="color:#555">*</span> <span style="color:#f60">10</span>
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>task <span style="color:#fc3">:foo</span> <span style="color:#069;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#366">puts</span> <span style="color:#c30">&#34;bar &#34;</span> <span style="color:#555">*</span> <span style="color:#f60">10</span>
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">end</span>
+</span></span></code></pre></div><p>If you run the <code>foo</code> task, you would get:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#033">$rake</span> foo
+</span></span><span style="display:flex;"><span>foo foo foo foo foo foo foo foo foo foo
+</span></span><span style="display:flex;"><span>bar bar bar bar bar bar bar bar bar bar
+</span></span></code></pre></div><p>This is far removed from behaviors of Ruby and <a href="http://www.gnu.org/software/make/" title="Make">Make</a>, the tools that inspired Rake. For clarity&rsquo;s sake, this is how Ruby treats redefinitions:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-ruby" data-lang="ruby"><span style="display:flex;"><span><span style="color:#09f;font-style:italic">#!/usr/bin/env ruby</span>
+</span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic">#example.rb</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">def</span> <span style="color:#c0f">example</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#366">puts</span> <span style="color:#c30">&#34;example &#34;</span> <span style="color:#555">*</span> <span style="color:#f60">10</span>
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">def</span> <span style="color:#c0f">example</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#366">puts</span> <span style="color:#c30">&#34;foobar &#34;</span> <span style="color:#555">*</span> <span style="color:#f60">10</span>
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">end</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>example
+</span></span></code></pre></div><p>When run:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#033">$ruby</span> example.rb
+</span></span><span style="display:flex;"><span>foobar foobar foobar foobar foobar foobar foobar foobar foobar foobar
+</span></span></code></pre></div><p>Lets take a look at Make&rsquo;s behavior. This is how Make treats redefinitions:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-make" data-lang="make"><span style="display:flex;"><span><span style="color:#09f;font-style:italic"># Example Makefile
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"></span>
+</span></span><span style="display:flex;"><span><span style="color:#c0f">foo</span><span style="color:#555">:</span>
+</span></span><span style="display:flex;"><span>    @echo Foo target
+</span></span><span style="display:flex;"><span><span style="color:#c0f">foo</span><span style="color:#555">:</span>
+</span></span><span style="display:flex;"><span>    @echo Redefined foo target
+</span></span></code></pre></div><p>When run:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#033">$make</span> foo
+</span></span><span style="display:flex;"><span>Makefile:6: warning: overriding commands <span style="color:#069;font-weight:bold">for</span> target <span style="color:#c30">`</span>foo<span style="color:#c30">&#39;
+</span></span></span><span style="display:flex;"><span><span style="color:#c30">Makefile:4: warning: ignoring old commands for target `foo&#39;</span>
+</span></span><span style="display:flex;"><span>Redefined foo target
+</span></span></code></pre></div><p>While this behavior of Rake may seem weird, there are some advantages to it like the ability to add custom behavior to third party Rake tasks. I asked <a href="https://twitter.com/#!/jimweirich">Jim Weirich</a>, the creator of Rake and he was <a href="http://www.quora.com/Ruby-programming-language/Why-did-Rake-choose-to-treat-a-re-definition-as-a-multiple-definition-instead-of-an-overwrite">of the opinion</a> that it was a useful choice. <em>We were <strong>not</strong> aware of this particular behavior of Rake.</em></p>
 <p>Under normal situations, this behavior should not cause us trouble, as it is unlikely that we would redefine our own Rake tasks. But this combined with the next issue led to some of our build tasks running twice.</p>
 <h3 id="ruby-187s-multiple-require-issue">Ruby 1.8.7&rsquo;s multiple require issue</h3>
 <p>It turns out that in Ruby 1.8.7, whenever a file is <code>require</code>d multiple times, Ruby decides whether to reload it based on the path of the file provided. So if you have the same file being required twice, but using different paths, the file will be loaded twice. If there are Rake tasks defined in that file, the effect of actions in the Rake task will be multiplied.</p>
 <p>Again, this can be best demonstrated with an example. Consider the following scenario. There is a paent directory with <code>Rakefile</code>, <code>zoo.rb</code> and a directory <code>subdir</code> with the file <code>bar.rb</code> inside it.</p>
 <p><code>zoo.rb</code> defines a Rake task <code>print_zoo</code>:</p>
-<pre><code class="language-ruby"># zoo.rb
-
-desc &quot;prints zoo&quot;
-task :print_zoo do
-  puts &quot;zoo &quot; * 10
-end
-</code></pre>
-<p><code>bar.rb</code> in the directory <code>subdir</code> does nothing but require <code>zoo</code> in the parent directory.</p>
-<pre><code class="language-ruby">#subdir/bar.rb
-
-require File.dirname(__FILE__) + &quot;/../zoo&quot;
-</code></pre>
-<p>The Rakefile requires both <code>zoo.rb</code> and <code>bar.rb</code> and defines a task to show the behavior.</p>
-<pre><code class="language-ruby">require File.dirname(__FILE__) + &quot;/zoo&quot;
-require File.dirname(__FILE__) + &quot;/subdir/bar&quot;
-
-desc &quot;show weirdness&quot;
-task :test =&gt; :print_zoo
-</code></pre>
-<p>Now if we run the <code>test</code> task:</p>
-<pre><code class="language-bash">$rake test
-zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo
-zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo
-</code></pre>
-<p>Lets take a step back and think about that. If we load Ruby files multiple times using <code>require</code> we can easily end up repeating a build step that would take 30 minutes to complete.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-ruby" data-lang="ruby"><span style="display:flex;"><span><span style="color:#09f;font-style:italic"># zoo.rb</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>desc <span style="color:#c30">&#34;prints zoo&#34;</span>
+</span></span><span style="display:flex;"><span>task <span style="color:#fc3">:print_zoo</span> <span style="color:#069;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#366">puts</span> <span style="color:#c30">&#34;zoo &#34;</span> <span style="color:#555">*</span> <span style="color:#f60">10</span>
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">end</span>
+</span></span></code></pre></div><p><code>bar.rb</code> in the directory <code>subdir</code> does nothing but require <code>zoo</code> in the parent directory.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-ruby" data-lang="ruby"><span style="display:flex;"><span><span style="color:#09f;font-style:italic">#subdir/bar.rb</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#366">require</span> <span style="color:#360">File</span><span style="color:#555">.</span>dirname(<span style="color:#366">__FILE__</span>) <span style="color:#555">+</span> <span style="color:#c30">&#34;/../zoo&#34;</span>
+</span></span></code></pre></div><p>The Rakefile requires both <code>zoo.rb</code> and <code>bar.rb</code> and defines a task to show the behavior.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-ruby" data-lang="ruby"><span style="display:flex;"><span><span style="color:#366">require</span> <span style="color:#360">File</span><span style="color:#555">.</span>dirname(<span style="color:#366">__FILE__</span>) <span style="color:#555">+</span> <span style="color:#c30">&#34;/zoo&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#366">require</span> <span style="color:#360">File</span><span style="color:#555">.</span>dirname(<span style="color:#366">__FILE__</span>) <span style="color:#555">+</span> <span style="color:#c30">&#34;/subdir/bar&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>desc <span style="color:#c30">&#34;show weirdness&#34;</span>
+</span></span><span style="display:flex;"><span>task <span style="color:#fc3">:test</span> <span style="color:#555">=&gt;</span> <span style="color:#fc3">:print_zoo</span>
+</span></span></code></pre></div><p>Now if we run the <code>test</code> task:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#033">$rake</span> <span style="color:#366">test</span>
+</span></span><span style="display:flex;"><span>zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo
+</span></span><span style="display:flex;"><span>zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo
+</span></span></code></pre></div><p>Lets take a step back and think about that. If we load Ruby files multiple times using <code>require</code> we can easily end up repeating a build step that would take 30 minutes to complete.</p>
 <p>I must note that this issue does not happen on Ruby 1.9.3, where files are being loaded only once. All the code I showed here is available <a href="https://github.com/sdqali/rake_sandbox">here</a>, if you want to take a closer look.</p>
 <h2 id="learning">Learning</h2>
 <p>This is not meant to be a criticism of Rake or Ruby. Although Rake&rsquo;s behavior in this scenario looks weird, there are good reasons why Jim chose that behavior. And we should have moved to Ruby 1.9.3 anyway.  Certainly the learning is that we need to have a better understanding of the tools we use daily.</p>

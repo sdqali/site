@@ -99,12 +99,12 @@ Just like the last example, the fact that Gradle scripts are written in a Groovy
         <div>
           <p>Continuing from the last <a href="/blog/2013/10/01/accessing-environment-variables-in-gradle/">blog post</a>, I have been looking at reading user input from a Gradle script. This was a result of Stack Overflow user <em>user672009</em>&rsquo;s <a href="http://stackoverflow.com/questions/18328730/how-to-create-a-release-signed-apk-file-using-gradle/19130098#19130098">question</a> about prompting for input from a Gradle script so the one does not have to include passwords in the script while checking in.</p>
 <p>Just like the last example, the fact that Gradle scripts are written in a Groovy DSL comes to our help. Groovy&rsquo;s <code>System. console(). readLine</code> can be called from inside Gradle tasks. The same recipe from the last post can be rewritten to prompt for various parameters.</p>
-<pre><code>signingConfigs {
+<pre tabindex="0"><code>signingConfigs {
 	release {
-		storeFile file(System.console().readLine(&quot;\n\$ Enter keystore path: &quot;))
-		storePassword System.console().readLine(&quot;\n\$ Enter keystore password: &quot;)
-		keyAlias System.console().readLine(&quot;\n\$ Enter key alias: &quot;)
-		keyPassword System.console().readLine(&quot;\n\$ Enter key password: &quot;)
+		storeFile file(System.console().readLine(&#34;\n\$ Enter keystore path: &#34;))
+		storePassword System.console().readLine(&#34;\n\$ Enter keystore password: &#34;)
+		keyAlias System.console().readLine(&#34;\n\$ Enter key alias: &#34;)
+		keyPassword System.console().readLine(&#34;\n\$ Enter key password: &#34;)
 	}
 }
 
@@ -113,8 +113,7 @@ buildTypes {
 		signingConfig signingConfigs.release
 	}
 }
-</code></pre>
-<h3 id="this-is-a-bad-idea">This is a bad idea</h3>
+</code></pre><h3 id="this-is-a-bad-idea">This is a bad idea</h3>
 <p>While Gradle allows this kind of prompts, this is a bad pattern for a build script, especially when the script is run remotely, for example on a Continuous Integration <sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> environment. The correct way to prevent hard coding of parameters like this is to access them from environment variables.</p>
 <div class="footnotes" role="doc-endnotes">
 <hr>

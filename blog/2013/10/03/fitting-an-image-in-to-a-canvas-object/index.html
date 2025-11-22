@@ -93,59 +93,56 @@
           <p>I have been playing around with Canvas objects and images for a side project I am doing. One of the first things I had to figure out for this project was how to fit an image of arbitrary height and width on to a Canvas object of arbitrary, but known dimensions while preserving the aspect ratios of the image. This blog post is an explanation of the solution I came up with for this.</p>
 <h3 id="the-problem">The problem</h3>
 <p>The application has a Canvas object on which it needs to draw arbitrary images. The Canvas&rsquo;s dimensions are set to <strong>450px</strong> by <strong>300px</strong>. The image that needs to be drawn will have unknown aspect ratio. The ideal case will be when the image&rsquo;s aspect ratio is <strong>3:2</strong>, just like the canvas. In this case, there is no need for any adjustments to be made and the image can be drawn like this:</p>
-<pre><code class="language-javascript">var canvas = document.getElementById('canvas');
-var context = canvas.getContext('2d');
-var imageObj = new Image();
-imageObj.onload = function() {
-	context.drawImage(imageObj, 0, 0, canvas.width, canvas.height);
-}
-</code></pre>
-<p>But fitting images with aspect ratios different from the Canvas can be a little tricky. The fundamental problem here is that when aspect ratio is different, there is only one pair of edges-either vertical or horizontal-that can be fitted on to the canvas. The image will have to be placed in the center along the other axis. The following diagram illustrates this.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">var</span> canvas <span style="color:#555">=</span> <span style="color:#366">document</span>.getElementById(<span style="color:#c30">&#39;canvas&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">var</span> context <span style="color:#555">=</span> canvas.getContext(<span style="color:#c30">&#39;2d&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">var</span> imageObj <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">new</span> Image();
+</span></span><span style="display:flex;"><span>imageObj.onload <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">function</span>() {
+</span></span><span style="display:flex;"><span>	context.drawImage(imageObj, <span style="color:#f60">0</span>, <span style="color:#f60">0</span>, canvas.width, canvas.height);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>But fitting images with aspect ratios different from the Canvas can be a little tricky. The fundamental problem here is that when aspect ratio is different, there is only one pair of edges-either vertical or horizontal-that can be fitted on to the canvas. The image will have to be placed in the center along the other axis. The following diagram illustrates this.</p>
 <p><img src="/images/canvas_fitting.png" alt="Canvas fitting" title="Canvas fitting"></p>
 <p>Since fitting depends on the aspect ratio, the code should take it into consideration. The following code compares the ratios and chooses to fit the image horizontally or vertically.</p>
-<pre><code class="language-javascript">var canvas = document.getElementById('canvas');
-var context = canvas.getContext('2d');
-var imageObj = new Image();
-
-var fitImageOn = function(canvas, imageObj) {
-	var imageAspectRatio = imageObj.width / imageObj.height;
-	var canvasAspectRatio = canvas.width / canvas.height;
-	var renderableHeight, renderableWidth, xStart, yStart;
-
-	// If image's aspect ratio is less than canvas's we fit on height
-	// and place the image centrally along width
-	if(imageAspectRatio &lt; canvasAspectRatio) {
-		renderableHeight = canvas.height;
-		renderableWidth = imageObj.width * (renderableHeight / imageObj.height);
-		xStart = (canvas.width - renderableWidth) / 2;
-		yStart = 0;
-	}
-
-	// If image's aspect ratio is greater than canvas's we fit on width
-	// and place the image centrally along height
-	else if(imageAspectRatio &gt; canvasAspectRatio) {
-		renderableWidth = canvas.width
-		renderableHeight = imageObj.height * (renderableWidth / imageObj.width);
-		xStart = 0;
-		yStart = (canvas.height - renderableHeight) / 2;
-	}
-
-	// Happy path - keep aspect ratio
-	else {
-		renderableHeight = canvas.height;
-		renderableWidth = canvas.width;
-		xStart = 0;
-		yStart = 0;
-	}
-	context.drawImage(imageObj, xStart, yStart, renderableWidth, renderableHeight);
-};
-
-imageObj.onload = function() {
-	fitImageOn(canvas, imageObj)
-};
-
-</code></pre>
-<p>A demo of this code in action can be found <a href="/demos/canvas_fitting.html">here</a>.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">var</span> canvas <span style="color:#555">=</span> <span style="color:#366">document</span>.getElementById(<span style="color:#c30">&#39;canvas&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">var</span> context <span style="color:#555">=</span> canvas.getContext(<span style="color:#c30">&#39;2d&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">var</span> imageObj <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">new</span> Image();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">var</span> fitImageOn <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">function</span>(canvas, imageObj) {
+</span></span><span style="display:flex;"><span>	<span style="color:#069;font-weight:bold">var</span> imageAspectRatio <span style="color:#555">=</span> imageObj.width <span style="color:#555">/</span> imageObj.height;
+</span></span><span style="display:flex;"><span>	<span style="color:#069;font-weight:bold">var</span> canvasAspectRatio <span style="color:#555">=</span> canvas.width <span style="color:#555">/</span> canvas.height;
+</span></span><span style="display:flex;"><span>	<span style="color:#069;font-weight:bold">var</span> renderableHeight, renderableWidth, xStart, yStart;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#09f;font-style:italic">// If image&#39;s aspect ratio is less than canvas&#39;s we fit on height
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"></span>	<span style="color:#09f;font-style:italic">// and place the image centrally along width
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"></span>	<span style="color:#069;font-weight:bold">if</span>(imageAspectRatio <span style="color:#555">&lt;</span> canvasAspectRatio) {
+</span></span><span style="display:flex;"><span>		renderableHeight <span style="color:#555">=</span> canvas.height;
+</span></span><span style="display:flex;"><span>		renderableWidth <span style="color:#555">=</span> imageObj.width <span style="color:#555">*</span> (renderableHeight <span style="color:#555">/</span> imageObj.height);
+</span></span><span style="display:flex;"><span>		xStart <span style="color:#555">=</span> (canvas.width <span style="color:#555">-</span> renderableWidth) <span style="color:#555">/</span> <span style="color:#f60">2</span>;
+</span></span><span style="display:flex;"><span>		yStart <span style="color:#555">=</span> <span style="color:#f60">0</span>;
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#09f;font-style:italic">// If image&#39;s aspect ratio is greater than canvas&#39;s we fit on width
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"></span>	<span style="color:#09f;font-style:italic">// and place the image centrally along height
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"></span>	<span style="color:#069;font-weight:bold">else</span> <span style="color:#069;font-weight:bold">if</span>(imageAspectRatio <span style="color:#555">&gt;</span> canvasAspectRatio) {
+</span></span><span style="display:flex;"><span>		renderableWidth <span style="color:#555">=</span> canvas.width
+</span></span><span style="display:flex;"><span>		renderableHeight <span style="color:#555">=</span> imageObj.height <span style="color:#555">*</span> (renderableWidth <span style="color:#555">/</span> imageObj.width);
+</span></span><span style="display:flex;"><span>		xStart <span style="color:#555">=</span> <span style="color:#f60">0</span>;
+</span></span><span style="display:flex;"><span>		yStart <span style="color:#555">=</span> (canvas.height <span style="color:#555">-</span> renderableHeight) <span style="color:#555">/</span> <span style="color:#f60">2</span>;
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#09f;font-style:italic">// Happy path - keep aspect ratio
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"></span>	<span style="color:#069;font-weight:bold">else</span> {
+</span></span><span style="display:flex;"><span>		renderableHeight <span style="color:#555">=</span> canvas.height;
+</span></span><span style="display:flex;"><span>		renderableWidth <span style="color:#555">=</span> canvas.width;
+</span></span><span style="display:flex;"><span>		xStart <span style="color:#555">=</span> <span style="color:#f60">0</span>;
+</span></span><span style="display:flex;"><span>		yStart <span style="color:#555">=</span> <span style="color:#f60">0</span>;
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	context.drawImage(imageObj, xStart, yStart, renderableWidth, renderableHeight);
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>imageObj.onload <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">function</span>() {
+</span></span><span style="display:flex;"><span>	fitImageOn(canvas, imageObj)
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><p>A demo of this code in action can be found <a href="/demos/canvas_fitting.html">here</a>.</p>
 
         </div>
         <aside id="gh-comments-list">

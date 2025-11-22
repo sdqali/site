@@ -88,167 +88,156 @@
         <div>
           <p>In this blog post, we will explore how Postgres stores Enum types and how to query for Enum types and their values. Postgres&rsquo; Enum, like their counterparts in many programming languags are data types that allow only a predefined set of values to be assigned to them. An interesting difference is that compared to programming languages, Postgres does allow blanks within the values of Enums.</p>
 <p>Postgres Enums are created using the <code>CREATE TYPE</code> statement. The values are ordered in the order in which they are specified in the <code>CREATE</code> statement.</p>
-<pre><code class="language-sql">=&gt; CREATE TYPE weather AS ENUM (
-  'sunny', 'rainy', 'cloudy', 'snow'
-  );
-
-CREATE TYPE
-
-</code></pre>
-<p>Postgres stores Enums in the <code>pg_type</code> catalog. This catalog assigns a <code>typcategory</code> to every type and Enums <a href="https://www.postgresql.org/docs/current/catalog-pg-type.html#CATALOG-TYPCATEGORY-TABLE">have category</a> <code>E</code>.</p>
-<pre><code class="language-sql">=&gt; SELECT
-  *
-  FROM pg_type
-  WHERE typcategory = 'E';
-
--[ RECORD 1 ]--+----------
-typname        | weather
-typnamespace   | 2200
-typowner       | 24576
-typlen         | 4
-typbyval       | t
-typtype        | e
-typcategory    | E
-typispreferred | f
-typisdefined   | t
-typdelim       | ,
-typrelid       | 0
-typelem        | 0
-typarray       | 41019
-typinput       | enum_in
-typoutput      | enum_out
-typreceive     | enum_recv
-typsend        | enum_send
-typmodin       | -
-typmodout      | -
-typanalyze     | -
-typalign       | i
-typstorage     | p
-typnotnull     | f
-typbasetype    | 0
-typtypmod      | -1
-typndims       | 0
-typcollation   | 0
-typdefaultbin  |
-typdefault     |
-typacl         |
-
-</code></pre>
-<p>This shows us that the name of the enum is <code>weather</code>. How do we find the possible values of this Enum? Values are stored in the catalog <code>pg_enum</code>.</p>
-<pre><code class="language-sql">=&gt; SELECT
-  *
-  FROM pg_enum;
-
- enumtypid | enumsortorder | enumlabel
------------+---------------+-----------
-     41020 |             1 | sunny
-     41020 |             2 | rainy
-     41020 |             3 | cloudy
-     41020 |             4 | snow
-(4 rows)
-</code></pre>
-<p>It is worth noting that each of the enum values are in separate rows of the catalog, with each row using the same <code>enumtypid</code>. The <code>enumtypid</code> is referring to the <code>oid</code> of the enum entry in <code>pg_type</code> catalog. We can verify that we are indeed looking at the same type. <sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup></p>
-<pre><code class="language-sql">=&gt; SELECT
-  *
-FROM pg_type
-WHERE oid = 41020;
-
--[ RECORD 1 ]--+----------
-typname        | weather
-typnamespace   | 2200
-typowner       | 24576
-typlen         | 4
-typbyval       | t
-typtype        | e
-typcategory    | E
-typispreferred | f
-typisdefined   | t
-typdelim       | ,
-typrelid       | 0
-typelem        | 0
-typarray       | 41019
-typinput       | enum_in
-typoutput      | enum_out
-typreceive     | enum_recv
-typsend        | enum_send
-typmodin       | -
-typmodout      | -
-typanalyze     | -
-typalign       | i
-typstorage     | p
-typnotnull     | f
-typbasetype    | 0
-typtypmod      | -1
-typndims       | 0
-typcollation   | 0
-typdefaultbin  |
-typdefault     |
-typacl         |
-</code></pre>
-<p>We can use the information we have so far to perform a <code>JOIN</code> on these catalogs to get all Enum types. To test that values and types are fetched correctly, lets create another enum.</p>
-<pre><code class="language-sql">=&gt; CREATE TYPE transport AS ENUM (
-  'bus', 'tram', 'rail', 'ferry'
-);
-
-CREATE TYPE
-</code></pre>
-<p>This enum will create more entries in <code>pg_enum</code>.</p>
-<pre><code class="language-sql">=&gt; SELECT
-  *
-FROM pg_enum;
-
- enumtypid | enumsortorder | enumlabel
------------+---------------+-----------
-     41020 |             1 | sunny
-     41020 |             2 | rainy
-     41020 |             3 | cloudy
-     41020 |             4 | snow
-     41030 |             1 | bus
-     41030 |             2 | tram
-     41030 |             3 | rail
-     41030 |             4 | ferry
-(8 rows)
-</code></pre>
-<p>We can now perform the <code>JOIN</code></p>
-<pre><code class="language-sql">=&gt; SELECT
-  type.typname,
-  enum.enumlabel AS value
-FROM pg_enum AS enum
-JOIN pg_type AS type
-  ON (type.oid = enum.enumtypid)
-GROUP BY enum.enumlabel,
-         type.typname;
-
-  typname  | value
------------+--------
- weather   | cloudy
- transport | ferry
- transport | bus
- transport | tram
- transport | rail
- weather   | rainy
- weather   | sunny
- weather   | snow
-(8 rows)
-
-</code></pre>
-<p>This query needs a <code>GROUP BY</code> due to the fact that there are multiple rows representing a single Enum&rsquo;s values.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#555">=&gt;</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">CREATE</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">TYPE</span><span style="color:#bbb"> </span>weather<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span>ENUM<span style="color:#bbb"> </span>(<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#c30">&#39;sunny&#39;</span>,<span style="color:#bbb"> </span><span style="color:#c30">&#39;rainy&#39;</span>,<span style="color:#bbb"> </span><span style="color:#c30">&#39;cloudy&#39;</span>,<span style="color:#bbb"> </span><span style="color:#c30">&#39;snow&#39;</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">CREATE</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">TYPE</span><span style="color:#bbb">
+</span></span></span></code></pre></div><p>Postgres stores Enums in the <code>pg_type</code> catalog. This catalog assigns a <code>typcategory</code> to every type and Enums <a href="https://www.postgresql.org/docs/current/catalog-pg-type.html#CATALOG-TYPCATEGORY-TABLE">have category</a> <code>E</code>.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#555">=&gt;</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">SELECT</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#555">*</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">FROM</span><span style="color:#bbb"> </span>pg_type<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">WHERE</span><span style="color:#bbb"> </span>typcategory<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#39;E&#39;</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#555">-</span>[<span style="color:#bbb"> </span>RECORD<span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb"> </span>]<span style="color:#09f;font-style:italic">--+----------
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"></span>typname<span style="color:#bbb">        </span><span style="color:#555">|</span><span style="color:#bbb"> </span>weather<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typnamespace<span style="color:#bbb">   </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">2200</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typowner<span style="color:#bbb">       </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">24576</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typlen<span style="color:#bbb">         </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">4</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typbyval<span style="color:#bbb">       </span><span style="color:#555">|</span><span style="color:#bbb"> </span>t<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typtype<span style="color:#bbb">        </span><span style="color:#555">|</span><span style="color:#bbb"> </span>e<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typcategory<span style="color:#bbb">    </span><span style="color:#555">|</span><span style="color:#bbb"> </span>E<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typispreferred<span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span>f<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typisdefined<span style="color:#bbb">   </span><span style="color:#555">|</span><span style="color:#bbb"> </span>t<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typdelim<span style="color:#bbb">       </span><span style="color:#555">|</span><span style="color:#bbb"> </span>,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typrelid<span style="color:#bbb">       </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">0</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typelem<span style="color:#bbb">        </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">0</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typarray<span style="color:#bbb">       </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">41019</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typinput<span style="color:#bbb">       </span><span style="color:#555">|</span><span style="color:#bbb"> </span>enum_in<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typoutput<span style="color:#bbb">      </span><span style="color:#555">|</span><span style="color:#bbb"> </span>enum_out<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typreceive<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span>enum_recv<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typsend<span style="color:#bbb">        </span><span style="color:#555">|</span><span style="color:#bbb"> </span>enum_send<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typmodin<span style="color:#bbb">       </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#555">-</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typmodout<span style="color:#bbb">      </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#555">-</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typanalyze<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#555">-</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typalign<span style="color:#bbb">       </span><span style="color:#555">|</span><span style="color:#bbb"> </span>i<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typstorage<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span>p<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typnotnull<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span>f<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typbasetype<span style="color:#bbb">    </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">0</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typtypmod<span style="color:#bbb">      </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#555">-</span><span style="color:#f60">1</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typndims<span style="color:#bbb">       </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">0</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typcollation<span style="color:#bbb">   </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">0</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typdefaultbin<span style="color:#bbb">  </span><span style="color:#555">|</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typdefault<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typacl<span style="color:#bbb">         </span><span style="color:#555">|</span><span style="color:#bbb">
+</span></span></span></code></pre></div><p>This shows us that the name of the enum is <code>weather</code>. How do we find the possible values of this Enum? Values are stored in the catalog <code>pg_enum</code>.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#555">=&gt;</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">SELECT</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#555">*</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">FROM</span><span style="color:#bbb"> </span>pg_enum;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"> </span>enumtypid<span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span>enumsortorder<span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span>enumlabel<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#09f;font-style:italic">-----------+---------------+-----------
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"></span><span style="color:#bbb">     </span><span style="color:#f60">41020</span><span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb">             </span><span style="color:#f60">1</span><span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span>sunny<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">     </span><span style="color:#f60">41020</span><span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb">             </span><span style="color:#f60">2</span><span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span>rainy<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">     </span><span style="color:#f60">41020</span><span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb">             </span><span style="color:#f60">3</span><span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span>cloudy<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">     </span><span style="color:#f60">41020</span><span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb">             </span><span style="color:#f60">4</span><span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span>snow<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>(<span style="color:#f60">4</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">rows</span>)<span style="color:#bbb">
+</span></span></span></code></pre></div><p>It is worth noting that each of the enum values are in separate rows of the catalog, with each row using the same <code>enumtypid</code>. The <code>enumtypid</code> is referring to the <code>oid</code> of the enum entry in <code>pg_type</code> catalog. We can verify that we are indeed looking at the same type. <sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#555">=&gt;</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">SELECT</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#555">*</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">FROM</span><span style="color:#bbb"> </span>pg_type<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">WHERE</span><span style="color:#bbb"> </span>oid<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#f60">41020</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#555">-</span>[<span style="color:#bbb"> </span>RECORD<span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb"> </span>]<span style="color:#09f;font-style:italic">--+----------
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"></span>typname<span style="color:#bbb">        </span><span style="color:#555">|</span><span style="color:#bbb"> </span>weather<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typnamespace<span style="color:#bbb">   </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">2200</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typowner<span style="color:#bbb">       </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">24576</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typlen<span style="color:#bbb">         </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">4</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typbyval<span style="color:#bbb">       </span><span style="color:#555">|</span><span style="color:#bbb"> </span>t<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typtype<span style="color:#bbb">        </span><span style="color:#555">|</span><span style="color:#bbb"> </span>e<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typcategory<span style="color:#bbb">    </span><span style="color:#555">|</span><span style="color:#bbb"> </span>E<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typispreferred<span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span>f<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typisdefined<span style="color:#bbb">   </span><span style="color:#555">|</span><span style="color:#bbb"> </span>t<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typdelim<span style="color:#bbb">       </span><span style="color:#555">|</span><span style="color:#bbb"> </span>,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typrelid<span style="color:#bbb">       </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">0</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typelem<span style="color:#bbb">        </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">0</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typarray<span style="color:#bbb">       </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">41019</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typinput<span style="color:#bbb">       </span><span style="color:#555">|</span><span style="color:#bbb"> </span>enum_in<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typoutput<span style="color:#bbb">      </span><span style="color:#555">|</span><span style="color:#bbb"> </span>enum_out<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typreceive<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span>enum_recv<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typsend<span style="color:#bbb">        </span><span style="color:#555">|</span><span style="color:#bbb"> </span>enum_send<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typmodin<span style="color:#bbb">       </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#555">-</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typmodout<span style="color:#bbb">      </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#555">-</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typanalyze<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#555">-</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typalign<span style="color:#bbb">       </span><span style="color:#555">|</span><span style="color:#bbb"> </span>i<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typstorage<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span>p<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typnotnull<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span>f<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typbasetype<span style="color:#bbb">    </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">0</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typtypmod<span style="color:#bbb">      </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#555">-</span><span style="color:#f60">1</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typndims<span style="color:#bbb">       </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">0</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typcollation<span style="color:#bbb">   </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">0</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typdefaultbin<span style="color:#bbb">  </span><span style="color:#555">|</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typdefault<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>typacl<span style="color:#bbb">         </span><span style="color:#555">|</span><span style="color:#bbb">
+</span></span></span></code></pre></div><p>We can use the information we have so far to perform a <code>JOIN</code> on these catalogs to get all Enum types. To test that values and types are fetched correctly, lets create another enum.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#555">=&gt;</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">CREATE</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">TYPE</span><span style="color:#bbb"> </span>transport<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span>ENUM<span style="color:#bbb"> </span>(<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#c30">&#39;bus&#39;</span>,<span style="color:#bbb"> </span><span style="color:#c30">&#39;tram&#39;</span>,<span style="color:#bbb"> </span><span style="color:#c30">&#39;rail&#39;</span>,<span style="color:#bbb"> </span><span style="color:#c30">&#39;ferry&#39;</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">CREATE</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">TYPE</span><span style="color:#bbb">
+</span></span></span></code></pre></div><p>This enum will create more entries in <code>pg_enum</code>.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#555">=&gt;</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">SELECT</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#555">*</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">FROM</span><span style="color:#bbb"> </span>pg_enum;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"> </span>enumtypid<span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span>enumsortorder<span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span>enumlabel<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#09f;font-style:italic">-----------+---------------+-----------
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"></span><span style="color:#bbb">     </span><span style="color:#f60">41020</span><span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb">             </span><span style="color:#f60">1</span><span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span>sunny<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">     </span><span style="color:#f60">41020</span><span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb">             </span><span style="color:#f60">2</span><span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span>rainy<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">     </span><span style="color:#f60">41020</span><span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb">             </span><span style="color:#f60">3</span><span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span>cloudy<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">     </span><span style="color:#f60">41020</span><span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb">             </span><span style="color:#f60">4</span><span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span>snow<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">     </span><span style="color:#f60">41030</span><span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb">             </span><span style="color:#f60">1</span><span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span>bus<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">     </span><span style="color:#f60">41030</span><span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb">             </span><span style="color:#f60">2</span><span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span>tram<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">     </span><span style="color:#f60">41030</span><span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb">             </span><span style="color:#f60">3</span><span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span>rail<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">     </span><span style="color:#f60">41030</span><span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb">             </span><span style="color:#f60">4</span><span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span>ferry<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>(<span style="color:#f60">8</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">rows</span>)<span style="color:#bbb">
+</span></span></span></code></pre></div><p>We can now perform the <code>JOIN</code></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#555">=&gt;</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">SELECT</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">type</span>.typname,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>enum.enumlabel<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span>value<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">FROM</span><span style="color:#bbb"> </span>pg_enum<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span>enum<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">JOIN</span><span style="color:#bbb"> </span>pg_type<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">type</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">ON</span><span style="color:#bbb"> </span>(<span style="color:#069;font-weight:bold">type</span>.oid<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>enum.enumtypid)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">GROUP</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">BY</span><span style="color:#bbb"> </span>enum.enumlabel,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">         </span><span style="color:#069;font-weight:bold">type</span>.typname;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>typname<span style="color:#bbb">  </span><span style="color:#555">|</span><span style="color:#bbb"> </span>value<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#09f;font-style:italic">-----------+--------
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"></span><span style="color:#bbb"> </span>weather<span style="color:#bbb">   </span><span style="color:#555">|</span><span style="color:#bbb"> </span>cloudy<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"> </span>transport<span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span>ferry<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"> </span>transport<span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span>bus<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"> </span>transport<span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span>tram<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"> </span>transport<span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span>rail<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"> </span>weather<span style="color:#bbb">   </span><span style="color:#555">|</span><span style="color:#bbb"> </span>rainy<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"> </span>weather<span style="color:#bbb">   </span><span style="color:#555">|</span><span style="color:#bbb"> </span>sunny<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"> </span>weather<span style="color:#bbb">   </span><span style="color:#555">|</span><span style="color:#bbb"> </span>snow<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>(<span style="color:#f60">8</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">rows</span>)<span style="color:#bbb">
+</span></span></span></code></pre></div><p>This query needs a <code>GROUP BY</code> due to the fact that there are multiple rows representing a single Enum&rsquo;s values.</p>
 <p>This result gives us everything we want in most cases. But sometimes we want to get a single row with an Enum and all it&rsquo;s values. This can be accomplished by the use of Postgres&rsquo; <a href="https://www.postgresql.org/docs/9.0/functions-aggregate.html"><code>string_agg</code></a> function.</p>
-<pre><code class="language-sql">=&gt; SELECT
-  type.typname AS name,
-  string_agg(enum.enumlabel, '|') AS value
-FROM pg_enum AS enum
-JOIN pg_type AS type
-  ON (type.oid = enum.enumtypid)
-GROUP BY type.typname;
-
-   name    |          value
------------+-------------------------
- transport | bus|tram|rail|ferry
- weather   | sunny|rainy|cloudy|snow
-(2 rows)
-</code></pre>
-<p>Our choice of <code>|</code> as the separator is arbitrary, but it is important to remember that Postgres does allow blanks in Enum values and using blank as the separator will lead to unexpected and wrong results. <sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#555">=&gt;</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">SELECT</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">type</span>.typname<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span>name,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>string_agg(enum.enumlabel,<span style="color:#bbb"> </span><span style="color:#c30">&#39;|&#39;</span>)<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span>value<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">FROM</span><span style="color:#bbb"> </span>pg_enum<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span>enum<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">JOIN</span><span style="color:#bbb"> </span>pg_type<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">type</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">ON</span><span style="color:#bbb"> </span>(<span style="color:#069;font-weight:bold">type</span>.oid<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>enum.enumtypid)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">GROUP</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">BY</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">type</span>.typname;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">   </span>name<span style="color:#bbb">    </span><span style="color:#555">|</span><span style="color:#bbb">          </span>value<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#09f;font-style:italic">-----------+-------------------------
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"></span><span style="color:#bbb"> </span>transport<span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span>bus<span style="color:#555">|</span>tram<span style="color:#555">|</span>rail<span style="color:#555">|</span>ferry<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"> </span>weather<span style="color:#bbb">   </span><span style="color:#555">|</span><span style="color:#bbb"> </span>sunny<span style="color:#555">|</span>rainy<span style="color:#555">|</span>cloudy<span style="color:#555">|</span>snow<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>(<span style="color:#f60">2</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">rows</span>)<span style="color:#bbb">
+</span></span></span></code></pre></div><p>Our choice of <code>|</code> as the separator is arbitrary, but it is important to remember that Postgres does allow blanks in Enum values and using blank as the separator will lead to unexpected and wrong results. <sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup></p>
 <div class="footnotes" role="doc-endnotes">
 <hr>
 <ol>

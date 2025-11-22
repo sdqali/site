@@ -27,41 +27,37 @@
 &lt;p&gt;The data is available for public consumption, although Yelp owns any derivative dataset you create from the original &lt;sup id=&#34;fnref:2&#34;&gt;&lt;a href=&#34;#fn:2&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;2&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
 &lt;p&gt;The data is available as files with each line representing a JSON object. Since I am using MongoDB these days to analyze geospatial data, I wanted to convert this into an easy format that I could import into Mongo. Mongo puts a strict constraint on how a location needs to be specified - It expects a location field in a document to be an array in the format &lt;code&gt;[longitude, latitude]&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;With this in mind, the first step is to convert and transform the objects into objects that Mongo can make sense of. The following Ruby script does the job:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-ruby&#34;&gt;#!/usr/bin/env ruby
-
-require &amp;quot;json&amp;quot;
-
-businesses = IO.readlines(&amp;quot;yelp.business.json&amp;quot;).map do |line|
-  b = JSON.parse(line)
-  b[&amp;quot;location&amp;quot;] = {
-    &amp;quot;type&amp;quot; =&amp;gt; &amp;quot;Point&amp;quot;,
-    &amp;quot;coordinates&amp;quot; =&amp;gt; [b[&amp;quot;longitude&amp;quot;], b[&amp;quot;latitude&amp;quot;]]
-  }
-  b
-end
-IO.write &amp;quot;businesses.mongo.json&amp;quot;, businesses.to_json
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;The next step is to import this data into Mongo using the &lt;code&gt;mongoimport&lt;/code&gt; tool.&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;mongoimport --collection businesses --file businesses.mongo.json --jsonArray
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;We need the &lt;code&gt;--jsonArray&lt;/code&gt; parameter because our data is an array.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;#!/usr/bin/env ruby&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;require&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;json&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;businesses &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;IO&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;readlines(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;yelp.business.json&amp;#34;&lt;/span&gt;)&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;map &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;do&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;line&lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  b &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;JSON&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;parse(line)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  b&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;location&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;type&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Point&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;coordinates&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;b&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;longitude&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;, b&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;latitude&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;]]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  b
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#360&#34;&gt;IO&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;write &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;businesses.mongo.json&amp;#34;&lt;/span&gt;, businesses&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;to_json
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The next step is to import this data into Mongo using the &lt;code&gt;mongoimport&lt;/code&gt; tool.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;mongoimport --collection businesses --file businesses.mongo.json --jsonArray
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;We need the &lt;code&gt;--jsonArray&lt;/code&gt; parameter because our data is an array.&lt;/p&gt;
 &lt;p&gt;Since there are 42153 businesses, it will take some time. On my Macbook Pro, it took around 2 minutes, 10 seconds. Once the import is done, make sure that we have a Geospatial index on the &lt;code&gt;location&lt;/code&gt; field.&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;db.businesses.ensureIndex({location: &amp;quot;2dsphere&amp;quot;})
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Once the indexing is done, we can use Mongo&amp;rsquo;s Geospatial queries to find interesting things. As an example, here we look up all the restaurants within 1 kilometer distance from downtown Phoenix.&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;db.businesses.find({
-  location: {
-    $near: {
-      $geometry: {
-	type: &amp;quot;Point&amp;quot;,
-	coordinates: [-112.0667, 33.4500]
-      },
-      $maxDistance: 1000
-    }
-  }
-})
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Happy hacking.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;db.businesses.ensureIndex({location&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;2dsphere&amp;#34;&lt;/span&gt;})
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Once the indexing is done, we can use Mongo&amp;rsquo;s Geospatial queries to find interesting things. As an example, here we look up all the restaurants within 1 kilometer distance from downtown Phoenix.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;db.businesses.find({
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  location&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    $near&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      $geometry&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	type&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Point&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	coordinates&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; [&lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;112.0667&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;33.4500&lt;/span&gt;]
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      },
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      $maxDistance&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;1000&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;})
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Happy hacking.&lt;/p&gt;
 &lt;div class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
 &lt;hr&gt;
 &lt;ol&gt;
@@ -86,61 +82,56 @@ IO.write &amp;quot;businesses.mongo.json&amp;quot;, businesses.to_json
 &lt;p&gt;The first part of this series looked at how to implement basic rate limiting in a Rails application. However, as pointed out in the improvements section, the implementation was not complete - it did not provide clients enough information about the rate limiting that is in place and how long they should wait before making further requests once they hit the limit.&lt;/p&gt;
 &lt;p&gt;In order to tell the client about the rate limit parameters, the mechanism needs to be able to set headers on the response. While a &lt;code&gt;before_filter&lt;/code&gt; is useful to limit the requests, it can not change the response from a valid request. One could use an &lt;code&gt;after_filter&lt;/code&gt; to achieve this, but a Rack middleware &lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; is a more suitable solution given that middlewares can act up on a request as well as the response generated by the application for that request.&lt;/p&gt;
 &lt;p&gt;We will need to comment out the &lt;code&gt;before_filter&lt;/code&gt; that was introduced in Part 1. Then we will define a blank middleware and wire it up. The convention is to define middlwares in &lt;code&gt;app/middleware&lt;/code&gt;.&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-ruby&#34;&gt;
-# app/middleware/rate_limit.rb
-
-class RateLimit
-  def initialize(app)
-    @app = app
-  end
-
-  def call(env)
-    @app.env
-  end
-end
-
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;This middleware is wired up as follows:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-ruby&#34;&gt;
-# config/application.rb
-
-class Application &amp;lt; Rails::Application
-  ...
-  config.middleware.use &amp;quot;RateLimit&amp;quot;
-end
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h3 id=&#34;basic-rate-limiting&#34;&gt;Basic Rate Limiting&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# app/middleware/rate_limit.rb&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;RateLimit&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;initialize&lt;/span&gt;(app)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#033&#34;&gt;@app&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; app
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;call&lt;/span&gt;(env)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#033&#34;&gt;@app&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;env
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This middleware is wired up as follows:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# config/application.rb&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;Application&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;Rails&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;&lt;span style=&#34;color:#360&#34;&gt;Application&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#555&#34;&gt;...&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  config&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;middleware&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;use &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;RateLimit&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;basic-rate-limiting&#34;&gt;Basic Rate Limiting&lt;/h3&gt;
 &lt;p&gt;Let&amp;rsquo;s re-implement what we implemented in Part 1 using the middleware.&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-ruby&#34;&gt;  def call(env)
-    client_ip = env[&amp;quot;REMOTE_ADDR&amp;quot;]
-    key = &amp;quot;count:#{client_ip}&amp;quot;
-    count = REDIS.get(key)
-    unless count
-      REDIS.set(key, 0)
-      REDIS.expire(key, THROTTLE_TIME_WINDOW)
-    end
-
-    if count.to_i &amp;gt;= THROTTLE_MAX_REQUESTS
-      [
-       429,
-       {},
-       [message]
-      ]
-    else
-      REDIS.incr(key)
-      @app.call(env)
-    end
-  end
-
-  private
-  def message
-    {
-      :message =&amp;gt; &amp;quot;You have fired too many requests. Please wait for some time.&amp;quot;
-    }.to_json
-  end
-
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h3 id=&#34;rate-limit-status&#34;&gt;Rate limit status&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;call&lt;/span&gt;(env)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    client_ip &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; env&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;REMOTE_ADDR&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    key &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;count:&lt;/span&gt;&lt;span style=&#34;color:#a00&#34;&gt;#{&lt;/span&gt;client_ip&lt;span style=&#34;color:#a00&#34;&gt;}&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    count &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;REDIS&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;get(key)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;unless&lt;/span&gt; count
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#360&#34;&gt;REDIS&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;set(key, &lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#360&#34;&gt;REDIS&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;expire(key, &lt;span style=&#34;color:#360&#34;&gt;THROTTLE_TIME_WINDOW&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; count&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;to_i &lt;span style=&#34;color:#555&#34;&gt;&amp;gt;=&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;THROTTLE_MAX_REQUESTS&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;       &lt;span style=&#34;color:#f60&#34;&gt;429&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;       {},
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;       &lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;message&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;else&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#360&#34;&gt;REDIS&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;incr(key)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#033&#34;&gt;@app&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;call(env)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069&#34;&gt;private&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;message&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#fc3&#34;&gt;:message&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;You have fired too many requests. Please wait for some time.&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;to_json
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;rate-limit-status&#34;&gt;Rate limit status&lt;/h3&gt;
 &lt;p&gt;There are various header conventions for providing a client it&amp;rsquo;s rate limit status. For this example, we will use the convention that GitHub &lt;sup id=&#34;fnref:2&#34;&gt;&lt;a href=&#34;#fn:2&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;2&lt;/a&gt;&lt;/sup&gt; and Twitter &lt;sup id=&#34;fnref:3&#34;&gt;&lt;a href=&#34;#fn:3&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;3&lt;/a&gt;&lt;/sup&gt; use. The following headers represent the rate limit status:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;X-RateLimit-Limit&lt;/code&gt; - The maximum number of requests that the client is permitted to make in the time window.&lt;/li&gt;
@@ -148,77 +139,74 @@ end
 &lt;li&gt;&lt;code&gt;X-RateLimit-Reset&lt;/code&gt; - The time at which the current rate limit window resets in UTC epoch seconds &lt;sup id=&#34;fnref:4&#34;&gt;&lt;a href=&#34;#fn:4&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;4&lt;/a&gt;&lt;/sup&gt;.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;The middleware will set these headers for all requests with the following change:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-ruby&#34;&gt;  def call(env)
-    client_ip = env[&amp;quot;REMOTE_ADDR&amp;quot;]
-    key = &amp;quot;count:#{client_ip}&amp;quot;
-    count = REDIS.get(key)
-    unless count
-      REDIS.set(key, 0)
-      REDIS.expire(key, THROTTLE_TIME_WINDOW)
-    end
-
-    if count.to_i &amp;gt;= THROTTLE_MAX_REQUESTS
-      [
-       429,
-       rate_limit_headers(count, key),
-       [message]
-      ]
-    else
-      REDIS.incr(key)
-      status, headers, body = @app.call(env)
-      [
-       status,
-       headers.merge(rate_limit_headers(count.to_i + 1, key)),
-       body
-      ]
-    end
-  end
-
-  private
-  def message
-    {
-      :message =&amp;gt; &amp;quot;You have fired too many requests. Please wait for some time.&amp;quot;
-    }.to_json
-  end
-
-  def rate_limit_headers(count, key)
-    ttl = REDIS.ttl(key)
-    time = Time.now.to_i
-    time_till_reset = (time + ttl.to_i).to_s
-    {
-      &amp;quot;X-Rate-Limit-Limit&amp;quot; =&amp;gt;  &amp;quot;60&amp;quot;,
-      &amp;quot;X-Rate-Limit-Remaining&amp;quot; =&amp;gt; (60 - count.to_i).to_s,
-      &amp;quot;X-Rate-Limit-Reset&amp;quot; =&amp;gt; time_till_reset
-    }
-  end
-
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;This computes the time remaining till the limit is reset and the number of requests remaining and sets the appropriate headers.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;call&lt;/span&gt;(env)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    client_ip &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; env&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;REMOTE_ADDR&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    key &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;count:&lt;/span&gt;&lt;span style=&#34;color:#a00&#34;&gt;#{&lt;/span&gt;client_ip&lt;span style=&#34;color:#a00&#34;&gt;}&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    count &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;REDIS&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;get(key)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;unless&lt;/span&gt; count
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#360&#34;&gt;REDIS&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;set(key, &lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#360&#34;&gt;REDIS&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;expire(key, &lt;span style=&#34;color:#360&#34;&gt;THROTTLE_TIME_WINDOW&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; count&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;to_i &lt;span style=&#34;color:#555&#34;&gt;&amp;gt;=&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;THROTTLE_MAX_REQUESTS&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;       &lt;span style=&#34;color:#f60&#34;&gt;429&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;       rate_limit_headers(count, key),
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;       &lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;message&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;else&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#360&#34;&gt;REDIS&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;incr(key)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      status, headers, body &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;@app&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;call(env)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;       status,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;       headers&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;merge(rate_limit_headers(count&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;to_i &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;, key)),
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;       body
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069&#34;&gt;private&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;message&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#fc3&#34;&gt;:message&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;You have fired too many requests. Please wait for some time.&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;to_json
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;rate_limit_headers&lt;/span&gt;(count, key)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    ttl &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;REDIS&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;ttl(key)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    time &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;Time&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;now&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;to_i
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    time_till_reset &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; (time &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; ttl&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;to_i)&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;to_s
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;X-Rate-Limit-Limit&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt;  &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;60&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;X-Rate-Limit-Remaining&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; (&lt;span style=&#34;color:#f60&#34;&gt;60&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt; count&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;to_i)&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;to_s,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;X-Rate-Limit-Reset&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; time_till_reset
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This computes the time remaining till the limit is reset and the number of requests remaining and sets the appropriate headers.&lt;/p&gt;
 &lt;p&gt;Let&amp;rsquo;s test this.&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;bash$ for i in {1..100}
-do
-curl -i http://localhost:3000/foo.json &amp;gt;&amp;gt; /tmp/headers.log
-done
-
-bash$ less /tmp/headers.log | grep X-Rate-Limit
-X-Rate-Limit-Limit: 60
-X-Rate-Limit-Remaining: 59
-X-Rate-Limit-Reset: 1381717125
-X-Rate-Limit-Limit: 60
-X-Rate-Limit-Remaining: 58
-X-Rate-Limit-Reset: 1381717125
-...
-X-Rate-Limit-Limit: 60
-X-Rate-Limit-Remaining: 1
-X-Rate-Limit-Reset: 1381717124
-X-Rate-Limit-Limit: 60
-X-Rate-Limit-Remaining: 0
-X-Rate-Limit-Reset: 1381717124
-X-Rate-Limit-Limit: 60
-X-Rate-Limit-Remaining: 0
-X-Rate-Limit-Reset: 1381717124
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;The code for this implementation is on my &lt;a href=&#34;https://github.com/sdqali/rails_throttle&#34;&gt;GitHub profile&lt;/a&gt;.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;bash$ &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;for&lt;/span&gt; i in &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;1..100&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;do&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;curl -i http://localhost:3000/foo.json &amp;gt;&amp;gt; /tmp/headers.log
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;done&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;bash$ less /tmp/headers.log | grep X-Rate-Limit
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;X-Rate-Limit-Limit: &lt;span style=&#34;color:#f60&#34;&gt;60&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;X-Rate-Limit-Remaining: &lt;span style=&#34;color:#f60&#34;&gt;59&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;X-Rate-Limit-Reset: &lt;span style=&#34;color:#f60&#34;&gt;1381717125&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;X-Rate-Limit-Limit: &lt;span style=&#34;color:#f60&#34;&gt;60&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;X-Rate-Limit-Remaining: &lt;span style=&#34;color:#f60&#34;&gt;58&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;X-Rate-Limit-Reset: &lt;span style=&#34;color:#f60&#34;&gt;1381717125&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;...
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;X-Rate-Limit-Limit: &lt;span style=&#34;color:#f60&#34;&gt;60&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;X-Rate-Limit-Remaining: &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;X-Rate-Limit-Reset: &lt;span style=&#34;color:#f60&#34;&gt;1381717124&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;X-Rate-Limit-Limit: &lt;span style=&#34;color:#f60&#34;&gt;60&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;X-Rate-Limit-Remaining: &lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;X-Rate-Limit-Reset: &lt;span style=&#34;color:#f60&#34;&gt;1381717124&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;X-Rate-Limit-Limit: &lt;span style=&#34;color:#f60&#34;&gt;60&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;X-Rate-Limit-Remaining: &lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;X-Rate-Limit-Reset: &lt;span style=&#34;color:#f60&#34;&gt;1381717124&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The code for this implementation is on my &lt;a href=&#34;https://github.com/sdqali/rails_throttle&#34;&gt;GitHub profile&lt;/a&gt;.&lt;/p&gt;
 &lt;div class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
 &lt;hr&gt;
 &lt;ol&gt;
@@ -251,111 +239,102 @@ X-Rate-Limit-Reset: 1381717124
 &lt;h3 id=&#34;the-test-application&#34;&gt;The test application&lt;/h3&gt;
 &lt;p&gt;We will create a simple Rails application with a single API endpoint at &lt;code&gt;foo.json&lt;/code&gt;. The code needed for this is as follows:&lt;/p&gt;
 &lt;p&gt;Routes:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-ruby&#34;&gt;# config/routes.rb
-
-RailsThrottle::Application.routes.draw do
-  get &#39;foo.json&#39; =&amp;gt; &#39;foo#index&#39;
-end
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;The controller:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-ruby&#34;&gt;# app/controllers/foo_controller.rb
-
-class FooController &amp;lt; ApplicationController
-  def index
-    render json: {foo: :bar}
-  end
-end
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h3 id=&#34;storing-the-rate-data&#34;&gt;Storing the rate data&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# config/routes.rb&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#360&#34;&gt;RailsThrottle&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;&lt;span style=&#34;color:#360&#34;&gt;Application&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;routes&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;draw &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;do&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  get &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;foo.json&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;foo#index&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The controller:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# app/controllers/foo_controller.rb&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;FooController&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;ApplicationController&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;index&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    render &lt;span style=&#34;color:#fc3&#34;&gt;json&lt;/span&gt;: {&lt;span style=&#34;color:#fc3&#34;&gt;foo&lt;/span&gt;: &lt;span style=&#34;color:#fc3&#34;&gt;:bar&lt;/span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;storing-the-rate-data&#34;&gt;Storing the rate data&lt;/h3&gt;
 &lt;p&gt;We need a place to store each client&amp;rsquo;s IP address and the number of requests it made. We need to increment this count for each request and reset the count to zero after a time period. Considering these needs, &lt;a href=&#34;http://redis.io/&#34;&gt;Redis&lt;/a&gt; is a great fit for this data store. Redis stores key value pairs and allows expiry time to be specified for each entry. Redis also comes with an &lt;code&gt;INCR&lt;/code&gt; &lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; command that ensures that increment operations are atomic. This will be useful to us if we were to run multiple instances of our app behind a load balancer.&lt;/p&gt;
 &lt;p&gt;To setup the application to use Redis, we will need to install the &lt;code&gt;redis&lt;/code&gt; &lt;sup id=&#34;fnref:2&#34;&gt;&lt;a href=&#34;#fn:2&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;2&lt;/a&gt;&lt;/sup&gt; gem. Once we have the gem, we will add a new &lt;code&gt;initializer&lt;/code&gt; named &lt;code&gt;throttle.rb&lt;/code&gt; which configures our Redis client.&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-ruby&#34;&gt;# config/initializers/throttle.rb
-
-require &amp;quot;redis&amp;quot;
-
-redis_conf  = YAML.load(File.join(Rails.root, &amp;quot;config&amp;quot;, &amp;quot;redis.yml&amp;quot;))
-REDIS = Redis.new(:host =&amp;gt; redis_conf[&amp;quot;host&amp;quot;], :port =&amp;gt; redis_conf[&amp;quot;port&amp;quot;])
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;This will load the Redis server&amp;rsquo;s host and port from the configuration file located at &lt;code&gt;config/redis.yml&lt;/code&gt;. This file will look like this:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;# config/redis.yml
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# config/initializers/throttle.rb&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;require&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;redis&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;redis_conf  &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;YAML&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;load(&lt;span style=&#34;color:#360&#34;&gt;File&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;join(&lt;span style=&#34;color:#360&#34;&gt;Rails&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;root, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;config&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;redis.yml&amp;#34;&lt;/span&gt;))
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#360&#34;&gt;REDIS&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;Redis&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;new(&lt;span style=&#34;color:#fc3&#34;&gt;:host&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; redis_conf&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;host&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;, &lt;span style=&#34;color:#fc3&#34;&gt;:port&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; redis_conf&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;port&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This will load the Redis server&amp;rsquo;s host and port from the configuration file located at &lt;code&gt;config/redis.yml&lt;/code&gt;. This file will look like this:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;# config/redis.yml
 
 host: localhost
 port: 6379
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h3 id=&#34;using-a-before_filter-for-rate-limiting&#34;&gt;Using a &lt;code&gt;before_filter&lt;/code&gt; for rate limiting.&lt;/h3&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;using-a-before_filter-for-rate-limiting&#34;&gt;Using a &lt;code&gt;before_filter&lt;/code&gt; for rate limiting.&lt;/h3&gt;
 &lt;p&gt;The first step is to log the number of requests each client is making. This can easily be achieved with a &lt;code&gt;before_filter&lt;/code&gt; &lt;sup id=&#34;fnref:3&#34;&gt;&lt;a href=&#34;#fn:3&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;3&lt;/a&gt;&lt;/sup&gt;. Let&amp;rsquo;s add the filter into the &lt;code&gt;ApplicationController&lt;/code&gt;.&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-ruby&#34;&gt;# app/controllers/application_controller.rb
-
-class ApplicationController &amp;lt; ActionController::Base
-  ...
-
-  before_filter :throttle
-
-  def throttle
-    client_ip = request.env[&amp;quot;REMOTE_ADDR&amp;quot;]
-    key = &amp;quot;count:#{client_ip}&amp;quot;
-    count = REDIS.get(key)
-
-    unless count
-      REDIS.set(key, 0)
-    end
-    REDIS.incr(key)
-    true
-  end
-
-  ...
-end
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Since this &lt;code&gt;before_filter&lt;/code&gt; belongs to the &lt;code&gt;ApplicationController&lt;/code&gt;, it will be applied to all requests, unless a specific controller chooses to skip it. So before every request is processed, the filter grabs the client&amp;rsquo;s IP and checks whether there is a count in Redis for this IP. If there is no count key, it creates one. Finally it increments the count.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# app/controllers/application_controller.rb&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;ApplicationController&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;ActionController&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;&lt;span style=&#34;color:#360&#34;&gt;Base&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#555&#34;&gt;...&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  before_filter &lt;span style=&#34;color:#fc3&#34;&gt;:throttle&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;throttle&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    client_ip &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; request&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;env&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;REMOTE_ADDR&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    key &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;count:&lt;/span&gt;&lt;span style=&#34;color:#a00&#34;&gt;#{&lt;/span&gt;client_ip&lt;span style=&#34;color:#a00&#34;&gt;}&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    count &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;REDIS&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;get(key)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;unless&lt;/span&gt; count
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#360&#34;&gt;REDIS&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;set(key, &lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#360&#34;&gt;REDIS&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;incr(key)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069&#34;&gt;true&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#555&#34;&gt;...&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Since this &lt;code&gt;before_filter&lt;/code&gt; belongs to the &lt;code&gt;ApplicationController&lt;/code&gt;, it will be applied to all requests, unless a specific controller chooses to skip it. So before every request is processed, the filter grabs the client&amp;rsquo;s IP and checks whether there is a count in Redis for this IP. If there is no count key, it creates one. Finally it increments the count.&lt;/p&gt;
 &lt;p&gt;At this point, the filter just records the requests made, but does not limit requests. Let&amp;rsquo;s go ahead and implement limiting. We need to specify the time window for rate limiting and how many requests should be allowed in that time window. We will allow a client a maximum of &lt;code&gt;60&lt;/code&gt; requests in &lt;code&gt;15&lt;/code&gt; minutes. The following constants need to be defined in &lt;code&gt;throttle.rb&lt;/code&gt;.&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;THROTTLE_TIME_WINDOW = 15 * 60
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;THROTTLE_TIME_WINDOW = 15 * 60
 THROTTLE_MAX_REQUESTS = 60
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;The filter needs to be changed to respond with error messages when the rate limit is exceeded.&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-ruby&#34;&gt;# app/controllers/application_controller.rb
-
-class ApplicationController &amp;lt; ActionController::Base
-  ...
-
-  before_filter :throttle
-
-  def throttle
-    client_ip = request.env[&amp;quot;REMOTE_ADDR&amp;quot;]
-    key = &amp;quot;count:#{client_ip}&amp;quot;
-    count = REDIS.get(key)
-
-    unless count
-      REDIS.set(key, 0)
-      REDIS.expire(key, THROTTLE_TIME_WINDOW)
-      return true
-    end
-
-    if count.to_i &amp;gt;= THROTTLE_MAX_REQUESTS
-      render :status =&amp;gt; 429, :json =&amp;gt; {:message =&amp;gt; &amp;quot;You have fired too many requests. Please wait for some time.&amp;quot;}
-      return
-    end
-    REDIS.incr(key)
-    true
-  end
-
-  ...
-end
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;When the limit is reached, subsequent requests will be responded with an error message and the HTTP status code &lt;code&gt;429&lt;/code&gt;. The 429 &lt;sup id=&#34;fnref:4&#34;&gt;&lt;a href=&#34;#fn:4&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;4&lt;/a&gt;&lt;/sup&gt; status code indicates that the user has sent too many requests in a given amount of time.&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;The filter needs to be changed to respond with error messages when the rate limit is exceeded.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# app/controllers/application_controller.rb&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;ApplicationController&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;&amp;lt;&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;ActionController&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;&lt;span style=&#34;color:#360&#34;&gt;Base&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#555&#34;&gt;...&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  before_filter &lt;span style=&#34;color:#fc3&#34;&gt;:throttle&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;throttle&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    client_ip &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; request&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;env&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;REMOTE_ADDR&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    key &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;count:&lt;/span&gt;&lt;span style=&#34;color:#a00&#34;&gt;#{&lt;/span&gt;client_ip&lt;span style=&#34;color:#a00&#34;&gt;}&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    count &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;REDIS&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;get(key)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;unless&lt;/span&gt; count
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#360&#34;&gt;REDIS&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;set(key, &lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#360&#34;&gt;REDIS&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;expire(key, &lt;span style=&#34;color:#360&#34;&gt;THROTTLE_TIME_WINDOW&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#069&#34;&gt;true&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; count&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;to_i &lt;span style=&#34;color:#555&#34;&gt;&amp;gt;=&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;THROTTLE_MAX_REQUESTS&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      render &lt;span style=&#34;color:#fc3&#34;&gt;:status&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;429&lt;/span&gt;, &lt;span style=&#34;color:#fc3&#34;&gt;:json&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; {&lt;span style=&#34;color:#fc3&#34;&gt;:message&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;You have fired too many requests. Please wait for some time.&amp;#34;&lt;/span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#360&#34;&gt;REDIS&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;incr(key)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069&#34;&gt;true&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#555&#34;&gt;...&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;When the limit is reached, subsequent requests will be responded with an error message and the HTTP status code &lt;code&gt;429&lt;/code&gt;. The 429 &lt;sup id=&#34;fnref:4&#34;&gt;&lt;a href=&#34;#fn:4&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;4&lt;/a&gt;&lt;/sup&gt; status code indicates that the user has sent too many requests in a given amount of time.&lt;/p&gt;
 &lt;p&gt;Let&amp;rsquo;s go ahead and test this.&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;bash$ for i in {1..100}
-do
-curl -i http://localhost:3000/foo.json &amp;gt;&amp;gt; /dev/null
-done
-
-bash$ less log/development.log | grep &amp;quot;200 OK&amp;quot; | wc -l
-      60
-
-bash$ less log/development.log | grep &amp;quot;429 Too Many Requests&amp;quot; | wc -l
-      40
-
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;As you can see after &lt;code&gt;60&lt;/code&gt; requests, all requests get the &lt;code&gt;429&lt;/code&gt; response.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;bash$ &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;for&lt;/span&gt; i in &lt;span style=&#34;color:#555&#34;&gt;{&lt;/span&gt;1..100&lt;span style=&#34;color:#555&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;do&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;curl -i http://localhost:3000/foo.json &amp;gt;&amp;gt; /dev/null
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;done&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;bash$ less log/development.log | grep &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;200 OK&amp;#34;&lt;/span&gt; | wc -l
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#f60&#34;&gt;60&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;bash$ less log/development.log | grep &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;429 Too Many Requests&amp;#34;&lt;/span&gt; | wc -l
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#f60&#34;&gt;40&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;As you can see after &lt;code&gt;60&lt;/code&gt; requests, all requests get the &lt;code&gt;429&lt;/code&gt; response.&lt;/p&gt;
 &lt;h3 id=&#34;improvements&#34;&gt;Improvements&lt;/h3&gt;
 &lt;p&gt;While what we have implemented limits the requests, it does not give the client enough information as to how long it has to wait before making requests again. It would also be helpful if the server tells the client on each request how many total requests it is allowed to make in a window and how many more requests it can perform before limiting kicks in. We will look at this in the next blog post.&lt;/p&gt;
 &lt;p&gt;A sample application with this rate limiting in place is on &lt;a href=&#34;https://github.com/sdqali/rails_throttle/tree/filter&#34;&gt;GitHub&lt;/a&gt;.&lt;/p&gt;
@@ -386,38 +365,35 @@ bash$ less log/development.log | grep &amp;quot;429 Too Many Requests&amp;quot; 
       
       <guid>https://sadique.io/blog/2013/10/01/ruby-named-capture-groups-and-local-variables/?utm_source=site&amp;utm_medium=feed</guid>
       <description>&lt;p&gt;Ruby&amp;rsquo;s regular expressions support &lt;a href=&#34;https://sadique.io/blog/2013/09/29/named-capture-groups-in-regular-expressions/&#34;&gt;named capture groups&lt;/a&gt;, since 1.9. However, there is a weird behaviour while using named capture groups with the &lt;code&gt;Regexp#=~&lt;/code&gt; method. When named capture groups are used with &lt;code&gt;=~&lt;/code&gt;, the captured values are placed in local variables with the same name as the capture group. The following example demonstrates this:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-ruby&#34;&gt;#!/usr/bin/env ruby
-
-month = &amp;quot;January&amp;quot;
-test_string = &amp;quot;Today&#39;s date is: 9/28/2013.&amp;quot;
-/(?&amp;lt;month&amp;gt;\d{1,2})\/(?&amp;lt;day&amp;gt;\d{1,2})\/(?&amp;lt;year&amp;gt;\d{4})/ =~ test_string
-puts month.inspect
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;This when executed will print &lt;code&gt;9&lt;/code&gt;.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;#!/usr/bin/env ruby&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;month &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;January&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;test_string &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Today&amp;#39;s date is: 9/28/2013.&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#3aa&#34;&gt;/(?&amp;lt;month&amp;gt;\d{1,2})\/(?&amp;lt;day&amp;gt;\d{1,2})\/(?&amp;lt;year&amp;gt;\d{4})/&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=~&lt;/span&gt; test_string
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; month&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;inspect
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This when executed will print &lt;code&gt;9&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;The official documentation &lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; says:&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;When named capture groups are used with a literal regexp on the left-hand side of an expression and the =~ operator, the captured text is also assigned to local variables with corresponding names.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;This local variable assignment does not happen if the regular expression is on the right-hand side of the expression or the regular expression contains a variable interpolation.&lt;/p&gt;
 &lt;h3 id=&#34;regexp-on-right-hand-side&#34;&gt;Regexp on right-hand side&lt;/h3&gt;
-&lt;pre&gt;&lt;code class=&#34;language-ruby&#34;&gt;#!/usr/bin/env ruby
-
-month = &amp;quot;January&amp;quot;
-test_string = &amp;quot;Today&#39;s date is: 9/28/2013.&amp;quot;
-test_string =~ /(?&amp;lt;month&amp;gt;\d{1,2})\/(?&amp;lt;day&amp;gt;\d{1,2})\/(?&amp;lt;year&amp;gt;\d{4})/
-puts month.inspect
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;This will print &lt;code&gt;January&lt;/code&gt;.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;#!/usr/bin/env ruby&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;month &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;January&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;test_string &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Today&amp;#39;s date is: 9/28/2013.&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;test_string &lt;span style=&#34;color:#555&#34;&gt;=~&lt;/span&gt; &lt;span style=&#34;color:#3aa&#34;&gt;/(?&amp;lt;month&amp;gt;\d{1,2})\/(?&amp;lt;day&amp;gt;\d{1,2})\/(?&amp;lt;year&amp;gt;\d{4})/&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; month&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;inspect
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This will print &lt;code&gt;January&lt;/code&gt;.&lt;/p&gt;
 &lt;h3 id=&#34;regexp-with-interpolation&#34;&gt;Regexp with interpolation&lt;/h3&gt;
-&lt;pre&gt;&lt;code class=&#34;language-ruby&#34;&gt;#!/usr/bin/env ruby
-
-month = &amp;quot;January&amp;quot;
-DAY = &amp;quot;day&amp;quot;
-test_string = &amp;quot;Today&#39;s date is: 9/28/2013.&amp;quot;
-/(?&amp;lt;month&amp;gt;\d{1,2})\/(?&amp;lt;#{DAY}&amp;gt;\d{1,2})\/(?&amp;lt;year&amp;gt;\d{4})/ =~ test_string
-puts month.inspect
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;This will print &lt;code&gt;January&lt;/code&gt;.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;#!/usr/bin/env ruby&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;month &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;January&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#360&#34;&gt;DAY&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;day&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;test_string &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Today&amp;#39;s date is: 9/28/2013.&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#3aa&#34;&gt;/(?&amp;lt;month&amp;gt;\d{1,2})\/(?&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#a00&#34;&gt;#{&lt;/span&gt;&lt;span style=&#34;color:#360&#34;&gt;DAY&lt;/span&gt;&lt;span style=&#34;color:#a00&#34;&gt;}&lt;/span&gt;&lt;span style=&#34;color:#3aa&#34;&gt;&amp;gt;\d{1,2})\/(?&amp;lt;year&amp;gt;\d{4})/&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=~&lt;/span&gt; test_string
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; month&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;inspect
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This will print &lt;code&gt;January&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;This behaviour is present only for the &lt;code&gt;Regexp#=~&lt;/code&gt; method and not for &lt;code&gt;Regexp#match&lt;/code&gt;. So it is safer to use the latter without worrying about unintended side effects.&lt;/p&gt;
 &lt;p&gt;PS: Hat tip to &lt;a href=&#34;http://www.nilenso.com/people.html#gja&#34;&gt;Tejas&lt;/a&gt; for telling me about this quirk.&lt;/p&gt;
 &lt;div class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
@@ -441,36 +417,33 @@ puts month.inspect
 &lt;h2 id=&#34;ruby&#34;&gt;Ruby&lt;/h2&gt;
 &lt;p&gt;Ruby has supported named capture groups since version 1.9. Each match group is named by using &lt;code&gt;?&amp;lt;name&amp;gt;&lt;/code&gt; inside the match group and these matches are made available has a hash and each match can be accessed by using the match group name as the key.&lt;/p&gt;
 &lt;p&gt;&lt;em&gt;WestCoastJustin&lt;/em&gt;&amp;rsquo;s example will look like this in Ruby:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-ruby&#34;&gt;#!/usr/bin/env ruby
-
-test_string = &amp;quot;Today&#39;s date is: 9/28/2013.&amp;quot;
-
-match = test_string.match /(?&amp;lt;month&amp;gt;\d{1,2})\/(?&amp;lt;day&amp;gt;\d{1,2})\/(?&amp;lt;year&amp;gt;\d{4})/
-puts match.inspect
-puts match[:month]
-puts match[:day]
-puts match[:year]
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;This is much easier to understand because looking at it, it makes it clear that the intent of matching the first group of 1 or 2 digits is to look for the &lt;strong&gt;month&lt;/strong&gt; in the date. Similarly, the intent of the &lt;em&gt;day&lt;/em&gt; and &lt;em&gt;year&lt;/em&gt; matches are easier to understand.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;#!/usr/bin/env ruby&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;test_string &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Today&amp;#39;s date is: 9/28/2013.&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;match &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; test_string&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;match &lt;span style=&#34;color:#3aa&#34;&gt;/(?&amp;lt;month&amp;gt;\d{1,2})\/(?&amp;lt;day&amp;gt;\d{1,2})\/(?&amp;lt;year&amp;gt;\d{4})/&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; match&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;inspect
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; match&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#fc3&#34;&gt;:month&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; match&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#fc3&#34;&gt;:day&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; match&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#fc3&#34;&gt;:year&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This is much easier to understand because looking at it, it makes it clear that the intent of matching the first group of 1 or 2 digits is to look for the &lt;strong&gt;month&lt;/strong&gt; in the date. Similarly, the intent of the &lt;em&gt;day&lt;/em&gt; and &lt;em&gt;year&lt;/em&gt; matches are easier to understand.&lt;/p&gt;
 &lt;p&gt;This will result in:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;&amp;gt; ruby /tmp/named_matches.rb
-#&amp;lt;MatchData &amp;quot;9/28/2013&amp;quot; month:&amp;quot;9&amp;quot; day:&amp;quot;28&amp;quot; year:&amp;quot;2013&amp;quot;&amp;gt;
-9
-28
-2013
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;##Python
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&amp;gt; ruby /tmp/named_matches.rb
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;#&amp;lt;MatchData &amp;#34;9/28/2013&amp;#34; month:&amp;#34;9&amp;#34; day:&amp;#34;28&amp;#34; year:&amp;#34;2013&amp;#34;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f60&#34;&gt;9&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f60&#34;&gt;28&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f60&#34;&gt;2013&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;##Python
 Python&amp;rsquo;s &lt;code&gt;re&lt;/code&gt; module supports named match groups using the &lt;code&gt;?P&amp;lt;name&amp;gt;&lt;/code&gt; pattern. After a pattern search, the results are placed in a &lt;code&gt;dict&lt;/code&gt;.&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;#!/usr/bin/env ruby
-
-import re
-
-test_string = &amp;quot;Today&#39;s date is: 9/28/2013.&amp;quot;
-pattern = re.compile(r&amp;quot;(?P&amp;lt;month&amp;gt;\d{1,2})\/(?P&amp;lt;day&amp;gt;\d{1,2})\/(?P&amp;lt;year&amp;gt;\d{4})&amp;quot;)
-match_dict = pattern.search(test_string).groupdict()
-print(match_dict)
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;JavaScript does not support named capture groups. There are a lot of &lt;a href=&#34;http://trentrichardson.com/2011/08/02/javascript-regexp-match-named-captures/&#34;&gt;hacks&lt;/a&gt; aimed at providing this functionality. The XRegExp library &lt;a href=&#34;http://xregexp.com/syntax/#namedCapture&#34;&gt;supports&lt;/a&gt; named capture groups.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;#!/usr/bin/env ruby&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color:#0cf;font-weight:bold&#34;&gt;re&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;test_string &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Today&amp;#39;s date is: 9/28/2013.&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;pattern &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; re&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;compile(&lt;span style=&#34;color:#c30&#34;&gt;r&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;(?P&amp;lt;month&amp;gt;\d{1,2})\/(?P&amp;lt;day&amp;gt;\d{1,2})\/(?P&amp;lt;year&amp;gt;\d&lt;/span&gt;&lt;span style=&#34;color:#a00&#34;&gt;{4}&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;)&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;match_dict &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; pattern&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;search(test_string)&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;groupdict()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt;(match_dict)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;JavaScript does not support named capture groups. There are a lot of &lt;a href=&#34;http://trentrichardson.com/2011/08/02/javascript-regexp-match-named-captures/&#34;&gt;hacks&lt;/a&gt; aimed at providing this functionality. The XRegExp library &lt;a href=&#34;http://xregexp.com/syntax/#namedCapture&#34;&gt;supports&lt;/a&gt; named capture groups.&lt;/p&gt;
 </description>
     </item>
     
@@ -487,10 +460,9 @@ print(match_dict)
 &lt;ul&gt;
 &lt;li&gt;Specify the gemset by adding it&amp;rsquo;s name to a &lt;code&gt;rbenv-gemsets&lt;/code&gt; file in the root directory of the project.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;cat rbenv-gemsets
-$ .gems
-&lt;/code&gt;&lt;/pre&gt;
-&lt;ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;cat rbenv-gemsets
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;$ .gems
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ul&gt;
 &lt;li&gt;Install the gems, by using &lt;code&gt;gem install&lt;/code&gt; or with bundler.&lt;/li&gt;
 &lt;li&gt;The gems will be installed in &lt;code&gt;.gems&lt;/code&gt; directory under the project root.&lt;/li&gt;
 &lt;li&gt;Ruby will look for gems in the &lt;code&gt;.gems&lt;/code&gt; directory.&lt;/li&gt;
@@ -500,20 +472,17 @@ $ .gems
 &lt;ul&gt;
 &lt;li&gt;Install gems to a &lt;code&gt;.gems&lt;/code&gt; directory using bundler&lt;/li&gt;
 &lt;/ul&gt;
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;bundle install --path .gems
-&lt;/code&gt;&lt;/pre&gt;
-&lt;ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;bundle install --path .gems
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ul&gt;
 &lt;li&gt;Wrap calls with &lt;code&gt;bundle exec&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;bundle exec rake --version
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h2 id=&#34;use-a-devenv-file&#34;&gt;Use a devenv file&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;bundle &lt;span style=&#34;color:#366&#34;&gt;exec&lt;/span&gt; rake --version
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;use-a-devenv-file&#34;&gt;Use a devenv file&lt;/h2&gt;
 &lt;p&gt;This is a hacky way doing things and it was the first that came to my mind when I was looking at this problem. This approach involves adding a project specific &lt;code&gt;devenv&lt;/code&gt; file that is sourced when one starts to work on that project. This file will set the &lt;code&gt;GEM_HOME&lt;/code&gt; and &lt;code&gt;GEM_PATH&lt;/code&gt; environment variables to the directory where the gemset is supposed to live as well as prepend the &lt;code&gt;gems/bin&lt;/code&gt; directory of the gemset to &lt;code&gt;PATH&lt;/code&gt;. An example &lt;code&gt;devenv&lt;/code&gt; file will be as follows&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;export GEM_PATH=./.gems
-export GEM_HOME=./.gems
-export PATH=./.gems/bin:$PATH
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;In the end, I ended up choosing the &lt;code&gt;bundler&lt;/code&gt; approach. I use bundler in most of my Ruby projects anyway. The downside to this is that every invocation will be spawning a &lt;code&gt;bundler&lt;/code&gt; process, in addition to whatever we intend to do.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;GEM_PATH&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;./.gems
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;GEM_HOME&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;./.gems
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;PATH&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;./.gems/bin:&lt;span style=&#34;color:#033&#34;&gt;$PATH&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;In the end, I ended up choosing the &lt;code&gt;bundler&lt;/code&gt; approach. I use bundler in most of my Ruby projects anyway. The downside to this is that every invocation will be spawning a &lt;code&gt;bundler&lt;/code&gt; process, in addition to whatever we intend to do.&lt;/p&gt;
 &lt;div class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
 &lt;hr&gt;
 &lt;ol&gt;
@@ -541,22 +510,20 @@ export PATH=./.gems/bin:$PATH
       <guid>https://sadique.io/blog/2013/09/08/looking-up-compiler-params-used-to-compile-a-ruby-version/?utm_source=site&amp;utm_medium=feed</guid>
       <description>&lt;p&gt;Today &lt;a href=&#34;https://twitter.com/kgrz&#34;&gt;Kashyap&lt;/a&gt; asked how one can identify the compiler parameters passed when compiling a Ruby version. I was curious how to achieve this and like any confused developer started searching for and looking in the Ruby documentation. Searching for &lt;strong&gt;compiler parameters in ruby&lt;/strong&gt; did not yield any interesting results and the group of constants with the &lt;code&gt;RUBY_&lt;/code&gt; prefix &lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; loaded in Ruby did not include anything related to compiler flags. Then I came across this blog post &lt;sup id=&#34;fnref:2&#34;&gt;&lt;a href=&#34;#fn:2&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;2&lt;/a&gt;&lt;/sup&gt; by &lt;a href=&#34;https://twitter.com/happycode&#34;&gt;Jan Lelis&lt;/a&gt; and I was curious what else &lt;code&gt;RbConfig::CONFIG&lt;/code&gt; contains. This hash contains all the compiler flags used to compile the current Ruby VM.&lt;/p&gt;
 &lt;p&gt;This code snippet prints the hash.&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-ruby&#34;&gt;#! /usr/bin/env ruby
-
-require &amp;quot;rbconfig&amp;quot;
-
-RbConfig::CONFIG.each do |k, v|
-  puts &amp;quot;#{k} - #{v}&amp;quot;
-end
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;When this is executed under Ruby 1.9.3p194  under OS X, a section of the output will look like this:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;target_vendor - apple
-target_os - darwin12.2.1
-CC - gcc-4.2
-CFLAGS -  -O3 -ggdb -Wextra -Wno-unused-parameter -Wno-parentheses -Wno-long-long -Wno-missing-field-initializers -Werror=pointer-arith -Werror=write-strings -Werror=declaration-after-statement -Werror=shorten-64-to-32 -Werror=implicit-function-declaration -I/Users/sdqali/.rvm/usr/include -fno-common -pipe
-LDFLAGS - -L. -L/Users/sdqali/.rvm/usr/lib -L/usr/local/lib
-&lt;/code&gt;&lt;/pre&gt;
-&lt;div class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;#! /usr/bin/env ruby&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;require&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;rbconfig&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#360&#34;&gt;RbConfig&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;&lt;span style=&#34;color:#360&#34;&gt;CONFIG&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;each &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;do&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;k, v&lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#a00&#34;&gt;#{&lt;/span&gt;k&lt;span style=&#34;color:#a00&#34;&gt;}&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt; - &lt;/span&gt;&lt;span style=&#34;color:#a00&#34;&gt;#{&lt;/span&gt;v&lt;span style=&#34;color:#a00&#34;&gt;}&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;When this is executed under Ruby 1.9.3p194  under OS X, a section of the output will look like this:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;target_vendor - apple
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;target_os - darwin12.2.1
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;CC - gcc-4.2
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;CFLAGS -  -O3 -ggdb -Wextra -Wno-unused-parameter -Wno-parentheses -Wno-long-long -Wno-missing-field-initializers -Werror&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;pointer-arith -Werror&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;write-strings -Werror&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;declaration-after-statement -Werror&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;shorten-64-to-32 -Werror&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;implicit-function-declaration -I/Users/sdqali/.rvm/usr/include -fno-common -pipe
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;LDFLAGS - -L. -L/Users/sdqali/.rvm/usr/lib -L/usr/local/lib
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class=&#34;footnotes&#34; role=&#34;doc-endnotes&#34;&gt;
 &lt;hr&gt;
 &lt;ol&gt;
 &lt;li id=&#34;fn:1&#34;&gt;
@@ -579,77 +546,71 @@ LDFLAGS - -L. -L/Users/sdqali/.rvm/usr/lib -L/usr/local/lib
       <description>&lt;p&gt;I have been doing some coding in Python recently. While playing around with some code, I noticed that the way &lt;a href=&#34;http://en.wikipedia.org/wiki/Here_document&#34;&gt;heredocs&lt;/a&gt; are used in Python is different from Ruby.&lt;/p&gt;
 &lt;h2 id=&#34;python&#34;&gt;Python&lt;/h2&gt;
 &lt;p&gt;Consider the following snippet:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# test.py
-
-print &amp;quot;some text in single line&amp;quot;
-
-print &amp;quot;&amp;quot;&amp;quot;
-As opposed to
-some text
-written as
-heredoc
-&amp;quot;&amp;quot;&amp;quot;
-print &amp;quot;and then another single line&amp;quot;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;When run, this would result in this:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;bash-3.2$ python test.py
-some text in single line
-
-As opposed to
-some text
-written as
-heredoc
-
-and then another single line
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Notice how there is a preceding and trailing linebreak around the string printed using heredoc.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# test.py&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;some text in single line&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&amp;#34;&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt;As opposed to
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt;some text
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt;written as
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt;heredoc
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;and then another single line&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;When run, this would result in this:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;bash-3.2$ python test.py
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;some text in single line
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;As opposed to
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;some text
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;written as
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;heredoc
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;and &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;then&lt;/span&gt; another single line
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Notice how there is a preceding and trailing linebreak around the string printed using heredoc.&lt;/p&gt;
 &lt;p&gt;I spent a lot of time trying to figure out how and why this was happening. Finally, help came from &lt;code&gt;@dibb&lt;/code&gt; on &lt;code&gt;#python&lt;/code&gt;. Looks like I was doing it wrong. In Python, the useful part of the heredoc starts immediately after the &lt;code&gt;&amp;quot;&amp;quot;&amp;quot;&lt;/code&gt;. So if you don&amp;rsquo;t want those excess linebreaks, you should write something like this:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# test2.py
-
-print &amp;quot;some text in single line&amp;quot;
-
-print &amp;quot;&amp;quot;&amp;quot;As opposed to
-some text
-written as
-heredoc&amp;quot;&amp;quot;&amp;quot;
-
-print &amp;quot;and then another single line&amp;quot;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;When run, this would print the text without the extra line breaks:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;bash-3.2$ python test2.py
-some text in single line
-As opposed to
-some text
-written as
-heredoc
-and then another single line
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;If you don&amp;rsquo;t want to write the string just after the &lt;code&gt;&amp;quot;&amp;quot;&amp;quot;&lt;/code&gt;, you could use a &lt;code&gt;\&lt;/code&gt; to remove the linebreaks, like this:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;# test3.py
-
-print &amp;quot;&amp;quot;&amp;quot;\
-As opposed to
-some text
-written as
-heredoc\
-&amp;quot;&amp;quot;&amp;quot;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h2 id=&#34;ruby&#34;&gt;Ruby&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# test2.py&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;some text in single line&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&amp;#34;&amp;#34;As opposed to
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt;some text
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt;written as
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt;heredoc&amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;and then another single line&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;When run, this would print the text without the extra line breaks:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;bash-3.2$ python test2.py
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;some text in single line
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;As opposed to
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;some text
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;written as
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;heredoc
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;and &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;then&lt;/span&gt; another single line
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;If you don&amp;rsquo;t want to write the string just after the &lt;code&gt;&amp;quot;&amp;quot;&amp;quot;&lt;/code&gt;, you could use a &lt;code&gt;\&lt;/code&gt; to remove the linebreaks, like this:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# test3.py&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;As opposed to
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt;some text
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt;written as
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt;heredoc&lt;/span&gt;&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30;font-weight:bold&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;ruby&#34;&gt;Ruby&lt;/h2&gt;
 &lt;p&gt;I come from the Ruby world, where the heredocs behave in a slightly different way. The equivalent code in Ruby would look like this:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-ruby&#34;&gt;# test.rb
-
-puts &amp;quot;some text in single line&amp;quot;
-
-puts &amp;lt;&amp;lt;-STR
-As opposed to
-some text
-written as
-heredoc
-STR
-
-puts &amp;quot;and then another single line&amp;quot;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Notice how the actual content of the heredoc begins only on the line after &lt;code&gt;&amp;lt;&amp;lt;-STR&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# test.rb&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;some text in single line&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;lt;&amp;lt;-STR
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#360&#34;&gt;As&lt;/span&gt; opposed to
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;some text
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;written as
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;heredoc
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#360&#34;&gt;STR&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;and then another single line&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Notice how the actual content of the heredoc begins only on the line after &lt;code&gt;&amp;lt;&amp;lt;-STR&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;I hope being aware of this detail saves you some time.&lt;/p&gt;</description>
     </item>
     
@@ -668,82 +629,72 @@ puts &amp;quot;and then another single line&amp;quot;
 &lt;p&gt;While debugging our build, our new developer discovered that certain tasks that take up 10 minutes to complete were being executed twice. We soon started trying to figure out where in the chain of Rake task calls did we end up repeating a task. There were none. After some time, we would learn that we did not know enough about Rake and Ruby 1.8.7&lt;/p&gt;
 &lt;h3 id=&#34;rakes-redefining-behavior&#34;&gt;Rake&amp;rsquo;s redefining behavior&lt;/h3&gt;
 &lt;p&gt;Rake treats redefining a Task as akin to appending actions to the same Task. To see this in action, add the following to a Rakefile:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-ruby&#34;&gt;task :foo do
-  puts &amp;quot;foo &amp;quot; * 10
-end
-
-task :foo do
-  puts &amp;quot;bar &amp;quot; * 10
-end
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;If you run the &lt;code&gt;foo&lt;/code&gt; task, you would get:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;$rake foo
-foo foo foo foo foo foo foo foo foo foo
-bar bar bar bar bar bar bar bar bar bar
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;This is far removed from behaviors of Ruby and &lt;a href=&#34;http://www.gnu.org/software/make/&#34; title=&#34;Make&#34;&gt;Make&lt;/a&gt;, the tools that inspired Rake. For clarity&amp;rsquo;s sake, this is how Ruby treats redefinitions:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-ruby&#34;&gt;#!/usr/bin/env ruby
-#example.rb
-
-def example
-  puts &amp;quot;example &amp;quot; * 10
-end
-
-def example
-  puts &amp;quot;foobar &amp;quot; * 10
-end
-
-example
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;When run:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;$ruby example.rb
-foobar foobar foobar foobar foobar foobar foobar foobar foobar foobar
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Lets take a look at Make&amp;rsquo;s behavior. This is how Make treats redefinitions:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-make&#34;&gt;# Example Makefile
-
-foo:
-    @echo Foo target
-foo:
-    @echo Redefined foo target
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;When run:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;$make foo
-Makefile:6: warning: overriding commands for target `foo&#39;
-Makefile:4: warning: ignoring old commands for target `foo&#39;
-Redefined foo target
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;While this behavior of Rake may seem weird, there are some advantages to it like the ability to add custom behavior to third party Rake tasks. I asked &lt;a href=&#34;https://twitter.com/#!/jimweirich&#34;&gt;Jim Weirich&lt;/a&gt;, the creator of Rake and he was &lt;a href=&#34;http://www.quora.com/Ruby-programming-language/Why-did-Rake-choose-to-treat-a-re-definition-as-a-multiple-definition-instead-of-an-overwrite&#34;&gt;of the opinion&lt;/a&gt; that it was a useful choice. &lt;em&gt;We were &lt;strong&gt;not&lt;/strong&gt; aware of this particular behavior of Rake.&lt;/em&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;task &lt;span style=&#34;color:#fc3&#34;&gt;:foo&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;do&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;foo &amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;10&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;task &lt;span style=&#34;color:#fc3&#34;&gt;:foo&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;do&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;bar &amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;10&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;If you run the &lt;code&gt;foo&lt;/code&gt; task, you would get:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#033&#34;&gt;$rake&lt;/span&gt; foo
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;foo foo foo foo foo foo foo foo foo foo
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;bar bar bar bar bar bar bar bar bar bar
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This is far removed from behaviors of Ruby and &lt;a href=&#34;http://www.gnu.org/software/make/&#34; title=&#34;Make&#34;&gt;Make&lt;/a&gt;, the tools that inspired Rake. For clarity&amp;rsquo;s sake, this is how Ruby treats redefinitions:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;#!/usr/bin/env ruby&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;#example.rb&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;example&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;example &amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;10&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;example&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;foobar &amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;10&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;example
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;When run:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#033&#34;&gt;$ruby&lt;/span&gt; example.rb
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;foobar foobar foobar foobar foobar foobar foobar foobar foobar foobar
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Lets take a look at Make&amp;rsquo;s behavior. This is how Make treats redefinitions:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-make&#34; data-lang=&#34;make&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# Example Makefile
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c0f&#34;&gt;foo&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    @echo Foo target
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c0f&#34;&gt;foo&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    @echo Redefined foo target
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;When run:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#033&#34;&gt;$make&lt;/span&gt; foo
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Makefile:6: warning: overriding commands &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;for&lt;/span&gt; target &lt;span style=&#34;color:#c30&#34;&gt;`&lt;/span&gt;foo&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#c30&#34;&gt;Makefile:4: warning: ignoring old commands for target `foo&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Redefined foo target
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;While this behavior of Rake may seem weird, there are some advantages to it like the ability to add custom behavior to third party Rake tasks. I asked &lt;a href=&#34;https://twitter.com/#!/jimweirich&#34;&gt;Jim Weirich&lt;/a&gt;, the creator of Rake and he was &lt;a href=&#34;http://www.quora.com/Ruby-programming-language/Why-did-Rake-choose-to-treat-a-re-definition-as-a-multiple-definition-instead-of-an-overwrite&#34;&gt;of the opinion&lt;/a&gt; that it was a useful choice. &lt;em&gt;We were &lt;strong&gt;not&lt;/strong&gt; aware of this particular behavior of Rake.&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;Under normal situations, this behavior should not cause us trouble, as it is unlikely that we would redefine our own Rake tasks. But this combined with the next issue led to some of our build tasks running twice.&lt;/p&gt;
 &lt;h3 id=&#34;ruby-187s-multiple-require-issue&#34;&gt;Ruby 1.8.7&amp;rsquo;s multiple require issue&lt;/h3&gt;
 &lt;p&gt;It turns out that in Ruby 1.8.7, whenever a file is &lt;code&gt;require&lt;/code&gt;d multiple times, Ruby decides whether to reload it based on the path of the file provided. So if you have the same file being required twice, but using different paths, the file will be loaded twice. If there are Rake tasks defined in that file, the effect of actions in the Rake task will be multiplied.&lt;/p&gt;
 &lt;p&gt;Again, this can be best demonstrated with an example. Consider the following scenario. There is a paent directory with &lt;code&gt;Rakefile&lt;/code&gt;, &lt;code&gt;zoo.rb&lt;/code&gt; and a directory &lt;code&gt;subdir&lt;/code&gt; with the file &lt;code&gt;bar.rb&lt;/code&gt; inside it.&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;zoo.rb&lt;/code&gt; defines a Rake task &lt;code&gt;print_zoo&lt;/code&gt;:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-ruby&#34;&gt;# zoo.rb
-
-desc &amp;quot;prints zoo&amp;quot;
-task :print_zoo do
-  puts &amp;quot;zoo &amp;quot; * 10
-end
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;code&gt;bar.rb&lt;/code&gt; in the directory &lt;code&gt;subdir&lt;/code&gt; does nothing but require &lt;code&gt;zoo&lt;/code&gt; in the parent directory.&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-ruby&#34;&gt;#subdir/bar.rb
-
-require File.dirname(__FILE__) + &amp;quot;/../zoo&amp;quot;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;The Rakefile requires both &lt;code&gt;zoo.rb&lt;/code&gt; and &lt;code&gt;bar.rb&lt;/code&gt; and defines a task to show the behavior.&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-ruby&#34;&gt;require File.dirname(__FILE__) + &amp;quot;/zoo&amp;quot;
-require File.dirname(__FILE__) + &amp;quot;/subdir/bar&amp;quot;
-
-desc &amp;quot;show weirdness&amp;quot;
-task :test =&amp;gt; :print_zoo
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Now if we run the &lt;code&gt;test&lt;/code&gt; task:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;$rake test
-zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo
-zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Lets take a step back and think about that. If we load Ruby files multiple times using &lt;code&gt;require&lt;/code&gt; we can easily end up repeating a build step that would take 30 minutes to complete.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# zoo.rb&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;desc &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;prints zoo&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;task &lt;span style=&#34;color:#fc3&#34;&gt;:print_zoo&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;do&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;zoo &amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;10&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;code&gt;bar.rb&lt;/code&gt; in the directory &lt;code&gt;subdir&lt;/code&gt; does nothing but require &lt;code&gt;zoo&lt;/code&gt; in the parent directory.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;#subdir/bar.rb&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;require&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;File&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;dirname(&lt;span style=&#34;color:#366&#34;&gt;__FILE__&lt;/span&gt;) &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/../zoo&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The Rakefile requires both &lt;code&gt;zoo.rb&lt;/code&gt; and &lt;code&gt;bar.rb&lt;/code&gt; and defines a task to show the behavior.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;require&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;File&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;dirname(&lt;span style=&#34;color:#366&#34;&gt;__FILE__&lt;/span&gt;) &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/zoo&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;require&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;File&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;dirname(&lt;span style=&#34;color:#366&#34;&gt;__FILE__&lt;/span&gt;) &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/subdir/bar&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;desc &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;show weirdness&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;task &lt;span style=&#34;color:#fc3&#34;&gt;:test&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#fc3&#34;&gt;:print_zoo&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Now if we run the &lt;code&gt;test&lt;/code&gt; task:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#033&#34;&gt;$rake&lt;/span&gt; &lt;span style=&#34;color:#366&#34;&gt;test&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Lets take a step back and think about that. If we load Ruby files multiple times using &lt;code&gt;require&lt;/code&gt; we can easily end up repeating a build step that would take 30 minutes to complete.&lt;/p&gt;
 &lt;p&gt;I must note that this issue does not happen on Ruby 1.9.3, where files are being loaded only once. All the code I showed here is available &lt;a href=&#34;https://github.com/sdqali/rake_sandbox&#34;&gt;here&lt;/a&gt;, if you want to take a closer look.&lt;/p&gt;
 &lt;h2 id=&#34;learning&#34;&gt;Learning&lt;/h2&gt;
 &lt;p&gt;This is not meant to be a criticism of Rake or Ruby. Although Rake&amp;rsquo;s behavior in this scenario looks weird, there are good reasons why Jim chose that behavior. And we should have moved to Ruby 1.9.3 anyway.  Certainly the learning is that we need to have a better understanding of the tools we use daily.&lt;/p&gt;</description>
@@ -830,85 +781,84 @@ http://en.wikipedia.org/wiki/The_Heart_of_Midlothian
 &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;I am still trying to make more sense of the links that I clicked away and the articles I read when I was page hopping.&lt;/p&gt;
 &lt;p&gt;The Ruby script that parses Chromium history and figures out the Wikipedia links is below:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-ruby&#34;&gt;#!/usr/bin/env ruby
-# Ruby script to parse Chromium (or Google Chrome) history to identify Wikipedia pages read per day.
-# usage: ./wikipedia_history.rb &amp;lt;location of Chromium history db&amp;gt;
-# The Chromium history db can be usually found under ~/.config/chromium/Default
-
-require &#39;rubygems&#39;
-require &#39;sqlite3&#39;
-
-US_IN_A_DAY = 24 * 60 * 60 * 1000000
-SITE = &amp;quot;wikipedia&amp;quot;
-
-module ChromiumHP
-  class DbConnection
-    def initialize db_name
-      @db_name = db_name
-    end
-
-    def urls_history
-      db = SQLite3::Database.new @db_name
-      urls = db.execute(&amp;quot;SELECT last_visit_time, url from urls ORDER BY last_visit_time;&amp;quot;).map do |t, u|
-        {:last_visit_time =&amp;gt; t, :url =&amp;gt; u}
-      end
-      db.close
-      urls
-    end
-  end
-
-  class Parser
-    def initialize db_name
-      @db_name = db_name
-    end
-
-    def chunks days
-      @history ||= get_history
-      parts = @history.group_by do |h|
-         h[:last_visit_time] / (days * US_IN_A_DAY)
-      end
-      parts.map { |k, group| group }
-    end
-
-    private
-    def get_history
-      DbConnection.new(@db_name).urls_history
-    end
-  end
-
-  class Analyzer
-    def self.graph chunks
-      chunks.map do |c|
-        c.find_all do |entry|
-          url = entry[:url]
-          url.include?(SITE) &amp;amp;&amp;amp;
-            !url.include?(&amp;quot;facebook&amp;quot;) &amp;amp;&amp;amp;
-            !url.include?(&amp;quot;google&amp;quot;)
-        end
-      end.find_all do |c|
-        !c.empty?
-      end.sort_by do |c|
-        c.length
-      end.map do |c|
-        c.map do |entry|
-          entry[:url]
-        end
-      end
-    end
-  end
-end
-
-
-history_loc = ARGV.first
-abort &amp;quot;Error: Pass the chromium history location as parameter&amp;quot; if history_loc.nil?
-
-daily_chunks = ChromiumHP::Parser.new(history_loc + &amp;quot;/History&amp;quot;).chunks(1)
-ChromiumHP::Analyzer.graph(daily_chunks).each do |entries|
-  puts entries
-  puts &amp;quot;&amp;quot;
-end
-&lt;/code&gt;&lt;/pre&gt;
-</description>
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;#!/usr/bin/env ruby&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# Ruby script to parse Chromium (or Google Chrome) history to identify Wikipedia pages read per day.&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# usage: ./wikipedia_history.rb &amp;lt;location of Chromium history db&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# The Chromium history db can be usually found under ~/.config/chromium/Default&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;require&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;rubygems&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;require&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;sqlite3&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#360&#34;&gt;US_IN_A_DAY&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;24&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;60&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;60&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;1000000&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#360&#34;&gt;SITE&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;wikipedia&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;module&lt;/span&gt; &lt;span style=&#34;color:#0cf;font-weight:bold&#34;&gt;ChromiumHP&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;DbConnection&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;initialize&lt;/span&gt; db_name
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#033&#34;&gt;@db_name&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; db_name
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;urls_history&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      db &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;SQLite3&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;&lt;span style=&#34;color:#360&#34;&gt;Database&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;new &lt;span style=&#34;color:#033&#34;&gt;@db_name&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      urls &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; db&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;execute(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;SELECT last_visit_time, url from urls ORDER BY last_visit_time;&amp;#34;&lt;/span&gt;)&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;map &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;do&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;t, u&lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        {&lt;span style=&#34;color:#fc3&#34;&gt;:last_visit_time&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; t, &lt;span style=&#34;color:#fc3&#34;&gt;:url&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&amp;gt;&lt;/span&gt; u}
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      db&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;close
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      urls
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;Parser&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;initialize&lt;/span&gt; db_name
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#033&#34;&gt;@db_name&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; db_name
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;chunks&lt;/span&gt; days
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#033&#34;&gt;@history&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;||=&lt;/span&gt; get_history
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      parts &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;@history&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;group_by &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;do&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;h&lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;         h&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#fc3&#34;&gt;:last_visit_time&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;/&lt;/span&gt; (days &lt;span style=&#34;color:#555&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;US_IN_A_DAY&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      parts&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;map { &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;k, group&lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt; group }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069&#34;&gt;private&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;get_history&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#360&#34;&gt;DbConnection&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;new(&lt;span style=&#34;color:#033&#34;&gt;@db_name&lt;/span&gt;)&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;urls_history
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;Analyzer&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;self&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color:#c0f&#34;&gt;graph&lt;/span&gt; chunks
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      chunks&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;map &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;do&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;c&lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        c&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;find_all &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;do&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;entry&lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;          url &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; entry&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#fc3&#34;&gt;:url&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;          url&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;include?(&lt;span style=&#34;color:#360&#34;&gt;SITE&lt;/span&gt;) &lt;span style=&#34;color:#555&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            &lt;span style=&#34;color:#555&#34;&gt;!&lt;/span&gt;url&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;include?(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;facebook&amp;#34;&lt;/span&gt;) &lt;span style=&#34;color:#555&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            &lt;span style=&#34;color:#555&#34;&gt;!&lt;/span&gt;url&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;include?(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;google&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;find_all &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;do&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;c&lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#555&#34;&gt;!&lt;/span&gt;c&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;empty?
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;sort_by &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;do&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;c&lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        c&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;length
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;map &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;do&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;c&lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        c&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;map &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;do&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;entry&lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;          entry&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#fc3&#34;&gt;:url&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;history_loc &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;ARGV&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;first
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;abort&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Error: Pass the chromium history location as parameter&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; history_loc&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;nil?
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;daily_chunks &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;ChromiumHP&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;&lt;span style=&#34;color:#360&#34;&gt;Parser&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;new(history_loc &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/History&amp;#34;&lt;/span&gt;)&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;chunks(&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#360&#34;&gt;ChromiumHP&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;&lt;span style=&#34;color:#360&#34;&gt;Analyzer&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;graph(daily_chunks)&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;each &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;do&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;entries&lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; entries
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description>
     </item>
     
     <item>
@@ -920,32 +870,31 @@ end
       <description>&lt;p&gt;I use Empathy as my preferred IM application. Today, I wanted to have a look at an IM conversation I had with someone. I pulled out the Empathy log corresponding to that conversation, and boom - it is in XML.&lt;/p&gt;
 &lt;p&gt;Just another excuse to write code. So I came up with the following. It was easy to write and it does not do much - It uses the Hpricot gem to parse the XML and prints the name of the people involved in the chat and their messages in a human readable form. What? You are one of those souls who actually enjoy reading XML? Well, I am not one of those.&lt;/p&gt;
 &lt;p&gt;So here is the code:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-ruby&#34;&gt;#!/usr/bin/env ruby
-# empathy_lp.rb
-# Usage - ./empathy_lp.rb /tmp/20110323.log
-
-require &#39;rubygems&#39;
-require &#39;hpricot&#39;
-
-module EmpathyLP
-  class LogParser
-    def initialize file_path
-      conversation_xml = IO.readlines(file_path).to_s
-      @doc = Hpricot conversation_xml
-    end
-
-    def messages
-      (@doc/&amp;quot;message&amp;quot;).map do |m|
-        m.attributes[&#39;name&#39;] + &amp;quot;: &amp;quot; + m.inner_text
-      end
-    end
-  end
-end
-
-path = ARGV.first
-puts EmpathyLP::LogParser.new(path).messages
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;I will modify this slightly to show a timestamp for each message.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;#!/usr/bin/env ruby&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# empathy_lp.rb&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# Usage - ./empathy_lp.rb /tmp/20110323.log&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;require&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;rubygems&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;require&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;hpricot&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;module&lt;/span&gt; &lt;span style=&#34;color:#0cf;font-weight:bold&#34;&gt;EmpathyLP&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;LogParser&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;initialize&lt;/span&gt; file_path
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      conversation_xml &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;IO&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;readlines(file_path)&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;to_s
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#033&#34;&gt;@doc&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;Hpricot&lt;/span&gt; conversation_xml
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;messages&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      (&lt;span style=&#34;color:#033&#34;&gt;@doc&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;/&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;message&amp;#34;&lt;/span&gt;)&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;map &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;do&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;m&lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        m&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;attributes&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;name&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;: &amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; m&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;inner_text
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;path &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;ARGV&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;first
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;EmpathyLP&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;::&lt;/span&gt;&lt;span style=&#34;color:#360&#34;&gt;LogParser&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;new(path)&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;messages
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;I will modify this slightly to show a timestamp for each message.&lt;/p&gt;
 </description>
     </item>
     
@@ -956,22 +905,20 @@ puts EmpathyLP::LogParser.new(path).messages
       
       <guid>https://sadique.io/blog/2011/03/23/binary-signature-art/?utm_source=site&amp;utm_medium=feed</guid>
       <description>&lt;p&gt;I was reading this very interesting &lt;a href=&#34;http://forums.xkcd.com/viewtopic.php?f=7&amp;amp;t=11765&#34;&gt;thread&lt;/a&gt; on the xkcd forum when I noticed a post from a user with the following signature in binary:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;01001101 01100001 01100100 01100101 00100000 01011001 01101111 01110101 00100000 01001100 01101111 01101111 01101011 00100001&amp;quot;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;At first, that did not particularly entice me, mostly because the topic being discussed was really interesting, but it did come back to my focus when I saw that another user had quoted the signature, along with the comment &lt;code&gt;Yeah, you know it. LOL :-)&lt;/code&gt;. I had to find what the original message was.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f60&#34;&gt;01001101&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;01100001&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;01100100&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;01100101&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;00100000&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;01011001&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;01101111&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;01110101&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;00100000&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;01001100&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;01101111&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;01101111&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;01101011&lt;/span&gt; 00100001&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;At first, that did not particularly entice me, mostly because the topic being discussed was really interesting, but it did come back to my focus when I saw that another user had quoted the signature, along with the comment &lt;code&gt;Yeah, you know it. LOL :-)&lt;/code&gt;. I had to find what the original message was.&lt;/p&gt;
 &lt;p&gt;So couple of minutes of Ruby later, I figured it out. His message was simple - &lt;code&gt;Made You Look!&lt;/code&gt;. Yeah, he sure did!&lt;/p&gt;
 &lt;p&gt;Here is the rather simple Ruby code snippet that did the trick:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-ruby&#34;&gt;code = &amp;quot;01001101 01100001 01100100 01100101 00100000 01011001 01101111 01110101 00100000 01001100 01101111 01101111 01101011 00100001&amp;quot;
-
-parts = code.split &amp;quot; &amp;quot;
-
-text = parts.map do |p|
-  p.to_i(2).chr
-end.to_s
-
-puts text
-&lt;/code&gt;&lt;/pre&gt;
-</description>
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;code &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;01001101 01100001 01100100 01100101 00100000 01011001 01101111 01110101 00100000 01001100 01101111 01101111 01101011 00100001&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;parts &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; code&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;split &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34; &amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;text &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; parts&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;map &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;do&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;&lt;span style=&#34;color:#366&#34;&gt;p&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;|&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#366&#34;&gt;p&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;to_i(&lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;)&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;chr
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;end&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;to_s
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; text
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description>
     </item>
     
     <item>
@@ -984,24 +931,21 @@ puts text
 &lt;p&gt;You are in Ruby world, a world of weak typing, no type casting and pure bliss in coding. You forget that some languages care about the type of elements in an Array. And you end up spending a lot of time figuring out why you are staring at a stupid looking exception.&lt;/p&gt;
 &lt;p&gt;I will be using a dummy example for describing the problem.&lt;/p&gt;
 &lt;p&gt;The following code snippet tries to compare two arrays in JRuby using Java Arrays&amp;rsquo; equals method. In JRuby world, one would expect this to work. Actually, one should not, but Ruby really gets into you.&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-ruby&#34;&gt;require &#39;java&#39;
-import &#39;java.util.Arrays&#39;
-
-puts &amp;quot;Arrays equal&amp;quot; if Arrays.equals([1, 2, 3], [1, 2, 3])
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Well, it does not. You get an error:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;no equals with arguments matching [class org.jruby.RubyArray, class org.jruby.RubyArray] on object Java::JavaUtil::Arrays (NameError)
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;This error message is informative. In our case, our unit tests threw an error that was very difficult to make any sense of. The reason why this fails is obvious.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;require&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;java&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;import &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;java.util.Arrays&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Arrays equal&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;Arrays&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;equals(&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;3&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;, &lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;3&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Well, it does not. You get an error:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;no equals with arguments matching &lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;class org.jruby.RubyArray, class org.jruby.RubyArray&lt;span style=&#34;color:#555&#34;&gt;]&lt;/span&gt; on object Java::JavaUtil::Arrays &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;NameError&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This error message is informative. In our case, our unit tests threw an error that was very difficult to make any sense of. The reason why this fails is obvious.&lt;/p&gt;
 &lt;p&gt;Java does care about the Type of things that form an Array. So you need to cast it to the correct type.&lt;/p&gt;
 &lt;p&gt;Here is the code that actually works:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-ruby&#34;&gt;require &#39;java&#39;
-import &#39;java.util.Arrays&#39;
-
-puts &amp;quot;Arrays equal&amp;quot; if Arrays.equals([1,2,3].to_java(java.lang.Integer),
-                                     [1,2,3].to_java(java.lang.Integer))
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;The &lt;code&gt;to_java&lt;/code&gt; method casts the elements of the Ruby array into Java array with elements of type specified.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-ruby&#34; data-lang=&#34;ruby&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;require&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;java&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;import &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;java.util.Arrays&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;puts&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Arrays equal&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color:#360&#34;&gt;Arrays&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;equals(&lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;,&lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;,&lt;span style=&#34;color:#f60&#34;&gt;3&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;].&lt;/span&gt;to_java(java&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;lang&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;Integer),
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                                     &lt;span style=&#34;color:#555&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;,&lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;,&lt;span style=&#34;color:#f60&#34;&gt;3&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;].&lt;/span&gt;to_java(java&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;lang&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;Integer))
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The &lt;code&gt;to_java&lt;/code&gt; method casts the elements of the Ruby array into Java array with elements of type specified.&lt;/p&gt;
 </description>
     </item>
     

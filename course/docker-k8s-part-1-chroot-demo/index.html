@@ -55,43 +55,34 @@
            itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div >
           <h2 id="create-a-chroot-jail">Create a chroot jail</h2>
-<pre><code>mkdir jail
-</code></pre>
-<h2 id="create-directories-for-system-binaries">Create directories for system binaries</h2>
-<pre><code>mkdir jail/bin
-</code></pre>
-<h2 id="copy-the-bash-binary-from-the-host">Copy the bash binary from the host</h2>
-<pre><code>cp -v /bin/bash jail/bin
-</code></pre>
-<h2 id="create-a-list-of-libraries-needed-for-the-binary-to-work">Create a list of libraries needed for the binary to work</h2>
-<pre><code>list_of_libs=&quot;$(ldd /bin/bash | egrep -o '/lib.*\.[0-9]')&quot;
+<pre tabindex="0"><code>mkdir jail
+</code></pre><h2 id="create-directories-for-system-binaries">Create directories for system binaries</h2>
+<pre tabindex="0"><code>mkdir jail/bin
+</code></pre><h2 id="copy-the-bash-binary-from-the-host">Copy the bash binary from the host</h2>
+<pre tabindex="0"><code>cp -v /bin/bash jail/bin
+</code></pre><h2 id="create-a-list-of-libraries-needed-for-the-binary-to-work">Create a list of libraries needed for the binary to work</h2>
+<pre tabindex="0"><code>list_of_libs=&#34;$(ldd /bin/bash | egrep -o &#39;/lib.*\.[0-9]&#39;)&#34;
 echo $list_of_libs
-</code></pre>
-<h2 id="copy-the-libraries-recursively">Copy the libraries recursively</h2>
-<pre><code>for i in $list_of_libs; do cp  -v --parents &quot;$i&quot; `pwd`/jail; done
-</code></pre>
-<h2 id="create-a-demo-script">Create a demo script</h2>
-<pre><code>#!/bin/bash
+</code></pre><h2 id="copy-the-libraries-recursively">Copy the libraries recursively</h2>
+<pre tabindex="0"><code>for i in $list_of_libs; do cp  -v --parents &#34;$i&#34; `pwd`/jail; done
+</code></pre><h2 id="create-a-demo-script">Create a demo script</h2>
+<pre tabindex="0"><code>#!/bin/bash
 
 let i=0;
 while :
 do
         let i++
-        echo &quot;Last value of i is ${i}&quot;
-        read -rep $'Pausing for 5 seconds\n' -t 5
+        echo &#34;Last value of i is ${i}&#34;
+        read -rep $&#39;Pausing for 5 seconds\n&#39; -t 5
 done
-</code></pre>
-<h2 id="copy-the-demo-script-to-the-jail">Copy the demo script to the jail</h2>
-<pre><code>chmod +x demos.sh
+</code></pre><h2 id="copy-the-demo-script-to-the-jail">Copy the demo script to the jail</h2>
+<pre tabindex="0"><code>chmod +x demos.sh
 cp demo.sh jail/
+</code></pre><h2 id="enter-the-chroot">Enter the chroot</h2>
+<pre tabindex="0"><code>sudo chroot `pwd`/jail /bin/bash
+</code></pre><h2 id="in-the-chroot-execute-the-shell-script">In the chroot, execute the shell script</h2>
+<pre tabindex="0"><code>./demo.sh
 </code></pre>
-<h2 id="enter-the-chroot">Enter the chroot</h2>
-<pre><code>sudo chroot `pwd`/jail /bin/bash
-</code></pre>
-<h2 id="in-the-chroot-execute-the-shell-script">In the chroot, execute the shell script</h2>
-<pre><code>./demo.sh
-</code></pre>
-
         </div>
       </div>
     </article>

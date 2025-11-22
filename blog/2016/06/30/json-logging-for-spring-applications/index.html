@@ -98,73 +98,69 @@ If you have an application that writes logs, there are many reasons to make it w
           <meta content="logstash spring boot example" name="keywords">
 If you have an application that writes logs, there are many reasons to make it write the log in JSON format. It makes it easier to search and analyze them when using tools such as the ELK Stack [^1]. JSON formatted logs make it easier to look at them when looking at how the app is behaving in real time using tools like jq [^2]. This blog post documents how to format logs as JSON in a Spring application.
 <p>We will be using the <code>logstash-logback-encoder</code> <a href="https://github.com/logstash/logstash-logback-encoder">encoder</a> from Logstash. This can be added to the application with the following Maven dependency:</p>
-<pre><code class="language-xml">&lt;dependency&gt;
-    &lt;groupId&gt;net.logstash.logback&lt;/groupId&gt;
-    &lt;artifactId&gt;logstash-logback-encoder&lt;/artifactId&gt;
-    &lt;version&gt;4.7&lt;/version&gt;
-&lt;/dependency&gt;
-</code></pre>
-<p>The next step is to configure logback to log using the new encoder. This can be done by placing a <code>logback.xml</code> configuration file in the application&rsquo;s class path - for example in the <code>main/resources</code> directory.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-xml" data-lang="xml"><span style="display:flex;"><span><span style="color:#309;font-weight:bold">&lt;dependency&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&lt;groupId&gt;</span>net.logstash.logback<span style="color:#309;font-weight:bold">&lt;/groupId&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&lt;artifactId&gt;</span>logstash-logback-encoder<span style="color:#309;font-weight:bold">&lt;/artifactId&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&lt;version&gt;</span>4.7<span style="color:#309;font-weight:bold">&lt;/version&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#309;font-weight:bold">&lt;/dependency&gt;</span>
+</span></span></code></pre></div><p>The next step is to configure logback to log using the new encoder. This can be done by placing a <code>logback.xml</code> configuration file in the application&rsquo;s class path - for example in the <code>main/resources</code> directory.</p>
 <p>If we want the application to log to the console in JSON format, we will use a <code>ConsoleAppender</code> with the encoder as follows:</p>
-<pre><code class="language-xml">&lt;configuration&gt;
-    &lt;appender name=&quot;consoleAppender&quot; class=&quot;ch.qos.logback.core.ConsoleAppender&quot;&gt;
-        &lt;encoder class=&quot;net.logstash.logback.encoder.LogstashEncoder&quot;/&gt;
-    &lt;/appender&gt;
-    &lt;logger name=&quot;jsonLogger&quot; additivity=&quot;false&quot; level=&quot;DEBUG&quot;&gt;
-        &lt;appender-ref ref=&quot;consoleAppender&quot;/&gt;
-    &lt;/logger&gt;
-    &lt;root level=&quot;INFO&quot;&gt;
-        &lt;appender-ref ref=&quot;consoleAppender&quot;/&gt;
-    &lt;/root&gt;
-&lt;/configuration&gt;
-</code></pre>
-<p>If we wanted the application to log to a file with the logs being rotated, we will configure a <code>RollingFileAppender</code> with the encoder, as follows:</p>
-<pre><code class="language-xml">&lt;configuration&gt;
-    &lt;property name=&quot;LOG_PATH&quot; value=&quot;/tmp/json-log.json&quot; /&gt;
-    &lt;appender name=&quot;jsonAppender&quot; class=&quot;ch.qos.logback.core.rolling.RollingFileAppender&quot;&gt;
-        &lt;File&gt;${LOG_PATH}&lt;/File&gt;
-        &lt;encoder class=&quot;net.logstash.logback.encoder.LogstashEncoder&quot;/&gt;
-        &lt;rollingPolicy class=&quot;ch.qos.logback.core.rolling.FixedWindowRollingPolicy&quot;&gt;
-            &lt;maxIndex&gt;1&lt;/maxIndex&gt;
-            &lt;fileNamePattern&gt;${LOG_PATH}.%i&lt;/fileNamePattern&gt;
-        &lt;/rollingPolicy&gt;
-        &lt;triggeringPolicy class=&quot;ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy&quot;&gt;
-            &lt;MaxFileSize&gt;1MB&lt;/MaxFileSize&gt;
-        &lt;/triggeringPolicy&gt;
-    &lt;/appender&gt;
-    &lt;logger name=&quot;jsonLogger&quot; additivity=&quot;false&quot; level=&quot;DEBUG&quot;&gt;
-        &lt;appender-ref ref=&quot;jsonAppender&quot;/&gt;
-    &lt;/logger&gt;
-    &lt;root level=&quot;INFO&quot;&gt;
-        &lt;appender-ref ref=&quot;jsonAppender&quot;/&gt;
-    &lt;/root&gt;
-&lt;/configuration&gt;
-</code></pre>
-<p>With this configuration in place, we can tail the logs to observe the application in a much more readable manner:</p>
-<pre><code>$ tail -f /tmp/json-log.json  | jq .
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-xml" data-lang="xml"><span style="display:flex;"><span><span style="color:#309;font-weight:bold">&lt;configuration&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&lt;appender</span> <span style="color:#309">name=</span><span style="color:#c30">&#34;consoleAppender&#34;</span> <span style="color:#309">class=</span><span style="color:#c30">&#34;ch.qos.logback.core.ConsoleAppender&#34;</span><span style="color:#309;font-weight:bold">&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#309;font-weight:bold">&lt;encoder</span> <span style="color:#309">class=</span><span style="color:#c30">&#34;net.logstash.logback.encoder.LogstashEncoder&#34;</span><span style="color:#309;font-weight:bold">/&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&lt;/appender&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&lt;logger</span> <span style="color:#309">name=</span><span style="color:#c30">&#34;jsonLogger&#34;</span> <span style="color:#309">additivity=</span><span style="color:#c30">&#34;false&#34;</span> <span style="color:#309">level=</span><span style="color:#c30">&#34;DEBUG&#34;</span><span style="color:#309;font-weight:bold">&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#309;font-weight:bold">&lt;appender-ref</span> <span style="color:#309">ref=</span><span style="color:#c30">&#34;consoleAppender&#34;</span><span style="color:#309;font-weight:bold">/&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&lt;/logger&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&lt;root</span> <span style="color:#309">level=</span><span style="color:#c30">&#34;INFO&#34;</span><span style="color:#309;font-weight:bold">&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#309;font-weight:bold">&lt;appender-ref</span> <span style="color:#309">ref=</span><span style="color:#c30">&#34;consoleAppender&#34;</span><span style="color:#309;font-weight:bold">/&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&lt;/root&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#309;font-weight:bold">&lt;/configuration&gt;</span>
+</span></span></code></pre></div><p>If we wanted the application to log to a file with the logs being rotated, we will configure a <code>RollingFileAppender</code> with the encoder, as follows:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-xml" data-lang="xml"><span style="display:flex;"><span><span style="color:#309;font-weight:bold">&lt;configuration&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&lt;property</span> <span style="color:#309">name=</span><span style="color:#c30">&#34;LOG_PATH&#34;</span> <span style="color:#309">value=</span><span style="color:#c30">&#34;/tmp/json-log.json&#34;</span> <span style="color:#309;font-weight:bold">/&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&lt;appender</span> <span style="color:#309">name=</span><span style="color:#c30">&#34;jsonAppender&#34;</span> <span style="color:#309">class=</span><span style="color:#c30">&#34;ch.qos.logback.core.rolling.RollingFileAppender&#34;</span><span style="color:#309;font-weight:bold">&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#309;font-weight:bold">&lt;File&gt;</span>${LOG_PATH}<span style="color:#309;font-weight:bold">&lt;/File&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#309;font-weight:bold">&lt;encoder</span> <span style="color:#309">class=</span><span style="color:#c30">&#34;net.logstash.logback.encoder.LogstashEncoder&#34;</span><span style="color:#309;font-weight:bold">/&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#309;font-weight:bold">&lt;rollingPolicy</span> <span style="color:#309">class=</span><span style="color:#c30">&#34;ch.qos.logback.core.rolling.FixedWindowRollingPolicy&#34;</span><span style="color:#309;font-weight:bold">&gt;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#309;font-weight:bold">&lt;maxIndex&gt;</span>1<span style="color:#309;font-weight:bold">&lt;/maxIndex&gt;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#309;font-weight:bold">&lt;fileNamePattern&gt;</span>${LOG_PATH}.%i<span style="color:#309;font-weight:bold">&lt;/fileNamePattern&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#309;font-weight:bold">&lt;/rollingPolicy&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#309;font-weight:bold">&lt;triggeringPolicy</span> <span style="color:#309">class=</span><span style="color:#c30">&#34;ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy&#34;</span><span style="color:#309;font-weight:bold">&gt;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#309;font-weight:bold">&lt;MaxFileSize&gt;</span>1MB<span style="color:#309;font-weight:bold">&lt;/MaxFileSize&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#309;font-weight:bold">&lt;/triggeringPolicy&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&lt;/appender&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&lt;logger</span> <span style="color:#309">name=</span><span style="color:#c30">&#34;jsonLogger&#34;</span> <span style="color:#309">additivity=</span><span style="color:#c30">&#34;false&#34;</span> <span style="color:#309">level=</span><span style="color:#c30">&#34;DEBUG&#34;</span><span style="color:#309;font-weight:bold">&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#309;font-weight:bold">&lt;appender-ref</span> <span style="color:#309">ref=</span><span style="color:#c30">&#34;jsonAppender&#34;</span><span style="color:#309;font-weight:bold">/&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&lt;/logger&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&lt;root</span> <span style="color:#309">level=</span><span style="color:#c30">&#34;INFO&#34;</span><span style="color:#309;font-weight:bold">&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#309;font-weight:bold">&lt;appender-ref</span> <span style="color:#309">ref=</span><span style="color:#c30">&#34;jsonAppender&#34;</span><span style="color:#309;font-weight:bold">/&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&lt;/root&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#309;font-weight:bold">&lt;/configuration&gt;</span>
+</span></span></code></pre></div><p>With this configuration in place, we can tail the logs to observe the application in a much more readable manner:</p>
+<pre tabindex="0"><code>$ tail -f /tmp/json-log.json  | jq .
 {
-  &quot;@timestamp&quot;: &quot;2016-06-30T20:01:59.651-04:00&quot;,
-  &quot;@version&quot;: 1,
-  &quot;message&quot;: &quot;Mapped \&quot;{[/error],produces=[text/html]}\&quot; onto public org.springframework.web.servlet.ModelAndView org.springframework.boot.autoconfigure.web.BasicErrorController.errorHtml(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)&quot;,
-  &quot;logger_name&quot;: &quot;org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping&quot;,
-  &quot;thread_name&quot;: &quot;main&quot;,
-  &quot;level&quot;: &quot;INFO&quot;,
-  &quot;level_value&quot;: 20000,
-  &quot;HOSTNAME&quot;: &quot;somehostname&quot;
+  &#34;@timestamp&#34;: &#34;2016-06-30T20:01:59.651-04:00&#34;,
+  &#34;@version&#34;: 1,
+  &#34;message&#34;: &#34;Mapped \&#34;{[/error],produces=[text/html]}\&#34; onto public org.springframework.web.servlet.ModelAndView org.springframework.boot.autoconfigure.web.BasicErrorController.errorHtml(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)&#34;,
+  &#34;logger_name&#34;: &#34;org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping&#34;,
+  &#34;thread_name&#34;: &#34;main&#34;,
+  &#34;level&#34;: &#34;INFO&#34;,
+  &#34;level_value&#34;: 20000,
+  &#34;HOSTNAME&#34;: &#34;somehostname&#34;
 }
 {
-  &quot;@timestamp&quot;: &quot;2016-06-30T20:01:59.677-04:00&quot;,
-  &quot;@version&quot;: 1,
-  &quot;message&quot;: &quot;Mapped URL path [/webjars/**] onto handler of type [class org.springframework.web.servlet.resource.ResourceHttpRequestHandler]&quot;,
-  &quot;logger_name&quot;: &quot;org.springframework.web.servlet.handler.SimpleUrlHandlerMapping&quot;,
-  &quot;thread_name&quot;: &quot;main&quot;,
-  &quot;level&quot;: &quot;INFO&quot;,
-  &quot;level_value&quot;: 20000,
-  &quot;HOSTNAME&quot;: &quot;somehostname&quot;
+  &#34;@timestamp&#34;: &#34;2016-06-30T20:01:59.677-04:00&#34;,
+  &#34;@version&#34;: 1,
+  &#34;message&#34;: &#34;Mapped URL path [/webjars/**] onto handler of type [class org.springframework.web.servlet.resource.ResourceHttpRequestHandler]&#34;,
+  &#34;logger_name&#34;: &#34;org.springframework.web.servlet.handler.SimpleUrlHandlerMapping&#34;,
+  &#34;thread_name&#34;: &#34;main&#34;,
+  &#34;level&#34;: &#34;INFO&#34;,
+  &#34;level_value&#34;: 20000,
+  &#34;HOSTNAME&#34;: &#34;somehostname&#34;
 }
 ...
-</code></pre>
-<p>The Logstach encoder also provides for a <a href="https://github.com/logstash/logstash-logback-encoder#custom_field_names">variety of customizations</a> to the way the logs are written.</p>
+</code></pre><p>The Logstach encoder also provides for a <a href="https://github.com/logstash/logstash-logback-encoder#custom_field_names">variety of customizations</a> to the way the logs are written.</p>
 <p>A sample application with these configurations is available in <a href="https://github.com/sdqali/json-log">this repository</a>.</p>
         </div>
         <aside id="gh-comments-list">

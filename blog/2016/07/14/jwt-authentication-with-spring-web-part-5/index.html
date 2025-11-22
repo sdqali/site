@@ -107,199 +107,190 @@
 </ul>
 <p>We will use the following Angular plugins - <code>angular-resource</code> for interacting with our APIs, <code>ngstorage</code> to access the localStorage to store the JWT and <code>angular-ui-router</code> to handle routing and managing UI views.</p>
 <p>For this example, our UI components are under the <code>src/main/resources/static</code> directory. We will be loading our dependencies using bower by adding a <code>.bowerrc</code> file at the root of our project.</p>
-<pre><code class="language-json">{
-  &quot;directory&quot;: &quot;src/main/resources/static/bower_components&quot;,
-  &quot;json&quot;: &quot;bower.json&quot;
-}
-</code></pre>
-<p>We will specify the dependencies we need in our <code>bower.json</code>:</p>
-<pre><code class="language-json">{
-  &quot;name&quot;: &quot;jwt&quot;,
-  &quot;dependencies&quot;: {
-    &quot;angular&quot;: &quot;~1.3.0&quot;,
-    &quot;angular-resource&quot;: &quot;~1.3.0&quot;,
-    &quot;bootstrap-css-only&quot;: &quot;~3.2.0&quot;,
-    &quot;ngstorage&quot;: &quot;0.3.10&quot;,
-    &quot;angular-ui-router&quot;: &quot;1.0.0-beta.1&quot;
-  }
-}
-</code></pre>
-<p>The dependencies can be installed using <code>bower install</code>. Once we have the dependencies, we can start by configuring Spring Security to allow access to the UI components:</p>
-<pre><code class="language-java">        String[] patterns = new String[] {
-            &quot;/login&quot;,
-            &quot;/bower_components/**/*&quot;,
-            &quot;/app/**/*&quot;,
-            &quot;/index.html&quot;,
-            &quot;/home.html&quot;,
-            &quot;/signin.html&quot;
-        };
-        http.authorizeRequests()
-                .antMatchers(patterns)
-                .permitAll()
-        // ...
-</code></pre>
-<p>We will start by creating our UI template <code>index.html</code>:</p>
-<pre><code class="language-html">&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;en&quot;&gt;
-  &lt;head&gt;
-    &lt;link rel=&quot;stylesheet&quot; href=&quot;./bower_components/bootstrap-css-only/css/bootstrap.min.css&quot; /&gt;
-  &lt;/head&gt;
-  &lt;body ng-app=&quot;jwtDemo&quot;&gt;
-    &lt;div class=&quot;container&quot;&gt;
-      &lt;ui-view&gt;&lt;/ui-view&gt;
-    &lt;/div&gt;
-    &lt;script type=&quot;text/javascript&quot; src=&quot;./bower_components/angular/angular.min.js&quot;&gt;&lt;/script&gt;
-    &lt;script type=&quot;text/javascript&quot; src=&quot;./bower_components/angular-resource/angular-resource.min.js&quot;&gt;&lt;/script&gt;
-    &lt;script type=&quot;text/javascript&quot; src=&quot;./bower_components/ngstorage/ngStorage.min.js&quot;&gt;&lt;/script&gt;
-    &lt;script type=&quot;text/javascript&quot; src=&quot;./bower_components/angular-ui-router/release/angular-ui-router.min.js&quot;&gt;&lt;/script&gt;
-    &lt;script type=&quot;text/javascript&quot; src=&quot;./app/app.js&quot;&gt;&lt;/script&gt;
-    &lt;script type=&quot;text/javascript&quot; src=&quot;./app/controllers.js&quot;&gt;&lt;/script&gt;
-    &lt;script type=&quot;text/javascript&quot; src=&quot;./app/services.js&quot;&gt;&lt;/script&gt;
-  &lt;/body&gt;
-&lt;/html&gt;
-</code></pre>
-<p>For this example, we will have one Angular service in <code>app/services.js</code> that performs login:</p>
-<pre><code class="language-javascript">(function(angular) {
-  var LoginFactory = function($resource) {
-    return $resource('/login', {}, {
-      login: {
-        method: 'POST'
-      }
-    });
-  };
-
-  LoginFactory.$inject = ['$resource'];
-  angular.module('jwtDemo.services').factory('Login', LoginFactory);
-}(angular));
-</code></pre>
-<p>We will need two controllers in <code>app/controller.js</code> - one for the login page to manage login and one for the profile page:</p>
-<pre><code class="language-javascript">(function(angular) {
-  var LoginController = function($scope, $localStorage, $http, $location, Login) {
-    $scope.login = function(username, password) {
-      new Login({username: username, password: password})
-          .$login(function (profile, headers) {
-            $localStorage.user = profile;
-            $localStorage.token = headers().token;
-            $http.defaults.headers.common.Authorization = 'Bearer ' + headers().token;
-            $location.path(&quot;/&quot;);
-          }, function (error) {
-            console.log(error);
-          });
-    };
-
-    $scope.logout = function () {
-      delete $localStorage.user;
-      delete $localStorage.token;
-      $http.defaults.headers.common = {};
-    }
-
-    $scope.logout();
-  };
-
-  LoginController.$inject = ['$scope', '$localStorage', '$http', '$location','Login'];
-  angular.module(&quot;jwtDemo.controllers&quot;).controller(&quot;LoginController&quot;, LoginController);
-
-
-  var ProfileController = function ($scope, $localStorage) {
-    $scope.profile = $localStorage.user;
-  };
-  ProfileController.inject = ['$scope', '$localStorage'];
-  angular.module(&quot;jwtDemo.controllers&quot;).controller(&quot;ProfileController&quot;, ProfileController);
-}(angular));
-</code></pre>
-<p>The <code>LoginController</code> has two methods - login and logout. The login method uses the <code>LoginService</code> to make a request and saves the JWT and user profile returned up on successful login. It also sets the <code>Authorization</code> header default to the JWT returned so that every subsequent request uses it to authenticate. The user is then navigated to the home page. Logout is performed by removing the JWT and profile from local storage and clearing the header defaults.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#309;font-weight:bold">&#34;directory&#34;</span>: <span style="color:#c30">&#34;src/main/resources/static/bower_components&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#309;font-weight:bold">&#34;json&#34;</span>: <span style="color:#c30">&#34;bower.json&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>We will specify the dependencies we need in our <code>bower.json</code>:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#309;font-weight:bold">&#34;name&#34;</span>: <span style="color:#c30">&#34;jwt&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#309;font-weight:bold">&#34;dependencies&#34;</span>: {
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&#34;angular&#34;</span>: <span style="color:#c30">&#34;~1.3.0&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&#34;angular-resource&#34;</span>: <span style="color:#c30">&#34;~1.3.0&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&#34;bootstrap-css-only&#34;</span>: <span style="color:#c30">&#34;~3.2.0&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&#34;ngstorage&#34;</span>: <span style="color:#c30">&#34;0.3.10&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&#34;angular-ui-router&#34;</span>: <span style="color:#c30">&#34;1.0.0-beta.1&#34;</span>
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The dependencies can be installed using <code>bower install</code>. Once we have the dependencies, we can start by configuring Spring Security to allow access to the UI components:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#bbb">        </span>String<span style="color:#555">[]</span><span style="color:#bbb"> </span>patterns<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>String<span style="color:#555">[]</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#c30">&#34;/login&#34;</span>,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#c30">&#34;/bower_components/**/*&#34;</span>,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#c30">&#34;/app/**/*&#34;</span>,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#c30">&#34;/index.html&#34;</span>,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#c30">&#34;/home.html&#34;</span>,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#c30">&#34;/signin.html&#34;</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>};<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>http.<span style="color:#309">authorizeRequests</span>()<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">antMatchers</span>(patterns)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">permitAll</span>()<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#09f;font-style:italic">// ...</span><span style="color:#bbb">
+</span></span></span></code></pre></div><p>We will start by creating our UI template <code>index.html</code>:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span><span style="color:#099">&lt;!DOCTYPE html&gt;</span>
+</span></span><span style="display:flex;"><span>&lt;<span style="color:#309;font-weight:bold">html</span> <span style="color:#309">lang</span><span style="color:#555">=</span><span style="color:#c30">&#34;en&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#309;font-weight:bold">head</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#309;font-weight:bold">link</span> <span style="color:#309">rel</span><span style="color:#555">=</span><span style="color:#c30">&#34;stylesheet&#34;</span> <span style="color:#309">href</span><span style="color:#555">=</span><span style="color:#c30">&#34;./bower_components/bootstrap-css-only/css/bootstrap.min.css&#34;</span> /&gt;
+</span></span><span style="display:flex;"><span>  &lt;/<span style="color:#309;font-weight:bold">head</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#309;font-weight:bold">body</span> <span style="color:#309">ng-app</span><span style="color:#555">=</span><span style="color:#c30">&#34;jwtDemo&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#309;font-weight:bold">div</span> <span style="color:#309">class</span><span style="color:#555">=</span><span style="color:#c30">&#34;container&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>      &lt;<span style="color:#309;font-weight:bold">ui-view</span>&gt;&lt;/<span style="color:#309;font-weight:bold">ui-view</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;/<span style="color:#309;font-weight:bold">div</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#309;font-weight:bold">script</span> <span style="color:#309">type</span><span style="color:#555">=</span><span style="color:#c30">&#34;text/javascript&#34;</span> <span style="color:#309">src</span><span style="color:#555">=</span><span style="color:#c30">&#34;./bower_components/angular/angular.min.js&#34;</span>&gt;&lt;/<span style="color:#309;font-weight:bold">script</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#309;font-weight:bold">script</span> <span style="color:#309">type</span><span style="color:#555">=</span><span style="color:#c30">&#34;text/javascript&#34;</span> <span style="color:#309">src</span><span style="color:#555">=</span><span style="color:#c30">&#34;./bower_components/angular-resource/angular-resource.min.js&#34;</span>&gt;&lt;/<span style="color:#309;font-weight:bold">script</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#309;font-weight:bold">script</span> <span style="color:#309">type</span><span style="color:#555">=</span><span style="color:#c30">&#34;text/javascript&#34;</span> <span style="color:#309">src</span><span style="color:#555">=</span><span style="color:#c30">&#34;./bower_components/ngstorage/ngStorage.min.js&#34;</span>&gt;&lt;/<span style="color:#309;font-weight:bold">script</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#309;font-weight:bold">script</span> <span style="color:#309">type</span><span style="color:#555">=</span><span style="color:#c30">&#34;text/javascript&#34;</span> <span style="color:#309">src</span><span style="color:#555">=</span><span style="color:#c30">&#34;./bower_components/angular-ui-router/release/angular-ui-router.min.js&#34;</span>&gt;&lt;/<span style="color:#309;font-weight:bold">script</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#309;font-weight:bold">script</span> <span style="color:#309">type</span><span style="color:#555">=</span><span style="color:#c30">&#34;text/javascript&#34;</span> <span style="color:#309">src</span><span style="color:#555">=</span><span style="color:#c30">&#34;./app/app.js&#34;</span>&gt;&lt;/<span style="color:#309;font-weight:bold">script</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#309;font-weight:bold">script</span> <span style="color:#309">type</span><span style="color:#555">=</span><span style="color:#c30">&#34;text/javascript&#34;</span> <span style="color:#309">src</span><span style="color:#555">=</span><span style="color:#c30">&#34;./app/controllers.js&#34;</span>&gt;&lt;/<span style="color:#309;font-weight:bold">script</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#309;font-weight:bold">script</span> <span style="color:#309">type</span><span style="color:#555">=</span><span style="color:#c30">&#34;text/javascript&#34;</span> <span style="color:#309">src</span><span style="color:#555">=</span><span style="color:#c30">&#34;./app/services.js&#34;</span>&gt;&lt;/<span style="color:#309;font-weight:bold">script</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;/<span style="color:#309;font-weight:bold">body</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#309;font-weight:bold">html</span>&gt;
+</span></span></code></pre></div><p>For this example, we will have one Angular service in <code>app/services.js</code> that performs login:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span>(<span style="color:#069;font-weight:bold">function</span>(angular) {
+</span></span><span style="display:flex;"><span>  <span style="color:#069;font-weight:bold">var</span> LoginFactory <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">function</span>($resource) {
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">return</span> $resource(<span style="color:#c30">&#39;/login&#39;</span>, {}, {
+</span></span><span style="display:flex;"><span>      login<span style="color:#555">:</span> {
+</span></span><span style="display:flex;"><span>        method<span style="color:#555">:</span> <span style="color:#c30">&#39;POST&#39;</span>
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    });
+</span></span><span style="display:flex;"><span>  };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  LoginFactory.$inject <span style="color:#555">=</span> [<span style="color:#c30">&#39;$resource&#39;</span>];
+</span></span><span style="display:flex;"><span>  angular.module(<span style="color:#c30">&#39;jwtDemo.services&#39;</span>).factory(<span style="color:#c30">&#39;Login&#39;</span>, LoginFactory);
+</span></span><span style="display:flex;"><span>}(angular));
+</span></span></code></pre></div><p>We will need two controllers in <code>app/controller.js</code> - one for the login page to manage login and one for the profile page:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span>(<span style="color:#069;font-weight:bold">function</span>(angular) {
+</span></span><span style="display:flex;"><span>  <span style="color:#069;font-weight:bold">var</span> LoginController <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">function</span>($scope, $localStorage, $http, $location, Login) {
+</span></span><span style="display:flex;"><span>    $scope.login <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">function</span>(username, password) {
+</span></span><span style="display:flex;"><span>      <span style="color:#069;font-weight:bold">new</span> Login({username<span style="color:#555">:</span> username, password<span style="color:#555">:</span> password})
+</span></span><span style="display:flex;"><span>          .$login(<span style="color:#069;font-weight:bold">function</span> (profile, headers) {
+</span></span><span style="display:flex;"><span>            $localStorage.user <span style="color:#555">=</span> profile;
+</span></span><span style="display:flex;"><span>            $localStorage.token <span style="color:#555">=</span> headers().token;
+</span></span><span style="display:flex;"><span>            $http.defaults.headers.common.Authorization <span style="color:#555">=</span> <span style="color:#c30">&#39;Bearer &#39;</span> <span style="color:#555">+</span> headers().token;
+</span></span><span style="display:flex;"><span>            $location.path(<span style="color:#c30">&#34;/&#34;</span>);
+</span></span><span style="display:flex;"><span>          }, <span style="color:#069;font-weight:bold">function</span> (error) {
+</span></span><span style="display:flex;"><span>            console.log(error);
+</span></span><span style="display:flex;"><span>          });
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    $scope.logout <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">function</span> () {
+</span></span><span style="display:flex;"><span>      <span style="color:#069;font-weight:bold">delete</span> $localStorage.user;
+</span></span><span style="display:flex;"><span>      <span style="color:#069;font-weight:bold">delete</span> $localStorage.token;
+</span></span><span style="display:flex;"><span>      $http.defaults.headers.common <span style="color:#555">=</span> {};
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    $scope.logout();
+</span></span><span style="display:flex;"><span>  };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  LoginController.$inject <span style="color:#555">=</span> [<span style="color:#c30">&#39;$scope&#39;</span>, <span style="color:#c30">&#39;$localStorage&#39;</span>, <span style="color:#c30">&#39;$http&#39;</span>, <span style="color:#c30">&#39;$location&#39;</span>,<span style="color:#c30">&#39;Login&#39;</span>];
+</span></span><span style="display:flex;"><span>  angular.module(<span style="color:#c30">&#34;jwtDemo.controllers&#34;</span>).controller(<span style="color:#c30">&#34;LoginController&#34;</span>, LoginController);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#069;font-weight:bold">var</span> ProfileController <span style="color:#555">=</span> <span style="color:#069;font-weight:bold">function</span> ($scope, $localStorage) {
+</span></span><span style="display:flex;"><span>    $scope.profile <span style="color:#555">=</span> $localStorage.user;
+</span></span><span style="display:flex;"><span>  };
+</span></span><span style="display:flex;"><span>  ProfileController.inject <span style="color:#555">=</span> [<span style="color:#c30">&#39;$scope&#39;</span>, <span style="color:#c30">&#39;$localStorage&#39;</span>];
+</span></span><span style="display:flex;"><span>  angular.module(<span style="color:#c30">&#34;jwtDemo.controllers&#34;</span>).controller(<span style="color:#c30">&#34;ProfileController&#34;</span>, ProfileController);
+</span></span><span style="display:flex;"><span>}(angular));
+</span></span></code></pre></div><p>The <code>LoginController</code> has two methods - login and logout. The login method uses the <code>LoginService</code> to make a request and saves the JWT and user profile returned up on successful login. It also sets the <code>Authorization</code> header default to the JWT returned so that every subsequent request uses it to authenticate. The user is then navigated to the home page. Logout is performed by removing the JWT and profile from local storage and clearing the header defaults.</p>
 <p>The next step is to create <code>app/app.js</code> to wire up the Angular application together:</p>
-<pre><code class="language-javascript">(function(angular) {
-  angular.module(&quot;jwtDemo.controllers&quot;, []);
-  angular.module(&quot;jwtDemo.services&quot;, []);
-  angular.module(&quot;jwtDemo&quot;, [&quot;ui.router&quot;, &quot;ngResource&quot;, &quot;ngStorage&quot;, &quot;jwtDemo.controllers&quot;, &quot;jwtDemo.services&quot;])
-      .config(function ($stateProvider, $urlRouterProvider) {
-        $urlRouterProvider.otherwise(&quot;/&quot;);
-
-        $stateProvider
-            .state('home', {
-              url: '/',
-              templateUrl: 'home.html',
-              controller: 'ProfileController'
-            })
-            .state('signin', {
-              url: '/signin',
-              templateUrl: 'signin.html',
-              controller: 'LoginController'
-            })
-            .state('signout', {
-              url: '/signout',
-              templateUrl: 'signin.html',
-              controller: 'LoginController'
-            });
-      })
-      .run(function ($localStorage, $http, $location, $rootScope) {
-        if ($localStorage.user) {
-          $http.defaults.headers.common.Authorization = 'Bearer ' + $localStorage.token;
-        }
-
-        $rootScope.$on('$locationChangeStart', function (event, next, current) {
-          if ($location.path() !== &quot;/signin&quot; &amp;&amp; !$localStorage.user) {
-            $location.path('/signin');
-          } else if ($location.path() === &quot;/signin&quot; &amp;&amp; $localStorage.user) {
-            $location.path('/');
-          }
-        });
-      });
-}(angular));
-</code></pre>
-<p>We start by wiring together our services and controllers to the main module. We use the state provider to map front end URLs to templates. The home page will use the <code>home.html</code> template and the sign in and sign out URLs will use the <code>sigin.html</code> template.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span>(<span style="color:#069;font-weight:bold">function</span>(angular) {
+</span></span><span style="display:flex;"><span>  angular.module(<span style="color:#c30">&#34;jwtDemo.controllers&#34;</span>, []);
+</span></span><span style="display:flex;"><span>  angular.module(<span style="color:#c30">&#34;jwtDemo.services&#34;</span>, []);
+</span></span><span style="display:flex;"><span>  angular.module(<span style="color:#c30">&#34;jwtDemo&#34;</span>, [<span style="color:#c30">&#34;ui.router&#34;</span>, <span style="color:#c30">&#34;ngResource&#34;</span>, <span style="color:#c30">&#34;ngStorage&#34;</span>, <span style="color:#c30">&#34;jwtDemo.controllers&#34;</span>, <span style="color:#c30">&#34;jwtDemo.services&#34;</span>])
+</span></span><span style="display:flex;"><span>      .config(<span style="color:#069;font-weight:bold">function</span> ($stateProvider, $urlRouterProvider) {
+</span></span><span style="display:flex;"><span>        $urlRouterProvider.otherwise(<span style="color:#c30">&#34;/&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        $stateProvider
+</span></span><span style="display:flex;"><span>            .state(<span style="color:#c30">&#39;home&#39;</span>, {
+</span></span><span style="display:flex;"><span>              url<span style="color:#555">:</span> <span style="color:#c30">&#39;/&#39;</span>,
+</span></span><span style="display:flex;"><span>              templateUrl<span style="color:#555">:</span> <span style="color:#c30">&#39;home.html&#39;</span>,
+</span></span><span style="display:flex;"><span>              controller<span style="color:#555">:</span> <span style="color:#c30">&#39;ProfileController&#39;</span>
+</span></span><span style="display:flex;"><span>            })
+</span></span><span style="display:flex;"><span>            .state(<span style="color:#c30">&#39;signin&#39;</span>, {
+</span></span><span style="display:flex;"><span>              url<span style="color:#555">:</span> <span style="color:#c30">&#39;/signin&#39;</span>,
+</span></span><span style="display:flex;"><span>              templateUrl<span style="color:#555">:</span> <span style="color:#c30">&#39;signin.html&#39;</span>,
+</span></span><span style="display:flex;"><span>              controller<span style="color:#555">:</span> <span style="color:#c30">&#39;LoginController&#39;</span>
+</span></span><span style="display:flex;"><span>            })
+</span></span><span style="display:flex;"><span>            .state(<span style="color:#c30">&#39;signout&#39;</span>, {
+</span></span><span style="display:flex;"><span>              url<span style="color:#555">:</span> <span style="color:#c30">&#39;/signout&#39;</span>,
+</span></span><span style="display:flex;"><span>              templateUrl<span style="color:#555">:</span> <span style="color:#c30">&#39;signin.html&#39;</span>,
+</span></span><span style="display:flex;"><span>              controller<span style="color:#555">:</span> <span style="color:#c30">&#39;LoginController&#39;</span>
+</span></span><span style="display:flex;"><span>            });
+</span></span><span style="display:flex;"><span>      })
+</span></span><span style="display:flex;"><span>      .run(<span style="color:#069;font-weight:bold">function</span> ($localStorage, $http, $location, $rootScope) {
+</span></span><span style="display:flex;"><span>        <span style="color:#069;font-weight:bold">if</span> ($localStorage.user) {
+</span></span><span style="display:flex;"><span>          $http.defaults.headers.common.Authorization <span style="color:#555">=</span> <span style="color:#c30">&#39;Bearer &#39;</span> <span style="color:#555">+</span> $localStorage.token;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        $rootScope.$on(<span style="color:#c30">&#39;$locationChangeStart&#39;</span>, <span style="color:#069;font-weight:bold">function</span> (event, next, current) {
+</span></span><span style="display:flex;"><span>          <span style="color:#069;font-weight:bold">if</span> ($location.path() <span style="color:#555">!==</span> <span style="color:#c30">&#34;/signin&#34;</span> <span style="color:#555">&amp;&amp;</span> <span style="color:#555">!</span>$localStorage.user) {
+</span></span><span style="display:flex;"><span>            $location.path(<span style="color:#c30">&#39;/signin&#39;</span>);
+</span></span><span style="display:flex;"><span>          } <span style="color:#069;font-weight:bold">else</span> <span style="color:#069;font-weight:bold">if</span> ($location.path() <span style="color:#555">===</span> <span style="color:#c30">&#34;/signin&#34;</span> <span style="color:#555">&amp;&amp;</span> $localStorage.user) {
+</span></span><span style="display:flex;"><span>            $location.path(<span style="color:#c30">&#39;/&#39;</span>);
+</span></span><span style="display:flex;"><span>          }
+</span></span><span style="display:flex;"><span>        });
+</span></span><span style="display:flex;"><span>      });
+</span></span><span style="display:flex;"><span>}(angular));
+</span></span></code></pre></div><p>We start by wiring together our services and controllers to the main module. We use the state provider to map front end URLs to templates. The home page will use the <code>home.html</code> template and the sign in and sign out URLs will use the <code>sigin.html</code> template.</p>
 <p>It also configures a listener that observes for URL changes made by the user and redirects them to the sign in page, unless they are already authenticated. If there is already a token in local storage when the application loads, that signifies that the user has already logged in a different tab and the authorization header default is set.</p>
 <p>The two views we have are simple - <code>signin.html</code> has a sign form:</p>
-<pre><code class="language-html">&lt;div class=&quot;row&quot;&gt;
-  &lt;div class='col-md-3'&gt;&lt;/div&gt;
-  &lt;div class=&quot;col-md-6&quot;&gt;
-    &lt;div class=&quot;login-box well&quot;&gt;
-      &lt;form role=&quot;form&quot; ng-submit=&quot;login(username, password)&quot;&gt;
-        &lt;legend&gt;Sign In&lt;/legend&gt;
-        &lt;div class=&quot;form-group&quot;&gt;
-          &lt;label for=&quot;username-email&quot;&gt;Username&lt;/label&gt;
-          &lt;input ng-model=&quot;username&quot; value='' id=&quot;username-email&quot; placeholder=&quot;Username&quot; type=&quot;text&quot;
-                 class=&quot;form-control&quot; /&gt;
-        &lt;/div&gt;
-        &lt;div class=&quot;form-group&quot;&gt;
-          &lt;label for=&quot;password&quot;&gt;Password&lt;/label&gt;
-          &lt;input ng-model=&quot;password&quot; id=&quot;password&quot; value='' placeholder=&quot;Password&quot; type=&quot;password&quot;
-                 class=&quot;form-control&quot; /&gt;
-        &lt;/div&gt;
-        &lt;div class=&quot;form-group&quot;&gt;
-          &lt;input type=&quot;submit&quot; class=&quot;btn btn-default btn-login-submit btn-block m-t-md&quot; value=&quot;Login&quot; /&gt;
-        &lt;/div&gt;
-      &lt;/form&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-  &lt;div class='col-md-3'&gt;&lt;/div&gt;
-&lt;/div&gt;
-</code></pre>
-<p>The view for home page - <code>home.html</code> renders a user profile:</p>
-<pre><code class="language-html">&lt;div class=&quot;row&quot;&gt;
-  &lt;h1&gt;Welcome, {{profile.name.first}}&lt;/h1&gt;
-  &lt;div class=&quot;col-lg-3 col-sm-6&quot;&gt;
-    &lt;div class=&quot;card hovercard&quot;&gt;
-      &lt;div class=&quot;cardheader&quot;&gt;
-      &lt;/div&gt;
-      &lt;div class=&quot;avatar&quot;&gt;
-        &lt;img alt=&quot;&quot; src=&quot;{{profile.thumbnail}}&quot;&gt;
-      &lt;/div&gt;
-      &lt;div class=&quot;info&quot;&gt;
-        &lt;div class=&quot;title&quot;&gt;
-          {{profile.username}}
-        &lt;/div&gt;
-        &lt;div class=&quot;desc&quot;&gt;{{profile.name.first}} {{profile.name.last}}&lt;/div&gt;
-      &lt;/div&gt;
-      &lt;div&gt;
-        &lt;a href=&quot;/#/signout&quot;&gt;Sign Out&lt;/a&gt;
-      &lt;/div&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-&lt;/div&gt;
-</code></pre>
-<p>It also has a link for signing out. With this code in place, we can start our Spring application and sign in from the browser.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#309;font-weight:bold">div</span> <span style="color:#309">class</span><span style="color:#555">=</span><span style="color:#c30">&#34;row&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#309;font-weight:bold">div</span> <span style="color:#309">class</span><span style="color:#555">=</span><span style="color:#c30">&#39;col-md-3&#39;</span>&gt;&lt;/<span style="color:#309;font-weight:bold">div</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#309;font-weight:bold">div</span> <span style="color:#309">class</span><span style="color:#555">=</span><span style="color:#c30">&#34;col-md-6&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#309;font-weight:bold">div</span> <span style="color:#309">class</span><span style="color:#555">=</span><span style="color:#c30">&#34;login-box well&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>      &lt;<span style="color:#309;font-weight:bold">form</span> <span style="color:#309">role</span><span style="color:#555">=</span><span style="color:#c30">&#34;form&#34;</span> <span style="color:#309">ng-submit</span><span style="color:#555">=</span><span style="color:#c30">&#34;login(username, password)&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>        &lt;<span style="color:#309;font-weight:bold">legend</span>&gt;Sign In&lt;/<span style="color:#309;font-weight:bold">legend</span>&gt;
+</span></span><span style="display:flex;"><span>        &lt;<span style="color:#309;font-weight:bold">div</span> <span style="color:#309">class</span><span style="color:#555">=</span><span style="color:#c30">&#34;form-group&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>          &lt;<span style="color:#309;font-weight:bold">label</span> <span style="color:#309">for</span><span style="color:#555">=</span><span style="color:#c30">&#34;username-email&#34;</span>&gt;Username&lt;/<span style="color:#309;font-weight:bold">label</span>&gt;
+</span></span><span style="display:flex;"><span>          &lt;<span style="color:#309;font-weight:bold">input</span> <span style="color:#309">ng-model</span><span style="color:#555">=</span><span style="color:#c30">&#34;username&#34;</span> <span style="color:#309">value</span><span style="color:#555">=</span><span style="color:#c30">&#39;&#39;</span> <span style="color:#309">id</span><span style="color:#555">=</span><span style="color:#c30">&#34;username-email&#34;</span> <span style="color:#309">placeholder</span><span style="color:#555">=</span><span style="color:#c30">&#34;Username&#34;</span> <span style="color:#309">type</span><span style="color:#555">=</span><span style="color:#c30">&#34;text&#34;</span>
+</span></span><span style="display:flex;"><span>                 <span style="color:#309">class</span><span style="color:#555">=</span><span style="color:#c30">&#34;form-control&#34;</span> /&gt;
+</span></span><span style="display:flex;"><span>        &lt;/<span style="color:#309;font-weight:bold">div</span>&gt;
+</span></span><span style="display:flex;"><span>        &lt;<span style="color:#309;font-weight:bold">div</span> <span style="color:#309">class</span><span style="color:#555">=</span><span style="color:#c30">&#34;form-group&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>          &lt;<span style="color:#309;font-weight:bold">label</span> <span style="color:#309">for</span><span style="color:#555">=</span><span style="color:#c30">&#34;password&#34;</span>&gt;Password&lt;/<span style="color:#309;font-weight:bold">label</span>&gt;
+</span></span><span style="display:flex;"><span>          &lt;<span style="color:#309;font-weight:bold">input</span> <span style="color:#309">ng-model</span><span style="color:#555">=</span><span style="color:#c30">&#34;password&#34;</span> <span style="color:#309">id</span><span style="color:#555">=</span><span style="color:#c30">&#34;password&#34;</span> <span style="color:#309">value</span><span style="color:#555">=</span><span style="color:#c30">&#39;&#39;</span> <span style="color:#309">placeholder</span><span style="color:#555">=</span><span style="color:#c30">&#34;Password&#34;</span> <span style="color:#309">type</span><span style="color:#555">=</span><span style="color:#c30">&#34;password&#34;</span>
+</span></span><span style="display:flex;"><span>                 <span style="color:#309">class</span><span style="color:#555">=</span><span style="color:#c30">&#34;form-control&#34;</span> /&gt;
+</span></span><span style="display:flex;"><span>        &lt;/<span style="color:#309;font-weight:bold">div</span>&gt;
+</span></span><span style="display:flex;"><span>        &lt;<span style="color:#309;font-weight:bold">div</span> <span style="color:#309">class</span><span style="color:#555">=</span><span style="color:#c30">&#34;form-group&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>          &lt;<span style="color:#309;font-weight:bold">input</span> <span style="color:#309">type</span><span style="color:#555">=</span><span style="color:#c30">&#34;submit&#34;</span> <span style="color:#309">class</span><span style="color:#555">=</span><span style="color:#c30">&#34;btn btn-default btn-login-submit btn-block m-t-md&#34;</span> <span style="color:#309">value</span><span style="color:#555">=</span><span style="color:#c30">&#34;Login&#34;</span> /&gt;
+</span></span><span style="display:flex;"><span>        &lt;/<span style="color:#309;font-weight:bold">div</span>&gt;
+</span></span><span style="display:flex;"><span>      &lt;/<span style="color:#309;font-weight:bold">form</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;/<span style="color:#309;font-weight:bold">div</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;/<span style="color:#309;font-weight:bold">div</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#309;font-weight:bold">div</span> <span style="color:#309">class</span><span style="color:#555">=</span><span style="color:#c30">&#39;col-md-3&#39;</span>&gt;&lt;/<span style="color:#309;font-weight:bold">div</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#309;font-weight:bold">div</span>&gt;
+</span></span></code></pre></div><p>The view for home page - <code>home.html</code> renders a user profile:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#309;font-weight:bold">div</span> <span style="color:#309">class</span><span style="color:#555">=</span><span style="color:#c30">&#34;row&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#309;font-weight:bold">h1</span>&gt;Welcome, {{profile.name.first}}&lt;/<span style="color:#309;font-weight:bold">h1</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#309;font-weight:bold">div</span> <span style="color:#309">class</span><span style="color:#555">=</span><span style="color:#c30">&#34;col-lg-3 col-sm-6&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#309;font-weight:bold">div</span> <span style="color:#309">class</span><span style="color:#555">=</span><span style="color:#c30">&#34;card hovercard&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>      &lt;<span style="color:#309;font-weight:bold">div</span> <span style="color:#309">class</span><span style="color:#555">=</span><span style="color:#c30">&#34;cardheader&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>      &lt;/<span style="color:#309;font-weight:bold">div</span>&gt;
+</span></span><span style="display:flex;"><span>      &lt;<span style="color:#309;font-weight:bold">div</span> <span style="color:#309">class</span><span style="color:#555">=</span><span style="color:#c30">&#34;avatar&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>        &lt;<span style="color:#309;font-weight:bold">img</span> <span style="color:#309">alt</span><span style="color:#555">=</span><span style="color:#c30">&#34;&#34;</span> <span style="color:#309">src</span><span style="color:#555">=</span><span style="color:#c30">&#34;{{profile.thumbnail}}&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>      &lt;/<span style="color:#309;font-weight:bold">div</span>&gt;
+</span></span><span style="display:flex;"><span>      &lt;<span style="color:#309;font-weight:bold">div</span> <span style="color:#309">class</span><span style="color:#555">=</span><span style="color:#c30">&#34;info&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>        &lt;<span style="color:#309;font-weight:bold">div</span> <span style="color:#309">class</span><span style="color:#555">=</span><span style="color:#c30">&#34;title&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>          {{profile.username}}
+</span></span><span style="display:flex;"><span>        &lt;/<span style="color:#309;font-weight:bold">div</span>&gt;
+</span></span><span style="display:flex;"><span>        &lt;<span style="color:#309;font-weight:bold">div</span> <span style="color:#309">class</span><span style="color:#555">=</span><span style="color:#c30">&#34;desc&#34;</span>&gt;{{profile.name.first}} {{profile.name.last}}&lt;/<span style="color:#309;font-weight:bold">div</span>&gt;
+</span></span><span style="display:flex;"><span>      &lt;/<span style="color:#309;font-weight:bold">div</span>&gt;
+</span></span><span style="display:flex;"><span>      &lt;<span style="color:#309;font-weight:bold">div</span>&gt;
+</span></span><span style="display:flex;"><span>        &lt;<span style="color:#309;font-weight:bold">a</span> <span style="color:#309">href</span><span style="color:#555">=</span><span style="color:#c30">&#34;/#/signout&#34;</span>&gt;Sign Out&lt;/<span style="color:#309;font-weight:bold">a</span>&gt;
+</span></span><span style="display:flex;"><span>      &lt;/<span style="color:#309;font-weight:bold">div</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;/<span style="color:#309;font-weight:bold">div</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;/<span style="color:#309;font-weight:bold">div</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#309;font-weight:bold">div</span>&gt;
+</span></span></code></pre></div><p>It also has a link for signing out. With this code in place, we can start our Spring application and sign in from the browser.</p>
 <p>This is the last of this series of blog posts on JWT and Spring. We built an API capable of authenticating with JWTs and a front end capable of authenticating against this API. The code for the complete example is available on <a href="https://github.com/sdqali/jwt-demo">GitHub</a>.</p>
         </div>
         <aside id="gh-comments-list">

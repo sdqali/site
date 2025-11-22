@@ -87,51 +87,49 @@ I started at urlparse and soon realized that Python3 moved this module to urllib
         <div>
           <p>My <a href="/blog/2017/08/17/uploading-a-standalone-artifact-to-nexus-3/">last blog post</a> about publishing standalone files to Nexus repositories prompted me to revisit URL manipulation in Python. When I did this <a href="/blog/2013/09/26/decomposing-urls-in-python/">the last time</a>, I used Python stand library&rsquo;s <code>urlparse</code> and it did the job. This time around, I needed to do a different kind of manipulation. Given a URL, I had to set credentials on it.</p>
 <p>I started at <code>urlparse</code> and soon realized that Python3 moved this module to <a href="https://docs.python.org/3/library/urllib.parse.html">urllib.parse</a>. That is not too bad, I thought. After playing around with it, it became clear that <code>urllib.parse</code> can&rsquo;t manipulate credentials in a URL.</p>
-<pre><code class="language-python">In [1]: from urllib import parse
-
-In [2]: url = parse.urlparse('http://example.com')
-
-In [3]: print(url)
-ParseResult(scheme='http', netloc='example.com', path='', params='', query='', fragment='')
-
-In [4]: url.username = &quot;username&quot;
----------------------------------------------------------------------------
-AttributeError                            Traceback (most recent call last)
-&lt;ipython-input-4-60e52fe02603&gt; in &lt;module&gt;()
-----&gt; 1 url.username = &quot;username&quot;
-
-AttributeError: can't set attribute
-
-In [5]: url.password = &quot;password&quot;
----------------------------------------------------------------------------
-AttributeError                            Traceback (most recent call last)
-&lt;ipython-input-5-4f64c7192b99&gt; in &lt;module&gt;()
-----&gt; 1 url.password = &quot;password&quot;
-
-AttributeError: can't set attribute
-
-In [6]: url.username == None
-Out[6]: True
-
-In [7]: url.password == None
-Out[7]: True
-</code></pre>
-<p>After spending time with various URL manipulation libraries in Python, <a href="https://github.com/gruns/furl">furl</a> was the only library that I found to be capable of this seemingly simple and common enough operation.</p>
-<pre><code class="language-python">In [1]: from furl import furl
-
-In [2]: url = furl('http://example.com')
-
-In [3]: url
-Out[3]: furl('http://example.com')
-
-In [4]: url.password = &quot;password&quot;
-
-In [5]: url.username = &quot;user&quot;
-
-In [6]: url.tostr()
-Out[6]: 'http://user:password@example.com'
-</code></pre>
-
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>In [<span style="color:#f60">1</span>]: <span style="color:#069;font-weight:bold">from</span> <span style="color:#0cf;font-weight:bold">urllib</span> <span style="color:#069;font-weight:bold">import</span> parse
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>In [<span style="color:#f60">2</span>]: url <span style="color:#555">=</span> parse<span style="color:#555">.</span>urlparse(<span style="color:#c30">&#39;http://example.com&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>In [<span style="color:#f60">3</span>]: <span style="color:#366">print</span>(url)
+</span></span><span style="display:flex;"><span>ParseResult(scheme<span style="color:#555">=</span><span style="color:#c30">&#39;http&#39;</span>, netloc<span style="color:#555">=</span><span style="color:#c30">&#39;example.com&#39;</span>, path<span style="color:#555">=</span><span style="color:#c30">&#39;&#39;</span>, params<span style="color:#555">=</span><span style="color:#c30">&#39;&#39;</span>, query<span style="color:#555">=</span><span style="color:#c30">&#39;&#39;</span>, fragment<span style="color:#555">=</span><span style="color:#c30">&#39;&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>In [<span style="color:#f60">4</span>]: url<span style="color:#555">.</span>username <span style="color:#555">=</span> <span style="color:#c30">&#34;username&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#555">---------------------------------------------------------------------------</span>
+</span></span><span style="display:flex;"><span><span style="color:#c00;font-weight:bold">AttributeError</span>                            Traceback (most recent call last)
+</span></span><span style="display:flex;"><span><span style="color:#555">&lt;</span>ipython<span style="color:#555">-</span><span style="color:#366">input</span><span style="color:#555">-</span><span style="color:#f60">4</span><span style="color:#555">-</span><span style="color:#f60">60e52</span>fe02603<span style="color:#555">&gt;</span> <span style="color:#000;font-weight:bold">in</span> <span style="color:#555">&lt;</span>module<span style="color:#555">&gt;</span>()
+</span></span><span style="display:flex;"><span><span style="color:#555">----&gt;</span> <span style="color:#f60">1</span> url<span style="color:#555">.</span>username <span style="color:#555">=</span> <span style="color:#c30">&#34;username&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#c00;font-weight:bold">AttributeError</span>: can<span style="color:#c30">&#39;t set attribute</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>In [<span style="color:#f60">5</span>]: url<span style="color:#555">.</span>password <span style="color:#555">=</span> <span style="color:#c30">&#34;password&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#555">---------------------------------------------------------------------------</span>
+</span></span><span style="display:flex;"><span><span style="color:#c00;font-weight:bold">AttributeError</span>                            Traceback (most recent call last)
+</span></span><span style="display:flex;"><span><span style="color:#555">&lt;</span>ipython<span style="color:#555">-</span><span style="color:#366">input</span><span style="color:#555">-</span><span style="color:#f60">5</span><span style="color:#555">-</span><span style="color:#f60">4</span>f64c7192b99<span style="color:#555">&gt;</span> <span style="color:#000;font-weight:bold">in</span> <span style="color:#555">&lt;</span>module<span style="color:#555">&gt;</span>()
+</span></span><span style="display:flex;"><span><span style="color:#555">----&gt;</span> <span style="color:#f60">1</span> url<span style="color:#555">.</span>password <span style="color:#555">=</span> <span style="color:#c30">&#34;password&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#c00;font-weight:bold">AttributeError</span>: can<span style="color:#c30">&#39;t set attribute</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>In [<span style="color:#f60">6</span>]: url<span style="color:#555">.</span>username <span style="color:#555">==</span> <span style="color:#069;font-weight:bold">None</span>
+</span></span><span style="display:flex;"><span>Out[<span style="color:#f60">6</span>]: <span style="color:#069;font-weight:bold">True</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>In [<span style="color:#f60">7</span>]: url<span style="color:#555">.</span>password <span style="color:#555">==</span> <span style="color:#069;font-weight:bold">None</span>
+</span></span><span style="display:flex;"><span>Out[<span style="color:#f60">7</span>]: <span style="color:#069;font-weight:bold">True</span>
+</span></span></code></pre></div><p>After spending time with various URL manipulation libraries in Python, <a href="https://github.com/gruns/furl">furl</a> was the only library that I found to be capable of this seemingly simple and common enough operation.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>In [<span style="color:#f60">1</span>]: <span style="color:#069;font-weight:bold">from</span> <span style="color:#0cf;font-weight:bold">furl</span> <span style="color:#069;font-weight:bold">import</span> furl
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>In [<span style="color:#f60">2</span>]: url <span style="color:#555">=</span> furl(<span style="color:#c30">&#39;http://example.com&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>In [<span style="color:#f60">3</span>]: url
+</span></span><span style="display:flex;"><span>Out[<span style="color:#f60">3</span>]: furl(<span style="color:#c30">&#39;http://example.com&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>In [<span style="color:#f60">4</span>]: url<span style="color:#555">.</span>password <span style="color:#555">=</span> <span style="color:#c30">&#34;password&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>In [<span style="color:#f60">5</span>]: url<span style="color:#555">.</span>username <span style="color:#555">=</span> <span style="color:#c30">&#34;user&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>In [<span style="color:#f60">6</span>]: url<span style="color:#555">.</span>tostr()
+</span></span><span style="display:flex;"><span>Out[<span style="color:#f60">6</span>]: <span style="color:#c30">&#39;http://user:password@example.com&#39;</span>
+</span></span></code></pre></div>
         </div>
         <aside id="gh-comments-list">
           <script>

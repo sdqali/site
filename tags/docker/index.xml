@@ -24,69 +24,60 @@
 &lt;li&gt;Tell the test container, through environment variables the &lt;code&gt;host&lt;/code&gt; and the &lt;code&gt;port&lt;/code&gt; of the new component.&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;So, off we went and configured everything:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;env.NEWAPP_HOST=http://new-app.local
-env.NEWAPP_PORT=1313
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;We ran the tests and boom:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;SocketError (Failed to open TCP connection to http://new-app.local:1313 (getaddrinfo: nodename nor servname provided, or not known))
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Well, that does not look right. We double check all the configurations and run the test again. Same result. May be we should be using a Ruby &lt;code&gt;Symbol&lt;/code&gt; instead of a &lt;code&gt;String&lt;/code&gt; in that particular config? May be. We try that, same result.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;env.NEWAPP_HOST&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;http://new-app.local
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;env.NEWAPP_PORT&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;1313&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;We ran the tests and boom:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;SocketError &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;Failed to open TCP connection to http://new-app.local:1313 &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;getaddrinfo: nodename nor servname provided, or not known&lt;span style=&#34;color:#555&#34;&gt;))&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Well, that does not look right. We double check all the configurations and run the test again. Same result. May be we should be using a Ruby &lt;code&gt;Symbol&lt;/code&gt; instead of a &lt;code&gt;String&lt;/code&gt; in that particular config? May be. We try that, same result.&lt;/p&gt;
 &lt;p&gt;At this point, we hop on to the test container and ping &lt;code&gt;new-app.local&lt;/code&gt;. It can connect.
 What if the app is not available? We should totally &lt;code&gt;telnet&lt;/code&gt; it. Well, this container does not have &lt;code&gt;telnet&lt;/code&gt;. We can totally install it, right? Right. What kind of distro is this running? Well &lt;code&gt;cat /etc/*release*&lt;/code&gt;. Debian, huh? &lt;code&gt;apt-get install telnet&lt;/code&gt;. Wooh. Back to &lt;code&gt;telnet&lt;/code&gt; then. That looks good.&lt;/p&gt;
 &lt;p&gt;At this point, the attention turns to the RSpec tests. What if the tests have some environment variables? Let&amp;rsquo;s debug it and look for things in Ruby&amp;rsquo;s &lt;code&gt;ENV&lt;/code&gt;. Hmmm, nothing interesting there. Can the Ruby process even connect to &lt;code&gt;new-app&lt;/code&gt;? We have &lt;code&gt;Faraday&lt;/code&gt;, let&amp;rsquo;s try that:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-irb&#34;&gt;&amp;gt; require &#39;faraday&#39;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code class=&#34;language-irb&#34; data-lang=&#34;irb&#34;&gt;&amp;gt; require &amp;#39;faraday&amp;#39;
 =&amp;gt; true
-&amp;gt; resp = Faraday.get &amp;quot;http://google.com&amp;quot;
+&amp;gt; resp = Faraday.get &amp;#34;http://google.com&amp;#34;
 &amp;gt; resp.status
 200
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Okay, does the library we use for the test even use &lt;code&gt;Faraday&lt;/code&gt;? Let&amp;rsquo;s open the source code for that and poke around. Nah, it uses &lt;code&gt;Net::Http&lt;/code&gt;. Let&amp;rsquo;s try the example from &lt;a href=&#34;https://ruby-doc.org/stdlib-2.5.0/libdoc/net/http/rdoc/Net/HTTP.html&#34;&gt;it&amp;rsquo;s documentation&lt;/a&gt;:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-irb&#34;&gt;&amp;gt; require &#39;net/http&#39;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Okay, does the library we use for the test even use &lt;code&gt;Faraday&lt;/code&gt;? Let&amp;rsquo;s open the source code for that and poke around. Nah, it uses &lt;code&gt;Net::Http&lt;/code&gt;. Let&amp;rsquo;s try the example from &lt;a href=&#34;https://ruby-doc.org/stdlib-2.5.0/libdoc/net/http/rdoc/Net/HTTP.html&#34;&gt;it&amp;rsquo;s documentation&lt;/a&gt;:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code class=&#34;language-irb&#34; data-lang=&#34;irb&#34;&gt;&amp;gt; require &amp;#39;net/http&amp;#39;
 =&amp;gt; true
-&amp;gt; Net::HTTP.get_response(URI(&amp;quot;http://new-app.local:1313&amp;quot;))
+&amp;gt; Net::HTTP.get_response(URI(&amp;#34;http://new-app.local:1313&amp;#34;))
 =&amp;gt; #&amp;lt;Net::HTTPOK 200 OK readbody=true&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Looks good. Well, wait! Our library uses &lt;code&gt;Net::HTTP.new&lt;/code&gt; to create a connection. Let&amp;rsquo;s try that:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-irb&#34;&gt;&amp;gt; conn = Net::HTTP.new(&amp;quot;http://new-app.local&amp;quot;, 1313)
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Looks good. Well, wait! Our library uses &lt;code&gt;Net::HTTP.new&lt;/code&gt; to create a connection. Let&amp;rsquo;s try that:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code class=&#34;language-irb&#34; data-lang=&#34;irb&#34;&gt;&amp;gt; conn = Net::HTTP.new(&amp;#34;http://new-app.local&amp;#34;, 1313)
 =&amp;gt; #&amp;lt;Net::HTTP http://new-app.local:1313 open=false&amp;gt;
-&amp;gt; conn.get(&amp;quot;/&amp;quot;)
+&amp;gt; conn.get(&amp;#34;/&amp;#34;)
 Traceback (most recent call last):
 .
 .
 .
 SocketError (Failed to open TCP connection to http://new-app.local:1313 (getaddrinfo: nodename nor servname provided, or not known))
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;At this point, we are covered in a mix of disappointment and excitement. We are annoyed that things are not working. But, may be, may be we have uncovered some obscure bug somewhere in the toolset? We would learn later that this is the point where we should have known what&amp;rsquo;s up? But we didn&amp;rsquo;t and the story continues.&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;At this point, we are covered in a mix of disappointment and excitement. We are annoyed that things are not working. But, may be, may be we have uncovered some obscure bug somewhere in the toolset? We would learn later that this is the point where we should have known what&amp;rsquo;s up? But we didn&amp;rsquo;t and the story continues.&lt;/p&gt;
 &lt;p&gt;At this point, we ping the Slack channels of the teams involved in building the library we consume. They have not seen this before. Someone suggests that they have had issues with Ruby inside Docker containers. We finally find a GitHub issue for a different project where someone encountered their container setting the &lt;code&gt;HTTP_PROXY&lt;/code&gt; env variable and that causing &lt;code&gt;Net::HTTP&lt;/code&gt; to fail. We pore over everything to make sure that there is no proxy set. What now?&lt;/p&gt;
 &lt;p&gt;What if we attempt to connect to the new app from a Ruby process running on one of the other 10 containers we run?&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;&amp;gt; docker exec -it 51dbf9f75ca8 ruby -e &#39;require &amp;quot;net/http&amp;quot;; conn = Net::HTTP.new(&amp;quot;http://new-app.local&amp;quot;, 1313); conn.get(&amp;quot;/&amp;quot;)&#39;
-Traceback (most recent call last):
-.
-.
-.
-SocketError (Failed to open TCP connection to http://new-app.local:1313 (getaddrinfo: nodename nor servname provided, or not known))
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;That is interesting, isn&amp;rsquo;t it? Is it happening to only our systems? What if we just tried to hit Google?&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;&amp;gt; docker exec -it 51dbf9f75ca8 ruby -e &#39;require &amp;quot;net/http&amp;quot;; conn = Net::HTTP.new(&amp;quot;http://google.com&amp;quot;, 80); conn.get(&amp;quot;/&amp;quot;)&#39;
-Traceback (most recent call last):
-.
-.
-.
-SocketError (Failed to open TCP connection to http://google.com:80 (getaddrinfo: nodename nor servname provided, or not known))
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;What if somehow our orchestration tool or containers created by us are causing it? Let&amp;rsquo;s try a random container from DockerHub:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;&amp;gt; docker run -it ruby:2.5-slim ruby -e &#39;require &amp;quot;net/http&amp;quot;; conn = Net::HTTP.new(&amp;quot;http://google.com&amp;quot;,80); conn.get(&amp;quot;/&amp;quot;)&#39;
-Traceback (most recent call last):
-.
-.
-.
-SocketError (Failed to open TCP connection to http://google.com:80 (getaddrinfo: nodename nor servname provided, or not known))
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;At this point, light bulbs are beginning to go off. Let&amp;rsquo;s try this on our laptops? Same result. And then it struck us. It says it can&amp;rsquo;t open a TCP connection to a URL with &lt;code&gt;http&lt;/code&gt; in it.  Of course, it cant. It should be looking for &lt;code&gt;google.com&lt;/code&gt;, should not it? Yes:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-irb&#34;&gt;&amp;gt; docker run -it ruby:2.5-slim ruby -e &#39;require &amp;quot;net/http&amp;quot;; conn = Net::HTTP.new(&amp;quot;google.com&amp;quot;, 80); res = conn.get(&amp;quot;/&amp;quot;); puts res.code&#39;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&amp;gt; docker &lt;span style=&#34;color:#366&#34;&gt;exec&lt;/span&gt; -it 51dbf9f75ca8 ruby -e &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;require &amp;#34;net/http&amp;#34;; conn = Net::HTTP.new(&amp;#34;http://new-app.local&amp;#34;, 1313); conn.get(&amp;#34;/&amp;#34;)&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Traceback &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;most recent call last&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;.
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;.
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;.
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;SocketError &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;Failed to open TCP connection to http://new-app.local:1313 &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;getaddrinfo: nodename nor servname provided, or not known&lt;span style=&#34;color:#555&#34;&gt;))&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;That is interesting, isn&amp;rsquo;t it? Is it happening to only our systems? What if we just tried to hit Google?&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&amp;gt; docker &lt;span style=&#34;color:#366&#34;&gt;exec&lt;/span&gt; -it 51dbf9f75ca8 ruby -e &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;require &amp;#34;net/http&amp;#34;; conn = Net::HTTP.new(&amp;#34;http://google.com&amp;#34;, 80); conn.get(&amp;#34;/&amp;#34;)&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Traceback &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;most recent call last&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;.
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;.
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;.
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;SocketError &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;Failed to open TCP connection to http://google.com:80 &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;getaddrinfo: nodename nor servname provided, or not known&lt;span style=&#34;color:#555&#34;&gt;))&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;What if somehow our orchestration tool or containers created by us are causing it? Let&amp;rsquo;s try a random container from DockerHub:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&amp;gt; docker run -it ruby:2.5-slim ruby -e &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;require &amp;#34;net/http&amp;#34;; conn = Net::HTTP.new(&amp;#34;http://google.com&amp;#34;,80); conn.get(&amp;#34;/&amp;#34;)&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Traceback &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;most recent call last&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;.
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;.
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;.
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;SocketError &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;Failed to open TCP connection to http://google.com:80 &lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;getaddrinfo: nodename nor servname provided, or not known&lt;span style=&#34;color:#555&#34;&gt;))&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;At this point, light bulbs are beginning to go off. Let&amp;rsquo;s try this on our laptops? Same result. And then it struck us. It says it can&amp;rsquo;t open a TCP connection to a URL with &lt;code&gt;http&lt;/code&gt; in it.  Of course, it cant. It should be looking for &lt;code&gt;google.com&lt;/code&gt;, should not it? Yes:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code class=&#34;language-irb&#34; data-lang=&#34;irb&#34;&gt;&amp;gt; docker run -it ruby:2.5-slim ruby -e &amp;#39;require &amp;#34;net/http&amp;#34;; conn = Net::HTTP.new(&amp;#34;google.com&amp;#34;, 80); res = conn.get(&amp;#34;/&amp;#34;); puts res.code&amp;#39;
 301
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;And with a lot of excitement and some shame, we realize that the library really meant &lt;code&gt;host&lt;/code&gt; when it asked for the &lt;code&gt;NEWAPP_HOST&lt;/code&gt; environment variable.&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;And with a lot of excitement and some shame, we realize that the library really meant &lt;code&gt;host&lt;/code&gt; when it asked for the &lt;code&gt;NEWAPP_HOST&lt;/code&gt; environment variable.&lt;/p&gt;
 &lt;p&gt;I don&amp;rsquo;t think there are any big lessons in this story other than that, sometimes the simplest explanation of a problems makes a lot more sense than you would think it does. Also, if you ever use &lt;code&gt;Net::HTTP.new&lt;/code&gt;, remember that it expects you to provide a &lt;code&gt;host&lt;/code&gt; as the first param, not a URL.&lt;/p&gt;
 </description>
     </item>
@@ -104,57 +95,49 @@ SocketError (Failed to open TCP connection to http://google.com:80 (getaddrinfo:
 &lt;p&gt;One of the first things I did was to try and see what it would take to go from an application to deploying it. I started with a simple Java application and had to set up the development environment. These are my notes from this process. This assumes that you have docker installed on your development environment.&lt;/p&gt;
 &lt;h2 id=&#34;install-minikube&#34;&gt;Install minikube&lt;/h2&gt;
 &lt;p&gt;&lt;a href=&#34;https://github.com/kubernetes/minikube&#34;&gt;Minikube&lt;/a&gt; is a tool that makes it easy to run Kubernetes for local development. To run minikube, you need to have a virtualizer installed - in my case I already had VirtualBox installed. Instructions for installing minikube is available &lt;a href=&#34;https://github.com/kubernetes/minikube/releases&#34;&gt;here&lt;/a&gt;. In my case, this is what I did:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;&amp;gt; curl -Lo minikube https://storage.googleapis.com/minikube/releases/v0.12.2/minikube-darwin-amd64
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;&amp;gt; curl -Lo minikube https://storage.googleapis.com/minikube/releases/v0.12.2/minikube-darwin-amd64
 &amp;gt; chmod +x minikube
 &amp;gt; sudo mv minikube /usr/local/bin/
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h2 id=&#34;install-kubectl&#34;&gt;Install kubectl&lt;/h2&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;install-kubectl&#34;&gt;Install kubectl&lt;/h2&gt;
 &lt;p&gt;&lt;a href=&#34;http://kubernetes.io/docs/user-guide/kubectl-overview/&#34;&gt;Kubectl&lt;/a&gt; is a command line application that executes commands against Kubernets clusters. Instructions for installing kubectl are available &lt;a href=&#34;http://kubernetes.io/docs/getting-started-guides/minikube/#install-kubectl&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;&amp;gt; curl -Lo kubectl http://storage.googleapis.com/kubernetes-release/release/v1.3.0/bin/darwin/amd64/kubectl
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;&amp;gt; curl -Lo kubectl http://storage.googleapis.com/kubernetes-release/release/v1.3.0/bin/darwin/amd64/kubectl
 &amp;gt; chmod +x kubectl
 &amp;gt; sudo mv kubectl /usr/local/bin/
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h2 id=&#34;set-up-a-docker-repository&#34;&gt;Set up a Docker repository&lt;/h2&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;set-up-a-docker-repository&#34;&gt;Set up a Docker repository&lt;/h2&gt;
 &lt;p&gt;Kubernetes pulls container images from publicly available registries. But because we are building an application that we will not be publishing to public docker registries, we need to create a local registry. There is a great write up on how to set up a local docker registry at &lt;a href=&#34;http://thenewstack.io/tutorial-configuring-ultimate-development-environment-kubernetes/&#34;&gt;Newstack&lt;/a&gt;.&lt;/p&gt;
 &lt;h2 id=&#34;start-minikube-with-the-registry&#34;&gt;Start minikube with the registry&lt;/h2&gt;
 &lt;p&gt;Now that we have a local docker registry, we can go ahead and tell minikube to consume images from this registry. However, if you have started a minikube cluster previously, the registry override will not be available to it unless it is deleted.&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;&amp;gt; docker-machine ip registry
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;&amp;gt; docker-machine ip registry
 192.168.99.100
 &amp;gt; minikube stop
 &amp;gt; minikube delete
-&amp;gt; minikube start --vm-driver=&amp;quot;virtualbox&amp;quot; --insecure-registry=192.168.99.100:80
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h2 id=&#34;create-a-container-image-for-the-application&#34;&gt;Create a container image for the application&lt;/h2&gt;
+&amp;gt; minikube start --vm-driver=&amp;#34;virtualbox&amp;#34; --insecure-registry=192.168.99.100:80
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;create-a-container-image-for-the-application&#34;&gt;Create a container image for the application&lt;/h2&gt;
 &lt;p&gt;The application in this case is a simple Spring Boot application that has exactly one controller.&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-java&#34;&gt;@RestController
-public class HelloController {
-  @RequestMapping(&amp;quot;/hello&amp;quot;)
-  public Map hello() {
-    return singletonMap(&amp;quot;message&amp;quot;, &amp;quot;hello&amp;quot;);
-  }
-}
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;In order to create a docker container from this application, we will use the &lt;a href=&#34;https://github.com/spotify/docker-maven-plugin&#34;&gt;Maven Docker Plugin&lt;/a&gt;. We will need to set a prefix for our docker image. This can be done with this maven property:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;&amp;lt;docker.image.prefix&amp;gt;sadiqueio&amp;lt;/docker.image.prefix&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;This plugin expects a &lt;code&gt;Dockerfile&lt;/code&gt; to be present in the &lt;code&gt;src/main/docker&lt;/code&gt; directory. Our &lt;code&gt;Dockerfile&lt;/code&gt; will look like this:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;FROM frolvlad/alpine-oraclejdk8:slim
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#99f&#34;&gt;@RestController&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#0a8;font-weight:bold&#34;&gt;HelloController&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;{&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;&lt;span style=&#34;color:#99f&#34;&gt;@RequestMapping&lt;/span&gt;(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/hello&amp;#34;&lt;/span&gt;)&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;public&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;Map&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#c0f&#34;&gt;hello&lt;/span&gt;()&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;{&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;    &lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt;&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;singletonMap(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;message&amp;#34;&lt;/span&gt;,&lt;span style=&#34;color:#bbb&#34;&gt; &lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;hello&amp;#34;&lt;/span&gt;);&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;  &lt;/span&gt;}&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#bbb&#34;&gt;&lt;/span&gt;}&lt;span style=&#34;color:#bbb&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;In order to create a docker container from this application, we will use the &lt;a href=&#34;https://github.com/spotify/docker-maven-plugin&#34;&gt;Maven Docker Plugin&lt;/a&gt;. We will need to set a prefix for our docker image. This can be done with this maven property:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;&amp;lt;docker.image.prefix&amp;gt;sadiqueio&amp;lt;/docker.image.prefix&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;This plugin expects a &lt;code&gt;Dockerfile&lt;/code&gt; to be present in the &lt;code&gt;src/main/docker&lt;/code&gt; directory. Our &lt;code&gt;Dockerfile&lt;/code&gt; will look like this:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;FROM frolvlad/alpine-oraclejdk8:slim
 ADD hello-world-0.0.1-SNAPSHOT.jar app.jar
-RUN sh -c &#39;touch /app.jar&#39;
-ENTRYPOINT [&amp;quot;java&amp;quot;,&amp;quot;-jar&amp;quot;,&amp;quot;/app.jar&amp;quot;]
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;With this in place, we can generate a docker image. We need to ensure that we are looking at the dev docker host.&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;&amp;gt; eval $(docker-machine env dev)
+RUN sh -c &amp;#39;touch /app.jar&amp;#39;
+ENTRYPOINT [&amp;#34;java&amp;#34;,&amp;#34;-jar&amp;#34;,&amp;#34;/app.jar&amp;#34;]
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;With this in place, we can generate a docker image. We need to ensure that we are looking at the dev docker host.&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;&amp;gt; eval $(docker-machine env dev)
 &amp;gt; mvn package docker:build
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h2 id=&#34;tag-and-push-the-image-to-local-registry&#34;&gt;Tag and push the image to local registry&lt;/h2&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;tag-and-push-the-image-to-local-registry&#34;&gt;Tag and push the image to local registry&lt;/h2&gt;
 &lt;p&gt;The generated image &lt;code&gt;sadiqueio/hello-world&lt;/code&gt; need to be published to the local registry we created.&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;&amp;gt; docker tag sadiqueio/hello-world 192.168.99.100:80/hello-world
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;&amp;gt; docker tag sadiqueio/hello-world 192.168.99.100:80/hello-world
 &amp;gt; docker push 192.168.99.100:80/hello-world
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h2 id=&#34;define-and-create-a-service&#34;&gt;Define and create a service&lt;/h2&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;define-and-create-a-service&#34;&gt;Define and create a service&lt;/h2&gt;
 &lt;p&gt;We will define a Kubernetes service object for this application &lt;code&gt;hello-world-service.yaml&lt;/code&gt;:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;apiVersion: v1
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;apiVersion: v1
 kind: Service
 metadata:
   name: hello-world
@@ -169,20 +152,18 @@ spec:
   selector:
     app: hello-world
     tier: backend
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;The service can be created using:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;&amp;gt; kubectl create -f hello-world-service.yaml
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;The service can be created using:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;&amp;gt; kubectl create -f hello-world-service.yaml
 You have exposed your service on an external port on all nodes in your
 cluster.  If you want to expose this service to the external internet, you may
 need to set up firewall rules for the service port(s) (tcp:30194) to serve traffic.
 
 See http://releases.k8s.io/release-1.3/docs/user-guide/services-firewalls.md for more details.
-service &amp;quot;hello-world&amp;quot; created
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Make a note of the port assigned to this service. We will use this port later to access our application.&lt;/p&gt;
+service &amp;#34;hello-world&amp;#34; created
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Make a note of the port assigned to this service. We will use this port later to access our application.&lt;/p&gt;
 &lt;h2 id=&#34;define-and-create-a-deployment&#34;&gt;Define and create a deployment&lt;/h2&gt;
 &lt;p&gt;The next step is to define and create a deployment for our application. This is where we specify the image we previously created and published to the registry.&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;apiVersion: extensions/v1beta1
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: hello-world
@@ -206,30 +187,25 @@ spec:
           value: dns
         ports:
         - containerPort: 8080
-&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;&amp;gt; kubectl create -f hello-world-deployment.yaml
-deployment &amp;quot;hello-world&amp;quot; created
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h2 id=&#34;ensure-that-the-deployment-is-successful&#34;&gt;Ensure that the deployment is successful&lt;/h2&gt;
-&lt;pre&gt;&lt;code&gt;&amp;gt; kubectl get services
+&lt;/code&gt;&lt;/pre&gt;&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;&amp;gt; kubectl create -f hello-world-deployment.yaml
+deployment &amp;#34;hello-world&amp;#34; created
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;ensure-that-the-deployment-is-successful&#34;&gt;Ensure that the deployment is successful&lt;/h2&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;&amp;gt; kubectl get services
 NAME          CLUSTER-IP   EXTERNAL-IP   PORT(S)    AGE
 hello-world   10.0.0.252   &amp;lt;none&amp;gt;        8080/TCP   4m
 &amp;gt; kubectl get deployments
 NAME          DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
 hello-world   1         1         1            1           4m
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h2 id=&#34;access-the-service&#34;&gt;Access the service&lt;/h2&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;access-the-service&#34;&gt;Access the service&lt;/h2&gt;
 &lt;p&gt;We already know the port assigned to our service. Because we specified &lt;code&gt;type: NodePort&lt;/code&gt;, the IP address we need to use is that of the Kubernetes cluster. This IP address can be found using the minikube command.&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;&amp;gt; minikube ip
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;&amp;gt; minikube ip
 192.168.99.102
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Now that we have both pieces of information, we can test that our application is up.&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;&amp;gt; curl  -s http://192.168.99.102:30194/hello | jq .
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Now that we have both pieces of information, we can test that our application is up.&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;&amp;gt; curl  -s http://192.168.99.102:30194/hello | jq .
 {
-  &amp;quot;message&amp;quot;: &amp;quot;hello&amp;quot;
+  &amp;#34;message&amp;#34;: &amp;#34;hello&amp;#34;
 }
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;That is it. We have deployed our hello world application using Kubernetes.&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;That is it. We have deployed our hello world application using Kubernetes.&lt;/p&gt;
 </description>
     </item>
     

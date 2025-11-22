@@ -90,117 +90,109 @@
         <div>
           <p>Yesterday my colleague <a href="https://twitter.com/imdhmd">Imdad</a> asked if there was a mechanism to add filtering to a Spring MVC end point that responded with JSON. We both started looking at it and this blog post explores a way to do it, albeit for a specific type of responses that was relevant to our discussions.</p>
 <p>For the purposes of this blog post, the response of the end point will be a collection of repositories, taken from the GitHub API for the end point <code>https://api.github.com/users/rails/repos</code>. This has the following structure.</p>
-<pre><code class="language-json">[
-  {
-    &quot;id&quot;: 20544,
-    &quot;name&quot;: &quot;account_location&quot;,
-    &quot;full_name&quot;: &quot;rails/account_location&quot;,
-    &quot;owner&quot;: {
-      ...
-    },
-    ...
-    &quot;watchers_count&quot;: 70,
-    &quot;language&quot;: &quot;Ruby&quot;,
-    &quot;has_issues&quot;: false,
-    &quot;has_downloads&quot;: true,
-    &quot;has_wiki&quot;: false,
-    &quot;has_pages&quot;: false,
-    &quot;forks_count&quot;: 12,
-    &quot;mirror_url&quot;: null,
-    &quot;open_issues_count&quot;: 0,
-    &quot;forks&quot;: 12,
-    &quot;open_issues&quot;: 0,
-    &quot;watchers&quot;: 70,
-    &quot;default_branch&quot;: &quot;master&quot;
-  }
-  ...
-  ...
-]
-</code></pre>
-<p>We have a simple end point that reads a file with this response and responds with a JSON representation of it.</p>
-<pre><code class="language-java">@RestController
-public class ReposController {
-    @RequestMapping(path = &quot;/repos&quot;, method = GET)
-    public List repos() throws URISyntaxException, IOException {
-        URL url = this.getClass().getClassLoader().getResource(&quot;repos.json&quot;).toURI().toURL();
-
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        return objectMapper.readValue(url, List.class);
-    }
-}
-</code></pre>
-<p>What we want to do is to provide a convenient mechanism so that this end point can respond for request made with url parameters which it uses to filter repositories. For example, we expect the request to <code>http://localhost:8080/repos?fork=true&amp;language=Ruby</code> to have a JSON response with an array containing only those repositories that are forks and have Ruby as their primary language. Of course, it is worth pointing out that in actual system, you would want to do these kind of filtering at the data layer instead of the web layer, but this is an exercise to see how we could do it at the Spring layer.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>[
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&#34;id&#34;</span>: <span style="color:#f60">20544</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&#34;name&#34;</span>: <span style="color:#c30">&#34;account_location&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&#34;full_name&#34;</span>: <span style="color:#c30">&#34;rails/account_location&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&#34;owner&#34;</span>: {
+</span></span><span style="display:flex;"><span>      <span style="color:#a00;background-color:#faa">...</span>
+</span></span><span style="display:flex;"><span>    },
+</span></span><span style="display:flex;"><span>    <span style="color:#a00;background-color:#faa">...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&#34;watchers_count&#34;</span>: <span style="color:#f60">70</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&#34;language&#34;</span>: <span style="color:#c30">&#34;Ruby&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&#34;has_issues&#34;</span>: <span style="color:#069;font-weight:bold">false</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&#34;has_downloads&#34;</span>: <span style="color:#069;font-weight:bold">true</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&#34;has_wiki&#34;</span>: <span style="color:#069;font-weight:bold">false</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&#34;has_pages&#34;</span>: <span style="color:#069;font-weight:bold">false</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&#34;forks_count&#34;</span>: <span style="color:#f60">12</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&#34;mirror_url&#34;</span>: <span style="color:#069;font-weight:bold">null</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&#34;open_issues_count&#34;</span>: <span style="color:#f60">0</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&#34;forks&#34;</span>: <span style="color:#f60">12</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&#34;open_issues&#34;</span>: <span style="color:#f60">0</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&#34;watchers&#34;</span>: <span style="color:#f60">70</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&#34;default_branch&#34;</span>: <span style="color:#c30">&#34;master&#34;</span>
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#a00;background-color:#faa">...</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a00;background-color:#faa">...</span>
+</span></span><span style="display:flex;"><span>]
+</span></span></code></pre></div><p>We have a simple end point that reads a file with this response and responds with a JSON representation of it.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@RestController</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">ReposController</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@RequestMapping</span>(path<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;/repos&#34;</span>,<span style="color:#bbb"> </span>method<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>GET)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>List<span style="color:#bbb"> </span><span style="color:#c0f">repos</span>()<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>URISyntaxException,<span style="color:#bbb"> </span>IOException<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>URL<span style="color:#bbb"> </span>url<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">this</span>.<span style="color:#309">getClass</span>().<span style="color:#309">getClassLoader</span>().<span style="color:#309">getResource</span>(<span style="color:#c30">&#34;repos.json&#34;</span>).<span style="color:#309">toURI</span>().<span style="color:#309">toURL</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>ObjectMapper<span style="color:#bbb"> </span>objectMapper<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>ObjectMapper();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>objectMapper.<span style="color:#309">readValue</span>(url,<span style="color:#bbb"> </span>List.<span style="color:#309">class</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>What we want to do is to provide a convenient mechanism so that this end point can respond for request made with url parameters which it uses to filter repositories. For example, we expect the request to <code>http://localhost:8080/repos?fork=true&amp;language=Ruby</code> to have a JSON response with an array containing only those repositories that are forks and have Ruby as their primary language. Of course, it is worth pointing out that in actual system, you would want to do these kind of filtering at the data layer instead of the web layer, but this is an exercise to see how we could do it at the Spring layer.</p>
 <p>We want our mechanism to be easy to use and I came with annotation that we would use as follows:</p>
-<pre><code class="language-java">public class ReposController {
-    @RequestMapping(path = &quot;/repos&quot;, method = GET)
-    @JsonFilter(keys = {&quot;fork&quot;, &quot;language&quot;})
-    public List repos() throws URISyntaxException, IOException {
-      // ...
-    }
-}
-</code></pre>
-<p>The annotation itself takes the following form:</p>
-<pre><code class="language-java">@Target(ElementType.METHOD)
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-public @interface JsonFilter {
-    // JSON keys that will be used for filtering
-    String[] keys() default {};
-}
-</code></pre>
-<p>Spring MVC provides a <code>ResponseBodyAdvice</code> <sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> to customize the response immediately after the execution of a controller method, which is exactly what we want in this situation. The interface expects us to implement two methods.</p>
-<pre><code class="language-java">@ControllerAdvice
-public class JsonFilterAdvice implements ResponseBodyAdvice&lt;List&gt; {
-    @Override
-    public boolean supports(MethodParameter returnType, Class&lt;? extends HttpMessageConverter&lt;?&gt;&gt; converterType) {
-        return true;
-    }
-
-    @Override
-    public List beforeBodyWrite(List body, MethodParameter returnType, MediaType selectedContentType, Class&lt;? extends
-    HttpMessageConverter&lt;?&gt;&gt; selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
-        return body;
-    }
-}
-
-</code></pre>
-<p>For our case, we want the advice to modify response only if the controller method has the <code>@JsonFilter</code> annotation. This is possible with the following implementation of the <code>supports</code> method:</p>
-<pre><code class="language-java">    @Override
-    public boolean supports(MethodParameter returnType, Class&lt;? extends HttpMessageConverter&lt;?&gt;&gt; converterType) {
-        List&lt;Annotation&gt; annotations = Arrays.asList(returnType.getMethodAnnotations());
-        return annotations.stream().anyMatch(annotation -&gt; annotation.annotationType().equals(JsonFilter.class));
-    }
-</code></pre>
-<p>The actual filtering of the response itself involves filtering the <code>List</code> for only those entries where every filter key has values provided in the incoming request. The following implementation achieves this:</p>
-<pre><code class="language-java">    @Override
-    public List beforeBodyWrite(List body, MethodParameter returnType, MediaType selectedContentType, Class&lt;? extends
-            HttpMessageConverter&lt;?&gt;&gt; selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
-        List&lt;Map&lt;String, Object&gt;&gt; values = (List&lt;Map&lt;String, Object&gt;&gt;) body;
-
-        // Identify keys we are interested in.
-        JsonFilter annotation = returnType.getMethodAnnotation(JsonFilter.class);
-        List&lt;String&gt; possibleFilters = Arrays.asList(annotation.keys());
-
-        HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
-
-        List&lt;Map&lt;String, Object&gt;&gt; result = values.stream().filter(map -&gt; {
-            boolean match = true;
-            Enumeration&lt;String&gt; parameterNames = servletRequest.getParameterNames();
-            while (parameterNames.hasMoreElements()) {
-                String parameterName = parameterNames.nextElement();
-                if(possibleFilters.contains(parameterName)) {
-                    String parameterValue = servletRequest.getParameter(parameterName);
-                    Object valueFromMap = map.get(parameterName);
-                    match = (valueFromMap != null) &amp;&amp; valueFromMap.toString().equals(parameterValue.toString());
-                }
-            }
-            return match;
-        }).collect(Collectors.toList());
-        return result;
-    }
-</code></pre>
-<p>For every entry in the list, we compare query parameter values in the request&rsquo;s URL to the one in the map and filter out only those entries where every combination matches. This is probably not the most efficient way of doing it, but for a quick hack, I am okay with it. Please feel free to take this and improve it. The code for this example is available on <a href="https://github.com/sdqali/spring-json-filter">GitHub</a>.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">ReposController</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@RequestMapping</span>(path<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;/repos&#34;</span>,<span style="color:#bbb"> </span>method<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>GET)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@JsonFilter</span>(keys<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>{<span style="color:#c30">&#34;fork&#34;</span>,<span style="color:#bbb"> </span><span style="color:#c30">&#34;language&#34;</span>})<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>List<span style="color:#bbb"> </span><span style="color:#c0f">repos</span>()<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>URISyntaxException,<span style="color:#bbb"> </span>IOException<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span><span style="color:#09f;font-style:italic">// ...</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>The annotation itself takes the following form:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Target</span>(ElementType.<span style="color:#309">METHOD</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@Documented</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@Retention</span>(RetentionPolicy.<span style="color:#309">RUNTIME</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#99f">@interface</span><span style="color:#bbb"> </span>JsonFilter<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">// JSON keys that will be used for filtering</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>String<span style="color:#555">[]</span><span style="color:#bbb"> </span><span style="color:#c0f">keys</span>()<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">default</span><span style="color:#bbb"> </span>{};<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>Spring MVC provides a <code>ResponseBodyAdvice</code> <sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> to customize the response immediately after the execution of a controller method, which is exactly what we want in this situation. The interface expects us to implement two methods.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@ControllerAdvice</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">JsonFilterAdvice</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">implements</span><span style="color:#bbb"> </span>ResponseBodyAdvice<span style="color:#555">&lt;</span>List<span style="color:#555">&gt;</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">boolean</span><span style="color:#bbb"> </span><span style="color:#c0f">supports</span>(MethodParameter<span style="color:#bbb"> </span>returnType,<span style="color:#bbb"> </span>Class<span style="color:#555">&lt;?</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">extends</span><span style="color:#bbb"> </span>HttpMessageConverter<span style="color:#555">&lt;?&gt;&gt;</span><span style="color:#bbb"> </span>converterType)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">true</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>List<span style="color:#bbb"> </span><span style="color:#c0f">beforeBodyWrite</span>(List<span style="color:#bbb"> </span>body,<span style="color:#bbb"> </span>MethodParameter<span style="color:#bbb"> </span>returnType,<span style="color:#bbb"> </span>MediaType<span style="color:#bbb"> </span>selectedContentType,<span style="color:#bbb"> </span>Class<span style="color:#555">&lt;?</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">extends</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>HttpMessageConverter<span style="color:#555">&lt;?&gt;&gt;</span><span style="color:#bbb"> </span>selectedConverterType,<span style="color:#bbb"> </span>ServerHttpRequest<span style="color:#bbb"> </span>request,<span style="color:#bbb"> </span>ServerHttpResponse<span style="color:#bbb"> </span>response)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>body;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>For our case, we want the advice to modify response only if the controller method has the <code>@JsonFilter</code> annotation. This is possible with the following implementation of the <code>supports</code> method:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">boolean</span><span style="color:#bbb"> </span><span style="color:#c0f">supports</span>(MethodParameter<span style="color:#bbb"> </span>returnType,<span style="color:#bbb"> </span>Class<span style="color:#555">&lt;?</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">extends</span><span style="color:#bbb"> </span>HttpMessageConverter<span style="color:#555">&lt;?&gt;&gt;</span><span style="color:#bbb"> </span>converterType)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>List<span style="color:#555">&lt;</span>Annotation<span style="color:#555">&gt;</span><span style="color:#bbb"> </span>annotations<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>Arrays.<span style="color:#309">asList</span>(returnType.<span style="color:#309">getMethodAnnotations</span>());<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>annotations.<span style="color:#309">stream</span>().<span style="color:#309">anyMatch</span>(annotation<span style="color:#bbb"> </span><span style="color:#555">-&gt;</span><span style="color:#bbb"> </span>annotation.<span style="color:#309">annotationType</span>().<span style="color:#309">equals</span>(JsonFilter.<span style="color:#309">class</span>));<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>The actual filtering of the response itself involves filtering the <code>List</code> for only those entries where every filter key has values provided in the incoming request. The following implementation achieves this:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>List<span style="color:#bbb"> </span><span style="color:#c0f">beforeBodyWrite</span>(List<span style="color:#bbb"> </span>body,<span style="color:#bbb"> </span>MethodParameter<span style="color:#bbb"> </span>returnType,<span style="color:#bbb"> </span>MediaType<span style="color:#bbb"> </span>selectedContentType,<span style="color:#bbb"> </span>Class<span style="color:#555">&lt;?</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">extends</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>HttpMessageConverter<span style="color:#555">&lt;?&gt;&gt;</span><span style="color:#bbb"> </span>selectedConverterType,<span style="color:#bbb"> </span>ServerHttpRequest<span style="color:#bbb"> </span>request,<span style="color:#bbb"> </span>ServerHttpResponse<span style="color:#bbb"> </span>response)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>List<span style="color:#555">&lt;</span>Map<span style="color:#555">&lt;</span>String,<span style="color:#bbb"> </span>Object<span style="color:#555">&gt;&gt;</span><span style="color:#bbb"> </span>values<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>(List<span style="color:#555">&lt;</span>Map<span style="color:#555">&lt;</span>String,<span style="color:#bbb"> </span>Object<span style="color:#555">&gt;&gt;</span>)<span style="color:#bbb"> </span>body;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#09f;font-style:italic">// Identify keys we are interested in.</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>JsonFilter<span style="color:#bbb"> </span>annotation<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>returnType.<span style="color:#309">getMethodAnnotation</span>(JsonFilter.<span style="color:#309">class</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>List<span style="color:#555">&lt;</span>String<span style="color:#555">&gt;</span><span style="color:#bbb"> </span>possibleFilters<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>Arrays.<span style="color:#309">asList</span>(annotation.<span style="color:#309">keys</span>());<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>HttpServletRequest<span style="color:#bbb"> </span>servletRequest<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>((ServletServerHttpRequest)<span style="color:#bbb"> </span>request).<span style="color:#309">getServletRequest</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>List<span style="color:#555">&lt;</span>Map<span style="color:#555">&lt;</span>String,<span style="color:#bbb"> </span>Object<span style="color:#555">&gt;&gt;</span><span style="color:#bbb"> </span>result<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>values.<span style="color:#309">stream</span>().<span style="color:#309">filter</span>(map<span style="color:#bbb"> </span><span style="color:#555">-&gt;</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#078;font-weight:bold">boolean</span><span style="color:#bbb"> </span>match<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">true</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>Enumeration<span style="color:#555">&lt;</span>String<span style="color:#555">&gt;</span><span style="color:#bbb"> </span>parameterNames<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>servletRequest.<span style="color:#309">getParameterNames</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#069;font-weight:bold">while</span><span style="color:#bbb"> </span>(parameterNames.<span style="color:#309">hasMoreElements</span>())<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>String<span style="color:#bbb"> </span>parameterName<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>parameterNames.<span style="color:#309">nextElement</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span><span style="color:#069;font-weight:bold">if</span>(possibleFilters.<span style="color:#309">contains</span>(parameterName))<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                    </span>String<span style="color:#bbb"> </span>parameterValue<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>servletRequest.<span style="color:#309">getParameter</span>(parameterName);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                    </span>Object<span style="color:#bbb"> </span>valueFromMap<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>map.<span style="color:#309">get</span>(parameterName);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                    </span>match<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>(valueFromMap<span style="color:#bbb"> </span><span style="color:#555">!=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>)<span style="color:#bbb"> </span><span style="color:#555">&amp;&amp;</span><span style="color:#bbb"> </span>valueFromMap.<span style="color:#309">toString</span>().<span style="color:#309">equals</span>(parameterValue.<span style="color:#309">toString</span>());<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>match;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}).<span style="color:#309">collect</span>(Collectors.<span style="color:#309">toList</span>());<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>result;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>For every entry in the list, we compare query parameter values in the request&rsquo;s URL to the one in the map and filter out only those entries where every combination matches. This is probably not the most efficient way of doing it, but for a quick hack, I am okay with it. Please feel free to take this and improve it. The code for this example is available on <a href="https://github.com/sdqali/spring-json-filter">GitHub</a>.</p>
 <p>PS: Imdad may or may not have asked me to credit him for this blog post. ;-)</p>
 <div class="footnotes" role="doc-endnotes">
 <hr>

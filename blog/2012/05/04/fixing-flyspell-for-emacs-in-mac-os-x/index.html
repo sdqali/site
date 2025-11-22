@@ -25,7 +25,6 @@
   <meta name="description" content="I use the flyspell-mode as a spell checking mechanism in emacs. Recently, I moved to Mac OS X, and I began to get this error whenever I started emacs:
 Error enabling Flyspell mode:
 (Searching for program No such file or directory aspell)
-
 I had installed aspell with Homebrew. The issue seemed to be that Emacs was unable to find the aspell binary. Homebrew installs binaries in /usr/local/bin and it was in my $PATH. It turns out Emacs uses it&rsquo;s own exec path to look for binaries to execute in sub-processes. So the fix is to add the /usr/local/bin path to the exec-path. This is the change needed to the ~/.emacs file:" />
   
     <meta content="mac-osx, emacs, homebrew, development, elisp" name="keywords">
@@ -39,7 +38,6 @@ I had installed aspell with Homebrew. The issue seemed to be that Emacs was unab
   <meta name="twitter:description" content="I use the flyspell-mode as a spell checking mechanism in emacs. Recently, I moved to Mac OS X, and I began to get this error whenever I started emacs:
 Error enabling Flyspell mode:
 (Searching for program No such file or directory aspell)
-
 I had installed aspell with Homebrew. The issue seemed to be that Emacs was unable to find the aspell binary. Homebrew installs binaries in /usr/local/bin and it was in my $PATH. It turns out Emacs uses it&rsquo;s own exec path to look for binaries to execute in sub-processes. So the fix is to add the /usr/local/bin path to the exec-path. This is the change needed to the ~/.emacs file:">
   <meta name="twitter:image" content="https://sadique.io///images/threaded-blue-on-black-cropped.jpg">
 
@@ -47,7 +45,6 @@ I had installed aspell with Homebrew. The issue seemed to be that Emacs was unab
   <meta property="og:description" content="I use the flyspell-mode as a spell checking mechanism in emacs. Recently, I moved to Mac OS X, and I began to get this error whenever I started emacs:
 Error enabling Flyspell mode:
 (Searching for program No such file or directory aspell)
-
 I had installed aspell with Homebrew. The issue seemed to be that Emacs was unable to find the aspell binary. Homebrew installs binaries in /usr/local/bin and it was in my $PATH. It turns out Emacs uses it&rsquo;s own exec path to look for binaries to execute in sub-processes. So the fix is to add the /usr/local/bin path to the exec-path. This is the change needed to the ~/.emacs file:" itemprop="description"/>
   <meta property="og:url" content="https://sadique.io/blog/2012/05/04/fixing-flyspell-for-emacs-in-mac-os-x/" />
   <meta property="og:image" content="https://sadique.io///images/threaded-blue-on-black-cropped.jpg" />
@@ -109,20 +106,17 @@ I had installed aspell with Homebrew. The issue seemed to be that Emacs was unab
            itemscope="itemscope" itemtype="http://schema.org/WebPageElement">
         <div>
           <p>I use the <a href="http://www.emacswiki.org/emacs/FlySpell">flyspell-mode</a> as a spell checking mechanism in emacs. Recently, I moved to Mac OS X, and I began to get this error whenever I started emacs:</p>
-<pre><code class="language-bash">Error enabling Flyspell mode:
-(Searching for program No such file or directory aspell)
-</code></pre>
-<p>I had installed aspell with Homebrew. The issue seemed to be that Emacs was unable to find the aspell binary. Homebrew installs binaries in <strong>/usr/local/bin</strong> and it was in my $PATH. It turns out Emacs uses it&rsquo;s own exec path to look for binaries to execute in sub-processes. So the fix is to add the <strong>/usr/local/bin</strong> path to the exec-path. This is the change needed to the <strong>~/.emacs</strong> file:</p>
-<pre><code class="language-lisp"> '(exec-path (quote (&quot;/usr/bin&quot; &quot;/bin&quot; &quot;/usr/sbin&quot; &quot;/sbin&quot; &quot;/usr/local/bin&quot;))))
-</code></pre>
-<p>Notice the <strong>/usr/local/bin</strong> in there.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>Error enabling Flyspell mode:
+</span></span><span style="display:flex;"><span><span style="color:#555">(</span>Searching <span style="color:#069;font-weight:bold">for</span> program No such file or directory aspell<span style="color:#555">)</span>
+</span></span></code></pre></div><p>I had installed aspell with Homebrew. The issue seemed to be that Emacs was unable to find the aspell binary. Homebrew installs binaries in <strong>/usr/local/bin</strong> and it was in my $PATH. It turns out Emacs uses it&rsquo;s own exec path to look for binaries to execute in sub-processes. So the fix is to add the <strong>/usr/local/bin</strong> path to the exec-path. This is the change needed to the <strong>~/.emacs</strong> file:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-lisp" data-lang="lisp"><span style="display:flex;"><span> <span style="color:#555">&#39;</span>(<span style="color:#033">exec-path</span> (<span style="color:#069;font-weight:bold">quote</span> (<span style="color:#c30">&#34;/usr/bin&#34;</span> <span style="color:#c30">&#34;/bin&#34;</span> <span style="color:#c30">&#34;/usr/sbin&#34;</span> <span style="color:#c30">&#34;/sbin&#34;</span> <span style="color:#c30">&#34;/usr/local/bin&#34;</span>))))
+</span></span></code></pre></div><p>Notice the <strong>/usr/local/bin</strong> in there.</p>
 <h2 id="update">Update</h2>
 <p>This does not seem to work. A better way to do this is to add the
 following:</p>
-<pre><code class="language-lisp">(setenv &quot;PATH&quot; (concat (getenv &quot;PATH&quot;) &quot;:/usr/local/bin&quot;))
-(setq exec-path (append exec-path '(&quot;/usr/local/bin&quot;)))
-</code></pre>
-
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-lisp" data-lang="lisp"><span style="display:flex;"><span>(<span style="color:#033">setenv</span> <span style="color:#c30">&#34;PATH&#34;</span> (<span style="color:#033">concat</span> (<span style="color:#033">getenv</span> <span style="color:#c30">&#34;PATH&#34;</span>) <span style="color:#c30">&#34;:/usr/local/bin&#34;</span>))
+</span></span><span style="display:flex;"><span>(<span style="color:#069;font-weight:bold">setq</span> <span style="color:#033">exec-path</span> (<span style="color:#c0f">append</span> <span style="color:#033">exec-path</span> <span style="color:#555">&#39;</span>(<span style="color:#c30">&#34;/usr/local/bin&#34;</span>)))
+</span></span></code></pre></div>
         </div>
         <aside id="gh-comments-list">
           <script>

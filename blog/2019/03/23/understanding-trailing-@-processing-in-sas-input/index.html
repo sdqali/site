@@ -90,35 +90,32 @@ The use of trailing @s to take control of how SAS advances the input pointer is 
           <p>One of the first things I noticed when I started poking around in SAS code is that the <code>input</code> statement is very powerful, flexible and hence sometimes hard to understand. It can read pretty much anything in to a dataset as long as you tell it what to do.</p>
 <p>The use of trailing <code>@</code>s to take control of how SAS advances the input pointer is a powerful technique to read from input files where the data is laid out in non-standard formats. In this blog post, we will try to understand how trailing <code>@</code> processing works with the help of some <code>infile</code> statement options and the <code>putlog</code> statement to write to the SAS log.</p>
 <p>Let&rsquo;s take this example from the excellent paper <em>The Input Statement: Where It&rsquo;s @</em> <sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> - given an put file where the first variable has to be read beginning from a particular column in the input line based on the value of the second variable.</p>
-<pre><code class="language-sas">Age  Type
-23   1
-  44 2
-</code></pre>
-<p>A first pass at trying to do this will result in code like this:</p>
-<pre><code class="language-sas">data ages;
-  input @6 type $1.;
-
-  if type='1' then
-    input @1 age 2.;
-  else if type='2' then
-    input @3 age 2.;
-  drop type;
-  datalines;
-23   1
-  44 2
-;
-run;
-
-proc print data=ages;
-  title &quot;Age read without trailing @&quot;;
-run;
-</code></pre>
-<p>The result we get is not what we expect.</p>
-<pre><code class="language-sas">| Obs | Age |
-|-----|-----|
-| 1   | .   |
-</code></pre>
-<p>We can understand how SAS read this input using the <code>line=</code> and <code>column=</code> options of the <code>infile</code> statement. While the code in the above listing does not explicitly use <code>infile</code> to point at the <code>datalines</code>, this can be done when we want to use <code>infile</code>&rsquo;s options with <code>datalines</code>.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sas" data-lang="sas"><span style="display:flex;"><span>Age  Type
+</span></span><span style="display:flex;"><span><span style="color:#f60">23</span>   <span style="color:#f60">1</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f60">44</span> <span style="color:#f60">2</span>
+</span></span></code></pre></div><p>A first pass at trying to do this will result in code like this:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sas" data-lang="sas"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">data </span>ages;
+</span></span><span style="display:flex;"><span>  <span style="color:#069;font-weight:bold">input</span> @<span style="color:#f60">6</span> type $<span style="color:#f60">1</span>.;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#069;font-weight:bold">if</span> type=<span style="color:#c30">&#39;1&#39;</span> <span style="color:#069;font-weight:bold">then</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">input</span> @<span style="color:#f60">1</span> age <span style="color:#f60">2</span>.;
+</span></span><span style="display:flex;"><span>  <span style="color:#069;font-weight:bold">else</span> <span style="color:#069;font-weight:bold">if</span> type=<span style="color:#c30">&#39;2&#39;</span> <span style="color:#069;font-weight:bold">then</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">input</span> @<span style="color:#f60">3</span> age <span style="color:#f60">2</span>.;
+</span></span><span style="display:flex;"><span>  <span style="color:#069;font-weight:bold">drop</span> type;
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">  datalines;</span>
+</span></span><span style="display:flex;"><span>23   1
+</span></span><span style="display:flex;"><span>  44 2
+</span></span><span style="display:flex;"><span>;
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">run;</span>
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">
+</span></span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">proc print </span>data=ages;
+</span></span><span style="display:flex;"><span>  <span style="color:#069;font-weight:bold">title</span> <span style="color:#c30">&#34;Age read without trailing @&#34;</span><span style="color:#069;font-weight:bold">;
+</span></span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">run;</span>
+</span></span></code></pre></div><p>The result we get is not what we expect.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sas" data-lang="sas"><span style="display:flex;"><span>| Obs | Age |
+</span></span><span style="display:flex;"><span>|-----|-----|
+</span></span><span style="display:flex;"><span>| <span style="color:#f60">1</span>   | .   |
+</span></span></code></pre></div><p>We can understand how SAS read this input using the <code>line=</code> and <code>column=</code> options of the <code>infile</code> statement. While the code in the above listing does not explicitly use <code>infile</code> to point at the <code>datalines</code>, this can be done when we want to use <code>infile</code>&rsquo;s options with <code>datalines</code>.</p>
 <p>This is a good time to remind us what the <code>line=</code> and <code>column=</code> options of <code>infile</code> does. From the <a href="https://documentation.sas.com/?docsetId=lestmtsref&amp;docsetTarget=n1rill4udj0tfun1fvce3j401plo.htm&amp;docsetVersion=9.4&amp;locale=en">documentation</a>:</p>
 <blockquote>
 <p>LINE=variable</p>
@@ -133,95 +130,88 @@ run;
 <p>names a variable that SAS uses to assign the current column location of the input pointer. As with automatic variables, the COLUMN= variable is not written to the data set.</p>
 </blockquote>
 <p>We can modify our code to set these options and then print the value of all variables including these options using the <code>_all_</code> variable that prints the <em>Program Data Vector (PDV)</em>.</p>
-<pre><code class="language-sas">data ages;
-  infile datalines line=line column=col;
-
-  input @6 type $1.;
-  putlog &quot;After reading type, before reading age: &quot; _all_ ;
-
-  if type='1' then
-    input @1 age 2.;
-  else if type='2' then
-    input @3 age 2.;
-  putlog &quot;After reading age: &quot; _all_ ;
-  putlog &quot;&quot;;
-
-  drop type;
-  datalines;
-23   1
-  44 2
-;
-run;
-</code></pre>
-<p>When the code runs, the following can be seen in the SAS logs:</p>
-<pre><code class="language-sas"> After reading type, before reading age: line=1 col=7 type=1 age=. _ERROR_=0 _N_=1
- After reading age: line=2 col=3 type=1 age=. _ERROR_=0 _N_=1
- &quot;
-</code></pre>
-<p>After <code>type</code> is read, we can see that the pointer is at line <code>1</code> and column <code>7</code>, which makes sense considering that the code instructs SAS to go to column <code>6</code> and read <code>1</code> character. But then we notice that when <code>age</code> is read, the pointer has moved to <code>2</code> and column <code>3</code> as instructed in the first branch of the <code>if else</code> condition. Since there is nothing at column <code>1-2</code> of line <code>2</code> in the input, a missing value is stored in <code>age</code>.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sas" data-lang="sas"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">data </span>ages;
+</span></span><span style="display:flex;"><span>  <span style="color:#069;font-weight:bold">infile</span> <span style="color:#069;font-weight:bold">datalines</span> line=line column=col;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#069;font-weight:bold">input</span> @<span style="color:#f60">6</span> type $<span style="color:#f60">1</span>.;
+</span></span><span style="display:flex;"><span>  putlog <span style="color:#c30">&#34;After reading type, before reading age: &#34;</span> <span style="color:#069;font-weight:bold">_all_</span> ;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#069;font-weight:bold">if</span> type=<span style="color:#c30">&#39;1&#39;</span> <span style="color:#069;font-weight:bold">then</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">input</span> @<span style="color:#f60">1</span> age <span style="color:#f60">2</span>.;
+</span></span><span style="display:flex;"><span>  <span style="color:#069;font-weight:bold">else</span> <span style="color:#069;font-weight:bold">if</span> type=<span style="color:#c30">&#39;2&#39;</span> <span style="color:#069;font-weight:bold">then</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">input</span> @<span style="color:#f60">3</span> age <span style="color:#f60">2</span>.;
+</span></span><span style="display:flex;"><span>  putlog <span style="color:#c30">&#34;After reading age: &#34;</span> <span style="color:#069;font-weight:bold">_all_</span> ;
+</span></span><span style="display:flex;"><span>  putlog <span style="color:#c30">&#34;&#34;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#069;font-weight:bold">drop</span> type;
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">  datalines;</span>
+</span></span><span style="display:flex;"><span>23   1
+</span></span><span style="display:flex;"><span>  44 2
+</span></span><span style="display:flex;"><span>;
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">run;</span>
+</span></span></code></pre></div><p>When the code runs, the following can be seen in the SAS logs:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sas" data-lang="sas"><span style="display:flex;"><span> After reading type, before reading age: line=<span style="color:#f60">1</span> col=<span style="color:#f60">7</span> type=<span style="color:#f60">1</span> age=. _ERROR_=<span style="color:#f60">0</span> <span style="color:#069;font-weight:bold">_N_</span>=<span style="color:#f60">1</span>
+</span></span><span style="display:flex;"><span> After reading age: line=<span style="color:#f60">2</span> col=<span style="color:#f60">3</span> type=<span style="color:#f60">1</span> age=. _ERROR_=<span style="color:#f60">0</span> <span style="color:#069;font-weight:bold">_N_</span>=<span style="color:#f60">1</span>
+</span></span><span style="display:flex;"><span> <span style="color:#c30">&#34;
+</span></span></span></code></pre></div><p>After <code>type</code> is read, we can see that the pointer is at line <code>1</code> and column <code>7</code>, which makes sense considering that the code instructs SAS to go to column <code>6</code> and read <code>1</code> character. But then we notice that when <code>age</code> is read, the pointer has moved to <code>2</code> and column <code>3</code> as instructed in the first branch of the <code>if else</code> condition. Since there is nothing at column <code>1-2</code> of line <code>2</code> in the input, a missing value is stored in <code>age</code>.</p>
 <p>What we want is some way to tell <code>input</code> to ot move the pointer after the first input statement. This is where the single trailing <code>@</code> comes in. It intructs <code>input</code> to stay on the same line for the next <code>input</code> statement in the <code>data</code> step. The above listing modified to use trailing <code>@</code> is as follows:</p>
-<pre><code class="language-sas">data trailing;
-  infile datalines line=line column=col;
-
-  input @6 type $1. @;
-  putlog &quot;After reading type, before reading age: &quot; _all_ ;
-
-  if type='1' then
-    input @1 age 2.;
-  else if type='2' then
-    input @3 age 2.;
-  putlog &quot;After reading age: &quot; _all_ ;
-  putlog &quot;&quot;;
-
-  drop type;
-  datalines;
-23   1
-  44 2
-;
-run;
-</code></pre>
-<p>The following log lines are written:</p>
-<pre><code class="language-sas"> After reading type, before reading age: line=1 col=7 type=1 age=. _ERROR_=0 _N_=1
- After reading age: line=1 col=3 type=1 age=23 _ERROR_=0 _N_=1
- &quot;
- After reading type, before reading age: line=1 col=7 type=2 age=. _ERROR_=0 _N_=2
- After reading age: line=1 col=5 type=2 age=44 _ERROR_=0 _N_=2
- &quot;
-</code></pre>
-<p>The log shows that <code>input</code> stayed on line <code>1</code> even after reading the <code>type</code> variable.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sas" data-lang="sas"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">data </span>trailing;
+</span></span><span style="display:flex;"><span>  <span style="color:#069;font-weight:bold">infile</span> <span style="color:#069;font-weight:bold">datalines</span> line=line column=col;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#069;font-weight:bold">input</span> @<span style="color:#f60">6</span> type $<span style="color:#f60">1</span>. @;
+</span></span><span style="display:flex;"><span>  putlog <span style="color:#c30">&#34;After reading type, before reading age: &#34;</span> <span style="color:#069;font-weight:bold">_all_</span> ;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#069;font-weight:bold">if</span> type=<span style="color:#c30">&#39;1&#39;</span> <span style="color:#069;font-weight:bold">then</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">input</span> @<span style="color:#f60">1</span> age <span style="color:#f60">2</span>.;
+</span></span><span style="display:flex;"><span>  <span style="color:#069;font-weight:bold">else</span> <span style="color:#069;font-weight:bold">if</span> type=<span style="color:#c30">&#39;2&#39;</span> <span style="color:#069;font-weight:bold">then</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">input</span> @<span style="color:#f60">3</span> age <span style="color:#f60">2</span>.;
+</span></span><span style="display:flex;"><span>  putlog <span style="color:#c30">&#34;After reading age: &#34;</span> <span style="color:#069;font-weight:bold">_all_</span> ;
+</span></span><span style="display:flex;"><span>  putlog <span style="color:#c30">&#34;&#34;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#069;font-weight:bold">drop</span> type;
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">  datalines;</span>
+</span></span><span style="display:flex;"><span>23   1
+</span></span><span style="display:flex;"><span>  44 2
+</span></span><span style="display:flex;"><span>;
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">run;</span>
+</span></span></code></pre></div><p>The following log lines are written:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sas" data-lang="sas"><span style="display:flex;"><span> After reading type, before reading age: line=<span style="color:#f60">1</span> col=<span style="color:#f60">7</span> type=<span style="color:#f60">1</span> age=. _ERROR_=<span style="color:#f60">0</span> <span style="color:#069;font-weight:bold">_N_</span>=<span style="color:#f60">1</span>
+</span></span><span style="display:flex;"><span> After reading age: line=<span style="color:#f60">1</span> col=<span style="color:#f60">3</span> type=<span style="color:#f60">1</span> age=<span style="color:#f60">23</span> _ERROR_=<span style="color:#f60">0</span> <span style="color:#069;font-weight:bold">_N_</span>=<span style="color:#f60">1</span>
+</span></span><span style="display:flex;"><span> <span style="color:#c30">&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#c30"> After reading type, before reading age: line=1 col=7 type=2 age=. _ERROR_=0 _N_=2
+</span></span></span><span style="display:flex;"><span><span style="color:#c30"> After reading age: line=1 col=5 type=2 age=44 _ERROR_=0 _N_=2
+</span></span></span><span style="display:flex;"><span><span style="color:#c30"> &#34;</span>
+</span></span></code></pre></div><p>The log shows that <code>input</code> stayed on line <code>1</code> even after reading the <code>type</code> variable.</p>
 <p>The new dataset has the expected values:</p>
-<pre><code class="language-sas">| Obs | Age |
-|-----|-----|
-| 1   | 23  |
-| 2   | 44  |
-</code></pre>
-<p>Here is another example that you often run in to on the internet when discussing trailing <code>@</code>:</p>
-<pre><code class="language-sas">data  colors;
-  infile datalines line=linenum column=col;
-  input @1 Var1 $ @8 Var2 $ @;
-  putlog &quot;After reading Var1 and Var2: &quot; _all_;
-
-  input @1 Var3 $ @8 Var4 $ ;
-  putlog &quot;After reading Var3 and Var4: &quot; _all_;
-  putlog &quot;&quot;;
-
-  datalines;
-RED    ORANGE  YELLOW  GREEN
-BLUE   INDIGO  PURPLE  VIOLET
-CYAN   WHITE   FUCSIA  BLACK
-GRAY   BROWN   PINK    MAGENTA
-;
-run;
-</code></pre>
-<p>This results in the following dataset:</p>
-<pre><code class="language-sas">|Obs  | Var1 | Var2   | Var3 | Var4   |
-|-----|------|--------|------|--------|
-| 1   | RED  | ORANGE | RED  | ORANGE |
-| 2   | BLUE | INDIGO | BLUE | INDIGO |
-| 3   | CYAN | WHITE  | CYAN | WHITE  |
-| 4   | GRAY | BROWN  | GRAY | BROWN  |
-</code></pre>
-<p>Because of the trailing <code>@</code> in the first <code>input</code> statement, the values of <code>Var1</code> and <code>Var3</code> for all the observations are the same, as both are read from column <code>1</code>. Similarly <code>Var2</code> and <code>Var4</code> are the same as they are read from column <code>8</code>.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sas" data-lang="sas"><span style="display:flex;"><span>| Obs | Age |
+</span></span><span style="display:flex;"><span>|-----|-----|
+</span></span><span style="display:flex;"><span>| <span style="color:#f60">1</span>   | <span style="color:#f60">23</span>  |
+</span></span><span style="display:flex;"><span>| <span style="color:#f60">2</span>   | <span style="color:#f60">44</span>  |
+</span></span></code></pre></div><p>Here is another example that you often run in to on the internet when discussing trailing <code>@</code>:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sas" data-lang="sas"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">data </span> colors;
+</span></span><span style="display:flex;"><span>  <span style="color:#069;font-weight:bold">infile</span> <span style="color:#069;font-weight:bold">datalines</span> line=linenum column=col;
+</span></span><span style="display:flex;"><span>  <span style="color:#069;font-weight:bold">input</span> @<span style="color:#f60">1</span> Var1 $ @<span style="color:#f60">8</span> Var2 $ @;
+</span></span><span style="display:flex;"><span>  putlog <span style="color:#c30">&#34;After reading Var1 and Var2: &#34;</span> <span style="color:#069;font-weight:bold">_all_</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#069;font-weight:bold">input</span> @<span style="color:#f60">1</span> Var3 $ @<span style="color:#f60">8</span> Var4 $ ;
+</span></span><span style="display:flex;"><span>  putlog <span style="color:#c30">&#34;After reading Var3 and Var4: &#34;</span> <span style="color:#069;font-weight:bold">_all_</span>;
+</span></span><span style="display:flex;"><span>  putlog <span style="color:#c30">&#34;&#34;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">
+</span></span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">  datalines;</span>
+</span></span><span style="display:flex;"><span>RED    ORANGE  YELLOW  GREEN
+</span></span><span style="display:flex;"><span>BLUE   INDIGO  PURPLE  VIOLET
+</span></span><span style="display:flex;"><span>CYAN   WHITE   FUCSIA  BLACK
+</span></span><span style="display:flex;"><span>GRAY   BROWN   PINK    MAGENTA
+</span></span><span style="display:flex;"><span>;
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">run;</span>
+</span></span></code></pre></div><p>This results in the following dataset:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sas" data-lang="sas"><span style="display:flex;"><span>|Obs  | Var1 | Var2   | Var3 | Var4   |
+</span></span><span style="display:flex;"><span>|-----|------|--------|------|--------|
+</span></span><span style="display:flex;"><span>| <span style="color:#f60">1</span>   | RED  | ORANGE | RED  | ORANGE |
+</span></span><span style="display:flex;"><span>| <span style="color:#f60">2</span>   | BLUE | INDIGO | BLUE | INDIGO |
+</span></span><span style="display:flex;"><span>| <span style="color:#f60">3</span>   | CYAN | WHITE  | CYAN | WHITE  |
+</span></span><span style="display:flex;"><span>| <span style="color:#f60">4</span>   | GRAY | BROWN  | GRAY | BROWN  |
+</span></span></code></pre></div><p>Because of the trailing <code>@</code> in the first <code>input</code> statement, the values of <code>Var1</code> and <code>Var3</code> for all the observations are the same, as both are read from column <code>1</code>. Similarly <code>Var2</code> and <code>Var4</code> are the same as they are read from column <code>8</code>.</p>
 <div class="footnotes" role="doc-endnotes">
 <hr>
 <ol>

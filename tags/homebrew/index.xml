@@ -15,20 +15,17 @@
       
       <guid>https://sadique.io/blog/2012/05/04/fixing-flyspell-for-emacs-in-mac-os-x/?utm_source=site&amp;utm_medium=feed</guid>
       <description>&lt;p&gt;I use the &lt;a href=&#34;http://www.emacswiki.org/emacs/FlySpell&#34;&gt;flyspell-mode&lt;/a&gt; as a spell checking mechanism in emacs. Recently, I moved to Mac OS X, and I began to get this error whenever I started emacs:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;Error enabling Flyspell mode:
-(Searching for program No such file or directory aspell)
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;I had installed aspell with Homebrew. The issue seemed to be that Emacs was unable to find the aspell binary. Homebrew installs binaries in &lt;strong&gt;/usr/local/bin&lt;/strong&gt; and it was in my $PATH. It turns out Emacs uses it&amp;rsquo;s own exec path to look for binaries to execute in sub-processes. So the fix is to add the &lt;strong&gt;/usr/local/bin&lt;/strong&gt; path to the exec-path. This is the change needed to the &lt;strong&gt;~/.emacs&lt;/strong&gt; file:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-lisp&#34;&gt; &#39;(exec-path (quote (&amp;quot;/usr/bin&amp;quot; &amp;quot;/bin&amp;quot; &amp;quot;/usr/sbin&amp;quot; &amp;quot;/sbin&amp;quot; &amp;quot;/usr/local/bin&amp;quot;))))
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Notice the &lt;strong&gt;/usr/local/bin&lt;/strong&gt; in there.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Error enabling Flyspell mode:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#555&#34;&gt;(&lt;/span&gt;Searching &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;for&lt;/span&gt; program No such file or directory aspell&lt;span style=&#34;color:#555&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;I had installed aspell with Homebrew. The issue seemed to be that Emacs was unable to find the aspell binary. Homebrew installs binaries in &lt;strong&gt;/usr/local/bin&lt;/strong&gt; and it was in my $PATH. It turns out Emacs uses it&amp;rsquo;s own exec path to look for binaries to execute in sub-processes. So the fix is to add the &lt;strong&gt;/usr/local/bin&lt;/strong&gt; path to the exec-path. This is the change needed to the &lt;strong&gt;~/.emacs&lt;/strong&gt; file:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-lisp&#34; data-lang=&#34;lisp&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt; &lt;span style=&#34;color:#555&#34;&gt;&amp;#39;&lt;/span&gt;(&lt;span style=&#34;color:#033&#34;&gt;exec-path&lt;/span&gt; (&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;quote&lt;/span&gt; (&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/usr/bin&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/bin&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/usr/sbin&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/sbin&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/usr/local/bin&amp;#34;&lt;/span&gt;))))
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Notice the &lt;strong&gt;/usr/local/bin&lt;/strong&gt; in there.&lt;/p&gt;
 &lt;h2 id=&#34;update&#34;&gt;Update&lt;/h2&gt;
 &lt;p&gt;This does not seem to work. A better way to do this is to add the
 following:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-lisp&#34;&gt;(setenv &amp;quot;PATH&amp;quot; (concat (getenv &amp;quot;PATH&amp;quot;) &amp;quot;:/usr/local/bin&amp;quot;))
-(setq exec-path (append exec-path &#39;(&amp;quot;/usr/local/bin&amp;quot;)))
-&lt;/code&gt;&lt;/pre&gt;
-</description>
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-lisp&#34; data-lang=&#34;lisp&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;(&lt;span style=&#34;color:#033&#34;&gt;setenv&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;PATH&amp;#34;&lt;/span&gt; (&lt;span style=&#34;color:#033&#34;&gt;concat&lt;/span&gt; (&lt;span style=&#34;color:#033&#34;&gt;getenv&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;PATH&amp;#34;&lt;/span&gt;) &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;:/usr/local/bin&amp;#34;&lt;/span&gt;))
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;(&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;setq&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;exec-path&lt;/span&gt; (&lt;span style=&#34;color:#c0f&#34;&gt;append&lt;/span&gt; &lt;span style=&#34;color:#033&#34;&gt;exec-path&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;&amp;#39;&lt;/span&gt;(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/usr/local/bin&amp;#34;&lt;/span&gt;)))
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description>
     </item>
     
   </channel>

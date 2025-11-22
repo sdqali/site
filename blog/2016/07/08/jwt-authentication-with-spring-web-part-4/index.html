@@ -106,229 +106,219 @@
 <li><a href="/blog/2016/07/13/jwt-authentication-with-spring-web-part-5/">Part 5</a> - Securing the front end</li>
 </ul>
 <p>We will start by configuring Spring security with a filter to capture the JWT passed by the client in the <code>Authorization</code> header. We will wire up this filter to go before the <code>UsernamePasswordAuthenticationFilter</code> provided by Spring security.</p>
-<pre><code class="language-java">@Configuration
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
-
-    @Autowired
-    private JwtAuthFilter jwtAuthFilter;
-    // ...
-
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable();
-
-        http.authorizeRequests()
-                .antMatchers(&quot;/login&quot;)
-                .permitAll()
-                .antMatchers(&quot;/**/*&quot;)
-                .hasAuthority(&quot;ROLE_USER&quot;)
-                .and()
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                // ...
-    }
-</code></pre>
-<p>The filter captures the <code>Authorization</code> header and creates a <code>JwtAuthToken</code> and sets that as the current authentication for the request.</p>
-<pre><code class="language-java">@Component
-public class JwtAuthFilter implements Filter {
-    @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
-
-    }
-
-    @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        HttpServletRequest servletRequest = (HttpServletRequest) request;
-        String authorization = servletRequest.getHeader(&quot;Authorization&quot;);
-        if (authorization != null) {
-            JwtAuthToken token = new JwtAuthToken(authorization.replaceAll(&quot;Bearer &quot;, &quot;&quot;));
-            SecurityContextHolder.getContext().setAuthentication(token);
-        }
-        chain.doFilter(request, response);
-    }
-
-    @Override
-    public void destroy() {
-
-    }
-}
-</code></pre>
-<p>The <code>JwtAuthToken</code> is simply a conduit to carry the token and although it implements the <code>Authentication</code> interface, it does not do much.</p>
-<pre><code class="language-java">public class JwtAuthToken implements Authentication {
-    private final String token;
-
-    public JwtAuthToken(String token) {
-        this.token = token;
-    }
-
-    @Override
-    public Collection&lt;? extends GrantedAuthority&gt; getAuthorities() {
-        return null;
-    }
-
-    @Override
-    public Object getCredentials() {
-        return token;
-    }
-
-    @Override
-    public Object getDetails() {
-        return null;
-    }
-
-    @Override
-    public Object getPrincipal() {
-        return null;
-    }
-
-    @Override
-    public boolean isAuthenticated() {
-        return false;
-    }
-
-    @Override
-    public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
-
-    }
-
-    @Override
-    public String getName() {
-        return null;
-    }
-}
-</code></pre>
-<p>At this point, we need to tell Spring Security how to verify the tokens. This can be done by providing a custom <code>AuthenticationProvider</code>. This can be done by overriding the <code>configure</code> method.</p>
-<pre><code class="language-java">@Configuration
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    @Autowired
-    private JwtAuthenticationProvider jwtAuthenticationProvider;
-
-    // ...
-    @Override
-    public void configure(AuthenticationManagerBuilder auth)  throws Exception {
-        auth.authenticationProvider(jwtAuthenticationProvider);
-    }
-    // ...
-}
-</code></pre>
-<p>The <code>JwtAuthenticationProvider</code> receives the <code>Authentication</code> instance set on the <code>SecurityContext</code>, which in our case is the <code>JwtAuthToken</code> we set using the <code>JwtAuthFilter</code>. This token is then verified using the <code>JwtService</code>. If the token is valid, we return a <code>JwtAuthenticatedProfile</code> or throw an exception if it is invalid.</p>
-<pre><code class="language-java">@Component
-public class JwtAuthenticationProvider implements AuthenticationProvider {
-    private final JwtService jwtService;
-
-    @SuppressWarnings(&quot;unused&quot;)
-    public JwtAuthenticationProvider() {
-        this(null);
-    }
-
-    @Autowired
-    public JwtAuthenticationProvider(JwtService jwtService) {
-        this.jwtService = jwtService;
-    }
-
-    @Override
-    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        try {
-            Optional&lt;MinimalProfile&gt; possibleProfile = jwtService.verify((String) authentication.getCredentials());
-            return new JwtAuthenticatedProfile(possibleProfile.get());
-        } catch (Exception e) {
-            throw new JwtAuthenticationException(&quot;Failed to verify token&quot;, e);
-        }
-    }
-
-    @Override
-    public boolean supports(Class&lt;?&gt; authentication) {
-        return JwtAuthToken.class.equals(authentication);
-    }
-}
-</code></pre>
-<p><code>JwtAuthenticatedProfile</code> is another implementation of <code>Authentication</code> that wraps the user&rsquo;s profile information:</p>
-<pre><code class="language-java">public class JwtAuthenticatedProfile implements Authentication {
-
-    private final MinimalProfile minimalProfile;
-
-    public JwtAuthenticatedProfile(MinimalProfile minimalProfile) {
-        this.minimalProfile = minimalProfile;
-    }
-
-    @Override
-    public Collection&lt;? extends GrantedAuthority&gt; getAuthorities() {
-        return Collections.singletonList(new SimpleGrantedAuthority(&quot;ROLE_USER&quot;));
-    }
-
-    @Override
-    public Object getCredentials() {
-        return null;
-    }
-
-    @Override
-    public Object getDetails() {
-        return null;
-    }
-
-    @Override
-    public Object getPrincipal() {
-        return null;
-    }
-
-    @Override
-    public boolean isAuthenticated() {
-        return true;
-    }
-
-    @Override
-    public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
-
-    }
-
-    @Override
-    public String getName() {
-        return minimalProfile.getUsername();
-    }
-}
-</code></pre>
-<p>Next, we implement the verify functionality in <code>JwtService</code>.</p>
-<pre><code class="language-java">    public Optional&lt;MinimalProfile&gt; verify(String token) throws IOException, URISyntaxException {
-        byte[] secretKey = secretKeyProvider.getKey();
-        Jws&lt;Claims&gt; claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
-        return profileService.minimal(claims.getBody().getSubject().toString());
-    }
-</code></pre>
-<p>When we generated the JWT, we had set the username as the JWT subject.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Configuration</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">SecurityConfig</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">extends</span><span style="color:#bbb"> </span>WebSecurityConfigurerAdapter<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Autowired</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span>JwtAuthFilter<span style="color:#bbb"> </span>jwtAuthFilter;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">// ...</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">protected</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">configure</span>(HttpSecurity<span style="color:#bbb"> </span>http)<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>http.<span style="color:#309">csrf</span>().<span style="color:#309">disable</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>http.<span style="color:#309">authorizeRequests</span>()<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">antMatchers</span>(<span style="color:#c30">&#34;/login&#34;</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">permitAll</span>()<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">antMatchers</span>(<span style="color:#c30">&#34;/**/*&#34;</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">hasAuthority</span>(<span style="color:#c30">&#34;ROLE_USER&#34;</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">and</span>()<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">addFilterBefore</span>(jwtAuthFilter,<span style="color:#bbb"> </span>UsernamePasswordAuthenticationFilter.<span style="color:#309">class</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span><span style="color:#09f;font-style:italic">// ...</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>The filter captures the <code>Authorization</code> header and creates a <code>JwtAuthToken</code> and sets that as the current authentication for the request.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Component</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">JwtAuthFilter</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">implements</span><span style="color:#bbb"> </span>Filter<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">init</span>(FilterConfig<span style="color:#bbb"> </span>filterConfig)<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>ServletException<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">doFilter</span>(ServletRequest<span style="color:#bbb"> </span>request,<span style="color:#bbb"> </span>ServletResponse<span style="color:#bbb"> </span>response,<span style="color:#bbb"> </span>FilterChain<span style="color:#bbb"> </span>chain)<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>IOException,<span style="color:#bbb"> </span>ServletException<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>HttpServletRequest<span style="color:#bbb"> </span>servletRequest<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>(HttpServletRequest)<span style="color:#bbb"> </span>request;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>String<span style="color:#bbb"> </span>authorization<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>servletRequest.<span style="color:#309">getHeader</span>(<span style="color:#c30">&#34;Authorization&#34;</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">if</span><span style="color:#bbb"> </span>(authorization<span style="color:#bbb"> </span><span style="color:#555">!=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>JwtAuthToken<span style="color:#bbb"> </span>token<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>JwtAuthToken(authorization.<span style="color:#309">replaceAll</span>(<span style="color:#c30">&#34;Bearer &#34;</span>,<span style="color:#bbb"> </span><span style="color:#c30">&#34;&#34;</span>));<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>SecurityContextHolder.<span style="color:#309">getContext</span>().<span style="color:#309">setAuthentication</span>(token);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>chain.<span style="color:#309">doFilter</span>(request,<span style="color:#bbb"> </span>response);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">destroy</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>The <code>JwtAuthToken</code> is simply a conduit to carry the token and although it implements the <code>Authentication</code> interface, it does not do much.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">JwtAuthToken</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">implements</span><span style="color:#bbb"> </span>Authentication<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">final</span><span style="color:#bbb"> </span>String<span style="color:#bbb"> </span>token;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#c0f">JwtAuthToken</span>(String<span style="color:#bbb"> </span>token)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">this</span>.<span style="color:#309">token</span><span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>token;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>Collection<span style="color:#555">&lt;?</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">extends</span><span style="color:#bbb"> </span>GrantedAuthority<span style="color:#555">&gt;</span><span style="color:#bbb"> </span><span style="color:#c0f">getAuthorities</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>Object<span style="color:#bbb"> </span><span style="color:#c0f">getCredentials</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>token;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>Object<span style="color:#bbb"> </span><span style="color:#c0f">getDetails</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>Object<span style="color:#bbb"> </span><span style="color:#c0f">getPrincipal</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">boolean</span><span style="color:#bbb"> </span><span style="color:#c0f">isAuthenticated</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">false</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">setAuthenticated</span>(<span style="color:#078;font-weight:bold">boolean</span><span style="color:#bbb"> </span>isAuthenticated)<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>IllegalArgumentException<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>String<span style="color:#bbb"> </span><span style="color:#c0f">getName</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>At this point, we need to tell Spring Security how to verify the tokens. This can be done by providing a custom <code>AuthenticationProvider</code>. This can be done by overriding the <code>configure</code> method.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Configuration</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">SecurityConfig</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">extends</span><span style="color:#bbb"> </span>WebSecurityConfigurerAdapter<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Autowired</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span>JwtAuthenticationProvider<span style="color:#bbb"> </span>jwtAuthenticationProvider;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">// ...</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">configure</span>(AuthenticationManagerBuilder<span style="color:#bbb"> </span>auth)<span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>auth.<span style="color:#309">authenticationProvider</span>(jwtAuthenticationProvider);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#09f;font-style:italic">// ...</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>The <code>JwtAuthenticationProvider</code> receives the <code>Authentication</code> instance set on the <code>SecurityContext</code>, which in our case is the <code>JwtAuthToken</code> we set using the <code>JwtAuthFilter</code>. This token is then verified using the <code>JwtService</code>. If the token is valid, we return a <code>JwtAuthenticatedProfile</code> or throw an exception if it is invalid.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Component</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">JwtAuthenticationProvider</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">implements</span><span style="color:#bbb"> </span>AuthenticationProvider<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">final</span><span style="color:#bbb"> </span>JwtService<span style="color:#bbb"> </span>jwtService;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@SuppressWarnings</span>(<span style="color:#c30">&#34;unused&#34;</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#c0f">JwtAuthenticationProvider</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">this</span>(<span style="color:#069;font-weight:bold">null</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Autowired</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#c0f">JwtAuthenticationProvider</span>(JwtService<span style="color:#bbb"> </span>jwtService)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">this</span>.<span style="color:#309">jwtService</span><span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>jwtService;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>Authentication<span style="color:#bbb"> </span><span style="color:#c0f">authenticate</span>(Authentication<span style="color:#bbb"> </span>authentication)<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>AuthenticationException<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">try</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>Optional<span style="color:#555">&lt;</span>MinimalProfile<span style="color:#555">&gt;</span><span style="color:#bbb"> </span>possibleProfile<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>jwtService.<span style="color:#309">verify</span>((String)<span style="color:#bbb"> </span>authentication.<span style="color:#309">getCredentials</span>());<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>JwtAuthenticatedProfile(possibleProfile.<span style="color:#309">get</span>());<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">catch</span><span style="color:#bbb"> </span>(Exception<span style="color:#bbb"> </span>e)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#069;font-weight:bold">throw</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>JwtAuthenticationException(<span style="color:#c30">&#34;Failed to verify token&#34;</span>,<span style="color:#bbb"> </span>e);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">boolean</span><span style="color:#bbb"> </span><span style="color:#c0f">supports</span>(Class<span style="color:#555">&lt;?&gt;</span><span style="color:#bbb"> </span>authentication)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>JwtAuthToken.<span style="color:#309">class</span>.<span style="color:#309">equals</span>(authentication);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p><code>JwtAuthenticatedProfile</code> is another implementation of <code>Authentication</code> that wraps the user&rsquo;s profile information:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">JwtAuthenticatedProfile</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">implements</span><span style="color:#bbb"> </span>Authentication<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">final</span><span style="color:#bbb"> </span>MinimalProfile<span style="color:#bbb"> </span>minimalProfile;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#c0f">JwtAuthenticatedProfile</span>(MinimalProfile<span style="color:#bbb"> </span>minimalProfile)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">this</span>.<span style="color:#309">minimalProfile</span><span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>minimalProfile;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>Collection<span style="color:#555">&lt;?</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">extends</span><span style="color:#bbb"> </span>GrantedAuthority<span style="color:#555">&gt;</span><span style="color:#bbb"> </span><span style="color:#c0f">getAuthorities</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>Collections.<span style="color:#309">singletonList</span>(<span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>SimpleGrantedAuthority(<span style="color:#c30">&#34;ROLE_USER&#34;</span>));<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>Object<span style="color:#bbb"> </span><span style="color:#c0f">getCredentials</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>Object<span style="color:#bbb"> </span><span style="color:#c0f">getDetails</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>Object<span style="color:#bbb"> </span><span style="color:#c0f">getPrincipal</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">boolean</span><span style="color:#bbb"> </span><span style="color:#c0f">isAuthenticated</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">true</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">setAuthenticated</span>(<span style="color:#078;font-weight:bold">boolean</span><span style="color:#bbb"> </span>isAuthenticated)<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>IllegalArgumentException<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>String<span style="color:#bbb"> </span><span style="color:#c0f">getName</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>minimalProfile.<span style="color:#309">getUsername</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>Next, we implement the verify functionality in <code>JwtService</code>.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>Optional<span style="color:#555">&lt;</span>MinimalProfile<span style="color:#555">&gt;</span><span style="color:#bbb"> </span><span style="color:#c0f">verify</span>(String<span style="color:#bbb"> </span>token)<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>IOException,<span style="color:#bbb"> </span>URISyntaxException<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#078;font-weight:bold">byte</span><span style="color:#555">[]</span><span style="color:#bbb"> </span>secretKey<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>secretKeyProvider.<span style="color:#309">getKey</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>Jws<span style="color:#555">&lt;</span>Claims<span style="color:#555">&gt;</span><span style="color:#bbb"> </span>claims<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>Jwts.<span style="color:#309">parser</span>().<span style="color:#309">setSigningKey</span>(secretKey).<span style="color:#309">parseClaimsJws</span>(token);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>profileService.<span style="color:#309">minimal</span>(claims.<span style="color:#309">getBody</span>().<span style="color:#309">getSubject</span>().<span style="color:#309">toString</span>());<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>When we generated the JWT, we had set the username as the JWT subject.</p>
 <p>The last thing to do is to ensure that we handle exceptions that occur during token verification gracefully. Since the token verification is happening outside controllers, we won&rsquo;t be able to leverage <code>ControllerAdvice</code> to handle exceptions. This is where Spring Security&rsquo;s <code>AuthenticationEntryPoint</code> comes in to play. We will configure a custom <code>AuthenticationEntryPoint</code> as follows:</p>
-<pre><code class="language-java">        http.authorizeRequests()
-                .antMatchers(&quot;/login&quot;, &quot;/bower_components/**/*&quot;, &quot;/app/**/*&quot;, &quot;/index.html&quot;)
-                .permitAll()
-                .antMatchers(&quot;/**/*&quot;)
-                .hasAuthority(&quot;ROLE_USER&quot;)
-                .and()
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling()
-                .authenticationEntryPoint(jwtAuthEndPoint);
-
-</code></pre>
-<p>Our entry point, sets the HTTP status to <code>403</code>, and sets the response body to a JSON showing the error.</p>
-<pre><code class="language-java">@Component
-public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
-    @Override
-    public void commence(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, AuthenticationException e)
-            throws IOException, ServletException {
-        httpServletResponse.setStatus(SC_FORBIDDEN);
-        httpServletResponse.setContentType(MediaType.APPLICATION_JSON_VALUE);
-
-        String message;
-        if(e.getCause() != null) {
-            message = e.getCause().getMessage();
-        } else {
-            message = e.getMessage();
-        }
-        byte[] body = new ObjectMapper()
-                .writeValueAsBytes(Collections.singletonMap(&quot;error&quot;, message));
-        httpServletResponse.getOutputStream().write(body);
-    }
-}
-</code></pre>
-<p>With this configuration in place, we can request a token and make a subsequent request with the received JWT.</p>
-<pre><code>$ curl -i -X POST &quot;http://localhost:8080/login&quot; -d '{&quot;username&quot;:&quot;greenrabbit948&quot;, &quot;password&quot;:&quot;celeste&quot;}' --header &quot;Content-Type: application/json&quot;
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#bbb">        </span>http.<span style="color:#309">authorizeRequests</span>()<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">antMatchers</span>(<span style="color:#c30">&#34;/login&#34;</span>,<span style="color:#bbb"> </span><span style="color:#c30">&#34;/bower_components/**/*&#34;</span>,<span style="color:#bbb"> </span><span style="color:#c30">&#34;/app/**/*&#34;</span>,<span style="color:#bbb"> </span><span style="color:#c30">&#34;/index.html&#34;</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">permitAll</span>()<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">antMatchers</span>(<span style="color:#c30">&#34;/**/*&#34;</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">hasAuthority</span>(<span style="color:#c30">&#34;ROLE_USER&#34;</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">and</span>()<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">addFilterBefore</span>(jwtAuthFilter,<span style="color:#bbb"> </span>UsernamePasswordAuthenticationFilter.<span style="color:#309">class</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">exceptionHandling</span>()<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">authenticationEntryPoint</span>(jwtAuthEndPoint);<span style="color:#bbb">
+</span></span></span></code></pre></div><p>Our entry point, sets the HTTP status to <code>403</code>, and sets the response body to a JSON showing the error.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Component</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">JwtAuthenticationEntryPoint</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">implements</span><span style="color:#bbb"> </span>AuthenticationEntryPoint<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">commence</span>(HttpServletRequest<span style="color:#bbb"> </span>httpServletRequest,<span style="color:#bbb"> </span>HttpServletResponse<span style="color:#bbb"> </span>httpServletResponse,<span style="color:#bbb"> </span>AuthenticationException<span style="color:#bbb"> </span>e)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>IOException,<span style="color:#bbb"> </span>ServletException<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>httpServletResponse.<span style="color:#309">setStatus</span>(SC_FORBIDDEN);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>httpServletResponse.<span style="color:#309">setContentType</span>(MediaType.<span style="color:#309">APPLICATION_JSON_VALUE</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>String<span style="color:#bbb"> </span>message;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">if</span>(e.<span style="color:#309">getCause</span>()<span style="color:#bbb"> </span><span style="color:#555">!=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>message<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>e.<span style="color:#309">getCause</span>().<span style="color:#309">getMessage</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">else</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>message<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>e.<span style="color:#309">getMessage</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#078;font-weight:bold">byte</span><span style="color:#555">[]</span><span style="color:#bbb"> </span>body<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>ObjectMapper()<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">writeValueAsBytes</span>(Collections.<span style="color:#309">singletonMap</span>(<span style="color:#c30">&#34;error&#34;</span>,<span style="color:#bbb"> </span>message));<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>httpServletResponse.<span style="color:#309">getOutputStream</span>().<span style="color:#309">write</span>(body);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>With this configuration in place, we can request a token and make a subsequent request with the received JWT.</p>
+<pre tabindex="0"><code>$ curl -i -X POST &#34;http://localhost:8080/login&#34; -d &#39;{&#34;username&#34;:&#34;greenrabbit948&#34;, &#34;password&#34;:&#34;celeste&#34;}&#39; --header &#34;Content-Type: application/json&#34;
 HTTP/1.1 200 OK
 Server: Apache-Coyote/1.1
 X-Content-Type-Options: nosniff
@@ -342,32 +332,29 @@ Content-Type: application/json;charset=UTF-8
 Transfer-Encoding: chunked
 Date: Sun, 10 Jul 2016 06:54:12 GMT
 
-{&quot;username&quot;:&quot;greenrabbit948&quot;,&quot;name&quot;:{&quot;title&quot;:&quot;miss&quot;,&quot;first&quot;:&quot;dionaura&quot;,&quot;last&quot;:&quot;rodrigues&quot;},&quot;thumbnail&quot;:&quot;https://randomuser.me/api/portraits/thumb/women/78.jpg&quot;}
+{&#34;username&#34;:&#34;greenrabbit948&#34;,&#34;name&#34;:{&#34;title&#34;:&#34;miss&#34;,&#34;first&#34;:&#34;dionaura&#34;,&#34;last&#34;:&#34;rodrigues&#34;},&#34;thumbnail&#34;:&#34;https://randomuser.me/api/portraits/thumb/women/78.jpg&#34;}
 
-$ curl -s &quot;http://localhost:8080/profile/details/yellowfrog347&quot; --header &quot;Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJncmVlbnJhYmJpdDk0OCIsImV4cCI6MTQ2ODE0MDg1MiwiaXNzIjoiaW4uc2RxYWxpLmp3dCJ9.t9pqrOmYfaVkzuAQgo4D4VbN2PibQuHPuPA6RKYU-keTzbFAX58l77hQTc4Cq28HpjFOeiDvNpNEgilNHFOfVA&quot; | jq .
+$ curl -s &#34;http://localhost:8080/profile/details/yellowfrog347&#34; --header &#34;Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJncmVlbnJhYmJpdDk0OCIsImV4cCI6MTQ2ODE0MDg1MiwiaXNzIjoiaW4uc2RxYWxpLmp3dCJ9.t9pqrOmYfaVkzuAQgo4D4VbN2PibQuHPuPA6RKYU-keTzbFAX58l77hQTc4Cq28HpjFOeiDvNpNEgilNHFOfVA&#34; | jq .
 {
-  &quot;picture&quot;: {
-    &quot;large&quot;: &quot;https://randomuser.me/api/portraits/women/71.jpg&quot;,
-    &quot;medium&quot;: &quot;https://randomuser.me/api/portraits/med/women/71.jpg&quot;,
-    &quot;thumbnail&quot;: &quot;https://randomuser.me/api/portraits/thumb/women/71.jpg&quot;
+  &#34;picture&#34;: {
+    &#34;large&#34;: &#34;https://randomuser.me/api/portraits/women/71.jpg&#34;,
+    &#34;medium&#34;: &#34;https://randomuser.me/api/portraits/med/women/71.jpg&#34;,
+    &#34;thumbnail&#34;: &#34;https://randomuser.me/api/portraits/thumb/women/71.jpg&#34;
   },
-  &quot;name&quot;: {
-    &quot;title&quot;: &quot;ms&quot;,
-    &quot;first&quot;: &quot;sofia&quot;,
-    &quot;last&quot;: &quot;hansen&quot;
+  &#34;name&#34;: {
+    &#34;title&#34;: &#34;ms&#34;,
+    &#34;first&#34;: &#34;sofia&#34;,
+    &#34;last&#34;: &#34;hansen&#34;
   },
-  &quot;email&quot;: &quot;sofia.hansen@example.com&quot;,
-  &quot;username&quot;: &quot;yellowfrog347&quot;
+  &#34;email&#34;: &#34;sofia.hansen@example.com&#34;,
+  &#34;username&#34;: &#34;yellowfrog347&#34;
 }
-</code></pre>
-<p>If we were to make a request with an invalid JWT, we will receive an error:</p>
-<pre><code>$ curl -s &quot;http://localhost:8080/profile/details/yellowfrog347&quot; --header &quot;Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJncmVlbnJhYmJpdDk0OCIsImV4cCI6MTQ2ODE0MDg1MiwiaXNzIjoiaW4uc2RxYWxpLmp3dCJ9.t9pqrOmYfaVkzuAQgo4D4VbN2PibQuHPuPA6RKYU-keTzbFAX58l77hQTc4Cq28HpjFOeiDvNpNEgilNHFOfVAAAAAA&quot; | jq .
+</code></pre><p>If we were to make a request with an invalid JWT, we will receive an error:</p>
+<pre tabindex="0"><code>$ curl -s &#34;http://localhost:8080/profile/details/yellowfrog347&#34; --header &#34;Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJncmVlbnJhYmJpdDk0OCIsImV4cCI6MTQ2ODE0MDg1MiwiaXNzIjoiaW4uc2RxYWxpLmp3dCJ9.t9pqrOmYfaVkzuAQgo4D4VbN2PibQuHPuPA6RKYU-keTzbFAX58l77hQTc4Cq28HpjFOeiDvNpNEgilNHFOfVAAAAAA&#34; | jq .
 {
-  &quot;error&quot;: &quot;JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.&quot;
+  &#34;error&#34;: &#34;JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.&#34;
 }
-
-</code></pre>
-<p>In the next blog post, the fifth is this series, we will move on to building the front end with Angular JS and managing authentication from the front end. The source code for this example for the progress made from part 1 through part 4 is available on <a href="https://github.com/sdqali/jwt-demo/tree/verify_tokens">GitHub</a>.</p>
+</code></pre><p>In the next blog post, the fifth is this series, we will move on to building the front end with Angular JS and managing authentication from the front end. The source code for this example for the progress made from part 1 through part 4 is available on <a href="https://github.com/sdqali/jwt-demo/tree/verify_tokens">GitHub</a>.</p>
         </div>
         <aside id="gh-comments-list">
           <script>

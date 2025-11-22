@@ -88,83 +88,77 @@
         <div>
           <p>If you have built background workers or other non-server applications with Dropwizard, chances are that you used the Dropwizard Command pattern. In fact, even the sever you wrote with Dropwizard executes a command - specifically <code>io.dropwizard.cli.ServerCommand</code>. While the server command is great, sometimes you want to build applications that have all the goodies that Dropwizard offers, but you dont want to start a server. Managing Lifecycles is one example of a Dropwizard feature that works great for server applications, but needs some tweaking to get working for non-server commands.</p>
 <p>Let&rsquo;s take the following example. We have the simplest Dropwizard command below. It doesn&rsquo;t do much, except print some logs and sleep for a second in between.</p>
-<pre><code class="language-java">public class WaitingCommand extends EnvironmentCommand&lt;AppConfiguration&gt; {
-
-  public WaitingCommand(Application&lt;AppConfiguration&gt; application) {
-    super(application, &quot;wait&quot;, &quot;Wait for a second.&quot;);
-  }
-
-  @Override
-  protected void run(Environment environment, Namespace namespace, AppConfiguration configuration) throws Exception {
-    Logger.getInstance(getClass()).info(&quot;Starting command&quot;);
-    try {
-      Thread.sleep(1000);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
-    Logger.getInstance(getClass()).info(&quot;Finished running command&quot;);
-  }
-}
-</code></pre>
-<p>We can wire this to our application.</p>
-<pre><code class="language-java">public class MetricsApplication extends Application&lt;AppConfiguration&gt; {
-  public static void main(String[] args) throws Exception {
-    new MetricsApplication().run(args);
-  }
-
-  @Override
-  public void run(AppConfiguration configuration, Environment environment) throws Exception {
-
-  }
-
-  @Override
-  public void initialize(Bootstrap&lt;AppConfiguration&gt; bootstrap) {
-    bootstrap.addCommand(new WaitingCommand(this));
-
-    bootstrap.setConfigurationSourceProvider(new ResourceConfigurationSourceProvider());
-  }
-}
-</code></pre>
-<p>When our application runs with the <code>wait</code> command (i.e. we invoke it as <code>java -jar app.jar wait config.yml</code>), it does the little work we asked it to do.</p>
-<pre><code>INFO  [2019-07-29 01:42:43,703] org.eclipse.jetty.util.log: Logging initialized @2699ms to org.eclipse.jetty.util.log.Slf4jLog
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">WaitingCommand</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">extends</span><span style="color:#bbb"> </span>EnvironmentCommand<span style="color:#555">&lt;</span>AppConfiguration<span style="color:#555">&gt;</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#c0f">WaitingCommand</span>(Application<span style="color:#555">&lt;</span>AppConfiguration<span style="color:#555">&gt;</span><span style="color:#bbb"> </span>application)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">super</span>(application,<span style="color:#bbb"> </span><span style="color:#c30">&#34;wait&#34;</span>,<span style="color:#bbb"> </span><span style="color:#c30">&#34;Wait for a second.&#34;</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">protected</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">run</span>(Environment<span style="color:#bbb"> </span>environment,<span style="color:#bbb"> </span>Namespace<span style="color:#bbb"> </span>namespace,<span style="color:#bbb"> </span>AppConfiguration<span style="color:#bbb"> </span>configuration)<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>Logger.<span style="color:#309">getInstance</span>(getClass()).<span style="color:#309">info</span>(<span style="color:#c30">&#34;Starting command&#34;</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">try</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span>Thread.<span style="color:#309">sleep</span>(1000);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">catch</span><span style="color:#bbb"> </span>(InterruptedException<span style="color:#bbb"> </span>e)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span>e.<span style="color:#309">printStackTrace</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>Logger.<span style="color:#309">getInstance</span>(getClass()).<span style="color:#309">info</span>(<span style="color:#c30">&#34;Finished running command&#34;</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>We can wire this to our application.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">MetricsApplication</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">extends</span><span style="color:#bbb"> </span>Application<span style="color:#555">&lt;</span>AppConfiguration<span style="color:#555">&gt;</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">static</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">main</span>(String<span style="color:#555">[]</span><span style="color:#bbb"> </span>args)<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>MetricsApplication().<span style="color:#309">run</span>(args);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">run</span>(AppConfiguration<span style="color:#bbb"> </span>configuration,<span style="color:#bbb"> </span>Environment<span style="color:#bbb"> </span>environment)<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">initialize</span>(Bootstrap<span style="color:#555">&lt;</span>AppConfiguration<span style="color:#555">&gt;</span><span style="color:#bbb"> </span>bootstrap)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>bootstrap.<span style="color:#309">addCommand</span>(<span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>WaitingCommand(<span style="color:#069;font-weight:bold">this</span>));<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>bootstrap.<span style="color:#309">setConfigurationSourceProvider</span>(<span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>ResourceConfigurationSourceProvider());<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>When our application runs with the <code>wait</code> command (i.e. we invoke it as <code>java -jar app.jar wait config.yml</code>), it does the little work we asked it to do.</p>
+<pre tabindex="0"><code>INFO  [2019-07-29 01:42:43,703] org.eclipse.jetty.util.log: Logging initialized @2699ms to org.eclipse.jetty.util.log.Slf4jLog
 INFO  [2019-07-29 01:42:43,952] io.dropwizard.server.DefaultServerFactory: Registering jersey handler with root path prefix: /
 INFO  [2019-07-29 01:42:43,957] io.dropwizard.server.DefaultServerFactory: Registering admin handler with root path prefix: /
 INFO  [2019-07-29 01:42:43,960] io.sadique.dropwizard.WaitingCommand: Starting command
 INFO  [2019-07-29 01:42:44,966] io.sadique.dropwizard.WaitingCommand: Finished running command
-</code></pre>
-<h2 id="adding-a-lifecycle">Adding a lifecycle</h2>
+</code></pre><h2 id="adding-a-lifecycle">Adding a lifecycle</h2>
 <p>Let&rsquo;s try adding an object whose lifecycle we intend to be managed by Dropwizard. Again, this entity in the example doesn&rsquo;t do much - except log when it is started and stopped by Dropwizard.</p>
-<pre><code class="language-java">import io.dropwizard.lifecycle.Managed;
-import org.apache.log4j.Logger;
-
-public class ManagedObject implements Managed {
-  @Override
-  public void start() throws Exception {
-    Logger.getInstance(getClass()).info(&quot;Starting managed object&quot;);
-  }
-
-  @Override
-  public void stop() throws Exception {
-    Logger.getInstance(getClass()).info(&quot;Stopping managed object&quot;);
-  }
-}
-</code></pre>
-<p>We will of course need to tell Dropwizard to manage this object:</p>
-<pre><code class="language-java">
-  @Override
-  public void run(AppConfiguration configuration, Environment environment) throws Exception {
-    environment.lifecycle().manage(new ManagedObject());
-  }
-</code></pre>
-<p>When the application is run with the <code>wait</code> command, the log looks like:</p>
-<pre><code>INFO  [2019-07-29 01:50:28,510] org.eclipse.jetty.util.log: Logging initialized @1640ms to org.eclipse.jetty.util.log.Slf4jLog
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">import</span><span style="color:#bbb"> </span><span style="color:#0cf;font-weight:bold">io.dropwizard.lifecycle.Managed</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">import</span><span style="color:#bbb"> </span><span style="color:#0cf;font-weight:bold">org.apache.log4j.Logger</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">ManagedObject</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">implements</span><span style="color:#bbb"> </span>Managed<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">start</span>()<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>Logger.<span style="color:#309">getInstance</span>(getClass()).<span style="color:#309">info</span>(<span style="color:#c30">&#34;Starting managed object&#34;</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">stop</span>()<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>Logger.<span style="color:#309">getInstance</span>(getClass()).<span style="color:#309">info</span>(<span style="color:#c30">&#34;Stopping managed object&#34;</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>We will of course need to tell Dropwizard to manage this object:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">run</span>(AppConfiguration<span style="color:#bbb"> </span>configuration,<span style="color:#bbb"> </span>Environment<span style="color:#bbb"> </span>environment)<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>environment.<span style="color:#309">lifecycle</span>().<span style="color:#309">manage</span>(<span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>ManagedObject());<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>When the application is run with the <code>wait</code> command, the log looks like:</p>
+<pre tabindex="0"><code>INFO  [2019-07-29 01:50:28,510] org.eclipse.jetty.util.log: Logging initialized @1640ms to org.eclipse.jetty.util.log.Slf4jLog
 INFO  [2019-07-29 01:50:28,640] io.dropwizard.server.DefaultServerFactory: Registering jersey handler with root path prefix: /
 INFO  [2019-07-29 01:50:28,642] io.dropwizard.server.DefaultServerFactory: Registering admin handler with root path prefix: /
 INFO  [2019-07-29 01:50:28,647] io.sadique.dropwizard.WaitingCommand: Starting command
 INFO  [2019-07-29 01:50:29,649] io.sadique.dropwizard.WaitingCommand: Finished running command
-</code></pre>
-<p>Looks like the object we expected Dropwizard to start and stop was ignored. What if we run the application with the <code>server</code> command?</p>
-<pre><code>INFO  [2019-07-29 02:09:17,067] org.eclipse.jetty.setuid.SetUIDListener: Opened application@680a66dd{HTTP/1.1,[http/1.1]}{0.0.0.0:8080}
+</code></pre><p>Looks like the object we expected Dropwizard to start and stop was ignored. What if we run the application with the <code>server</code> command?</p>
+<pre tabindex="0"><code>INFO  [2019-07-29 02:09:17,067] org.eclipse.jetty.setuid.SetUIDListener: Opened application@680a66dd{HTTP/1.1,[http/1.1]}{0.0.0.0:8080}
 INFO  [2019-07-29 02:09:17,067] org.eclipse.jetty.setuid.SetUIDListener: Opened admin@2dd8239{HTTP/1.1,[http/1.1]}{0.0.0.0:8081}
 INFO  [2019-07-29 02:09:17,126] org.eclipse.jetty.server.Server: jetty-9.4.z-SNAPSHOT
 INFO  [2019-07-29 02:09:17,143] io.sadique.dropwizard.ManagedObject: Starting managed object
@@ -175,35 +169,33 @@ INFO  [2019-07-29 02:09:21,747] org.eclipse.jetty.server.AbstractConnector: Stop
 INFO  [2019-07-29 02:09:21,751] org.eclipse.jetty.server.handler.ContextHandler: Stopped i.d.j.MutableServletContextHandler@2ee83775{/,null,UNAVAILABLE}
 INFO  [2019-07-29 02:09:21,756] org.eclipse.jetty.server.handler.ContextHandler: Stopped i.d.j.MutableServletContextHandler@19382338{/,null,UNAVAILABLE}
 INFO  [2019-07-29 02:09:21,760] io.sadique.dropwizard.ManagedObject: Stopping managed object
-</code></pre>
-<p>The server seems to manage the lifecycle of the object as expected. Why is it the case that server command can manage the lifecycle, but our custom command can&rsquo;t?</p>
+</code></pre><p>The server seems to manage the lifecycle of the object as expected. Why is it the case that server command can manage the lifecycle, but our custom command can&rsquo;t?</p>
 <p>It turns out, it is not enough to register an entity whose lifecycle needs to be managed, someone needs to attach a lifecycle container to the <code>LifecycleEnvironment</code>. It is not an issue for the server command because it builds a server using <code>io.dropwizard.server.AbstractServerFactory#buildServer</code>, which in turn <a href="https://github.com/dropwizard/dropwizard/blob/master/dropwizard-core/src/main/java/io/dropwizard/server/AbstractServerFactory.java#L611">attaches the container</a>.</p>
 <h2 id="building-a-lifecyclemanagedcommand">Building a LifecycleManagedCommand</h2>
 <p>We can mimic the behavior of the server by constructing our own <code>ContainerLifecycle</code> and starting it before our command performs it&rsquo;s actions. This pattern can be generalized as a <code>LifecycleManagedCommand</code>.</p>
-<pre><code class="language-java">public abstract class LifecycleManagedCommand&lt;T extends Configuration&gt; extends EnvironmentCommand&lt;T&gt; {
-
-  private final ContainerLifeCycle containerLifeCycle;
-
-  public LifecycleManagedCommand(Application&lt;T&gt; application, String name, String description) {
-    super(application, name, description);
-    containerLifeCycle = new ContainerLifeCycle();
-  }
-
-  @Override
-  protected void run(Environment environment, Namespace namespace, T configuration) throws Exception {
-    environment.lifecycle().getManagedObjects().stream().forEach(mo -&gt; containerLifeCycle.addBean(mo));
-    ShutdownThread.register(containerLifeCycle);
-    containerLifeCycle.start();
-
-    runManaged(environment, namespace, configuration);
-
-    containerLifeCycle.stop();
-  }
-
-  abstract void runManaged(Environment environment, Namespace namespace, T configuration);
-}
-</code></pre>
-<p>This command ensures that:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">abstract</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">LifecycleManagedCommand</span><span style="color:#555">&lt;</span>T<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">extends</span><span style="color:#bbb"> </span>Configuration<span style="color:#555">&gt;</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">extends</span><span style="color:#bbb"> </span>EnvironmentCommand<span style="color:#555">&lt;</span>T<span style="color:#555">&gt;</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">final</span><span style="color:#bbb"> </span>ContainerLifeCycle<span style="color:#bbb"> </span>containerLifeCycle;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#c0f">LifecycleManagedCommand</span>(Application<span style="color:#555">&lt;</span>T<span style="color:#555">&gt;</span><span style="color:#bbb"> </span>application,<span style="color:#bbb"> </span>String<span style="color:#bbb"> </span>name,<span style="color:#bbb"> </span>String<span style="color:#bbb"> </span>description)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">super</span>(application,<span style="color:#bbb"> </span>name,<span style="color:#bbb"> </span>description);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>containerLifeCycle<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>ContainerLifeCycle();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@Override</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">protected</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">run</span>(Environment<span style="color:#bbb"> </span>environment,<span style="color:#bbb"> </span>Namespace<span style="color:#bbb"> </span>namespace,<span style="color:#bbb"> </span>T<span style="color:#bbb"> </span>configuration)<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>environment.<span style="color:#309">lifecycle</span>().<span style="color:#309">getManagedObjects</span>().<span style="color:#309">stream</span>().<span style="color:#309">forEach</span>(mo<span style="color:#bbb"> </span><span style="color:#555">-&gt;</span><span style="color:#bbb"> </span>containerLifeCycle.<span style="color:#309">addBean</span>(mo));<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>ShutdownThread.<span style="color:#309">register</span>(containerLifeCycle);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>containerLifeCycle.<span style="color:#309">start</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>runManaged(environment,<span style="color:#bbb"> </span>namespace,<span style="color:#bbb"> </span>configuration);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>containerLifeCycle.<span style="color:#309">stop</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">abstract</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">runManaged</span>(Environment<span style="color:#bbb"> </span>environment,<span style="color:#bbb"> </span>Namespace<span style="color:#bbb"> </span>namespace,<span style="color:#bbb"> </span>T<span style="color:#bbb"> </span>configuration);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>This command ensures that:</p>
 <ul>
 <li>A new <code>ContainerLifeCycle</code> is built before running the command.</li>
 <li>Every managed object registered with the Lifecycle is added to the container.</li>
@@ -211,33 +203,31 @@ INFO  [2019-07-29 02:09:21,760] io.sadique.dropwizard.ManagedObject: Stopping ma
 <li>The container is stopped after the command performs it&rsquo;s action.</li>
 </ul>
 <p>We can now now modify <code>WaitCommand</code> to use this pattern.</p>
-<pre><code>public class WaitingCommand extends LifecycleManagedCommand&lt;AppConfiguration&gt; {
+<pre tabindex="0"><code>public class WaitingCommand extends LifecycleManagedCommand&lt;AppConfiguration&gt; {
 
   public WaitingCommand(Application&lt;AppConfiguration&gt; application) {
-    super(application, &quot;wait&quot;, &quot;Wait for a second.&quot;);
+    super(application, &#34;wait&#34;, &#34;Wait for a second.&#34;);
   }
 
   @Override
   protected void runManaged(Environment environment, Namespace namespace, AppConfiguration configuration) {
-    Logger.getInstance(getClass()).info(&quot;Starting command&quot;);
+    Logger.getInstance(getClass()).info(&#34;Starting command&#34;);
     try {
       Thread.sleep(1000);
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
-    Logger.getInstance(getClass()).info(&quot;Finished running command&quot;);
+    Logger.getInstance(getClass()).info(&#34;Finished running command&#34;);
   }
 }
-</code></pre>
-<p>With this change, we can see that Dropwizard correctly handles the lifecycle when the <code>wait</code> command is executed.</p>
-<pre><code>INFO  [2019-07-29 02:26:34,560] io.dropwizard.server.DefaultServerFactory: Registering jersey handler with root path prefix: /
+</code></pre><p>With this change, we can see that Dropwizard correctly handles the lifecycle when the <code>wait</code> command is executed.</p>
+<pre tabindex="0"><code>INFO  [2019-07-29 02:26:34,560] io.dropwizard.server.DefaultServerFactory: Registering jersey handler with root path prefix: /
 INFO  [2019-07-29 02:26:34,563] io.dropwizard.server.DefaultServerFactory: Registering admin handler with root path prefix: /
 INFO  [2019-07-29 02:26:34,569] io.sadique.dropwizard.ManagedObject: Starting managed object
 INFO  [2019-07-29 02:26:34,569] io.sadique.dropwizard.WaitingCommand: Starting command
 INFO  [2019-07-29 02:26:35,575] io.sadique.dropwizard.WaitingCommand: Finished running command
 INFO  [2019-07-29 02:26:35,575] io.sadique.dropwizard.ManagedObject: Stopping managed object
-</code></pre>
-<p>The server command will of course continue to work as expected.</p>
+</code></pre><p>The server command will of course continue to work as expected.</p>
         </div>
         <aside id="gh-comments-list">
           <script>

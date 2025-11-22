@@ -40,18 +40,17 @@ well documented.&lt;/p&gt;
 &lt;p&gt;The bulk of the code is JavaScript. The API is easy to use. The
 following snippet adds a widget to the Addon toolbar at the bottom of
 the Firefox window:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;    var createWidget = function () {
-      new Widget({
-        id: &amp;quot;sdqali-getcache&amp;quot;,
-        label: &amp;quot;Get Google&#39;s cached version of the current page..&amp;quot;,
-        contentURL: self.data.url (&amp;quot;images/icon.png&amp;quot;),
-        onClick: function(event) {
-          loadCachedPage ();
-        }
-      });
-    };
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h2 id=&#34;adding-context-menu-entries&#34;&gt;Adding context menu entries&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;var&lt;/span&gt; createWidget &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;function&lt;/span&gt; () {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;new&lt;/span&gt; Widget({
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        id&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;sdqali-getcache&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        label&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Get Google&amp;#39;s cached version of the current page..&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        contentURL&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; self.data.url (&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;images/icon.png&amp;#34;&lt;/span&gt;),
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        onClick&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;function&lt;/span&gt;(event) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;          loadCachedPage ();
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      });
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    };
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;adding-context-menu-entries&#34;&gt;Adding context menu entries&lt;/h2&gt;
 &lt;p&gt;While things were pretty smooth overall, I ran in to a weird edge
 case. I wanted a context menu entry that would load the Google cache
 page, and I wanted this entry to be available regardless of whether the
@@ -104,28 +103,27 @@ file to the page.&lt;/p&gt;
 &lt;code&gt;http://webcache.googleusercontent.com/search?q=cache:&lt;/code&gt; to the beginning
 of the current URL and ask chrome to load the new URL in the same
 tab. The interesting bit of the code is below:&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;(function () {
-  var navigateToCachedPage = function (tab) {
-    var gCacheUrlPrefix = &amp;quot;http://webcache.googleusercontent.com/search?q=cache:&amp;quot;;
-    var currentUrl = tab.url;
-    var cacheUrl = gCacheUrlPrefix + currentUrl;
-    chrome.tabs.update(tab.id, {url: cacheUrl});
-  };
-
-  chrome.browserAction.onClicked.addListener(function(tab) {
-    navigateToCachedPage (tab);
-  });
-
-  chrome.contextMenus.create({
-    title: &amp;quot;View Google&#39;s cache&amp;quot;,
-    contexts:[&amp;quot;all&amp;quot;],
-    onclick: function (clickData, tab) {
-      navigateToCachedPage (tab);
-    }
-  });
-}) ();
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;I used this
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;(&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;function&lt;/span&gt; () {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;var&lt;/span&gt; navigateToCachedPage &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;function&lt;/span&gt; (tab) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;var&lt;/span&gt; gCacheUrlPrefix &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;http://webcache.googleusercontent.com/search?q=cache:&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;var&lt;/span&gt; currentUrl &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; tab.url;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;var&lt;/span&gt; cacheUrl &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; gCacheUrlPrefix &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; currentUrl;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    chrome.tabs.update(tab.id, {url&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; cacheUrl});
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  };
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  chrome.browserAction.onClicked.addListener(&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;function&lt;/span&gt;(tab) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    navigateToCachedPage (tab);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  });
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  chrome.contextMenus.create({
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    title&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;View Google&amp;#39;s cache&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    contexts&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt;[&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;all&amp;#34;&lt;/span&gt;],
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    onclick&lt;span style=&#34;color:#555&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;function&lt;/span&gt; (clickData, tab) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      navigateToCachedPage (tab);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  });
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}) ();
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;I used this
 &lt;a href=&#34;http://www.iconfinder.com/icondetails/7065/128/cache_icon&#34;&gt;beautiful icon&lt;/a&gt;
 by Sergio Sanchez Lopez. Since it comes with a GPL license, the plugin
 is also licensed under GPL.&lt;/p&gt;

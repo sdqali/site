@@ -93,363 +93,333 @@
           <p>This blog post is an exercise in identifying all the <code>sequences</code> in a PostgreSQL database that is associated with a table column via an <code>OWNED BY</code> relationship. Figuring out how to do this was harder than it should have been and this journals my understanding of it.</p>
 <p>When I first started looking at this, I ended up at this Stack Overflow <a href="https://stackoverflow.com/questions/9900346/how-do-you-view-new-sequence-ownership-information-in-postgres-after-using-alter">answer</a> from 2012. While that seemed to work, it is fair to say that I had no idea what it did. So, I set out to understand it and hopefully improve it.</p>
 <p>We will start by creating a <code>table</code> that we will later associate a <code>sequence</code> with.</p>
-<pre><code class="language-sql">CREATE TABLE users
-  (
-     id   BIGINT NOT NULL,
-     NAME VARCHAR(40) NOT NULL
-  );
-</code></pre>
-<p>Next, we will create a sequence that is not going to be owned by any columns - a freehanging sequence.</p>
-<pre><code class="language-sql">CREATE SEQUENCE freehanging;
-</code></pre>
-<p>Postgres stores <code>sequence</code>s across two different catalogs - <a href="https://www.postgresql.org/docs/current/catalog-pg-sequence.html"><code>pg_sequence</code></a> and <a href="https://www.postgresql.org/docs/current/catalog-pg-class.html"><code>pg_class</code></a>. Catalog <code>pg_sequence</code> contains sequence parameters like <code>seqstart</code>, <code>seqincrement</code> etc. The rest of the information gets stored in <code>pg_class</code> catalog with the <code>seqlrelid</code> column in <code>pg_sequence</code> pointing to the corresponding <code>pg_class</code> entry.</p>
-<pre><code class="language-sql">=&gt; \x
-Expanded display is on.
-
-=&gt; SELECT *
-FROM   pg_sequence;
-
--[ RECORD 1 ]+--------------------
-seqrelid     | 41000
-seqtypid     | 20
-seqstart     | 1
-seqincrement | 1
-seqmax       | 9223372036854775807
-seqmin       | 1
-seqcache     | 1
-seqcycle     | f
-
-</code></pre>
-<p>That has the information that Postgres can use, but it does not look particularly useful to a human being. Luckily, Postgres provides a <code>view</code> named <a href="https://www.postgresql.org/docs/10/view-pg-sequences.html"><code>pg_sequences</code></a> that shows us more information.</p>
-<pre><code class="language-sql">=&gt; SELECT *
-FROM   pg_sequences;
-
--[ RECORD 1 ]-+--------------------
-schemaname    | public
-sequencename  | freehanging
-sequenceowner | todo
-data_type     | bigint
-start_value   | 1
-min_value     | 1
-max_value     | 9223372036854775807
-increment_by  | 1
-cycle         | f
-cache_size    | 1
-last_value    |
-
-</code></pre>
-<p>We can query <code>pg_class</code> with our <code>seqrelid</code>:</p>
-<pre><code class="language-sql">=&gt; SELECT *
-FROM   pg_class
-WHERE  relfilenode = 41000;
-
--[ RECORD 1 ]-------+------------
-relname             | freehanging
-relnamespace        | 2200
-reltype             | 41001
-reloftype           | 0
-relowner            | 24576
-relam               | 0
-relfilenode         | 41000
-reltablespace       | 0
-relpages            | 1
-reltuples           | 1
-relallvisible       | 0
-reltoastrelid       | 0
-relhasindex         | f
-relisshared         | f
-relpersistence      | p
-relkind             | S
-relnatts            | 3
-relchecks           | 0
-relhasoids          | f
-relhasrules         | f
-relhastriggers      | f
-relhassubclass      | f
-relrowsecurity      | f
-relforcerowsecurity | f
-relispopulated      | t
-relreplident        | n
-relispartition      | f
-relrewrite          | 0
-relfrozenxid        | 0
-relminmxid          | 0
-relacl              |
-reloptions          |
-relpartbound        |
-
-</code></pre>
-<p>We can create a second sequence we want to associate with the <code>users</code> table.</p>
-<pre><code class="language-sql">=&gt; CREATE SEQUENCE users_id_seq;
-
-CREATE SEQUENCE
-</code></pre>
-<p>This will now show up in our queries.</p>
-<pre><code class="language-sql">=&gt; SELECT *
-FROM   pg_sequence;
-
--[ RECORD 1 ]+--------------------
-seqrelid     | 41000
-seqtypid     | 20
-seqstart     | 1
-seqincrement | 1
-seqmax       | 9223372036854775807
-seqmin       | 1
-seqcache     | 1
-seqcycle     | f
--[ RECORD 2 ]+--------------------
-seqrelid     | 41002
-seqtypid     | 20
-seqstart     | 1
-seqincrement | 1
-seqmax       | 9223372036854775807
-seqmin       | 1
-seqcache     | 1
-seqcycle     | f
-
-=&gt; SELECT *
-FROM   pg_sequences;
-
--[ RECORD 1 ]-+--------------------
-schemaname    | public
-sequencename  | freehanging
-sequenceowner | todo
-data_type     | bigint
-start_value   | 1
-min_value     | 1
-max_value     | 9223372036854775807
-increment_by  | 1
-cycle         | f
-cache_size    | 1
-last_value    |
--[ RECORD 2 ]-+--------------------
-schemaname    | public
-sequencename  | users_id_seq
-sequenceowner | todo
-data_type     | bigint
-start_value   | 1
-min_value     | 1
-max_value     | 9223372036854775807
-increment_by  | 1
-cycle         | f
-cache_size    | 1
-last_value    |
-
-</code></pre>
-<p>We can perform a <code>join</code> on these catalogs.</p>
-<pre><code class="language-sql">=&gt; SELECT seqclass.relname,
-       seqclass.relfilenode
-FROM   pg_class AS seqclass
-       JOIN pg_sequence AS seq
-         ON ( seq.seqrelid = seqclass.relfilenode );
-
--[ RECORD 1 ]-------------
-relname     | freehanging
-relfilenode | 41000
--[ RECORD 2 ]-------------
-relname     | users_id_seq
-relfilenode | 41002
-
-</code></pre>
-<p>We can go ahead and associate the new sequence with the <code>users</code> table by specifying <code>OWNED BY</code>. By setting <code>OWNED BY</code>, we are specifying that if the column is dropped, we want the sequence to be dropped as well.</p>
-<pre><code>=&gt; ALTER SEQUENCE users_id_seq OWNED BY users.id;
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">CREATE</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">TABLE</span><span style="color:#bbb"> </span>users<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>(<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">     </span>id<span style="color:#bbb">   </span><span style="color:#366">BIGINT</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">NOT</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">NULL</span>,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">     </span>NAME<span style="color:#bbb"> </span><span style="color:#366">VARCHAR</span>(<span style="color:#f60">40</span>)<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">NOT</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">NULL</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>);<span style="color:#bbb">
+</span></span></span></code></pre></div><p>Next, we will create a sequence that is not going to be owned by any columns - a freehanging sequence.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">CREATE</span><span style="color:#bbb"> </span>SEQUENCE<span style="color:#bbb"> </span>freehanging;<span style="color:#bbb">
+</span></span></span></code></pre></div><p>Postgres stores <code>sequence</code>s across two different catalogs - <a href="https://www.postgresql.org/docs/current/catalog-pg-sequence.html"><code>pg_sequence</code></a> and <a href="https://www.postgresql.org/docs/current/catalog-pg-class.html"><code>pg_class</code></a>. Catalog <code>pg_sequence</code> contains sequence parameters like <code>seqstart</code>, <code>seqincrement</code> etc. The rest of the information gets stored in <code>pg_class</code> catalog with the <code>seqlrelid</code> column in <code>pg_sequence</code> pointing to the corresponding <code>pg_class</code> entry.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#555">=&gt;</span><span style="color:#bbb"> </span><span style="color:#a00;background-color:#faa">\</span>x<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>Expanded<span style="color:#bbb"> </span>display<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">is</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">on</span>.<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#555">=&gt;</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">SELECT</span><span style="color:#bbb"> </span><span style="color:#555">*</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">FROM</span><span style="color:#bbb">   </span>pg_sequence;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#555">-</span>[<span style="color:#bbb"> </span>RECORD<span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb"> </span>]<span style="color:#555">+</span><span style="color:#09f;font-style:italic">--------------------
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"></span>seqrelid<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">41000</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>seqtypid<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">20</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>seqstart<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>seqincrement<span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>seqmax<span style="color:#bbb">       </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">9223372036854775807</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>seqmin<span style="color:#bbb">       </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>seqcache<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>seqcycle<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span>f<span style="color:#bbb">
+</span></span></span></code></pre></div><p>That has the information that Postgres can use, but it does not look particularly useful to a human being. Luckily, Postgres provides a <code>view</code> named <a href="https://www.postgresql.org/docs/10/view-pg-sequences.html"><code>pg_sequences</code></a> that shows us more information.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#555">=&gt;</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">SELECT</span><span style="color:#bbb"> </span><span style="color:#555">*</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">FROM</span><span style="color:#bbb">   </span>pg_sequences;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#555">-</span>[<span style="color:#bbb"> </span>RECORD<span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb"> </span>]<span style="color:#555">-+</span><span style="color:#09f;font-style:italic">--------------------
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"></span>schemaname<span style="color:#bbb">    </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>sequencename<span style="color:#bbb">  </span><span style="color:#555">|</span><span style="color:#bbb"> </span>freehanging<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>sequenceowner<span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span>todo<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>data_type<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#366">bigint</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>start_value<span style="color:#bbb">   </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>min_value<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>max_value<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">9223372036854775807</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>increment_by<span style="color:#bbb">  </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">cycle</span><span style="color:#bbb">         </span><span style="color:#555">|</span><span style="color:#bbb"> </span>f<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>cache_size<span style="color:#bbb">    </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>last_value<span style="color:#bbb">    </span><span style="color:#555">|</span><span style="color:#bbb">
+</span></span></span></code></pre></div><p>We can query <code>pg_class</code> with our <code>seqrelid</code>:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#555">=&gt;</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">SELECT</span><span style="color:#bbb"> </span><span style="color:#555">*</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">FROM</span><span style="color:#bbb">   </span>pg_class<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">WHERE</span><span style="color:#bbb">  </span>relfilenode<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#f60">41000</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#555">-</span>[<span style="color:#bbb"> </span>RECORD<span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb"> </span>]<span style="color:#09f;font-style:italic">-------+------------
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"></span>relname<span style="color:#bbb">             </span><span style="color:#555">|</span><span style="color:#bbb"> </span>freehanging<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relnamespace<span style="color:#bbb">        </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">2200</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>reltype<span style="color:#bbb">             </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">41001</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>reloftype<span style="color:#bbb">           </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">0</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relowner<span style="color:#bbb">            </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">24576</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relam<span style="color:#bbb">               </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">0</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relfilenode<span style="color:#bbb">         </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">41000</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>reltablespace<span style="color:#bbb">       </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">0</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relpages<span style="color:#bbb">            </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>reltuples<span style="color:#bbb">           </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relallvisible<span style="color:#bbb">       </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">0</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>reltoastrelid<span style="color:#bbb">       </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">0</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relhasindex<span style="color:#bbb">         </span><span style="color:#555">|</span><span style="color:#bbb"> </span>f<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relisshared<span style="color:#bbb">         </span><span style="color:#555">|</span><span style="color:#bbb"> </span>f<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relpersistence<span style="color:#bbb">      </span><span style="color:#555">|</span><span style="color:#bbb"> </span>p<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relkind<span style="color:#bbb">             </span><span style="color:#555">|</span><span style="color:#bbb"> </span>S<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relnatts<span style="color:#bbb">            </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">3</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relchecks<span style="color:#bbb">           </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">0</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relhasoids<span style="color:#bbb">          </span><span style="color:#555">|</span><span style="color:#bbb"> </span>f<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relhasrules<span style="color:#bbb">         </span><span style="color:#555">|</span><span style="color:#bbb"> </span>f<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relhastriggers<span style="color:#bbb">      </span><span style="color:#555">|</span><span style="color:#bbb"> </span>f<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relhassubclass<span style="color:#bbb">      </span><span style="color:#555">|</span><span style="color:#bbb"> </span>f<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relrowsecurity<span style="color:#bbb">      </span><span style="color:#555">|</span><span style="color:#bbb"> </span>f<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relforcerowsecurity<span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span>f<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relispopulated<span style="color:#bbb">      </span><span style="color:#555">|</span><span style="color:#bbb"> </span>t<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relreplident<span style="color:#bbb">        </span><span style="color:#555">|</span><span style="color:#bbb"> </span>n<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relispartition<span style="color:#bbb">      </span><span style="color:#555">|</span><span style="color:#bbb"> </span>f<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relrewrite<span style="color:#bbb">          </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">0</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relfrozenxid<span style="color:#bbb">        </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">0</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relminmxid<span style="color:#bbb">          </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">0</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relacl<span style="color:#bbb">              </span><span style="color:#555">|</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>reloptions<span style="color:#bbb">          </span><span style="color:#555">|</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relpartbound<span style="color:#bbb">        </span><span style="color:#555">|</span><span style="color:#bbb">
+</span></span></span></code></pre></div><p>We can create a second sequence we want to associate with the <code>users</code> table.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#555">=&gt;</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">CREATE</span><span style="color:#bbb"> </span>SEQUENCE<span style="color:#bbb"> </span>users_id_seq;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">CREATE</span><span style="color:#bbb"> </span>SEQUENCE<span style="color:#bbb">
+</span></span></span></code></pre></div><p>This will now show up in our queries.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#555">=&gt;</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">SELECT</span><span style="color:#bbb"> </span><span style="color:#555">*</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">FROM</span><span style="color:#bbb">   </span>pg_sequence;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#555">-</span>[<span style="color:#bbb"> </span>RECORD<span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb"> </span>]<span style="color:#555">+</span><span style="color:#09f;font-style:italic">--------------------
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"></span>seqrelid<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">41000</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>seqtypid<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">20</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>seqstart<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>seqincrement<span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>seqmax<span style="color:#bbb">       </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">9223372036854775807</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>seqmin<span style="color:#bbb">       </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>seqcache<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>seqcycle<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span>f<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#555">-</span>[<span style="color:#bbb"> </span>RECORD<span style="color:#bbb"> </span><span style="color:#f60">2</span><span style="color:#bbb"> </span>]<span style="color:#555">+</span><span style="color:#09f;font-style:italic">--------------------
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"></span>seqrelid<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">41002</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>seqtypid<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">20</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>seqstart<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>seqincrement<span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>seqmax<span style="color:#bbb">       </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">9223372036854775807</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>seqmin<span style="color:#bbb">       </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>seqcache<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>seqcycle<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span>f<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#555">=&gt;</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">SELECT</span><span style="color:#bbb"> </span><span style="color:#555">*</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">FROM</span><span style="color:#bbb">   </span>pg_sequences;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#555">-</span>[<span style="color:#bbb"> </span>RECORD<span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb"> </span>]<span style="color:#555">-+</span><span style="color:#09f;font-style:italic">--------------------
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"></span>schemaname<span style="color:#bbb">    </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>sequencename<span style="color:#bbb">  </span><span style="color:#555">|</span><span style="color:#bbb"> </span>freehanging<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>sequenceowner<span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span>todo<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>data_type<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#366">bigint</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>start_value<span style="color:#bbb">   </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>min_value<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>max_value<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">9223372036854775807</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>increment_by<span style="color:#bbb">  </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">cycle</span><span style="color:#bbb">         </span><span style="color:#555">|</span><span style="color:#bbb"> </span>f<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>cache_size<span style="color:#bbb">    </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>last_value<span style="color:#bbb">    </span><span style="color:#555">|</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#555">-</span>[<span style="color:#bbb"> </span>RECORD<span style="color:#bbb"> </span><span style="color:#f60">2</span><span style="color:#bbb"> </span>]<span style="color:#555">-+</span><span style="color:#09f;font-style:italic">--------------------
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"></span>schemaname<span style="color:#bbb">    </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>sequencename<span style="color:#bbb">  </span><span style="color:#555">|</span><span style="color:#bbb"> </span>users_id_seq<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>sequenceowner<span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span>todo<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>data_type<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#366">bigint</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>start_value<span style="color:#bbb">   </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>min_value<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>max_value<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">9223372036854775807</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>increment_by<span style="color:#bbb">  </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">cycle</span><span style="color:#bbb">         </span><span style="color:#555">|</span><span style="color:#bbb"> </span>f<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>cache_size<span style="color:#bbb">    </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>last_value<span style="color:#bbb">    </span><span style="color:#555">|</span><span style="color:#bbb">
+</span></span></span></code></pre></div><p>We can perform a <code>join</code> on these catalogs.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#555">=&gt;</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">SELECT</span><span style="color:#bbb"> </span>seqclass.relname,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">       </span>seqclass.relfilenode<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">FROM</span><span style="color:#bbb">   </span>pg_class<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span>seqclass<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">       </span><span style="color:#069;font-weight:bold">JOIN</span><span style="color:#bbb"> </span>pg_sequence<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span>seq<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">         </span><span style="color:#069;font-weight:bold">ON</span><span style="color:#bbb"> </span>(<span style="color:#bbb"> </span>seq.seqrelid<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>seqclass.relfilenode<span style="color:#bbb"> </span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#555">-</span>[<span style="color:#bbb"> </span>RECORD<span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb"> </span>]<span style="color:#09f;font-style:italic">-------------
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"></span>relname<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span>freehanging<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relfilenode<span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">41000</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#555">-</span>[<span style="color:#bbb"> </span>RECORD<span style="color:#bbb"> </span><span style="color:#f60">2</span><span style="color:#bbb"> </span>]<span style="color:#09f;font-style:italic">-------------
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"></span>relname<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span>users_id_seq<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relfilenode<span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">41002</span><span style="color:#bbb">
+</span></span></span></code></pre></div><p>We can go ahead and associate the new sequence with the <code>users</code> table by specifying <code>OWNED BY</code>. By setting <code>OWNED BY</code>, we are specifying that if the column is dropped, we want the sequence to be dropped as well.</p>
+<pre tabindex="0"><code>=&gt; ALTER SEQUENCE users_id_seq OWNED BY users.id;
 
 ALTER SEQUENCE
-</code></pre>
-<p>This association is recorded by Postgres in the <a href="https://www.postgresql.org/docs/current/catalog-pg-depend.html"><code>pg_depend</code></a> catalog, using an <code>a</code> dependency type.</p>
+</code></pre><p>This association is recorded by Postgres in the <a href="https://www.postgresql.org/docs/current/catalog-pg-depend.html"><code>pg_depend</code></a> catalog, using an <code>a</code> dependency type.</p>
 <blockquote>
 <p>DEPENDENCY_AUTO (a)</p>
 <p>The dependent object can be dropped separately from the referenced object, and should be automatically dropped (regardless of RESTRICT or CASCADE mode) if the referenced object is dropped. Example: a named constraint on a table is made autodependent on the table, so that it will go away if the table is dropped.</p>
 </blockquote>
-<pre><code class="language-sql">=&gt; SELECT *
-FROM   pg_depend
-WHERE  objid = 41002
-       AND deptype = 'a';
-
--[ RECORD 1 ]------
-classid     | 1259
-objid       | 41002
-objsubid    | 0
-refclassid  | 1259
-refobjid    | 40997
-refobjsubid | 1
-deptype     | a
-
-</code></pre>
-<p>We can also verify that the <code>freehanging</code> sequence has no dependencies of type <code>a</code>.</p>
-<pre><code class="language-sql">=&gt; SELECT *
-FROM   pg_depend
-WHERE  objid = 41000
-       AND deptype = 'a';
-
-(0 rows)
-
-</code></pre>
-<p>Now that we have a dependency identified for this relationship, we can verify that the dependency is indeed with the <code>users</code> table. For this, we will query using the dependency&rsquo;s <code>refobjid</code>.</p>
-<pre><code class="language-sql">=&gt; SELECT *
-FROM   pg_class
-WHERE  relfilenode = 40997;
-
--[ RECORD 1 ]-------+------
-relname             | users
-relnamespace        | 2200
-reltype             | 40999
-reloftype           | 0
-relowner            | 24576
-relam               | 0
-relfilenode         | 40997
-reltablespace       | 0
-relpages            | 0
-reltuples           | 0
-relallvisible       | 0
-reltoastrelid       | 0
-relhasindex         | f
-relisshared         | f
-relpersistence      | p
-relkind             | r
-relnatts            | 2
-relchecks           | 0
-relhasoids          | f
-relhasrules         | f
-relhastriggers      | f
-relhassubclass      | f
-relrowsecurity      | f
-relforcerowsecurity | f
-relispopulated      | t
-relreplident        | d
-relispartition      | f
-relrewrite          | 0
-relfrozenxid        | 5021
-relminmxid          | 1
-relacl              |
-reloptions          |
-relpartbound        |
-
-</code></pre>
-<p>We can indeed see that the dependency is on the <code>users</code> table.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#555">=&gt;</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">SELECT</span><span style="color:#bbb"> </span><span style="color:#555">*</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">FROM</span><span style="color:#bbb">   </span>pg_depend<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">WHERE</span><span style="color:#bbb">  </span>objid<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#f60">41002</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">       </span><span style="color:#069;font-weight:bold">AND</span><span style="color:#bbb"> </span>deptype<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#39;a&#39;</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#555">-</span>[<span style="color:#bbb"> </span>RECORD<span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb"> </span>]<span style="color:#09f;font-style:italic">------
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"></span>classid<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">1259</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>objid<span style="color:#bbb">       </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">41002</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>objsubid<span style="color:#bbb">    </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">0</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>refclassid<span style="color:#bbb">  </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">1259</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>refobjid<span style="color:#bbb">    </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">40997</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>refobjsubid<span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>deptype<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span>a<span style="color:#bbb">
+</span></span></span></code></pre></div><p>We can also verify that the <code>freehanging</code> sequence has no dependencies of type <code>a</code>.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#555">=&gt;</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">SELECT</span><span style="color:#bbb"> </span><span style="color:#555">*</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">FROM</span><span style="color:#bbb">   </span>pg_depend<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">WHERE</span><span style="color:#bbb">  </span>objid<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#f60">41000</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">       </span><span style="color:#069;font-weight:bold">AND</span><span style="color:#bbb"> </span>deptype<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#39;a&#39;</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>(<span style="color:#f60">0</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">rows</span>)<span style="color:#bbb">
+</span></span></span></code></pre></div><p>Now that we have a dependency identified for this relationship, we can verify that the dependency is indeed with the <code>users</code> table. For this, we will query using the dependency&rsquo;s <code>refobjid</code>.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#555">=&gt;</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">SELECT</span><span style="color:#bbb"> </span><span style="color:#555">*</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">FROM</span><span style="color:#bbb">   </span>pg_class<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">WHERE</span><span style="color:#bbb">  </span>relfilenode<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#f60">40997</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#555">-</span>[<span style="color:#bbb"> </span>RECORD<span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb"> </span>]<span style="color:#09f;font-style:italic">-------+------
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"></span>relname<span style="color:#bbb">             </span><span style="color:#555">|</span><span style="color:#bbb"> </span>users<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relnamespace<span style="color:#bbb">        </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">2200</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>reltype<span style="color:#bbb">             </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">40999</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>reloftype<span style="color:#bbb">           </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">0</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relowner<span style="color:#bbb">            </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">24576</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relam<span style="color:#bbb">               </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">0</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relfilenode<span style="color:#bbb">         </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">40997</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>reltablespace<span style="color:#bbb">       </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">0</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relpages<span style="color:#bbb">            </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">0</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>reltuples<span style="color:#bbb">           </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">0</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relallvisible<span style="color:#bbb">       </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">0</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>reltoastrelid<span style="color:#bbb">       </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">0</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relhasindex<span style="color:#bbb">         </span><span style="color:#555">|</span><span style="color:#bbb"> </span>f<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relisshared<span style="color:#bbb">         </span><span style="color:#555">|</span><span style="color:#bbb"> </span>f<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relpersistence<span style="color:#bbb">      </span><span style="color:#555">|</span><span style="color:#bbb"> </span>p<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relkind<span style="color:#bbb">             </span><span style="color:#555">|</span><span style="color:#bbb"> </span>r<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relnatts<span style="color:#bbb">            </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">2</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relchecks<span style="color:#bbb">           </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">0</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relhasoids<span style="color:#bbb">          </span><span style="color:#555">|</span><span style="color:#bbb"> </span>f<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relhasrules<span style="color:#bbb">         </span><span style="color:#555">|</span><span style="color:#bbb"> </span>f<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relhastriggers<span style="color:#bbb">      </span><span style="color:#555">|</span><span style="color:#bbb"> </span>f<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relhassubclass<span style="color:#bbb">      </span><span style="color:#555">|</span><span style="color:#bbb"> </span>f<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relrowsecurity<span style="color:#bbb">      </span><span style="color:#555">|</span><span style="color:#bbb"> </span>f<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relforcerowsecurity<span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span>f<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relispopulated<span style="color:#bbb">      </span><span style="color:#555">|</span><span style="color:#bbb"> </span>t<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relreplident<span style="color:#bbb">        </span><span style="color:#555">|</span><span style="color:#bbb"> </span>d<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relispartition<span style="color:#bbb">      </span><span style="color:#555">|</span><span style="color:#bbb"> </span>f<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relrewrite<span style="color:#bbb">          </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">0</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relfrozenxid<span style="color:#bbb">        </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">5021</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relminmxid<span style="color:#bbb">          </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relacl<span style="color:#bbb">              </span><span style="color:#555">|</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>reloptions<span style="color:#bbb">          </span><span style="color:#555">|</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>relpartbound<span style="color:#bbb">        </span><span style="color:#555">|</span><span style="color:#bbb">
+</span></span></span></code></pre></div><p>We can indeed see that the dependency is on the <code>users</code> table.</p>
 <p>What about the column associated with this dependency? Postgres stores information about table columns in <a href="https://www.postgresql.org/docs/current/catalog-pg-attribute.html"><code>pg_attribute</code></a> catalog. We can verify that the dependency is on the <code>id</code> column, by querying <code>pg_attribute</code>.</p>
-<pre><code class="language-sql">=&gt; SELECT *
-FROM   pg_attribute
-WHERE  attrelid = 40997
-       AND attnum = 1;
-
--[ RECORD 1 ]-+------
-attrelid      | 40997
-attname       | id
-atttypid      | 20
-attstattarget | -1
-attlen        | 8
-attnum        | 1
-attndims      | 0
-attcacheoff   | -1
-atttypmod     | -1
-attbyval      | t
-attstorage    | p
-attalign      | d
-attnotnull    | t
-atthasdef     | f
-atthasmissing | f
-attidentity   |
-attisdropped  | f
-attislocal    | t
-attinhcount   | 0
-attcollation  | 0
-attacl        |
-attoptions    |
-attfdwoptions |
-attmissingval |
-
-</code></pre>
-<p>We can see that the column corresponding to the dependency is indeed <code>id</code>.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#555">=&gt;</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">SELECT</span><span style="color:#bbb"> </span><span style="color:#555">*</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">FROM</span><span style="color:#bbb">   </span>pg_attribute<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">WHERE</span><span style="color:#bbb">  </span>attrelid<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#f60">40997</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">       </span><span style="color:#069;font-weight:bold">AND</span><span style="color:#bbb"> </span>attnum<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#f60">1</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#555">-</span>[<span style="color:#bbb"> </span>RECORD<span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb"> </span>]<span style="color:#555">-+</span><span style="color:#09f;font-style:italic">------
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"></span>attrelid<span style="color:#bbb">      </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">40997</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>attname<span style="color:#bbb">       </span><span style="color:#555">|</span><span style="color:#bbb"> </span>id<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>atttypid<span style="color:#bbb">      </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">20</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>attstattarget<span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#555">-</span><span style="color:#f60">1</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>attlen<span style="color:#bbb">        </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">8</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>attnum<span style="color:#bbb">        </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>attndims<span style="color:#bbb">      </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">0</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>attcacheoff<span style="color:#bbb">   </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#555">-</span><span style="color:#f60">1</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>atttypmod<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#555">-</span><span style="color:#f60">1</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>attbyval<span style="color:#bbb">      </span><span style="color:#555">|</span><span style="color:#bbb"> </span>t<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>attstorage<span style="color:#bbb">    </span><span style="color:#555">|</span><span style="color:#bbb"> </span>p<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>attalign<span style="color:#bbb">      </span><span style="color:#555">|</span><span style="color:#bbb"> </span>d<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>attnotnull<span style="color:#bbb">    </span><span style="color:#555">|</span><span style="color:#bbb"> </span>t<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>atthasdef<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span>f<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>atthasmissing<span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span>f<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>attidentity<span style="color:#bbb">   </span><span style="color:#555">|</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>attisdropped<span style="color:#bbb">  </span><span style="color:#555">|</span><span style="color:#bbb"> </span>f<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>attislocal<span style="color:#bbb">    </span><span style="color:#555">|</span><span style="color:#bbb"> </span>t<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>attinhcount<span style="color:#bbb">   </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">0</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>attcollation<span style="color:#bbb">  </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">0</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>attacl<span style="color:#bbb">        </span><span style="color:#555">|</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>attoptions<span style="color:#bbb">    </span><span style="color:#555">|</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>attfdwoptions<span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>attmissingval<span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb">
+</span></span></span></code></pre></div><p>We can see that the column corresponding to the dependency is indeed <code>id</code>.</p>
 <p>Our <code>join</code> can now be improved to use this information. First, we will add the table name:</p>
-<pre><code class="language-sql">=&gt; SELECT seqclass.relname     AS sequence_name,
-       seqclass.relfilenode AS sequenceref,
-       dep.refobjid         AS depobjref,
-       depclass.relname     AS table_name
-FROM   pg_class AS seqclass
-       JOIN pg_sequence AS seq
-         ON ( seq.seqrelid = seqclass.relfilenode )
-       JOIN pg_depend AS dep
-         ON ( seq.seqrelid = dep.objid )
-       JOIN pg_class AS depclass
-         ON ( dep.refobjid = depclass.relfilenode );
-
--[ RECORD 1 ]+-------------
-sequence_name | users_id_seq
-sequenceref  | 41002
-depobjref    | 40997
-table_name    | users
-
-</code></pre>
-<p>We have to join twice on the <code>pg_class</code> catalog - once to get the <code>sequence</code>&rsquo;s columns and once to get the <code>dependency</code>&rsquo;s columns. This leaves us with the name of the table and the sequence name.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#555">=&gt;</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">SELECT</span><span style="color:#bbb"> </span>seqclass.relname<span style="color:#bbb">     </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span>sequence_name,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">       </span>seqclass.relfilenode<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span>sequenceref,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">       </span>dep.refobjid<span style="color:#bbb">         </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span>depobjref,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">       </span>depclass.relname<span style="color:#bbb">     </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">table_name</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">FROM</span><span style="color:#bbb">   </span>pg_class<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span>seqclass<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">       </span><span style="color:#069;font-weight:bold">JOIN</span><span style="color:#bbb"> </span>pg_sequence<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span>seq<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">         </span><span style="color:#069;font-weight:bold">ON</span><span style="color:#bbb"> </span>(<span style="color:#bbb"> </span>seq.seqrelid<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>seqclass.relfilenode<span style="color:#bbb"> </span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">       </span><span style="color:#069;font-weight:bold">JOIN</span><span style="color:#bbb"> </span>pg_depend<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span>dep<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">         </span><span style="color:#069;font-weight:bold">ON</span><span style="color:#bbb"> </span>(<span style="color:#bbb"> </span>seq.seqrelid<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>dep.objid<span style="color:#bbb"> </span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">       </span><span style="color:#069;font-weight:bold">JOIN</span><span style="color:#bbb"> </span>pg_class<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span>depclass<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">         </span><span style="color:#069;font-weight:bold">ON</span><span style="color:#bbb"> </span>(<span style="color:#bbb"> </span>dep.refobjid<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>depclass.relfilenode<span style="color:#bbb"> </span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#555">-</span>[<span style="color:#bbb"> </span>RECORD<span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb"> </span>]<span style="color:#555">+</span><span style="color:#09f;font-style:italic">-------------
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"></span>sequence_name<span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span>users_id_seq<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>sequenceref<span style="color:#bbb">  </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">41002</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>depobjref<span style="color:#bbb">    </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">40997</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">table_name</span><span style="color:#bbb">    </span><span style="color:#555">|</span><span style="color:#bbb"> </span>users<span style="color:#bbb">
+</span></span></span></code></pre></div><p>We have to join twice on the <code>pg_class</code> catalog - once to get the <code>sequence</code>&rsquo;s columns and once to get the <code>dependency</code>&rsquo;s columns. This leaves us with the name of the table and the sequence name.</p>
 <p>Finally, we can perform a join on <code>pg_attribute</code> to get column information.</p>
-<pre><code class="language-sql">=&gt; SELECT seqclass.relname     AS sequence_name,
-       seqclass.relfilenode AS sequenceref,
-       dep.refobjid         AS depobjref,
-       depclass.relname     AS tabl_ename,
-       attrib.attname       AS column_name
-FROM   pg_class AS seqclass
-       JOIN pg_sequence AS seq
-         ON ( seq.seqrelid = seqclass.relfilenode )
-       JOIN pg_depend AS dep
-         ON ( seq.seqrelid = dep.objid )
-       JOIN pg_class AS depclass
-         ON ( dep.refobjid = depclass.relfilenode )
-       JOIN pg_attribute AS attrib
-         ON ( attrib.attnum = dep.refobjsubid
-              AND attrib.attrelid = dep.refobjid );
-
--[ RECORD 1 ]+-------------
-sequence_name | users_id_seq
-sequenceref   | 41002
-depobjref     | 40997
-table_name    | users
-column_name   | id
-
-</code></pre>
-<p>We can drop <code>sequenceref</code> and <code>depobjref</code> from the result as it is not of particular interest to us when reporting this.</p>
-<pre><code class="language-sql">=&gt; SELECT seqclass.relname AS sequence_name,
-       depclass.relname AS table_name,
-       attrib.attname   AS column_name
-FROM   pg_class AS seqclass
-       JOIN pg_sequence AS seq
-         ON ( seq.seqrelid = seqclass.relfilenode )
-       JOIN pg_depend AS dep
-         ON ( seq.seqrelid = dep.objid )
-       JOIN pg_class AS depclass
-         ON ( dep.refobjid = depclass.relfilenode )
-       JOIN pg_attribute AS attrib
-         ON ( attrib.attnum = dep.refobjsubid
-              AND attrib.attrelid = dep.refobjid );
-
--[ RECORD 1 ]+-------------
-sequenc_ename | users_id_seq
-table_name    | users
-column_name   | id
-
-</code></pre>
-<h2 id="postgres-versions-before-10">Postgres versions before 10</h2>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#555">=&gt;</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">SELECT</span><span style="color:#bbb"> </span>seqclass.relname<span style="color:#bbb">     </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span>sequence_name,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">       </span>seqclass.relfilenode<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span>sequenceref,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">       </span>dep.refobjid<span style="color:#bbb">         </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span>depobjref,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">       </span>depclass.relname<span style="color:#bbb">     </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span>tabl_ename,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">       </span>attrib.attname<span style="color:#bbb">       </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">column_name</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">FROM</span><span style="color:#bbb">   </span>pg_class<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span>seqclass<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">       </span><span style="color:#069;font-weight:bold">JOIN</span><span style="color:#bbb"> </span>pg_sequence<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span>seq<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">         </span><span style="color:#069;font-weight:bold">ON</span><span style="color:#bbb"> </span>(<span style="color:#bbb"> </span>seq.seqrelid<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>seqclass.relfilenode<span style="color:#bbb"> </span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">       </span><span style="color:#069;font-weight:bold">JOIN</span><span style="color:#bbb"> </span>pg_depend<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span>dep<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">         </span><span style="color:#069;font-weight:bold">ON</span><span style="color:#bbb"> </span>(<span style="color:#bbb"> </span>seq.seqrelid<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>dep.objid<span style="color:#bbb"> </span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">       </span><span style="color:#069;font-weight:bold">JOIN</span><span style="color:#bbb"> </span>pg_class<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span>depclass<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">         </span><span style="color:#069;font-weight:bold">ON</span><span style="color:#bbb"> </span>(<span style="color:#bbb"> </span>dep.refobjid<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>depclass.relfilenode<span style="color:#bbb"> </span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">       </span><span style="color:#069;font-weight:bold">JOIN</span><span style="color:#bbb"> </span>pg_attribute<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span>attrib<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">         </span><span style="color:#069;font-weight:bold">ON</span><span style="color:#bbb"> </span>(<span style="color:#bbb"> </span>attrib.attnum<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>dep.refobjsubid<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">              </span><span style="color:#069;font-weight:bold">AND</span><span style="color:#bbb"> </span>attrib.attrelid<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>dep.refobjid<span style="color:#bbb"> </span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#555">-</span>[<span style="color:#bbb"> </span>RECORD<span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb"> </span>]<span style="color:#555">+</span><span style="color:#09f;font-style:italic">-------------
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"></span>sequence_name<span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span>users_id_seq<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>sequenceref<span style="color:#bbb">   </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">41002</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>depobjref<span style="color:#bbb">     </span><span style="color:#555">|</span><span style="color:#bbb"> </span><span style="color:#f60">40997</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">table_name</span><span style="color:#bbb">    </span><span style="color:#555">|</span><span style="color:#bbb"> </span>users<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">column_name</span><span style="color:#bbb">   </span><span style="color:#555">|</span><span style="color:#bbb"> </span>id<span style="color:#bbb">
+</span></span></span></code></pre></div><p>We can drop <code>sequenceref</code> and <code>depobjref</code> from the result as it is not of particular interest to us when reporting this.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#555">=&gt;</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">SELECT</span><span style="color:#bbb"> </span>seqclass.relname<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span>sequence_name,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">       </span>depclass.relname<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">table_name</span>,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">       </span>attrib.attname<span style="color:#bbb">   </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">column_name</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">FROM</span><span style="color:#bbb">   </span>pg_class<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span>seqclass<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">       </span><span style="color:#069;font-weight:bold">JOIN</span><span style="color:#bbb"> </span>pg_sequence<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span>seq<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">         </span><span style="color:#069;font-weight:bold">ON</span><span style="color:#bbb"> </span>(<span style="color:#bbb"> </span>seq.seqrelid<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>seqclass.relfilenode<span style="color:#bbb"> </span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">       </span><span style="color:#069;font-weight:bold">JOIN</span><span style="color:#bbb"> </span>pg_depend<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span>dep<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">         </span><span style="color:#069;font-weight:bold">ON</span><span style="color:#bbb"> </span>(<span style="color:#bbb"> </span>seq.seqrelid<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>dep.objid<span style="color:#bbb"> </span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">       </span><span style="color:#069;font-weight:bold">JOIN</span><span style="color:#bbb"> </span>pg_class<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span>depclass<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">         </span><span style="color:#069;font-weight:bold">ON</span><span style="color:#bbb"> </span>(<span style="color:#bbb"> </span>dep.refobjid<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>depclass.relfilenode<span style="color:#bbb"> </span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">       </span><span style="color:#069;font-weight:bold">JOIN</span><span style="color:#bbb"> </span>pg_attribute<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span>attrib<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">         </span><span style="color:#069;font-weight:bold">ON</span><span style="color:#bbb"> </span>(<span style="color:#bbb"> </span>attrib.attnum<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>dep.refobjsubid<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">              </span><span style="color:#069;font-weight:bold">AND</span><span style="color:#bbb"> </span>attrib.attrelid<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>dep.refobjid<span style="color:#bbb"> </span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#555">-</span>[<span style="color:#bbb"> </span>RECORD<span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb"> </span>]<span style="color:#555">+</span><span style="color:#09f;font-style:italic">-------------
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"></span>sequenc_ename<span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span>users_id_seq<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">table_name</span><span style="color:#bbb">    </span><span style="color:#555">|</span><span style="color:#bbb"> </span>users<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">column_name</span><span style="color:#bbb">   </span><span style="color:#555">|</span><span style="color:#bbb"> </span>id<span style="color:#bbb">
+</span></span></span></code></pre></div><h2 id="postgres-versions-before-10">Postgres versions before 10</h2>
 <p>The <code>pg_sequence</code> catalog was introduced in Postgres 10. For versions before 10, we need another way to get hold of the sequence&rsquo;s representation in <code>pg_class</code> so that we can look up the dependencies. Luckily, <code>pg_class</code> has a column <code>relkind</code> that holds this informations. For a sequence, this column will be <code>S</code>. We can use this in the <code>join</code> instead of <code>pg_sequence</code>.</p>
-<pre><code class="language-sql">=&gt; SELECT seqclass.relname AS sequence_name,
-       depclass.relname AS table_name,
-       attrib.attname   as column_name
-FROM   pg_class AS seqclass
-       JOIN pg_depend AS dep
-         ON ( seqclass.relfilenode = dep.objid )
-       JOIN pg_class AS depclass
-         ON ( dep.refobjid = depclass.relfilenode )
-       JOIN pg_attribute AS attrib
-         ON ( attrib.attnum = dep.refobjsubid
-              AND attrib.attrelid = dep.refobjid )
-WHERE  seqclass.relkind = 'S';
-
--[ RECORD 1 ]-+-------------
-sequence_name | users_id_seq
-table_name    | users
-column_name   | id
-
-</code></pre>
-<p>This seems like information that should be surfaced by Postgres in an easier to access way. In fact there is a patch from <a href="https://web.archive.org/web/20190508035646/https://www.postgresql.org/message-id/1228622212.10877.59.camel%40godzilla.local.scalefeather.com">2008</a> that would have introduced this capability. When Postgres 10 introduced the <a href="https://web.archive.org/web/20190508035646/https://www.postgresql.org/message-id/1228622212.10877.59.camel%40godzilla.local.scalefeather.com"><code>pg_sequences</code></a> catalog, it stopped at surfacing the id of the user who owns the sequence.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#555">=&gt;</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">SELECT</span><span style="color:#bbb"> </span>seqclass.relname<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span>sequence_name,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">       </span>depclass.relname<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">table_name</span>,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">       </span>attrib.attname<span style="color:#bbb">   </span><span style="color:#069;font-weight:bold">as</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">column_name</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">FROM</span><span style="color:#bbb">   </span>pg_class<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span>seqclass<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">       </span><span style="color:#069;font-weight:bold">JOIN</span><span style="color:#bbb"> </span>pg_depend<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span>dep<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">         </span><span style="color:#069;font-weight:bold">ON</span><span style="color:#bbb"> </span>(<span style="color:#bbb"> </span>seqclass.relfilenode<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>dep.objid<span style="color:#bbb"> </span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">       </span><span style="color:#069;font-weight:bold">JOIN</span><span style="color:#bbb"> </span>pg_class<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span>depclass<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">         </span><span style="color:#069;font-weight:bold">ON</span><span style="color:#bbb"> </span>(<span style="color:#bbb"> </span>dep.refobjid<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>depclass.relfilenode<span style="color:#bbb"> </span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">       </span><span style="color:#069;font-weight:bold">JOIN</span><span style="color:#bbb"> </span>pg_attribute<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">AS</span><span style="color:#bbb"> </span>attrib<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">         </span><span style="color:#069;font-weight:bold">ON</span><span style="color:#bbb"> </span>(<span style="color:#bbb"> </span>attrib.attnum<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>dep.refobjsubid<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">              </span><span style="color:#069;font-weight:bold">AND</span><span style="color:#bbb"> </span>attrib.attrelid<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>dep.refobjid<span style="color:#bbb"> </span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">WHERE</span><span style="color:#bbb">  </span>seqclass.relkind<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#39;S&#39;</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#555">-</span>[<span style="color:#bbb"> </span>RECORD<span style="color:#bbb"> </span><span style="color:#f60">1</span><span style="color:#bbb"> </span>]<span style="color:#555">-+</span><span style="color:#09f;font-style:italic">-------------
+</span></span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"></span>sequence_name<span style="color:#bbb"> </span><span style="color:#555">|</span><span style="color:#bbb"> </span>users_id_seq<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">table_name</span><span style="color:#bbb">    </span><span style="color:#555">|</span><span style="color:#bbb"> </span>users<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">column_name</span><span style="color:#bbb">   </span><span style="color:#555">|</span><span style="color:#bbb"> </span>id<span style="color:#bbb">
+</span></span></span></code></pre></div><p>This seems like information that should be surfaced by Postgres in an easier to access way. In fact there is a patch from <a href="https://web.archive.org/web/20190508035646/https://www.postgresql.org/message-id/1228622212.10877.59.camel%40godzilla.local.scalefeather.com">2008</a> that would have introduced this capability. When Postgres 10 introduced the <a href="https://web.archive.org/web/20190508035646/https://www.postgresql.org/message-id/1228622212.10877.59.camel%40godzilla.local.scalefeather.com"><code>pg_sequences</code></a> catalog, it stopped at surfacing the id of the user who owns the sequence.</p>
         </div>
         <aside id="gh-comments-list">
           <script>

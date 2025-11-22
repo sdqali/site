@@ -90,7 +90,7 @@
         <div>
           <p>While working with Locust <sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> recently, we ran into a situation where we had to dynamically override an attribute in a class in the Locust library so as to control what value it got assigned. After a lot of scratching our heads and reading the Python documentation, we came across the <code>property</code> function. We were able to use this to hack together a solution that ensures that every time an attribute is read, it returns the result of executing a method.</p>
 <p>The following example demonstrates a stripped down version of this hack.</p>
-<pre><code>import random
+<pre tabindex="0"><code>import random
 
 class Foo(object):
     bar = random.random()
@@ -98,26 +98,24 @@ class Foo(object):
 foo = Foo()
 
 # Prints the value assigned when the Foo object is initialised.
-print(&quot;Before override&quot;)
+print(&#34;Before override&#34;)
 print(foo.bar)
 print(foo.bar)
 
 # Override
 Foo.bar = property(lambda self: random.random())
 
-print(&quot;After override&quot;)
+print(&#34;After override&#34;)
 print(foo.bar)
 print(foo.bar)
-</code></pre>
-<p>This snippet when executed will output the following:</p>
-<pre><code>Before override
+</code></pre><p>This snippet when executed will output the following:</p>
+<pre tabindex="0"><code>Before override
 0.0373028550804
 0.0373028550804
 After override
 0.603160033663
 0.501455108419
-</code></pre>
-<p>It can be seen that before introducing the override, the value of the <code>bar</code> attribute is set when the class is initialised and as expected, it does not change how many ever times the attribute is read. However, after the override, the attribute is assigned a new value every time it is read.</p>
+</code></pre><p>It can be seen that before introducing the override, the value of the <code>bar</code> attribute is set when the class is initialised and as expected, it does not change how many ever times the attribute is read. However, after the override, the attribute is assigned a new value every time it is read.</p>
 <h2 id="how-does-this-work">How does this work?</h2>
 <p>The <code>property()</code> <sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup> function returns an attribute for any class. It allows the creation of Ruby&rsquo;s <code>attr_accessor</code> <sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup> style attributes on classes so that one can write <code>instance.attrib</code> to read an attribute value and <code>instance.attrib= </code> to set an attribute value. What line <code>14</code> in the snippet does is to re-define the <code>bar</code> attribute to be a property whose <code>getter</code> is a <code>lambda</code>. Every time the <code>bar</code> attribute is read, the <code>lambda</code> gets executed.</p>
 <p>A more comprehensive example of this can be found in my <a href="https://github.com/sdqali/python_dojo/blob/master/dynamic_override/dynamic_override.py">Python dojo repository</a> on GitHub.</p>

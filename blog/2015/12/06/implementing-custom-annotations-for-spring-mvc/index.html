@@ -96,42 +96,38 @@ I often have to work with Spring MVC based code bases that have been living for 
 <p>Among the new things introduced in Spring 4 was the idea of meta-annotations. <sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> Meta annotations are annotations that can act up on other annotations by modifying and overriding attributes of the target annotations.</p>
 <p>This allows us to build composed annotations <sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup> that combine the behavior of multiple annotations. The <code>@AliasFor</code> annotation allows us to override attribute names, thereby adding great flexibility while composing.</p>
 <p>This is a common pattern in code bases that use Spring MVC.</p>
-<pre><code class="language-java">    @RequestMapping(path = &quot;/register&quot;,
-            method = RequestMethod.POST,
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
-    @ResponseStatus(HttpStatus.CREATED)
-    public Map register(@RequestBody @Valid EmailRequest emailRequest) {
-        return registrationService.register(emailRequest);
-    }
-</code></pre>
-<p>The two annotations as applied on this method represent the fact that this is an end point that a client can <code>POST</code> JSON to and produces JSON and a <code>201 Created</code> HTTP status when it succeeds. If we had 20 end points that did the similar operations, it would be really useful to have a <code>@PostJson</code> annotation that did the same thing.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@RequestMapping</span>(path<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;/register&#34;</span>,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>method<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>RequestMethod.<span style="color:#309">POST</span>,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>consumes<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>MediaType.<span style="color:#309">APPLICATION_JSON_VALUE</span>,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>produces<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>MediaType.<span style="color:#309">APPLICATION_JSON_VALUE</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@ResponseStatus</span>(HttpStatus.<span style="color:#309">CREATED</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>Map<span style="color:#bbb"> </span><span style="color:#c0f">register</span>(<span style="color:#99f">@RequestBody</span><span style="color:#bbb"> </span><span style="color:#99f">@Valid</span><span style="color:#bbb"> </span>EmailRequest<span style="color:#bbb"> </span>emailRequest)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>registrationService.<span style="color:#309">register</span>(emailRequest);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>The two annotations as applied on this method represent the fact that this is an end point that a client can <code>POST</code> JSON to and produces JSON and a <code>201 Created</code> HTTP status when it succeeds. If we had 20 end points that did the similar operations, it would be really useful to have a <code>@PostJson</code> annotation that did the same thing.</p>
 <p>The following is one way of writing such an annotation.</p>
-<pre><code class="language-java">@Target(METHOD)
-@Retention(RUNTIME)
-@Documented
-@RequestMapping(method = RequestMethod.POST,
-        consumes = MediaType.APPLICATION_JSON_VALUE,
-        produces = MediaType.APPLICATION_JSON_VALUE
-)
-@ResponseStatus(HttpStatus.CREATED)
-public @interface PostJson {
-    @AliasFor(annotation = RequestMapping.class, attribute = &quot;path&quot;)
-    String[] path() default {};
-}
-</code></pre>
-<p>This annotation takes a single parameter <code>path</code> that represents that URL path to which it will respond to. This can now be applied on the register end point.</p>
-<pre><code class="language-java">    @PostJson(path = &quot;/register&quot;)
-    public Map register(@RequestBody @Valid EmailRequest emailRequest) {
-        return registrationService.register(emailRequest);
-    }
-</code></pre>
-<p>If we wanted to allow the consumers of <code>@PostJson</code> to override other parameters of <code>@RequestMapping</code> or <code>@ResponseStatus</code>, it can be achieved by adding more aliases. For example, the following will allow users to specify a reason phrase.</p>
-<pre><code class="language-java">    @AliasFor(annotation = ResponseStatus.class, attribute = &quot;reason&quot;)
-    String[] reason() default {};
-</code></pre>
-<p>This pattern can easily be extended to introduce annotations like <code>@GetJson</code>, <code>@PutJson</code>, <code>@PostXml</code> and so on and so forth.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Target</span>(METHOD)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@Retention</span>(RUNTIME)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@Documented</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@RequestMapping</span>(method<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>RequestMethod.<span style="color:#309">POST</span>,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>consumes<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>MediaType.<span style="color:#309">APPLICATION_JSON_VALUE</span>,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>produces<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>MediaType.<span style="color:#309">APPLICATION_JSON_VALUE</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@ResponseStatus</span>(HttpStatus.<span style="color:#309">CREATED</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#99f">@interface</span><span style="color:#bbb"> </span>PostJson<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@AliasFor</span>(annotation<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>RequestMapping.<span style="color:#309">class</span>,<span style="color:#bbb"> </span>attribute<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;path&#34;</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>String<span style="color:#555">[]</span><span style="color:#bbb"> </span><span style="color:#c0f">path</span>()<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">default</span><span style="color:#bbb"> </span>{};<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>This annotation takes a single parameter <code>path</code> that represents that URL path to which it will respond to. This can now be applied on the register end point.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@PostJson</span>(path<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;/register&#34;</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>Map<span style="color:#bbb"> </span><span style="color:#c0f">register</span>(<span style="color:#99f">@RequestBody</span><span style="color:#bbb"> </span><span style="color:#99f">@Valid</span><span style="color:#bbb"> </span>EmailRequest<span style="color:#bbb"> </span>emailRequest)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>registrationService.<span style="color:#309">register</span>(emailRequest);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>If we wanted to allow the consumers of <code>@PostJson</code> to override other parameters of <code>@RequestMapping</code> or <code>@ResponseStatus</code>, it can be achieved by adding more aliases. For example, the following will allow users to specify a reason phrase.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@AliasFor</span>(annotation<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>ResponseStatus.<span style="color:#309">class</span>,<span style="color:#bbb"> </span>attribute<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;reason&#34;</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>String<span style="color:#555">[]</span><span style="color:#bbb"> </span><span style="color:#c0f">reason</span>()<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">default</span><span style="color:#bbb"> </span>{};<span style="color:#bbb">
+</span></span></span></code></pre></div><p>This pattern can easily be extended to introduce annotations like <code>@GetJson</code>, <code>@PutJson</code>, <code>@PostXml</code> and so on and so forth.</p>
 <div class="footnotes" role="doc-endnotes">
 <hr>
 <ol>

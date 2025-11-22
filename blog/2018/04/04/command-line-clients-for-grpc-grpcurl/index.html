@@ -95,61 +95,54 @@
 <h2 id="grpcurl">grpcurl</h2>
 <p>One of the things that immediately struck me when I started looking at grpcurl was how neat it&rsquo;s command line interface was, especially in comparison with that of polyglot. grpcurl is written in Go and expects you to provide <code>protoset</code> files that contain service descriptors exported from the <code>proto</code> files of the service.</p>
 <p>For example, for the <code>hello-world</code> service from the examples, the <code>protoset</code> files can be generated using:</p>
-<pre><code class="language-bash">&gt; pwd
-grpc-java/examples/src/main/proto
-&gt; protoc --proto_path=./ \
-    --descriptor_set_out=helloworld.protoset \
-    --include_imports \
-    ./helloworld.proto
-</code></pre>
-<p>This will produce a <code>protoset</code> file named <code>helloworld.protoset</code>. Using this, we can now list the services available:</p>
-<pre><code class="language-bash">&gt; grpcurl -protoset ./helloworld.protoset list
-helloworld.Greeter
-</code></pre>
-<p>We can also list all the methods available in a service:</p>
-<pre><code class="language-bash">&gt; grpcurl -protoset ./helloworld.protoset list helloworld.Greeter
-SayHello
-</code></pre>
-<p>There is also a describe command that produces description of a service:</p>
-<pre><code class="language-bash">&gt; grpcurl -protoset ./helloworld.protoset describe helloworld.Greeter
-helloworld.Greeter is a service:
-{
-  &quot;name&quot;: &quot;Greeter&quot;,
-  &quot;method&quot;: [
-    {
-      &quot;name&quot;: &quot;SayHello&quot;,
-      &quot;inputType&quot;: &quot;.helloworld.HelloRequest&quot;,
-      &quot;outputType&quot;: &quot;.helloworld.HelloReply&quot;,
-      &quot;options&quot;: {
-
-      }
-    }
-  ],
-  &quot;options&quot;: {
-
-  }
-}
-</code></pre>
-<p>Now we can execute the method on this service running on a server by specifying the address and the path to the method:</p>
-<pre><code class="language-bash">&gt; grpcurl -plaintext -protoset ./helloworld.protoset -d '{&quot;name&quot;:&quot;World&quot;}' localhost:50051 helloworld.Greeter/SayHello
-{
-  &quot;message&quot;: &quot;Hello World&quot;
-}
-</code></pre>
-<p>It can also read the JSON data to pass to the server from STDIN, by setting the value of <code>-d</code> to <code>@</code>:</p>
-<pre><code class="language-bash">&gt; echo '{&quot;name&quot;: &quot;World&quot;}' | grpcurl -plaintext -protoset ./helloworld.protoset -d @ localhost:50051 helloworld.Greeter/SayHello
-{
-  &quot;message&quot;: &quot;Hello World&quot;
-}
-</code></pre>
-<p>In both these examples, we passed the <code>-plaintext</code> switch because our server is not running with TLS.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>&gt; <span style="color:#366">pwd</span>
+</span></span><span style="display:flex;"><span>grpc-java/examples/src/main/proto
+</span></span><span style="display:flex;"><span>&gt; protoc --proto_path<span style="color:#555">=</span>./ <span style="color:#c30;font-weight:bold">\
+</span></span></span><span style="display:flex;"><span><span style="color:#c30;font-weight:bold"></span>    --descriptor_set_out<span style="color:#555">=</span>helloworld.protoset <span style="color:#c30;font-weight:bold">\
+</span></span></span><span style="display:flex;"><span><span style="color:#c30;font-weight:bold"></span>    --include_imports <span style="color:#c30;font-weight:bold">\
+</span></span></span><span style="display:flex;"><span><span style="color:#c30;font-weight:bold"></span>    ./helloworld.proto
+</span></span></code></pre></div><p>This will produce a <code>protoset</code> file named <code>helloworld.protoset</code>. Using this, we can now list the services available:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>&gt; grpcurl -protoset ./helloworld.protoset list
+</span></span><span style="display:flex;"><span>helloworld.Greeter
+</span></span></code></pre></div><p>We can also list all the methods available in a service:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>&gt; grpcurl -protoset ./helloworld.protoset list helloworld.Greeter
+</span></span><span style="display:flex;"><span>SayHello
+</span></span></code></pre></div><p>There is also a describe command that produces description of a service:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>&gt; grpcurl -protoset ./helloworld.protoset describe helloworld.Greeter
+</span></span><span style="display:flex;"><span>helloworld.Greeter is a service:
+</span></span><span style="display:flex;"><span><span style="color:#555">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#c30">&#34;name&#34;</span>: <span style="color:#c30">&#34;Greeter&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#c30">&#34;method&#34;</span>: <span style="color:#555">[</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#555">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#c30">&#34;name&#34;</span>: <span style="color:#c30">&#34;SayHello&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#c30">&#34;inputType&#34;</span>: <span style="color:#c30">&#34;.helloworld.HelloRequest&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#c30">&#34;outputType&#34;</span>: <span style="color:#c30">&#34;.helloworld.HelloReply&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#c30">&#34;options&#34;</span>: <span style="color:#555">{</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#555">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#555">}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#555">]</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#c30">&#34;options&#34;</span>: <span style="color:#555">{</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#555">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#555">}</span>
+</span></span></code></pre></div><p>Now we can execute the method on this service running on a server by specifying the address and the path to the method:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>&gt; grpcurl -plaintext -protoset ./helloworld.protoset -d <span style="color:#c30">&#39;{&#34;name&#34;:&#34;World&#34;}&#39;</span> localhost:50051 helloworld.Greeter/SayHello
+</span></span><span style="display:flex;"><span><span style="color:#555">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#c30">&#34;message&#34;</span>: <span style="color:#c30">&#34;Hello World&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#555">}</span>
+</span></span></code></pre></div><p>It can also read the JSON data to pass to the server from STDIN, by setting the value of <code>-d</code> to <code>@</code>:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>&gt; <span style="color:#366">echo</span> <span style="color:#c30">&#39;{&#34;name&#34;: &#34;World&#34;}&#39;</span> | grpcurl -plaintext -protoset ./helloworld.protoset -d @ localhost:50051 helloworld.Greeter/SayHello
+</span></span><span style="display:flex;"><span><span style="color:#555">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#c30">&#34;message&#34;</span>: <span style="color:#c30">&#34;Hello World&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#555">}</span>
+</span></span></code></pre></div><p>In both these examples, we passed the <code>-plaintext</code> switch because our server is not running with TLS.</p>
 <p>If we were to <a href="https://github.com/grpc/grpc-java/blob/master/documentation/server-reflection-tutorial.md">turn on reflection</a>, we will no longer need to depend on the <code>protoset</code> file.</p>
-<pre><code class="language-bash">&gt; echo '{&quot;name&quot;: &quot;World&quot;}' | grpcurl -plaintext -d @ localhost:50051 helloworld.Greeter/SayHello
-{
-  &quot;message&quot;: &quot;Hello World&quot;
-}
-</code></pre>
-<p>Overall, I like what the creator of grpcurl have done. The only thing I dont like is the fact that when reflection is turned off, we have to generate <code>protoset</code> files. It would have been great if it could just look at the existing <code>proto</code> files, which is what <code>polyglot</code> does. We will look at polyglot in the next blog post.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>&gt; <span style="color:#366">echo</span> <span style="color:#c30">&#39;{&#34;name&#34;: &#34;World&#34;}&#39;</span> | grpcurl -plaintext -d @ localhost:50051 helloworld.Greeter/SayHello
+</span></span><span style="display:flex;"><span><span style="color:#555">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#c30">&#34;message&#34;</span>: <span style="color:#c30">&#34;Hello World&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#555">}</span>
+</span></span></code></pre></div><p>Overall, I like what the creator of grpcurl have done. The only thing I dont like is the fact that when reflection is turned off, we have to generate <code>protoset</code> files. It would have been great if it could just look at the existing <code>proto</code> files, which is what <code>polyglot</code> does. We will look at polyglot in the next blog post.</p>
         </div>
         <aside id="gh-comments-list">
           <script>

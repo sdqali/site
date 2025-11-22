@@ -114,207 +114,195 @@
 <p>The profiles that we use for this example were generated using the <a href="https://randomuser.me/">Random User Generator</a> and stored in a JSON file, for convenience for this example. In the real world, you never want to store user information in a file. All the code for this example is available on <a href="https://github.com/sdqali/jwt-demo">GitHub</a>.</p>
 <h2 id="structure-of-the-user-profile">Structure of the User Profile</h2>
 <p>For this example, I specifically generated 500 random profiles with only a subset of fields - <code>name</code>, <code>email</code>, <code>login</code> and <code>picture</code>. With these fields, a profile has the following structure:</p>
-<pre><code class="language-json">{
-  &quot;name&quot;: {
-    &quot;title&quot;: &quot;mr&quot;,
-    &quot;first&quot;: &quot;matt&quot;,
-    &quot;last&quot;: &quot;hahn&quot;
-  },
-  &quot;email&quot;: &quot;matt.hahn@example.com&quot;,
-  &quot;login&quot;: {
-    &quot;username&quot;: &quot;greenostrich307&quot;,
-    &quot;password&quot;: &quot;darkange&quot;,
-    &quot;salt&quot;: &quot;V5xi38lN&quot;,
-    &quot;md5&quot;: &quot;cba0d5fb77ae3e0dbe177b9624df5ceb&quot;,
-    &quot;sha1&quot;: &quot;5f22fdcc79affdef604d89b64b7db599ed454c5e&quot;,
-    &quot;sha256&quot;: &quot;23afb0983e874169669f96cd72b69234aef4cf54a86f89a25e14e91941ac95a2&quot;
-  },
-  &quot;picture&quot;: {
-    &quot;large&quot;: &quot;https://randomuser.me/api/portraits/men/20.jpg&quot;,
-    &quot;medium&quot;: &quot;https://randomuser.me/api/portraits/med/men/20.jpg&quot;,
-    &quot;thumbnail&quot;: &quot;https://randomuser.me/api/portraits/thumb/men/20.jpg&quot;
-  }
-}
-</code></pre>
-<p>At this point, you can see the password and hash in there. As I explained above, you <em>do not</em> want to do this in a real application. As such, this example focuses on JWT and we are doing this purely for convenience.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#309;font-weight:bold">&#34;name&#34;</span>: {
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&#34;title&#34;</span>: <span style="color:#c30">&#34;mr&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&#34;first&#34;</span>: <span style="color:#c30">&#34;matt&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&#34;last&#34;</span>: <span style="color:#c30">&#34;hahn&#34;</span>
+</span></span><span style="display:flex;"><span>  },
+</span></span><span style="display:flex;"><span>  <span style="color:#309;font-weight:bold">&#34;email&#34;</span>: <span style="color:#c30">&#34;matt.hahn@example.com&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#309;font-weight:bold">&#34;login&#34;</span>: {
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&#34;username&#34;</span>: <span style="color:#c30">&#34;greenostrich307&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&#34;password&#34;</span>: <span style="color:#c30">&#34;darkange&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&#34;salt&#34;</span>: <span style="color:#c30">&#34;V5xi38lN&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&#34;md5&#34;</span>: <span style="color:#c30">&#34;cba0d5fb77ae3e0dbe177b9624df5ceb&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&#34;sha1&#34;</span>: <span style="color:#c30">&#34;5f22fdcc79affdef604d89b64b7db599ed454c5e&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&#34;sha256&#34;</span>: <span style="color:#c30">&#34;23afb0983e874169669f96cd72b69234aef4cf54a86f89a25e14e91941ac95a2&#34;</span>
+</span></span><span style="display:flex;"><span>  },
+</span></span><span style="display:flex;"><span>  <span style="color:#309;font-weight:bold">&#34;picture&#34;</span>: {
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&#34;large&#34;</span>: <span style="color:#c30">&#34;https://randomuser.me/api/portraits/men/20.jpg&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&#34;medium&#34;</span>: <span style="color:#c30">&#34;https://randomuser.me/api/portraits/med/men/20.jpg&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#309;font-weight:bold">&#34;thumbnail&#34;</span>: <span style="color:#c30">&#34;https://randomuser.me/api/portraits/thumb/men/20.jpg&#34;</span>
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>At this point, you can see the password and hash in there. As I explained above, you <em>do not</em> want to do this in a real application. As such, this example focuses on JWT and we are doing this purely for convenience.</p>
 <h2 id="the-data-models">The data models</h2>
 <p>The models for representing the data provided from the random user generator are as follows. We will be using the Lombok <sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> <code>@Data</code> annotation to stay away from having to write explicit setters and getters.</p>
 <h3 id="profile">Profile</h3>
-<pre><code class="language-java">import lombok.Data;
-
-@Data
-public class Profile {
-    private Name name;
-    private String email;
-    private Login login;
-    private Picture picture;
-}
-</code></pre>
-<h3 id="name">Name</h3>
-<pre><code class="language-java">@Data
-public class Name {
-    private String title;
-    private String first;
-    private String last;
-}
-</code></pre>
-<h3 id="login">Login</h3>
-<pre><code class="language-java">@Data
-public class Login {
-    String username;
-    String password;
-    String salt;
-    String md5;
-    String sha1;
-    String sha256;
-}
-</code></pre>
-<h3 id="picture">Picture</h3>
-<pre><code class="language-java">@Data
-public class Picture {
-    private URL large;
-    private URL medium;
-    private URL thumbnail;
-}
-</code></pre>
-<p>We will also create two other data models that expose a minimal set of profile information without the credentials.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">import</span><span style="color:#bbb"> </span><span style="color:#0cf;font-weight:bold">lombok.Data</span>;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@Data</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">Profile</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span>Name<span style="color:#bbb"> </span>name;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span>String<span style="color:#bbb"> </span>email;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span>Login<span style="color:#bbb"> </span>login;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span>Picture<span style="color:#bbb"> </span>picture;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><h3 id="name">Name</h3>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Data</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">Name</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span>String<span style="color:#bbb"> </span>title;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span>String<span style="color:#bbb"> </span>first;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span>String<span style="color:#bbb"> </span>last;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><h3 id="login">Login</h3>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Data</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">Login</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>String<span style="color:#bbb"> </span>username;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>String<span style="color:#bbb"> </span>password;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>String<span style="color:#bbb"> </span>salt;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>String<span style="color:#bbb"> </span>md5;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>String<span style="color:#bbb"> </span>sha1;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>String<span style="color:#bbb"> </span>sha256;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><h3 id="picture">Picture</h3>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Data</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">Picture</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span>URL<span style="color:#bbb"> </span>large;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span>URL<span style="color:#bbb"> </span>medium;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span>URL<span style="color:#bbb"> </span>thumbnail;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>We will also create two other data models that expose a minimal set of profile information without the credentials.</p>
 <h3 id="minimalprofile">MinimalProfile</h3>
-<pre><code class="language-java">@Data
-public class MinimalProfile {
-    private final String username;
-    private final Name name;
-    private final URL thumbnail;
-
-    public MinimalProfile(Profile profile) {
-        name = profile.getName();
-        username = profile.getLogin().getUsername();
-        thumbnail = profile.getPicture().getThumbnail();
-    }
-}
-</code></pre>
-<h3 id="detailedprofile">DetailedProfile</h3>
-<pre><code class="language-java">@Data
-public class DetailedProfile {
-
-    private final Picture picture;
-    private final Name name;
-    private final String email;
-    private final String username;
-
-    public DetailedProfile(Profile profile) {
-        name = profile.getName();
-        email = profile.getEmail();
-        picture = profile.getPicture();
-        username = profile.getLogin().getUsername();
-    }
-}
-</code></pre>
-<h2 id="the-controllers">The Controllers</h2>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Data</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">MinimalProfile</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">final</span><span style="color:#bbb"> </span>String<span style="color:#bbb"> </span>username;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">final</span><span style="color:#bbb"> </span>Name<span style="color:#bbb"> </span>name;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">final</span><span style="color:#bbb"> </span>URL<span style="color:#bbb"> </span>thumbnail;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#c0f">MinimalProfile</span>(Profile<span style="color:#bbb"> </span>profile)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>name<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>profile.<span style="color:#309">getName</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>username<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>profile.<span style="color:#309">getLogin</span>().<span style="color:#309">getUsername</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>thumbnail<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>profile.<span style="color:#309">getPicture</span>().<span style="color:#309">getThumbnail</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><h3 id="detailedprofile">DetailedProfile</h3>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Data</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">DetailedProfile</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">final</span><span style="color:#bbb"> </span>Picture<span style="color:#bbb"> </span>picture;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">final</span><span style="color:#bbb"> </span>Name<span style="color:#bbb"> </span>name;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">final</span><span style="color:#bbb"> </span>String<span style="color:#bbb"> </span>email;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">final</span><span style="color:#bbb"> </span>String<span style="color:#bbb"> </span>username;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#c0f">DetailedProfile</span>(Profile<span style="color:#bbb"> </span>profile)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>name<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>profile.<span style="color:#309">getName</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>email<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>profile.<span style="color:#309">getEmail</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>picture<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>profile.<span style="color:#309">getPicture</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>username<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>profile.<span style="color:#309">getLogin</span>().<span style="color:#309">getUsername</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><h2 id="the-controllers">The Controllers</h2>
 <p>The code for the API&rsquo;s controller is as follows:</p>
-<pre><code class="language-java">@RestController
-@RequestMapping(path = &quot;/profile&quot;)
-public class ProfileController {
-
-    private final ProfileService profileService;
-
-    @SuppressWarnings(&quot;unused&quot;)
-    public ProfileController() {
-        this(null);
-    }
-
-    @Autowired
-    public ProfileController(ProfileService profileService) {
-        this.profileService = profileService;
-    }
-
-    @RequestMapping(path = &quot;/{username}&quot;,
-            method = GET,
-            produces = APPLICATION_JSON_VALUE)
-    public MinimalProfile minimal(@PathVariable String username) {
-        return profileService.minimal(username)
-                .orElseThrow(() -&gt; new ProfileNotFoundException(username));
-    }
-
-    @RequestMapping(path = &quot;/details/{username}&quot;,
-            method = GET,
-            produces = APPLICATION_JSON_VALUE)
-    public DetailedProfile details(@PathVariable String username) {
-        return profileService.detailed(username)
-                .orElseThrow(() -&gt; new ProfileNotFoundException(username));
-    }
-}
-</code></pre>
-<p>It delegates querying for profiles to the <code>ProfileService</code> and throws exceptions if a Profile is not present. Notice the use of Java&rsquo;s <code>Optional</code> to throw exceptions.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@RestController</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@RequestMapping</span>(path<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;/profile&#34;</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">ProfileController</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">final</span><span style="color:#bbb"> </span>ProfileService<span style="color:#bbb"> </span>profileService;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@SuppressWarnings</span>(<span style="color:#c30">&#34;unused&#34;</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#c0f">ProfileController</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">this</span>(<span style="color:#069;font-weight:bold">null</span>);<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Autowired</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#c0f">ProfileController</span>(ProfileService<span style="color:#bbb"> </span>profileService)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">this</span>.<span style="color:#309">profileService</span><span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>profileService;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@RequestMapping</span>(path<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;/{username}&#34;</span>,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>method<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>GET,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>produces<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>APPLICATION_JSON_VALUE)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>MinimalProfile<span style="color:#bbb"> </span><span style="color:#c0f">minimal</span>(<span style="color:#99f">@PathVariable</span><span style="color:#bbb"> </span>String<span style="color:#bbb"> </span>username)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>profileService.<span style="color:#309">minimal</span>(username)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">orElseThrow</span>(()<span style="color:#bbb"> </span><span style="color:#555">-&gt;</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>ProfileNotFoundException(username));<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@RequestMapping</span>(path<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#c30">&#34;/details/{username}&#34;</span>,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>method<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>GET,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>produces<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>APPLICATION_JSON_VALUE)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>DetailedProfile<span style="color:#bbb"> </span><span style="color:#c0f">details</span>(<span style="color:#99f">@PathVariable</span><span style="color:#bbb"> </span>String<span style="color:#bbb"> </span>username)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>profileService.<span style="color:#309">detailed</span>(username)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">orElseThrow</span>(()<span style="color:#bbb"> </span><span style="color:#555">-&gt;</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>ProfileNotFoundException(username));<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>It delegates querying for profiles to the <code>ProfileService</code> and throws exceptions if a Profile is not present. Notice the use of Java&rsquo;s <code>Optional</code> to throw exceptions.</p>
 <h3 id="the-profileservice">The ProfileService</h3>
-<pre><code class="language-java">@Component
-public class ProfileService {
-    private final List&lt;Profile&gt; profiles;
-
-    private final Path PROFILES_FILE = Paths.get(this.getClass().getResource(&quot;/profiles.json&quot;).toURI());
-
-    public ProfileService() throws IOException, URISyntaxException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        profiles = objectMapper.readValue(PROFILES_FILE.toFile(), new TypeReference&lt;List&lt;Profile&gt;&gt;() {
-        });
-    }
-
-    protected Optional&lt;Profile&gt; get(String username) {
-        return profiles.stream()
-                .filter(profile -&gt; profile.getLogin().getUsername().equals(username))
-                .findFirst();
-    }
-
-    public Optional&lt;MinimalProfile&gt; minimal(String username) {
-        return get(username).map(profile -&gt; new MinimalProfile(profile));
-    }
-
-    public Optional&lt;DetailedProfile&gt; detailed(String username) {
-        return get(username).map(profile -&gt; new DetailedProfile(profile));
-    }
-}
-</code></pre>
-<h3 id="exception-handling">Exception Handling</h3>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Component</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">ProfileService</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">final</span><span style="color:#bbb"> </span>List<span style="color:#555">&lt;</span>Profile<span style="color:#555">&gt;</span><span style="color:#bbb"> </span>profiles;<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">final</span><span style="color:#bbb"> </span>Path<span style="color:#bbb"> </span>PROFILES_FILE<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>Paths.<span style="color:#309">get</span>(<span style="color:#069;font-weight:bold">this</span>.<span style="color:#309">getClass</span>().<span style="color:#309">getResource</span>(<span style="color:#c30">&#34;/profiles.json&#34;</span>).<span style="color:#309">toURI</span>());<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#c0f">ProfileService</span>()<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>IOException,<span style="color:#bbb"> </span>URISyntaxException<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>ObjectMapper<span style="color:#bbb"> </span>objectMapper<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>ObjectMapper();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>profiles<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>objectMapper.<span style="color:#309">readValue</span>(PROFILES_FILE.<span style="color:#309">toFile</span>(),<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>TypeReference<span style="color:#555">&lt;</span>List<span style="color:#555">&lt;</span>Profile<span style="color:#555">&gt;&gt;</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>});<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">protected</span><span style="color:#bbb"> </span>Optional<span style="color:#555">&lt;</span>Profile<span style="color:#555">&gt;</span><span style="color:#bbb"> </span><span style="color:#c0f">get</span>(String<span style="color:#bbb"> </span>username)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>profiles.<span style="color:#309">stream</span>()<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">filter</span>(profile<span style="color:#bbb"> </span><span style="color:#555">-&gt;</span><span style="color:#bbb"> </span>profile.<span style="color:#309">getLogin</span>().<span style="color:#309">getUsername</span>().<span style="color:#309">equals</span>(username))<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">                </span>.<span style="color:#309">findFirst</span>();<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>Optional<span style="color:#555">&lt;</span>MinimalProfile<span style="color:#555">&gt;</span><span style="color:#bbb"> </span><span style="color:#c0f">minimal</span>(String<span style="color:#bbb"> </span>username)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>get(username).<span style="color:#309">map</span>(profile<span style="color:#bbb"> </span><span style="color:#555">-&gt;</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>MinimalProfile(profile));<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>Optional<span style="color:#555">&lt;</span>DetailedProfile<span style="color:#555">&gt;</span><span style="color:#bbb"> </span><span style="color:#c0f">detailed</span>(String<span style="color:#bbb"> </span>username)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>get(username).<span style="color:#309">map</span>(profile<span style="color:#bbb"> </span><span style="color:#555">-&gt;</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>DetailedProfile(profile));<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><h3 id="exception-handling">Exception Handling</h3>
 <p>We will also need to wire up a <code>ControllerAdvice</code> to handle exceptions appropriately:</p>
-<pre><code class="language-java">
-@ControllerAdvice
-public class GlobalExceptionHandler {
-    @ResponseStatus(NOT_FOUND)
-    @ExceptionHandler(ProfileNotFoundException.class)
-    public void profileNotFound() {
-    }
-}
-</code></pre>
-<p>With this, you should have a profile service up and running.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@ControllerAdvice</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">GlobalExceptionHandler</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@ResponseStatus</span>(NOT_FOUND)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@ExceptionHandler</span>(ProfileNotFoundException.<span style="color:#309">class</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">profileNotFound</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>With this, you should have a profile service up and running.</p>
 <h3 id="minimal-profile">Minimal profile</h3>
-<pre><code>$ curl -s &quot;http://localhost:8080/profile/yellowfrog347&quot; | jq .
+<pre tabindex="0"><code>$ curl -s &#34;http://localhost:8080/profile/yellowfrog347&#34; | jq .
 {
-  &quot;username&quot;: &quot;yellowfrog347&quot;,
-  &quot;name&quot;: {
-    &quot;title&quot;: &quot;ms&quot;,
-    &quot;first&quot;: &quot;sofia&quot;,
-    &quot;last&quot;: &quot;hansen&quot;
+  &#34;username&#34;: &#34;yellowfrog347&#34;,
+  &#34;name&#34;: {
+    &#34;title&#34;: &#34;ms&#34;,
+    &#34;first&#34;: &#34;sofia&#34;,
+    &#34;last&#34;: &#34;hansen&#34;
   },
-  &quot;thumbnail&quot;: &quot;https://randomuser.me/api/portraits/thumb/women/71.jpg&quot;
+  &#34;thumbnail&#34;: &#34;https://randomuser.me/api/portraits/thumb/women/71.jpg&#34;
 }
-</code></pre>
-<h3 id="detailed-profile">Detailed Profile</h3>
-<pre><code>$ curl -s &quot;http://localhost:8080/profile/details/yellowfrog347&quot; | jq .
+</code></pre><h3 id="detailed-profile">Detailed Profile</h3>
+<pre tabindex="0"><code>$ curl -s &#34;http://localhost:8080/profile/details/yellowfrog347&#34; | jq .
 {
-  &quot;picture&quot;: {
-    &quot;large&quot;: &quot;https://randomuser.me/api/portraits/women/71.jpg&quot;,
-    &quot;medium&quot;: &quot;https://randomuser.me/api/portraits/med/women/71.jpg&quot;,
-    &quot;thumbnail&quot;: &quot;https://randomuser.me/api/portraits/thumb/women/71.jpg&quot;
+  &#34;picture&#34;: {
+    &#34;large&#34;: &#34;https://randomuser.me/api/portraits/women/71.jpg&#34;,
+    &#34;medium&#34;: &#34;https://randomuser.me/api/portraits/med/women/71.jpg&#34;,
+    &#34;thumbnail&#34;: &#34;https://randomuser.me/api/portraits/thumb/women/71.jpg&#34;
   },
-  &quot;name&quot;: {
-    &quot;title&quot;: &quot;ms&quot;,
-    &quot;first&quot;: &quot;sofia&quot;,
-    &quot;last&quot;: &quot;hansen&quot;
+  &#34;name&#34;: {
+    &#34;title&#34;: &#34;ms&#34;,
+    &#34;first&#34;: &#34;sofia&#34;,
+    &#34;last&#34;: &#34;hansen&#34;
   },
-  &quot;email&quot;: &quot;sofia.hansen@example.com&quot;,
-  &quot;username&quot;: &quot;yellowfrog347&quot;
+  &#34;email&#34;: &#34;sofia.hansen@example.com&#34;,
+  &#34;username&#34;: &#34;yellowfrog347&#34;
 }
-</code></pre>
-<p>The code for the application so far can be found <a href="https://github.com/sdqali/jwt-demo/tree/4f1da432a51fb8c88fc21a6fad895e03ca3611d9">here</a>. In the next blog post of the series, we will wire up Spring Security and build a login feature that issues a JWT after successful login.</p>
+</code></pre><p>The code for the application so far can be found <a href="https://github.com/sdqali/jwt-demo/tree/4f1da432a51fb8c88fc21a6fad895e03ca3611d9">here</a>. In the next blog post of the series, we will wire up Spring Security and build a login feature that issues a JWT after successful login.</p>
 <div class="footnotes" role="doc-endnotes">
 <hr>
 <ol>
