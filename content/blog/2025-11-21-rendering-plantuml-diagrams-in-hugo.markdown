@@ -119,7 +119,7 @@ security:
       - ^http://localhost:9999/svg/*
 ```
 
-It is important to note that the `skinparam svgDimensionStyle false` is important here to ensure that the SVG produced doesn't include `width` and `height` attributes [^16]. This allows finer control on how the SVG is displayed, especially on narrower screens, with CSS that would look like this:
+It is important to note that the `skinparam svgDimensionStyle false` is here to ensure that the SVG produced doesn't include `width` and `height` attributes [^16]. This allows finer control on how the SVG is displayed, especially on narrower screens, with CSS that would look like this:
 
 ```
 svg {
