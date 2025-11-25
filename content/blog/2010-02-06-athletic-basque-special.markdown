@@ -1,12 +1,12 @@
 ---
-bbcommentid: 96
+bbissueid: 96
 categories:
 - football
 - athletic
 - bilbao
 comments: true
 date: 2010-02-06
-ghcommentid: 19
+ghissueid: 19
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - football

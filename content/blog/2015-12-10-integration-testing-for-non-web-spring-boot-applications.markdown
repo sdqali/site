@@ -9,9 +9,9 @@ Tags:
 - spring
 aliases:
 - /blog/2015/12/10/integration-testing-challenges-for-non-web-spring-applications/
-bbcommentid: 51
+bbissueid: 51
 date: 2015-12-11 02:45:59
-ghcommentid: 105
+ghissueid: 105
 image: images/spring-by-pivotal.png
 title: Integration testing challenges for non-web Spring applications
 ---

@@ -6,8 +6,8 @@ tags:
 - hugo
 - github
 - bitbucket
-ghcommentid: 150
-bbcommentid: 143
+ghissueid: 150
+bbissueid: 143
 ---
 One thing that statically generated sites like this typically lack is a commenting system. There are solutions like discourse that you can embed, but then the commenter will need to create an account there, and you now have one more dependency. Sometimes, that is a perfectly reasonable approach.
 
@@ -131,22 +131,22 @@ And in the front-matter of each page:
 
 ```
 ghcommentId: 150
-bbcommentid: 143
+bbissueid: 143
 ```
 
 A Hugo partial then uses these parameters to set up the JS in each page:
 
 ```go
-{{ if isset .Params "ghcommentid" }}
-var ghUrl = "https://github.com/{{ .Site.Params.ghCommentsRepo }}/issues/{{ .Params.ghcommentid }}";
-var ghApiUrl = "https://api.github.com/repos/{{ .Site.Params.ghCommentsRepo }}/issues/{{ .Params.ghcommentid }}/comments";
+{{ if isset .Params "ghissueid" }}
+var ghUrl = "https://github.com/{{ .Site.Params.ghCommentsRepo }}/issues/{{ .Params.ghissueid }}";
+var ghApiUrl = "https://api.github.com/repos/{{ .Site.Params.ghCommentsRepo }}/issues/{{ .Params.ghissueid }}/comments";
 
 $("#gh-comments-list").append("<a class='issues-link'href='" + ghUrl + "'  target='_blank'>Comment via <span class='icon-github'/></a>");
 {{ end }}
 
-{{ if isset .Params "bbcommentid" }}
-var bbUrl = "https://bitbucket.org/{{ .Site.Params.bbCommentsRepo }}/issues/{{ .Params.bbcommentid }}/"
-var bbApiUrl = "https://api.bitbucket.org/2.0/repositories/{{ .Site.Params.bbCommentsRepo }}/issues/{{ .Params.bbcommentid }}/comments";
+{{ if isset .Params "bbissueid" }}
+var bbUrl = "https://bitbucket.org/{{ .Site.Params.bbCommentsRepo }}/issues/{{ .Params.bbissueid }}/"
+var bbApiUrl = "https://api.bitbucket.org/2.0/repositories/{{ .Site.Params.bbCommentsRepo }}/issues/{{ .Params.bbissueid }}/comments";
 
 $("#gh-comments-list").append("<a class='issues-link'href='" + bbUrl + "'  target='_blank'>Comment via <span class='icon-bitbucket'/></a>");
 {{ end }}

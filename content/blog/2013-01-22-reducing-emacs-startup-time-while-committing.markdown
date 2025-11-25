@@ -1,5 +1,5 @@
 ---
-bbcommentid: 37
+bbissueid: 37
 categories:
 - code
 - development
@@ -7,7 +7,7 @@ categories:
 - mac-osx
 comments: true
 date: 2013-01-22
-ghcommentid: 56
+ghissueid: 56
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - code

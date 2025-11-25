@@ -1,7 +1,7 @@
 ---
 aliases:
 - /2012/02/bullet-proof-jenkins-setup.html
-bbcommentid: 61
+bbissueid: 61
 categories:
 - jenkins
 - ci
@@ -12,7 +12,7 @@ categories:
 - development
 comments: true
 date: 2012-02-03
-ghcommentid: 30
+ghissueid: 30
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - jenkins

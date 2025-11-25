@@ -1,9 +1,9 @@
 ---
 aliases:
 - /blog/2018/05/04/freebuilder-plugin-for-intellij/
-bbcommentid: 104
+bbissueid: 104
 date: 2018-05-05 05:27:35
-ghcommentid: 137
+ghissueid: 137
 tags:
 - java
 - freebuilder

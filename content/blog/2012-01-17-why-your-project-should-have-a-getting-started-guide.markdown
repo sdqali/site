@@ -1,7 +1,7 @@
 ---
 aliases:
 - /2012/01/why-your-project-should-have-getting.html
-bbcommentid: 77
+bbissueid: 77
 categories:
 - code
 - rails
@@ -10,7 +10,7 @@ categories:
 - development
 comments: true
 date: 2012-01-17
-ghcommentid: 29
+ghissueid: 29
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - code

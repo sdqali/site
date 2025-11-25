@@ -15,9 +15,9 @@ Tags:
 aliases:
 - /blog/2016/11/29/implementing-feature-toggles-for-a-spring-boot-application---part-4/
 - /blog/2016/11/29/implementing-feature-toggles-for-a-spring-boot-application-part-4/
-bbcommentid: 121
+bbissueid: 121
 date: 2016-11-30 05:50:42
-ghcommentid: 130
+ghissueid: 130
 image: images/feature-toggles.png
 series:
 - feature-toggles

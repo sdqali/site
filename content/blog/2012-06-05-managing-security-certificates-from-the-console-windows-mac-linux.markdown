@@ -1,7 +1,7 @@
 ---
 aliases:
 - /blog/2012/06/05/managing-security-certificates-from-the-console-windows-mac-linux/
-bbcommentid: 78
+bbissueid: 78
 categories:
 - code
 - ssl
@@ -14,7 +14,7 @@ categories:
 - firefox
 comments: true
 date: 2012-06-05
-ghcommentid: 36
+ghissueid: 36
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - code

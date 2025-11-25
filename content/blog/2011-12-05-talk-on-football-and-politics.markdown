@@ -1,13 +1,13 @@
 ---
 aliases:
 - /2011/12/talk-on-football-and-politics.html
-bbcommentid: 112
+bbissueid: 112
 categories:
 - talk
 - football
 comments: true
 date: 2011-12-05
-ghcommentid: 27
+ghissueid: 27
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - talk

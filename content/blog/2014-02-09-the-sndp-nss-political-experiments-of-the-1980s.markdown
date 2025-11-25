@@ -1,12 +1,12 @@
 ---
-bbcommentid: 41
+bbissueid: 41
 categories:
 - kerala
 - malabar
 - politics
 comments: true
 date: 2014-02-09
-ghcommentid: 92
+ghissueid: 92
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - kerala

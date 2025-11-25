@@ -1,5 +1,5 @@
 ---
-bbcommentid: 29
+bbissueid: 29
 categories:
 - news
 - media
@@ -7,7 +7,7 @@ categories:
 - technology
 comments: true
 date: 2013-08-10
-ghcommentid: 69
+ghissueid: 69
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - news

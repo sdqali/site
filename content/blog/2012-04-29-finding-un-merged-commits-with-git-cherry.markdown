@@ -1,7 +1,7 @@
 ---
 aliases:
 - /2012/04/finding-un-merged-commits-with-git.html
-bbcommentid: 56
+bbissueid: 56
 categories:
 - code
 - git
@@ -10,7 +10,7 @@ categories:
 - development
 comments: true
 date: 2012-04-29
-ghcommentid: 31
+ghissueid: 31
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - code

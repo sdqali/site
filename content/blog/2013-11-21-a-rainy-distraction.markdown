@@ -1,11 +1,11 @@
 ---
-bbcommentid: 7
+bbissueid: 7
 categories:
 - life
 - rain
 comments: true
 date: 2013-11-21
-ghcommentid: 90
+ghissueid: 90
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - life

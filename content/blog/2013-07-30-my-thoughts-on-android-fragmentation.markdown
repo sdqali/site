@@ -1,12 +1,12 @@
 ---
-bbcommentid: 17
+bbissueid: 17
 categories:
 - android
 - technology
 - internet
 comments: true
 date: 2013-07-30
-ghcommentid: 64
+ghissueid: 64
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - android

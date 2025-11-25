@@ -4,8 +4,8 @@ date: 2025-11-20T19:45:44-08:00
 tags:
 - hugo
 - plantuml
-ghcommentid: 148
-bbcommentid: 141
+ghissueid: 148
+bbissueid: 141
 ---
 
 This blog is generated using Hugo [^1]. I have always wished that it had a way to render PlantUML diagrams [^2]. I am not alone in wishing for this - this is a feature that people have requested for over 5 years for now [^3]. But because of the peculiarities of Hugo's opinionated security posture [^4] and how PlantUML requires starting a Java process [^5], it has always been rejected [^6]. People have found various workarounds:

@@ -1,8 +1,8 @@
 ---
 title: Managing environment lifecycles for Dropwizard Commands
 date: 2019-07-28T18:29:49-07:00
-ghcommentid: 144
-bbcommentid: 137
+ghissueid: 144
+bbissueid: 137
 tags:
 - java
 - dropwizard

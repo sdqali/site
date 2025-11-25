@@ -1,8 +1,8 @@
 ---
 title: Viewing Sequence ownership information in Postgres
 date: 2019-05-07T18:04:42-07:00
-ghcommentid: 142
-bbcommentid: 135
+ghissueid: 142
+bbissueid: 135
 aliases:
 - /blog/2019/05/07/looking-up-sequence-ownership-information-in-postgres/
 tags:

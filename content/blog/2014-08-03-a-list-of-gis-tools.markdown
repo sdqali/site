@@ -1,5 +1,5 @@
 ---
-bbcommentid: 42
+bbissueid: 42
 categories:
 - gis
 - maps
@@ -8,7 +8,7 @@ categories:
 - tools
 comments: true
 date: 2014-08-03
-ghcommentid: 96
+ghissueid: 96
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - gis

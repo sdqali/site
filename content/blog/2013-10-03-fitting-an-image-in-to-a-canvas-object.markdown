@@ -1,12 +1,12 @@
 ---
-bbcommentid: 8
+bbissueid: 8
 categories:
 - javascript
 - canvas
 - code
 comments: true
 date: 2013-10-03
-ghcommentid: 85
+ghissueid: 85
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - javascript

@@ -1,9 +1,9 @@
 ---
 aliases:
 - /blog/2017/08/17/uploading-a-standalone-artifact-to-nexus-3/
-bbcommentid: 92
+bbissueid: 92
 date: 2017-08-18 04:00:43
-ghcommentid: 131
+ghissueid: 131
 tags:
 - maven
 - java

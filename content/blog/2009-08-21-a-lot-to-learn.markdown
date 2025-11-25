@@ -1,12 +1,12 @@
 ---
-bbcommentid: 87
+bbissueid: 87
 categories:
 - life
 - reflections
 - learn
 comments: true
 date: 2009-08-21
-ghcommentid: 15
+ghissueid: 15
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - life

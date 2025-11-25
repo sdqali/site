@@ -1,7 +1,7 @@
 ---
 aliases:
 - /blog/2014/08/02/importing-the-yelp-dataset-into-mongo/index.html
-bbcommentid: 43
+bbissueid: 43
 categories:
 - mongo
 - code
@@ -10,7 +10,7 @@ categories:
 - data
 comments: true
 date: 2014-08-02
-ghcommentid: 95
+ghissueid: 95
 image:
   feature: /images/threaded-blue-on-black-cropped.jpg
 tags:

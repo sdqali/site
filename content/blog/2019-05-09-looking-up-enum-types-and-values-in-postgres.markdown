@@ -1,8 +1,8 @@
 ---
 title: Looking up Enum types and values in Postgres
 date: 2019-05-09T17:10:23-07:00
-ghcommentid: 143
-bbcommentid: 136
+ghissueid: 143
+bbissueid: 136
 tags:
 - postgres
 - sql

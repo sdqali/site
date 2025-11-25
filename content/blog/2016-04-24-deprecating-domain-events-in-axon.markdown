@@ -7,9 +7,9 @@ Tags:
 - development
 - java
 - axon
-bbcommentid: 115
+bbissueid: 115
 date: 2016-04-24 23:35:43
-ghcommentid: 112
+ghissueid: 112
 image: images/axon.png
 title: Deprecating domain events in Axon
 ---

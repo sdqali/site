@@ -9,9 +9,9 @@ Tags:
 - camel
 - java
 - spring
-bbcommentid: 52
+bbissueid: 52
 date: 2015-12-16 06:07:01
-ghcommentid: 108
+ghissueid: 108
 image: images/apache-camel.png
 title: Authentication for Apache Camel HTTP components
 ---

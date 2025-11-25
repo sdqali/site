@@ -7,10 +7,10 @@ Categories:
 - automation
 - twist
 - cucumber
-bbcommentid: 80
+bbissueid: 80
 comments: true
 date: 2012-06-24
-ghcommentid: 38
+ghissueid: 38
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - development

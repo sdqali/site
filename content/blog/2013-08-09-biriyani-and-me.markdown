@@ -1,12 +1,12 @@
 ---
-bbcommentid: 31
+bbissueid: 31
 categories:
 - life
 - food
 - biriyani
 comments: true
 date: 2013-08-09
-ghcommentid: 68
+ghissueid: 68
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - life

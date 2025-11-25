@@ -12,9 +12,9 @@ Tags:
 - devops
 aliases:
 - /blog/2015/05/21/making-sense-of-cloud-foundry-security-group-declarations/
-bbcommentid: 46
+bbissueid: 46
 date: 2015-05-22 05:58:41
-ghcommentid: 99
+ghissueid: 99
 title: Making sense of Cloud Foundry security group declarations
 ---
 

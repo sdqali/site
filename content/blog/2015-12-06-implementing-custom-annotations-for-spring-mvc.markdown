@@ -7,9 +7,9 @@ Tags:
 - development
 - java
 - spring
-bbcommentid: 54
+bbissueid: 54
 date: 2015-12-06 21:28:26
-ghcommentid: 103
+ghissueid: 103
 image: images/spring-by-pivotal.png
 title: Implementing custom annotations for Spring MVC
 ---

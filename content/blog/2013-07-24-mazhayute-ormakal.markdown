@@ -1,11 +1,11 @@
 ---
-bbcommentid: 18
+bbissueid: 18
 categories:
 - rain
 - fiction
 comments: true
 date: 2013-07-24
-ghcommentid: 63
+ghissueid: 63
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - rain

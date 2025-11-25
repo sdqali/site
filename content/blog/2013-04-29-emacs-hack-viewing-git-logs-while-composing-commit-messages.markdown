@@ -1,5 +1,5 @@
 ---
-bbcommentid: 3
+bbissueid: 3
 categories:
 - code
 - development
@@ -9,7 +9,7 @@ categories:
 - tools
 comments: true
 date: 2013-04-29
-ghcommentid: 61
+ghissueid: 61
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - code

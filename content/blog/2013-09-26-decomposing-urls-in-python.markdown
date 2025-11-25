@@ -1,11 +1,11 @@
 ---
-bbcommentid: 21
+bbissueid: 21
 categories:
 - python
 - code
 comments: true
 date: 2013-09-26
-ghcommentid: 80
+ghissueid: 80
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - python

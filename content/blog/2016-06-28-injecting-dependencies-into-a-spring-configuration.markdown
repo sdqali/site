@@ -8,9 +8,9 @@ Tags:
 - java
 aliases:
 - /blog/2016/06/28/injecting-dependencies-into-a-spring-configuration/
-bbcommentid: 132
+bbissueid: 132
 date: 2016-06-29 03:17:51
-ghcommentid: 115
+ghissueid: 115
 image: images/spring-by-pivotal.png
 title: Injecting dependencies into a Spring @Configuration
 ---

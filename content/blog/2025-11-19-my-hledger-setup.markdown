@@ -5,8 +5,8 @@ tags:
 - hledger
 - nginx
 - jwt
-ghcommentid: 149
-bbcommentid: 142
+ghissueid: 149
+bbissueid: 142
 ---
 From 2014 to 2023, I kept track of all our finances, in one way or another. I started out with Intuit's Mint - it did a good job of aggregating accounts and presenting consolidated views. At some point, I became weary of Intuit having passwords to all my financial accounts and decided to keep track of everything in a Google Sheet, fronted by a Google Form to enter data.
 

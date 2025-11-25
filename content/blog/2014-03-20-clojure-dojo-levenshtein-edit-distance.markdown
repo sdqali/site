@@ -1,5 +1,5 @@
 ---
-bbcommentid: 39
+bbissueid: 39
 categories:
 - code
 - clojure
@@ -7,7 +7,7 @@ categories:
 - development
 comments: true
 date: 2014-03-20
-ghcommentid: 94
+ghissueid: 94
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - code

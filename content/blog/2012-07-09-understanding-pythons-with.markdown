@@ -1,14 +1,14 @@
 ---
 aliases:
 - /blog/2012/07/09/unerstanding-pythons-with/
-bbcommentid: 70
+bbissueid: 70
 categories:
 - python
 - code
 - development
 comments: true
 date: 2012-07-09
-ghcommentid: 41
+ghissueid: 41
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - python

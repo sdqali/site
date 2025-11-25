@@ -1,12 +1,12 @@
 ---
-bbcommentid: 86
+bbissueid: 86
 categories:
 - life
 - reflections
 - football
 comments: true
 date: 2009-08-16
-ghcommentid: 14
+ghissueid: 14
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - life

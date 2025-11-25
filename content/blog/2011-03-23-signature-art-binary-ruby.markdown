@@ -1,12 +1,12 @@
 ---
-bbcommentid: 109
+bbissueid: 109
 categories:
 - code
 - ruby
 - development
 comments: true
 date: 2011-03-23
-ghcommentid: 22
+ghissueid: 22
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - code

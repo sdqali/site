@@ -1,5 +1,5 @@
 ---
-bbcommentid: 75
+bbissueid: 75
 categories:
 - football
 - data
@@ -7,7 +7,7 @@ categories:
 - d3.js
 comments: true
 date: 2012-08-15
-ghcommentid: 47
+ghissueid: 47
 image: /images/threaded-blue-on-black-cropped.jpg
 keywords: null
 tags:

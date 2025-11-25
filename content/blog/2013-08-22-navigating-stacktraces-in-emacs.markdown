@@ -1,12 +1,12 @@
 ---
-bbcommentid: 34
+bbissueid: 34
 categories:
 - code
 - emacs
 - tools
 comments: true
 date: 2013-08-22
-ghcommentid: 75
+ghissueid: 75
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - code

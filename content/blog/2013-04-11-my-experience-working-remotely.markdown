@@ -1,5 +1,5 @@
 ---
-bbcommentid: 2
+bbissueid: 2
 categories:
 - development
 - work
@@ -7,7 +7,7 @@ categories:
 - reflections
 comments: true
 date: 2013-04-11
-ghcommentid: 59
+ghissueid: 59
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - development

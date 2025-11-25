@@ -1,5 +1,5 @@
 ---
-bbcommentid: 67
+bbissueid: 67
 categories:
 - talk
 - visualisation
@@ -9,7 +9,7 @@ categories:
 - deck.js
 comments: true
 date: 2012-07-16
-ghcommentid: 42
+ghissueid: 42
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - talk

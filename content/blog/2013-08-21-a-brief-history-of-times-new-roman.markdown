@@ -1,11 +1,11 @@
 ---
-bbcommentid: 30
+bbissueid: 30
 categories:
 - type
 - technology
 comments: true
 date: 2013-08-21
-ghcommentid: 74
+ghissueid: 74
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - type

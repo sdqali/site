@@ -1,5 +1,5 @@
 ---
-bbcommentid: 85
+bbissueid: 85
 categories:
 - life
 - reflections
@@ -7,7 +7,7 @@ categories:
 - thoughtworks
 comments: true
 date: 2009-09-22
-ghcommentid: 16
+ghissueid: 16
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - life

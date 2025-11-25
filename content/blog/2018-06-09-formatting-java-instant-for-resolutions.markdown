@@ -1,7 +1,7 @@
 ---
-bbcommentid: 106
+bbissueid: 106
 date: 2018-06-09 18:55:23
-ghcommentid: 138
+ghissueid: 138
 tags:
 - java
 - time

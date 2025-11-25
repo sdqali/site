@@ -1,12 +1,12 @@
 ---
-bbcommentid: 65
+bbissueid: 65
 categories:
 - code
 - browsers
 - javascript
 comments: true
 date: 2012-11-22
-ghcommentid: 50
+ghissueid: 50
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - code

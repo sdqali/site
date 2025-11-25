@@ -1,12 +1,12 @@
 ---
-bbcommentid: 4
+bbissueid: 4
 categories:
 - code
 - software
 - development
 comments: true
 date: 2013-04-08
-ghcommentid: 58
+ghissueid: 58
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - code

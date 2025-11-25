@@ -10,9 +10,9 @@ Tags:
 - java
 - spring
 - redis
-bbcommentid: 117
+bbissueid: 117
 date: 2016-11-02 20:10:33
-ghcommentid: 124
+ghissueid: 124
 image: img/redis-spring-boot.png
 title: Handling Deserialization errors in Spring Redis Sessions
 ---

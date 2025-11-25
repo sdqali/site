@@ -1,5 +1,5 @@
 ---
-bbcommentid: 19
+bbissueid: 19
 categories:
 - ruby
 - code
@@ -8,7 +8,7 @@ categories:
 - javascript
 comments: true
 date: 2013-09-29
-ghcommentid: 81
+ghissueid: 81
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - ruby

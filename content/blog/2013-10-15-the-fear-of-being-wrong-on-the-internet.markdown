@@ -1,10 +1,10 @@
 ---
-bbcommentid: 13
+bbissueid: 13
 categories:
 - internet
 comments: true
 date: 2013-10-15
-ghcommentid: 89
+ghissueid: 89
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - internet

@@ -1,11 +1,11 @@
 ---
-bbcommentid: 107
+bbissueid: 107
 categories:
 - drawing
 - life
 comments: true
 date: 2011-03-30
-ghcommentid: 24
+ghissueid: 24
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - drawing

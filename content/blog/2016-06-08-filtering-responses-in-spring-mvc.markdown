@@ -7,9 +7,9 @@ Tags:
 - development
 - java
 - spring
-bbcommentid: 134
+bbissueid: 134
 date: 2016-06-08 17:23:16
-ghcommentid: 114
+ghissueid: 114
 image: images/spring-by-pivotal.png
 title: Filtering responses in Spring MVC
 ---

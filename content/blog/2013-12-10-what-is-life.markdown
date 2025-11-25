@@ -1,10 +1,10 @@
 ---
-bbcommentid: 38
+bbissueid: 38
 categories:
 - fiction
 comments: true
 date: 2013-12-10
-ghcommentid: 91
+ghissueid: 91
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - fiction

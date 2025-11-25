@@ -8,9 +8,9 @@ Tags:
 - spring
 - mockmvc
 - java
-bbcommentid: 47
+bbissueid: 47
 date: 2015-11-24 10:45:06
-ghcommentid: 101
+ghissueid: 101
 image: images/spring-by-pivotal.png
 title: Testing async responses using MockMvc
 ---

@@ -1,5 +1,5 @@
 ---
-bbcommentid: 10
+bbissueid: 10
 categories:
 - code
 - groovy
@@ -7,7 +7,7 @@ categories:
 - android
 comments: true
 date: 2013-10-01
-ghcommentid: 82
+ghissueid: 82
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - code

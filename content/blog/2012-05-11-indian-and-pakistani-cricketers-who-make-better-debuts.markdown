@@ -1,5 +1,5 @@
 ---
-bbcommentid: 58
+bbissueid: 58
 categories:
 - data
 - development
@@ -12,7 +12,7 @@ categories:
 - pakistan
 comments: true
 date: 2012-05-11
-ghcommentid: 33
+ghissueid: 33
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - data

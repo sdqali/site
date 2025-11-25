@@ -1,5 +1,5 @@
 ---
-bbcommentid: 14
+bbissueid: 14
 categories:
 - rails
 - ruby
@@ -9,7 +9,7 @@ categories:
 - redis
 comments: true
 date: 2013-10-12
-ghcommentid: 87
+ghissueid: 87
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - rails

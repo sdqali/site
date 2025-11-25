@@ -1,12 +1,12 @@
 ---
-bbcommentid: 23
+bbissueid: 23
 categories:
 - code
 - bash
 - tools
 comments: true
 date: 2013-09-15
-ghcommentid: 78
+ghissueid: 78
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - code

@@ -1,5 +1,5 @@
 ---
-bbcommentid: 20
+bbissueid: 20
 categories:
 - food
 - burger
@@ -7,7 +7,7 @@ categories:
 - life
 comments: true
 date: 2013-09-17
-ghcommentid: 79
+ghissueid: 79
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - food

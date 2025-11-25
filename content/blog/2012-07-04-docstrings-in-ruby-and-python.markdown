@@ -1,5 +1,5 @@
 ---
-bbcommentid: 66
+bbissueid: 66
 categories:
 - python
 - code
@@ -8,7 +8,7 @@ categories:
 - heredoc
 comments: true
 date: 2012-07-04
-ghcommentid: 40
+ghissueid: 40
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - python

@@ -1,12 +1,12 @@
 ---
-bbcommentid: 71
+bbissueid: 71
 categories:
 - facebook
 - social-network
 - internet
 comments: true
 date: 2012-08-11
-ghcommentid: 46
+ghissueid: 46
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - facebook

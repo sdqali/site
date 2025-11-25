@@ -1,12 +1,12 @@
 ---
-bbcommentid: 12
+bbissueid: 12
 categories:
 - ruby
 - code
 - regexp
 comments: true
 date: 2013-10-01
-ghcommentid: 84
+ghissueid: 84
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - ruby

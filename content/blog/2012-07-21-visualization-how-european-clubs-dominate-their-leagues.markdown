@@ -1,7 +1,7 @@
 ---
 aliases:
 - /blog/2012/07/21/visualization-how-european-clubs-dominate-their-leagues
-bbcommentid: 69
+bbissueid: 69
 categories:
 - football
 - visualisation
@@ -10,7 +10,7 @@ categories:
 - code
 comments: true
 date: 2012-07-21
-ghcommentid: 44
+ghissueid: 44
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - football

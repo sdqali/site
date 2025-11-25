@@ -1,12 +1,12 @@
 ---
-bbcommentid: 72
+bbissueid: 72
 categories:
 - football
 - malabar
 - life
 comments: true
 date: 2012-08-21
-ghcommentid: 48
+ghissueid: 48
 image: /images/threaded-blue-on-black-cropped.jpg
 keywords: null
 tags:

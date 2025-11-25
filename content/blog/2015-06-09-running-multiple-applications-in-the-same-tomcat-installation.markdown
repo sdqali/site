@@ -7,9 +7,9 @@ Tags:
 - development
 - tomcat
 - java
-bbcommentid: 48
+bbissueid: 48
 date: 2015-06-09 05:11:05
-ghcommentid: 100
+ghissueid: 100
 image: images/1280px-Tomcat-logo.svg.png
 title: Running multiple applications in the same Tomcat installation
 ---

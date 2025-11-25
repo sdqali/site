@@ -10,9 +10,9 @@ Tags:
 - kubernetes
 aliases:
 - /blog/2016/11/04/a-very-basic-introduction-to-deploying-a-java-application-using-kubernetes/
-bbcommentid: 116
+bbissueid: 116
 date: 2016-11-05 05:34:53
-ghcommentid: 125
+ghissueid: 125
 image: img/KubernetesLogo.png
 keywords:
 - java

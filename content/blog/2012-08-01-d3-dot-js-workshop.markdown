@@ -1,5 +1,5 @@
 ---
-bbcommentid: 73
+bbissueid: 73
 categories:
 - talk
 - code
@@ -7,7 +7,7 @@ categories:
 - visualisation
 comments: true
 date: 2012-08-01
-ghcommentid: 45
+ghissueid: 45
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - talk

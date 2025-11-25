@@ -12,9 +12,9 @@ Tags:
 - request-parameters
 aliases:
 - /blog/2015/12/04/validating-requestparams-and-pathvariables-in-spring-mvc/
-bbcommentid: 49
+bbissueid: 49
 date: 2015-12-05 06:50:24
-ghcommentid: 102
+ghissueid: 102
 image: images/spring-by-pivotal.png
 title: Validating RequestParams and PathVariables in Spring MVC
 ---

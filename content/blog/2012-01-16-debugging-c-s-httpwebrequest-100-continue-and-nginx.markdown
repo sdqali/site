@@ -1,7 +1,7 @@
 ---
 aliases:
 - /2012/01/debugging-c-httpwebrequest-100-continue.html
-bbcommentid: 76
+bbissueid: 76
 categories:
 - c#
 - code
@@ -11,7 +11,7 @@ categories:
 - development
 comments: true
 date: 2012-01-16
-ghcommentid: 28
+ghissueid: 28
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - c#

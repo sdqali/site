@@ -1,11 +1,11 @@
 ---
-bbcommentid: 60
+bbissueid: 60
 categories:
 - reflections
 - learn
 comments: true
 date: 2012-05-30
-ghcommentid: 35
+ghissueid: 35
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - reflections

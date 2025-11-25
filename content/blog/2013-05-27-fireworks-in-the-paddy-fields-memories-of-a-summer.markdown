@@ -1,11 +1,11 @@
 ---
-bbcommentid: 6
+bbissueid: 6
 categories:
 - life
 - malabar
 comments: true
 date: 2013-05-27
-ghcommentid: 62
+ghissueid: 62
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - life

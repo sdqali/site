@@ -1,10 +1,10 @@
 ---
-bbcommentid: 36
+bbissueid: 36
 categories:
 - life
 comments: true
 date: 2013-01-21
-ghcommentid: 55
+ghissueid: 55
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - life

@@ -1,9 +1,9 @@
 ---
 aliases:
 - /blog/2018/03/22/a-jackson-and-freebuilder-quirk/
-bbcommentid: 100
+bbissueid: 100
 date: 2018-03-23 05:21:42
-ghcommentid: 134
+ghissueid: 134
 tags:
 - jackson
 - freebuilder

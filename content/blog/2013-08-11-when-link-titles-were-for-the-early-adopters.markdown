@@ -1,5 +1,5 @@
 ---
-bbcommentid: 26
+bbissueid: 26
 categories:
 - internet
 - web
@@ -7,7 +7,7 @@ categories:
 - accessibility
 comments: true
 date: 2013-08-11
-ghcommentid: 70
+ghissueid: 70
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - internet

@@ -1,5 +1,5 @@
 ---
-bbcommentid: 68
+bbissueid: 68
 categories:
 - social-network
 - twitter
@@ -7,7 +7,7 @@ categories:
 - google+
 comments: true
 date: 2012-07-17
-ghcommentid: 43
+ghissueid: 43
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - social-network

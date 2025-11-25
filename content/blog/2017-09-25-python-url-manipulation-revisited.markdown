@@ -1,9 +1,9 @@
 ---
 aliases:
 - /blog/2017/09/25/python-url-manipulation-revisited/
-bbcommentid: 91
+bbissueid: 91
 date: 2017-09-26 04:22:39
-ghcommentid: 132
+ghissueid: 132
 tags:
 - python
 title: Python URL manipulation revisited

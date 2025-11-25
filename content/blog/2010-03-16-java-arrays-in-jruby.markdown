@@ -1,5 +1,5 @@
 ---
-bbcommentid: 93
+bbissueid: 93
 categories:
 - code
 - jruby
@@ -8,7 +8,7 @@ categories:
 - development
 comments: true
 date: 2010-03-16
-ghcommentid: 20
+ghissueid: 20
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - code

@@ -1,5 +1,5 @@
 ---
-bbcommentid: 57
+bbissueid: 57
 categories:
 - mac-osx
 - emacs
@@ -8,7 +8,7 @@ categories:
 - elisp
 comments: true
 date: 2012-05-04
-ghcommentid: 32
+ghissueid: 32
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - mac-osx

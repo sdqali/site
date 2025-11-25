@@ -1,5 +1,5 @@
 ---
-bbcommentid: 25
+bbissueid: 25
 categories:
 - code
 - graphdb
@@ -7,7 +7,7 @@ categories:
 - cypher
 comments: true
 date: 2013-08-02
-ghcommentid: 66
+ghissueid: 66
 image: /images/threaded-blue-on-black-cropped.jpg
 tags:
 - code
