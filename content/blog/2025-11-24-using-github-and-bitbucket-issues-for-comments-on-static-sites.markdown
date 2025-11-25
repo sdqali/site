@@ -1,17 +1,17 @@
 ---
 title: Using GitHub and Bitbucket issues for comments on Static sites
 date: 2025-11-24T11:49:27-08:00
-draft: true
 tags:
 - hugo
 - github
 - bitbucket
-ghissueid: 150
-bbissueid: 143
+- codeberg
+ghissueid: 151
+bbissueid: 144
 ---
 One thing that statically generated sites like this typically lack is a commenting system. There are solutions like Disqus that you can embed, but then the commenter will need to create an account there, and you now have one more dependency. Sometimes, that is a perfectly reasonable approach.
 
-I came up with an approach [^1] that uses GitHub issues (and Bitbucket issues - but more about that later) to host comments.
+I came up with an approach [^1] that uses GitHub issues and Bitbucket issues to host comments.
 Since this site is hosted on GitHub, and most people who would leave a comment on this site have a GitHub account, it doesn't feel like another account to sign up for. And for those who don't have a GitHub account, the approach supports Bitbucket as well.
 
 ## First Iteration
@@ -158,9 +158,18 @@ $("#gh-comments-list").append("<a class='issues-link'href='" + bbUrl + "'  targe
 
 With this [GitHub issue](https://github.com/sdqali/site/issues/150) and this [Bitbucket issue](https://bitbucket.org/sdqali/sadique.io-comments/issues/143/example), this will render:
 
+![Comments](/images/comments.png)
+
 The front-matter parameters being `ghissueid` and `bbissueid` instead of `ghIssueId` and `bbIssueId` is down to a quirk of the Hugo templating system [^2]. Your static site generator may not have this issue.
 
-![Comments](/images/comments.png)
+## Nice to Haves
+ - With the rising popularity of Codeberg, it is worth adding support for commenting via Codeberg - they have a similar API to retrieve comments on an issue [^3].
+ - Issues are created for new entries manually. That gets old [^4], so it would be nice to create Issues via the script used to publish this site - [`publish.sh`](https://github.com/sdqali/site/blob/main/publish.sh).
+
+
+
 
 [^1]: The [original version](https://github.com/sdqali/site/commit/0f5aa21f38a8d8274656a46bcc44ce4a04b09e93#diff-eb261796c12a10bc5993c763ce2923dfe48aa14d9cf9b66187aeddceda10bf56) was implemented in 2019, and I am sure there are others who came up with similar approaches.
 [^2]: "Always have the front-matter keys in all-lowercase." - [Hugo Forum](https://discourse.gohugo.io/t/arent-all-front-matter-parameters-lower-cased-internally/11050).
+[^3]: Forgejo [issue/issueGetComments](https://codeberg.org/api/swagger#/issue/issueGetComments)
+[^4]: Or so, I assume, even though I didn't publish a single new entry between 2019 and this week.
