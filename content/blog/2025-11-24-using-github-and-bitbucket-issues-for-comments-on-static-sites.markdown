@@ -1,5 +1,5 @@
 ---
-title: Using GitHub and BitBucket issues for comments on Static sites
+title: Using GitHub and Bitbucket issues for comments on Static sites
 date: 2025-11-24T11:49:27-08:00
 draft: true
 tags:
@@ -12,19 +12,19 @@ bbissueid: 143
 One thing that statically generated sites like this typically lack is a commenting system. There are solutions like discourse that you can embed, but then the commenter will need to create an account there, and you now have one more dependency. Sometimes, that is a perfectly reasonable approach.
 
 I came up with an approach [^1] that uses GitHub issues (and Bitbucket issues - but more about that later) to host comments.
-Since this site is hosted on GitHub, and most people who would leave a comment on this site have a GitHub account, it doesn't feel like another account to sign up for. And for those who don't have a GitHub account, the approach supports BitBucket as well.
+Since this site is hosted on GitHub, and most people who would leave a comment on this site have a GitHub account, it doesn't feel like another account to sign up for. And for those who don't have a GitHub account, the approach supports Bitbucket as well.
 
 ## First Iteration
 
 The easiest approach would be:
-1. When publishing a new entry that accepts comments, a GitHub issue is created that links to the entry. A BitBucket issue is also created, linking back to the entry.
-2. Each entry links to the GitHub and BitBucket issue, as the place to leave comments.
+1. When publishing a new entry that accepts comments, a GitHub issue is created that links to the entry. A Bitbucket issue is also created, linking back to the entry.
+2. Each entry links to the GitHub and Bitbucket issue, as the place to leave comments.
 
-This has the glaring shortcoming that readers will need to open two separate pages to read comments, and comments from GitHub users aren't visible to BitBucket users, and _vice versa_.
+This has the glaring shortcoming that readers will need to open two separate pages to read comments, and comments from GitHub users aren't visible to Bitbucket users, and _vice versa_.
 
 ## Second Iteration
 
-Both BitBuket and GitHub offer public APIs that can fetch an issue and the comments on them. This makes it possible for each entry to fetch the comments from both sources, inter-leave them based on timestamps and render them directly on the page.
+Both Bitbucket and GitHub offer public APIs that can fetch an issue and the comments on them. This makes it possible for each entry to fetch the comments from both sources, inter-leave them based on timestamps and render them directly on the page.
 
 ```javascript
 document.addEventListener('DOMContentLoaded', function () {
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function () {
             username: comment.user.nickname
           },
           body: comment.content.html,
-          channel: "BitBucket"
+          channel: "Bitbucket"
         };
       });
     })
@@ -137,6 +137,8 @@ bbissueid: 143
 A Hugo partial then uses these parameters to set up the JS in each page:
 
 ```go
+// layouts/_partials/comments.snippet.html
+
 {{ if isset .Params "ghissueid" }}
 var ghUrl = "https://github.com/{{ .Site.Params.ghCommentsRepo }}/issues/{{ .Params.ghissueid }}";
 var ghApiUrl = "https://api.github.com/repos/{{ .Site.Params.ghCommentsRepo }}/issues/{{ .Params.ghissueid }}/comments";
@@ -154,7 +156,7 @@ $("#gh-comments-list").append("<a class='issues-link'href='" + bbUrl + "'  targe
 // Rest of the JS
 ```
 
-With this [GitHub issue](https://github.com/sdqali/site/issues/150) and this [BitBucket issue](https://bitbucket.org/sdqali/sadique.io-comments/issues/143/example), this will render:
+With this [GitHub issue](https://github.com/sdqali/site/issues/150) and this [Bitbucket issue](https://bitbucket.org/sdqali/sadique.io-comments/issues/143/example), this will render:
 
 ![Comments](/images/comments.png)
 
