@@ -438,89 +438,98 @@ var bbApiUrl = "https://api.bitbucket.org/2.0/repositories/sdqali\/sadique.io-co
 $("#gh-comments-list").append("<a class='issues-link'href='" + bbUrl + "'  target='_blank'>Comment via <span class='icon-bitbucket'/></a>");
 
 
-
-$(document).ready(function () {
+document.addEventListener('DOMContentLoaded', function () {
   var renderComments = function(comments) {
     comments.sort(function(first, second) {
       return first.createdAt - second.createdAt;
     });
 
-    $.each(comments, function(i, comment) {
-      var t = "<div class='gh-comment'>";
-      t += "<div class='gh-comment-header'><img src='" + comment.user.avatarUrl + "' width='24px'>";
-      t += "<b><a href='" + comment.user.profileUrl + "'>" + comment.user.username + "</a></b>";
-      t += " posted via "+ comment.channel + " at ";
-      t += "<em>" + comment.createdAt.toUTCString() + "</em></div>";
-      t += "<div id='gh-comment-hr'></div>";
-      t += comment.body;
-      t += "</div>";
-      $("#gh-comments-list").append(t);
+    var commentsList = document.getElementById('gh-comments-list');
+    comments.forEach(function(comment) {
+      var t = `
+        <div class='gh-comment'>
+          <div class='gh-comment-header'>
+            <img src='${comment.user.avatarUrl}' width='24px'>
+            <b><a href='${comment.user.profileUrl}'>${comment.user.username}</a></b>
+            posted via ${comment.channel} at
+            <a href="${comment.url}" rel="noopener noreferrer" target="_blank">
+              <em>${comment.createdAt.toUTCString()}</em>
+            </a>
+          </div>
+          <div id='gh-comment-hr'></div>
+          ${comment.body}
+        </div>
+      `;
+      commentsList.insertAdjacentHTML('beforeend', t);
     });
   };
 
-  var fetchBbComments = function(existingComments) {
+  var fetchBbComments = function() {
     if (typeof bbUrl === 'undefined' || bbUrl === null) {
-      renderComments(existingComments)
-      return;
+      return Promise.resolve([]);
     }
-
-    $.ajax(bbApiUrl, {
-      headers: {"Content-Type": "application/json"},
-      dataType: "json",
-      success: function(bbComments) {
-        comments = existingComments.concat($.map(bbComments.values, function(comment) {
-          return {
-            createdAt: new Date(comment.created_on),
-            user: {
-              avatarUrl: comment.user.links.avatar.href,
-              profileUrl: comment.user.links.html.href,
-              username: comment.user.username
-            },
-            body: comment.content.html,
-            channel: "BitBucket"
-          };
-        }));
-
-        renderComments(comments)
-      },
-      error: function() {
-        renderComments(existingComments);
-      }
+    return fetch(bbApiUrl, {
+      headers: {"Content-Type": "application/json"}
+    })
+    .then(function(response) {
+      if (!response.ok) throw new Error('Network response was not ok');
+      return response.json();
+    })
+    .then(function(bbComments) {
+      return bbComments.values.map(function(comment) {
+        return {
+          createdAt: new Date(comment.created_on),
+          user: {
+            avatarUrl: comment.user.links.avatar.href,
+            profileUrl: comment.user.links.html.href,
+            username: comment.user.nickname
+          },
+          url: comment.links.html,
+          body: comment.content.html,
+          channel: "BitBucket"
+        };
+      });
+    })
+    .catch(function() {
+      return [];
     });
   };
 
-  var fetchGhComments = function(callback) {
+  var fetchGhComments = function() {
     if (typeof ghUrl === 'undefined' || ghUrl === null) {
-      fetchBbComments([]);
-      return;
+      return Promise.resolve([]);
     }
-
-    $.ajax(ghApiUrl, {
-      headers: {Accept: "application/vnd.github.v3.html+json"},
-      dataType: "json",
-      success: function(ghComments) {
-        comments = $.map(ghComments, function(comment) {
-          return {
-            createdAt: new Date(comment.created_at),
-            user: {
-              avatarUrl: comment.user.avatar_url,
-              profileUrl: comment.user.html_url,
-              username: comment.user.login
-            },
-            body: comment.body_html,
-            channel: "GitHub"
-          };
-        });
-
-        callback(comments);
-      },
-      error: function() {
-        callback([]);
-      }
+    return fetch(ghApiUrl, {
+      headers: {Accept: "application/vnd.github.v3.html+json"}
+    })
+    .then(function(response) {
+      if (!response.ok) throw new Error('Network response was not ok');
+      return response.json();
+    })
+    .then(function(ghComments) {
+      return ghComments.map(function(comment) {
+        return {
+          createdAt: new Date(comment.created_at),
+          user: {
+            avatarUrl: comment.user.avatar_url,
+            profileUrl: comment.user.html_url,
+            username: comment.user.login
+          },
+          url: comment.html_url,
+          body: comment.body_html,
+          channel: "GitHub"
+        };
+      });
+    })
+    .catch(function() {
+      return [];
     });
   };
 
-  fetchGhComments(fetchBbComments);
+  Promise.all([fetchGhComments(), fetchBbComments()]).then(function(results) {
+    var allComments = results[0].concat(results[1]);
+    renderComments(allComments);
+  });
 });
 </script>
 
@@ -528,6 +537,22 @@ $(document).ready(function () {
         <aside>
           <h3>If you liked this post, you'll also like...</h3>
           <ul class="related-posts">
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             
