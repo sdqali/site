@@ -9,7 +9,7 @@ tags:
 ghissueid: 150
 bbissueid: 143
 ---
-One thing that statically generated sites like this typically lack is a commenting system. There are solutions like discourse that you can embed, but then the commenter will need to create an account there, and you now have one more dependency. Sometimes, that is a perfectly reasonable approach.
+One thing that statically generated sites like this typically lack is a commenting system. There are solutions like Disqus that you can embed, but then the commenter will need to create an account there, and you now have one more dependency. Sometimes, that is a perfectly reasonable approach.
 
 I came up with an approach [^1] that uses GitHub issues (and Bitbucket issues - but more about that later) to host comments.
 Since this site is hosted on GitHub, and most people who would leave a comment on this site have a GitHub account, it doesn't feel like another account to sign up for. And for those who don't have a GitHub account, the approach supports Bitbucket as well.
@@ -24,7 +24,7 @@ This has the glaring shortcoming that readers will need to open two separate pag
 
 ## Second Iteration
 
-Both Bitbucket and GitHub offer public APIs that can fetch an issue and the comments on them. This makes it possible for each entry to fetch the comments from both sources, inter-leave them based on timestamps and render them directly on the page.
+Both Bitbucket and GitHub offer public APIs that can fetch an Issue and the Comments on the Issue. This makes it possible for each entry to fetch the Comments from both sources, inter-leave them based on timestamps and render them directly on the page.
 
 ```javascript
 document.addEventListener('DOMContentLoaded', function () {
@@ -158,6 +158,9 @@ $("#gh-comments-list").append("<a class='issues-link'href='" + bbUrl + "'  targe
 
 With this [GitHub issue](https://github.com/sdqali/site/issues/150) and this [Bitbucket issue](https://bitbucket.org/sdqali/sadique.io-comments/issues/143/example), this will render:
 
+The front-matter parameters being `ghissueid` and `bbissueid` instead of `ghIssueId` and `bbIssueId` is down to a quirk of the Hugo templating system [^2]. Your static site generator may not have this issue.
+
 ![Comments](/images/comments.png)
 
 [^1]: The [original version](https://github.com/sdqali/site/commit/0f5aa21f38a8d8274656a46bcc44ce4a04b09e93#diff-eb261796c12a10bc5993c763ce2923dfe48aa14d9cf9b66187aeddceda10bf56) was implemented in 2019, and I am sure there are others who came up with similar approaches.
+[^2]: "Always have the front-matter keys in all-lowercase." - [Hugo Forum](https://discourse.gohugo.io/t/arent-all-front-matter-parameters-lower-cased-internally/11050).
