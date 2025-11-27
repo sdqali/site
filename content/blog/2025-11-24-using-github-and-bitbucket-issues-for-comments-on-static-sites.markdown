@@ -71,6 +71,7 @@ document.addEventListener('DOMContentLoaded', function () {
             profileUrl: comment.user.links.html.href,
             username: comment.user.nickname
           },
+          url: comment.links.html.href,
           body: comment.content.html,
           channel: "Bitbucket"
         };
@@ -101,6 +102,7 @@ document.addEventListener('DOMContentLoaded', function () {
             profileUrl: comment.user.html_url,
             username: comment.user.login
           },
+          url: comment.html_url,
           body: comment.body_html,
           channel: "GitHub"
         };
@@ -136,7 +138,7 @@ bbissueid: 143
 
 A Hugo partial then uses these parameters to set up the JS in each page:
 
-```go
+```go-html-template
 // layouts/_partials/comments.snippet.html
 
 {{ if isset .Params "ghissueid" }}

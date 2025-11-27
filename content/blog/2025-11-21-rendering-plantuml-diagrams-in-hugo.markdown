@@ -20,7 +20,7 @@ After having to pre-generate the diagram images, I began wondering if this could
 
 This is what I came up with:
 
-```go
+```go-html-template
 // layouts/shortcodes/plantuml.html
 {{ $baseUrl := site.Params.plantuml.baseUrl }}
 {{ $content := .Inner }}
@@ -121,7 +121,7 @@ security:
 
 It is important to note that the `skinparam svgDimensionStyle false` is here to ensure that the SVG produced doesn't include `width` and `height` attributes [^16]. This allows finer control on how the SVG is displayed, especially on narrower screens, with CSS that would look like this:
 
-```
+```css
 svg {
   margin-top: 20px;
   width: 100%;
@@ -132,7 +132,7 @@ svg {
 
 My configuration points to a local PlantUML server.
 
-```
+```shell
 docker run -d -p 9999:8080 plantuml/plantuml-server:jetty
 ```
 
