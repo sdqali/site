@@ -4,6 +4,8 @@ date: 2025-11-27T08:05:17-08:00
 tags:
   - macbook
   - linux
+ghissueid: 152
+bbissueid: 145
 ---
 I have a 2011 vintage MacBook Air that has not seen much usage. I purchased it from a previous employer's auction of used computers. It did just enough things - browsing, watching videos, working on documents, and writing some code in a pinch. Somewhere along the way, the battery stopped holding a charge and the MacBook became tethered to a power cable. This led me to replacing the battery, following tools, replacement battery and excellent instructions from iFixit[^1].
 
