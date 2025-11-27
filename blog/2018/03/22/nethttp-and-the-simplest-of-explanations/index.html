@@ -99,10 +99,10 @@ This is a story about how many layers of abstractions and indirections one works
 <li>Tell the test container, through environment variables the <code>host</code> and the <code>port</code> of the new component.</li>
 </ol>
 <p>So, off we went and configured everything:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>env.NEWAPP_HOST<span style="color:#555">=</span>http://new-app.local
-</span></span><span style="display:flex;"><span>env.NEWAPP_PORT<span style="color:#555">=</span><span style="color:#f60">1313</span>
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>env.NEWAPP_HOST=http://new-app.local
+</span></span><span style="display:flex;"><span>env.NEWAPP_PORT=<span style="color:#2aa198;font-weight:bold">1313</span>
 </span></span></code></pre></div><p>We ran the tests and boom:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>SocketError <span style="color:#555">(</span>Failed to open TCP connection to http://new-app.local:1313 <span style="color:#555">(</span>getaddrinfo: nodename nor servname provided, or not known<span style="color:#555">))</span>
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>SocketError (Failed to open TCP connection to http://new-app.local:1313 (getaddrinfo: nodename nor servname provided, or not known))
 </span></span></code></pre></div><p>Well, that does not look right. We double check all the configurations and run the test again. Same result. May be we should be using a Ruby <code>Symbol</code> instead of a <code>String</code> in that particular config? May be. We try that, same result.</p>
 <p>At this point, we hop on to the test container and ping <code>new-app.local</code>. It can connect.
 What if the app is not available? We should totally <code>telnet</code> it. Well, this container does not have <code>telnet</code>. We can totally install it, right? Right. What kind of distro is this running? Well <code>cat /etc/*release*</code>. Debian, huh? <code>apt-get install telnet</code>. Wooh. Back to <code>telnet</code> then. That looks good.</p>
@@ -129,26 +129,26 @@ SocketError (Failed to open TCP connection to http://new-app.local:1313 (getaddr
 </code></pre><p>At this point, we are covered in a mix of disappointment and excitement. We are annoyed that things are not working. But, may be, may be we have uncovered some obscure bug somewhere in the toolset? We would learn later that this is the point where we should have known what&rsquo;s up? But we didn&rsquo;t and the story continues.</p>
 <p>At this point, we ping the Slack channels of the teams involved in building the library we consume. They have not seen this before. Someone suggests that they have had issues with Ruby inside Docker containers. We finally find a GitHub issue for a different project where someone encountered their container setting the <code>HTTP_PROXY</code> env variable and that causing <code>Net::HTTP</code> to fail. We pore over everything to make sure that there is no proxy set. What now?</p>
 <p>What if we attempt to connect to the new app from a Ruby process running on one of the other 10 containers we run?</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>&gt; docker <span style="color:#366">exec</span> -it 51dbf9f75ca8 ruby -e <span style="color:#c30">&#39;require &#34;net/http&#34;; conn = Net::HTTP.new(&#34;http://new-app.local&#34;, 1313); conn.get(&#34;/&#34;)&#39;</span>
-</span></span><span style="display:flex;"><span>Traceback <span style="color:#555">(</span>most recent call last<span style="color:#555">)</span>:
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>&gt; docker <span style="color:#cb4b16">exec</span> -it 51dbf9f75ca8 ruby -e <span style="color:#2aa198">&#39;require &#34;net/http&#34;; conn = Net::HTTP.new(&#34;http://new-app.local&#34;, 1313); conn.get(&#34;/&#34;)&#39;</span>
+</span></span><span style="display:flex;"><span>Traceback (most recent call last):
 </span></span><span style="display:flex;"><span>.
 </span></span><span style="display:flex;"><span>.
 </span></span><span style="display:flex;"><span>.
-</span></span><span style="display:flex;"><span>SocketError <span style="color:#555">(</span>Failed to open TCP connection to http://new-app.local:1313 <span style="color:#555">(</span>getaddrinfo: nodename nor servname provided, or not known<span style="color:#555">))</span>
+</span></span><span style="display:flex;"><span>SocketError (Failed to open TCP connection to http://new-app.local:1313 (getaddrinfo: nodename nor servname provided, or not known))
 </span></span></code></pre></div><p>That is interesting, isn&rsquo;t it? Is it happening to only our systems? What if we just tried to hit Google?</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>&gt; docker <span style="color:#366">exec</span> -it 51dbf9f75ca8 ruby -e <span style="color:#c30">&#39;require &#34;net/http&#34;; conn = Net::HTTP.new(&#34;http://google.com&#34;, 80); conn.get(&#34;/&#34;)&#39;</span>
-</span></span><span style="display:flex;"><span>Traceback <span style="color:#555">(</span>most recent call last<span style="color:#555">)</span>:
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>&gt; docker <span style="color:#cb4b16">exec</span> -it 51dbf9f75ca8 ruby -e <span style="color:#2aa198">&#39;require &#34;net/http&#34;; conn = Net::HTTP.new(&#34;http://google.com&#34;, 80); conn.get(&#34;/&#34;)&#39;</span>
+</span></span><span style="display:flex;"><span>Traceback (most recent call last):
 </span></span><span style="display:flex;"><span>.
 </span></span><span style="display:flex;"><span>.
 </span></span><span style="display:flex;"><span>.
-</span></span><span style="display:flex;"><span>SocketError <span style="color:#555">(</span>Failed to open TCP connection to http://google.com:80 <span style="color:#555">(</span>getaddrinfo: nodename nor servname provided, or not known<span style="color:#555">))</span>
+</span></span><span style="display:flex;"><span>SocketError (Failed to open TCP connection to http://google.com:80 (getaddrinfo: nodename nor servname provided, or not known))
 </span></span></code></pre></div><p>What if somehow our orchestration tool or containers created by us are causing it? Let&rsquo;s try a random container from DockerHub:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>&gt; docker run -it ruby:2.5-slim ruby -e <span style="color:#c30">&#39;require &#34;net/http&#34;; conn = Net::HTTP.new(&#34;http://google.com&#34;,80); conn.get(&#34;/&#34;)&#39;</span>
-</span></span><span style="display:flex;"><span>Traceback <span style="color:#555">(</span>most recent call last<span style="color:#555">)</span>:
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>&gt; docker run -it ruby:2.5-slim ruby -e <span style="color:#2aa198">&#39;require &#34;net/http&#34;; conn = Net::HTTP.new(&#34;http://google.com&#34;,80); conn.get(&#34;/&#34;)&#39;</span>
+</span></span><span style="display:flex;"><span>Traceback (most recent call last):
 </span></span><span style="display:flex;"><span>.
 </span></span><span style="display:flex;"><span>.
 </span></span><span style="display:flex;"><span>.
-</span></span><span style="display:flex;"><span>SocketError <span style="color:#555">(</span>Failed to open TCP connection to http://google.com:80 <span style="color:#555">(</span>getaddrinfo: nodename nor servname provided, or not known<span style="color:#555">))</span>
+</span></span><span style="display:flex;"><span>SocketError (Failed to open TCP connection to http://google.com:80 (getaddrinfo: nodename nor servname provided, or not known))
 </span></span></code></pre></div><p>At this point, light bulbs are beginning to go off. Let&rsquo;s try this on our laptops? Same result. And then it struck us. It says it can&rsquo;t open a TCP connection to a URL with <code>http</code> in it.  Of course, it cant. It should be looking for <code>google.com</code>, should not it? Yes:</p>
 <pre tabindex="0"><code class="language-irb" data-lang="irb">&gt; docker run -it ruby:2.5-slim ruby -e &#39;require &#34;net/http&#34;; conn = Net::HTTP.new(&#34;google.com&#34;, 80); res = conn.get(&#34;/&#34;); puts res.code&#39;
 301

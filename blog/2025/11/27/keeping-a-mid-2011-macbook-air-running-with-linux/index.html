@@ -106,30 +106,30 @@
 <h2 id="things-that-needed-tweaking">Things that needed tweaking</h2>
 <h3 id="key-bindings">Key bindings</h3>
 <p>I have, over the years become so used to Mac keybindings that I set all my Linux desktops to use the same keybindings. I typically use <code>kinto.sh</code> <sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup> for this, even though it is not perfect <sup id="fnref:4"><a href="#fn:4" class="footnote-ref" role="doc-noteref">4</a></sup>. It turned out that I simply couldn&rsquo;t get it working on Linux Mint Mate, no matter how much Python venv wrangling I did. I have used <code>gnome-macos-remap-wayland</code> <sup id="fnref:5"><a href="#fn:5" class="footnote-ref" role="doc-noteref">5</a></sup> before when running Wayland, so I decided to switch to Gnome desktop instead of Mate. The default installation of <code>gnome-macos-remap-wayland</code> didn&rsquo;t start on login, and I ended up with this Systemd entry that worked:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-systemd" data-lang="systemd"><span style="display:flex;"><span><span style="color:#09f;font-style:italic">; /etc/systemd/system/default.target.wants/gnome-macos-remap.service</span>
-</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">[Unit]</span>
-</span></span><span style="display:flex;"><span><span style="color:#309">Description</span><span style="color:#555">=</span><span style="color:#c30">GNOME -&gt; macOS Remap</span>
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-systemd" data-lang="systemd"><span style="display:flex;"><span><span style="color:#93a1a1;font-style:italic">; /etc/systemd/system/default.target.wants/gnome-macos-remap.service</span>
+</span></span><span style="display:flex;"><span><span style="color:#859900">[Unit]</span>
+</span></span><span style="display:flex;"><span><span style="color:#268bd2">Description</span>=<span style="color:#2aa198">GNOME -&gt; macOS Remap</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">[Service]</span>
-</span></span><span style="display:flex;"><span><span style="color:#309">Type</span><span style="color:#555">=</span><span style="color:#c30">simple</span>
-</span></span><span style="display:flex;"><span><span style="color:#309">Restart</span><span style="color:#555">=</span><span style="color:#c30">on-failure</span>
-</span></span><span style="display:flex;"><span><span style="color:#309">RestartSec</span><span style="color:#555">=</span><span style="color:#c30">10</span>
-</span></span><span style="display:flex;"><span><span style="color:#309">ExecStart</span><span style="color:#555">=</span><span style="color:#c30">xremap /etc/gnome-macos-remap/config.yml</span>
+</span></span><span style="display:flex;"><span><span style="color:#859900">[Service]</span>
+</span></span><span style="display:flex;"><span><span style="color:#268bd2">Type</span>=<span style="color:#2aa198">simple</span>
+</span></span><span style="display:flex;"><span><span style="color:#268bd2">Restart</span>=<span style="color:#2aa198">on-failure</span>
+</span></span><span style="display:flex;"><span><span style="color:#268bd2">RestartSec</span>=<span style="color:#2aa198">10</span>
+</span></span><span style="display:flex;"><span><span style="color:#268bd2">ExecStart</span>=<span style="color:#2aa198">xremap /etc/gnome-macos-remap/config.yml</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">[Install]</span>
-</span></span><span style="display:flex;"><span><span style="color:#309">WantedBy</span><span style="color:#555">=</span><span style="color:#c30">default.target</span>
+</span></span><span style="display:flex;"><span><span style="color:#859900">[Install]</span>
+</span></span><span style="display:flex;"><span><span style="color:#268bd2">WantedBy</span>=<span style="color:#2aa198">default.target</span>
 </span></span></code></pre></div><h3 id="start-up-chime">Start-up Chime</h3>
 <p>I needed a way to turn off the loud Startup Chime at boot time. After trying various approaches, I found something that just works<sup id="fnref:6"><a href="#fn:6" class="footnote-ref" role="doc-noteref">6</a></sup>.</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo su
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo su
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>sudo chattr -i /sys/firmware/efi/efivars/SystemAudioVolume-7c436110-ab2a-4bbb-a880-fe41995c9f82
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>sudo <span style="color:#366">printf</span> <span style="color:#c30">&#34;\x07\x00\x00\x00\x00&#34;</span> &gt; /sys/firmware/efi/efivars/SystemAudioVolume-7c436110-ab2a-4bbb-a880-fe41995c9f82
+</span></span><span style="display:flex;"><span>sudo <span style="color:#cb4b16">printf</span> <span style="color:#2aa198">&#34;\x07\x00\x00\x00\x00&#34;</span> &gt; /sys/firmware/efi/efivars/SystemAudioVolume-7c436110-ab2a-4bbb-a880-fe41995c9f82
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>sudo chattr +i /sys/firmware/efi/efivars/SystemAudioVolume-7c436110-ab2a-4bbb-a880-fe41995c9f82
 </span></span></code></pre></div><h3 id="function-key">Function Key</h3>
 <p>I want to be able to use the Function keys as plain Function keys by default. I was able to get that working by modifying the <code>hid_apple</code> module parameters<sup id="fnref:7"><a href="#fn:7" class="footnote-ref" role="doc-noteref">7</a></sup>:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#366">echo</span> options hid_apple <span style="color:#033">fnmode</span><span style="color:#555">=</span><span style="color:#f60">2</span> | sudo tee -a /etc/modprobe.d/hid_apple.conf
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#cb4b16">echo</span> options hid_apple <span style="color:#268bd2">fnmode</span>=<span style="color:#2aa198;font-weight:bold">2</span> | sudo tee -a /etc/modprobe.d/hid_apple.conf
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>sudo update-initramfs -u -k all
 </span></span></code></pre></div><h2 id="overall-impressions">Overall Impressions</h2>

@@ -106,63 +106,63 @@
 </ul>
 <h2 id="features-end-point">Features end point</h2>
 <p>The library expects feature flags to be provided to <code>featureFlagsProvider</code> in the following format:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>[
-</span></span><span style="display:flex;"><span>    { <span style="color:#309;font-weight:bold">&#34;key&#34;</span>: <span style="color:#c30">&#34;...&#34;</span>, <span style="color:#309;font-weight:bold">&#34;active&#34;</span>: <span style="color:#c30">&#34;...&#34;</span>, <span style="color:#309;font-weight:bold">&#34;name&#34;</span>: <span style="color:#c30">&#34;...&#34;</span>, <span style="color:#309;font-weight:bold">&#34;description&#34;</span>: <span style="color:#c30">&#34;...&#34;</span> },
-</span></span><span style="display:flex;"><span>    <span style="color:#a00;background-color:#faa">...</span>
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>[
+</span></span><span style="display:flex;"><span>    { <span style="color:#268bd2;font-weight:bold">&#34;key&#34;</span>: <span style="color:#2aa198">&#34;...&#34;</span>, <span style="color:#268bd2;font-weight:bold">&#34;active&#34;</span>: <span style="color:#2aa198">&#34;...&#34;</span>, <span style="color:#268bd2;font-weight:bold">&#34;name&#34;</span>: <span style="color:#2aa198">&#34;...&#34;</span>, <span style="color:#268bd2;font-weight:bold">&#34;description&#34;</span>: <span style="color:#2aa198">&#34;...&#34;</span> },
+</span></span><span style="display:flex;"><span>    ...
 </span></span><span style="display:flex;"><span>]
 </span></span></code></pre></div><p>The <code>FeatureController</code> will use the <code>FeatureRepository</code> to expose this will look like this:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@RestController</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@RequestMapping</span>(<span style="color:#c30">&#34;/features&#34;</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">FeatureController</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@Autowired</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>FeatureRepository<span style="color:#bbb"> </span>featureRepository;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@RequestMapping</span>(<span style="color:#c30">&#34;&#34;</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>List<span style="color:#555">&lt;</span>Map<span style="color:#555">&gt;</span><span style="color:#bbb"> </span><span style="color:#c0f">features</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>featureRepository.<span style="color:#309">allFeatures</span>()<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>.<span style="color:#309">entrySet</span>()<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>.<span style="color:#309">stream</span>()<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>.<span style="color:#309">map</span>(entry<span style="color:#bbb"> </span><span style="color:#555">-&gt;</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>HashMap<span style="color:#555">&lt;</span>String,<span style="color:#bbb"> </span>Object<span style="color:#555">&gt;</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">          </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>put(<span style="color:#c30">&#34;key&#34;</span>,<span style="color:#bbb"> </span>entry.<span style="color:#309">getKey</span>());<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>put(<span style="color:#c30">&#34;active&#34;</span>,<span style="color:#bbb"> </span>entry.<span style="color:#309">getValue</span>());<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>put(<span style="color:#c30">&#34;name&#34;</span>,<span style="color:#bbb"> </span>entry.<span style="color:#309">getKey</span>());<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>put(<span style="color:#c30">&#34;description&#34;</span>,<span style="color:#bbb"> </span>entry.<span style="color:#309">getKey</span>());<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">          </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>})<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>.<span style="color:#309">collect</span>(Collectors.<span style="color:#309">toList</span>());<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><p>We are using the double brace initialization technique to construct the map representing each feature. Initializing a map given a set of keys and values is still an exercise that requires a bunch of <a href="https://minborgsjavapot.blogspot.com/2014/12/java-8-initializing-maps-in-smartest-way.html">boiler plate</a> code in Java. You can get around this by using the convenient ImmutableMap.of() provided by <a href="https://mvnrepository.com/artifact/com.google.collections/google-collections/1.0">Google Collections</a>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#268bd2">@RestController</span>
+</span></span><span style="display:flex;"><span><span style="color:#268bd2">@RequestMapping</span>(<span style="color:#2aa198">&#34;/features&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#859900">public</span> <span style="color:#859900">class</span> <span style="color:#cb4b16">FeatureController</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#268bd2">@Autowired</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#268bd2">FeatureRepository</span> <span style="color:#268bd2">featureRepository</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#268bd2">@RequestMapping</span>(<span style="color:#2aa198">&#34;&#34;</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#859900">public</span> <span style="color:#268bd2">List</span>&lt;<span style="color:#268bd2">Map</span>&gt; <span style="color:#268bd2">features</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#859900">return</span> <span style="color:#268bd2">featureRepository</span>.<span style="color:#268bd2">allFeatures</span>()
+</span></span><span style="display:flex;"><span>        .<span style="color:#268bd2">entrySet</span>()
+</span></span><span style="display:flex;"><span>        .<span style="color:#268bd2">stream</span>()
+</span></span><span style="display:flex;"><span>        .<span style="color:#268bd2">map</span>(<span style="color:#268bd2">entry</span> -&gt; <span style="color:#859900">new</span> <span style="color:#268bd2">HashMap</span>&lt;<span style="color:#268bd2">String</span>, <span style="color:#268bd2">Object</span>&gt;() {
+</span></span><span style="display:flex;"><span>          {
+</span></span><span style="display:flex;"><span>            <span style="color:#268bd2">put</span>(<span style="color:#2aa198">&#34;key&#34;</span>, <span style="color:#268bd2">entry</span>.<span style="color:#268bd2">getKey</span>());
+</span></span><span style="display:flex;"><span>            <span style="color:#268bd2">put</span>(<span style="color:#2aa198">&#34;active&#34;</span>, <span style="color:#268bd2">entry</span>.<span style="color:#268bd2">getValue</span>());
+</span></span><span style="display:flex;"><span>            <span style="color:#268bd2">put</span>(<span style="color:#2aa198">&#34;name&#34;</span>, <span style="color:#268bd2">entry</span>.<span style="color:#268bd2">getKey</span>());
+</span></span><span style="display:flex;"><span>            <span style="color:#268bd2">put</span>(<span style="color:#2aa198">&#34;description&#34;</span>, <span style="color:#268bd2">entry</span>.<span style="color:#268bd2">getKey</span>());
+</span></span><span style="display:flex;"><span>          }
+</span></span><span style="display:flex;"><span>        })
+</span></span><span style="display:flex;"><span>        .<span style="color:#268bd2">collect</span>(<span style="color:#268bd2">Collectors</span>.<span style="color:#268bd2">toList</span>());
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>We are using the double brace initialization technique to construct the map representing each feature. Initializing a map given a set of keys and values is still an exercise that requires a bunch of <a href="https://minborgsjavapot.blogspot.com/2014/12/java-8-initializing-maps-in-smartest-way.html">boiler plate</a> code in Java. You can get around this by using the convenient ImmutableMap.of() provided by <a href="https://mvnrepository.com/artifact/com.google.collections/google-collections/1.0">Google Collections</a>.</p>
 <p>It is also important to change our <code>AppConfig</code> to initialize the instance of <code>Featurerepository</code> as a bean.</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Configuration</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">AppConfig</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">extends</span><span style="color:#bbb"> </span>WebMvcConfigurerAdapter<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@Autowired</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>Environment<span style="color:#bbb"> </span>env;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#09f;font-style:italic">// ...</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@Bean</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>FeatureRepository<span style="color:#bbb"> </span><span style="color:#c0f">featureRepository</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>FeatureRepository(env);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><p>With this configuration, we can get the feature state from the end point:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>&gt; curl -s <span style="color:#c30">&#34;http://localhost:8080/features&#34;</span> | jq .
-</span></span><span style="display:flex;"><span><span style="color:#555">[</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#555">{</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#c30">&#34;name&#34;</span>: <span style="color:#c30">&#34;feature.foo&#34;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#c30">&#34;active&#34;</span>: false,
-</span></span><span style="display:flex;"><span>    <span style="color:#c30">&#34;description&#34;</span>: <span style="color:#c30">&#34;feature.foo&#34;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#c30">&#34;key&#34;</span>: <span style="color:#c30">&#34;feature.foo&#34;</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#555">}</span>,
-</span></span><span style="display:flex;"><span>  <span style="color:#555">{</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#c30">&#34;name&#34;</span>: <span style="color:#c30">&#34;feature.hello&#34;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#c30">&#34;active&#34;</span>: true,
-</span></span><span style="display:flex;"><span>    <span style="color:#c30">&#34;description&#34;</span>: <span style="color:#c30">&#34;feature.hello&#34;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#c30">&#34;key&#34;</span>: <span style="color:#c30">&#34;feature.hello&#34;</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#555">}</span>
-</span></span><span style="display:flex;"><span><span style="color:#555">]</span>
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#268bd2">@Configuration</span>
+</span></span><span style="display:flex;"><span><span style="color:#859900">public</span> <span style="color:#859900">class</span> <span style="color:#cb4b16">AppConfig</span> <span style="color:#859900">extends</span> <span style="color:#268bd2">WebMvcConfigurerAdapter</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#268bd2">@Autowired</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#268bd2">Environment</span> <span style="color:#268bd2">env</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#93a1a1;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#268bd2">@Bean</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#859900">public</span> <span style="color:#268bd2">FeatureRepository</span> <span style="color:#268bd2">featureRepository</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#859900">return</span> <span style="color:#859900">new</span> <span style="color:#268bd2">FeatureRepository</span>(<span style="color:#268bd2">env</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>With this configuration, we can get the feature state from the end point:</p>
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>&gt; curl -s <span style="color:#2aa198">&#34;http://localhost:8080/features&#34;</span> | jq .
+</span></span><span style="display:flex;"><span>[
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#2aa198">&#34;name&#34;</span>: <span style="color:#2aa198">&#34;feature.foo&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#2aa198">&#34;active&#34;</span>: false,
+</span></span><span style="display:flex;"><span>    <span style="color:#2aa198">&#34;description&#34;</span>: <span style="color:#2aa198">&#34;feature.foo&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#2aa198">&#34;key&#34;</span>: <span style="color:#2aa198">&#34;feature.foo&#34;</span>
+</span></span><span style="display:flex;"><span>  },
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#2aa198">&#34;name&#34;</span>: <span style="color:#2aa198">&#34;feature.hello&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#2aa198">&#34;active&#34;</span>: true,
+</span></span><span style="display:flex;"><span>    <span style="color:#2aa198">&#34;description&#34;</span>: <span style="color:#2aa198">&#34;feature.hello&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#2aa198">&#34;key&#34;</span>: <span style="color:#2aa198">&#34;feature.hello&#34;</span>
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>]
 </span></span></code></pre></div><p>For our use case, we were comfortable re-using the feature key as the name and description of the feature. You may want to capture these meta data in your application configuration and expose this using Spring Boot’s <a href="http://docs.spring.io/spring-boot/docs/1.1.7.RELEASE/api/org/springframework/boot/context/properties/ConfigurationProperties.html">ConfigurationProperties</a>. You can find an example of how use structured configurations in <a href="https://github.com/sdqali/config-properties">my example project</a>.</p>
 <p>In the next part of this <a href="/series/feature-toggles/">series</a>, we will take a look at how to expose the feature information as an <a href="http://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-endpoints.html">admin end point</a>.</p>
         </div>

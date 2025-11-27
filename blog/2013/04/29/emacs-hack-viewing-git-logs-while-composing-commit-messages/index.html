@@ -105,39 +105,39 @@
 <ul>
 <li>Git commit messages are stored in the <code>COMMIT_EDITMSG</code> file under <code>.git/</code>. So the first thing to do is to ensure that this file always gets loaded with a custom minor mode. This can be done as follows:</li>
 </ul>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cl" data-lang="cl"><span style="display:flex;"><span>(<span style="color:#033">add-to-list</span> <span style="color:#fc3">&#39;auto-mode-alist</span> <span style="color:#555">&#39;</span>(<span style="color:#c30">&#34;\\COMMIT_EDITMSG\\&#39;&#34;</span> <span style="color:#555">.</span> <span style="color:#033">load-magit-log-when-committing-mode</span>))
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cl" data-lang="cl"><span style="display:flex;"><span>(<span style="color:#268bd2">add-to-list</span> <span style="color:#2aa198">&#39;auto-mode-alist</span> &#39;(<span style="color:#2aa198">&#34;\\COMMIT_EDITMSG\\&#39;&#34;</span> . <span style="color:#268bd2">load-magit-log-when-committing-mode</span>))
 </span></span></code></pre></div><p>The minor mode does not need to do anything. The definition would be like this:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cl" data-lang="cl"><span style="display:flex;"><span>(<span style="color:#033">define-minor-mode</span> <span style="color:#033">load-magit-log-when-committing-mode</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#c30">&#34;dummy&#34;</span>)
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cl" data-lang="cl"><span style="display:flex;"><span>(<span style="color:#268bd2">define-minor-mode</span> <span style="color:#268bd2">load-magit-log-when-committing-mode</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#2aa198">&#34;dummy&#34;</span>)
 </span></span></code></pre></div><ul>
 <li>Next step is to add a custom hook that gets run after loading the minor mode. This hook calls the function to load git logs. The code for this is:</li>
 </ul>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cl" data-lang="cl"><span style="display:flex;"><span>(<span style="color:#033">add-hook</span> <span style="color:#fc3">&#39;load-magit-log-when-committing-mode-hook</span> <span style="color:#fc3">&#39;show-magit-log-hook</span>)
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cl" data-lang="cl"><span style="display:flex;"><span>(<span style="color:#268bd2">add-hook</span> <span style="color:#2aa198">&#39;load-magit-log-when-committing-mode-hook</span> <span style="color:#2aa198">&#39;show-magit-log-hook</span>)
 </span></span></code></pre></div><ul>
 <li>The actual function to load git logs. It calls <code>magit-log</code> to load the logs and then opens the original <code>COMMIT_EDITMSG</code> in the other frame.</li>
 </ul>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cl" data-lang="cl"><span style="display:flex;"><span>(<span style="color:#366">defun</span> <span style="color:#033">show-magit-log-hook</span> ()
-</span></span><span style="display:flex;"><span>  (<span style="color:#033">cd</span> <span style="color:#c30">&#34;..&#34;</span>)
-</span></span><span style="display:flex;"><span>  (<span style="color:#033">magit-log</span>)
-</span></span><span style="display:flex;"><span>  (<span style="color:#033">switch-to-buffer-other-window</span> <span style="color:#c30">&#34;COMMIT_EDITMSG&#34;</span>))
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cl" data-lang="cl"><span style="display:flex;"><span>(<span style="color:#cb4b16">defun</span> <span style="color:#268bd2">show-magit-log-hook</span> ()
+</span></span><span style="display:flex;"><span>  (<span style="color:#268bd2">cd</span> <span style="color:#2aa198">&#34;..&#34;</span>)
+</span></span><span style="display:flex;"><span>  (<span style="color:#268bd2">magit-log</span>)
+</span></span><span style="display:flex;"><span>  (<span style="color:#268bd2">switch-to-buffer-other-window</span> <span style="color:#2aa198">&#34;COMMIT_EDITMSG&#34;</span>))
 </span></span></code></pre></div><p>This is how Emacs looks while committing with this hack in place:</p>
 <p><img src="/images/screenshot_git_commit_log.png" alt="&ldquo;Screenshot showing git commit log&rdquo;" title="Screenshot showing git commit log"></p>
 <p>If you want to use this, copy the following snippet to your <code>init.el</code>.</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cl" data-lang="cl"><span style="display:flex;"><span><span style="color:#09f;font-style:italic">;; load-magit-log-when-committing-mode</span>
-</span></span><span style="display:flex;"><span>(<span style="color:#033">define-minor-mode</span> <span style="color:#033">load-magit-log-when-committing-mode</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#c30">&#34;dummy&#34;</span>)
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cl" data-lang="cl"><span style="display:flex;"><span><span style="color:#93a1a1;font-style:italic">;; load-magit-log-when-committing-mode</span>
+</span></span><span style="display:flex;"><span>(<span style="color:#268bd2">define-minor-mode</span> <span style="color:#268bd2">load-magit-log-when-committing-mode</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#2aa198">&#34;dummy&#34;</span>)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic">;; the hook</span>
-</span></span><span style="display:flex;"><span>(<span style="color:#366">defun</span> <span style="color:#033">show-magit-log-hook</span> ()
-</span></span><span style="display:flex;"><span>  (<span style="color:#033">cd</span> <span style="color:#c30">&#34;..&#34;</span>)
-</span></span><span style="display:flex;"><span>  (<span style="color:#033">magit-log</span>)
-</span></span><span style="display:flex;"><span>  (<span style="color:#033">switch-to-buffer-other-window</span> <span style="color:#c30">&#34;COMMIT_EDITMSG&#34;</span>))
+</span></span><span style="display:flex;"><span><span style="color:#93a1a1;font-style:italic">;; the hook</span>
+</span></span><span style="display:flex;"><span>(<span style="color:#cb4b16">defun</span> <span style="color:#268bd2">show-magit-log-hook</span> ()
+</span></span><span style="display:flex;"><span>  (<span style="color:#268bd2">cd</span> <span style="color:#2aa198">&#34;..&#34;</span>)
+</span></span><span style="display:flex;"><span>  (<span style="color:#268bd2">magit-log</span>)
+</span></span><span style="display:flex;"><span>  (<span style="color:#268bd2">switch-to-buffer-other-window</span> <span style="color:#2aa198">&#34;COMMIT_EDITMSG&#34;</span>))
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic">;; add the hook</span>
-</span></span><span style="display:flex;"><span>(<span style="color:#033">add-hook</span> <span style="color:#fc3">&#39;load-magit-log-when-committing-mode-hook</span> <span style="color:#fc3">&#39;show-magit-log-hook</span>)
+</span></span><span style="display:flex;"><span><span style="color:#93a1a1;font-style:italic">;; add the hook</span>
+</span></span><span style="display:flex;"><span>(<span style="color:#268bd2">add-hook</span> <span style="color:#2aa198">&#39;load-magit-log-when-committing-mode-hook</span> <span style="color:#2aa198">&#39;show-magit-log-hook</span>)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic">;; load the mode for commit message</span>
-</span></span><span style="display:flex;"><span>(<span style="color:#033">add-to-list</span> <span style="color:#fc3">&#39;auto-mode-alist</span> <span style="color:#555">&#39;</span>(<span style="color:#c30">&#34;\\COMMIT_EDITMSG\\&#39;&#34;</span> <span style="color:#555">.</span> <span style="color:#033">load-magit-log-when-committing-mode</span>))
+</span></span><span style="display:flex;"><span><span style="color:#93a1a1;font-style:italic">;; load the mode for commit message</span>
+</span></span><span style="display:flex;"><span>(<span style="color:#268bd2">add-to-list</span> <span style="color:#2aa198">&#39;auto-mode-alist</span> &#39;(<span style="color:#2aa198">&#34;\\COMMIT_EDITMSG\\&#39;&#34;</span> . <span style="color:#268bd2">load-magit-log-when-committing-mode</span>))
 </span></span></code></pre></div>
         </div>
         <aside id="gh-comments-list">

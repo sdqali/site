@@ -117,35 +117,35 @@
 <hr>
 <p>Windows provides two ways to deal with certificates from the command line - <a href="http://technet.microsoft.com/en-us/library/cc732443%28WS.10%29.aspx" title="Certutil">Certutil</a> and <a href="http://msdn.microsoft.com/en-us/library/e78byta0.aspx" title="certmgr.exe">certmgr.exe</a>. We decided to go with Certutil because it is present out of the box on Windows 7 and Windows Server 2008, while certmgr.exe is part of the .Net runtime. This blog post will deal with Certutil.</p>
 <h3 id="adding-a-certificate">Adding a certificate</h3>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>certutil.exe -addstore -user root foo.crt
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>certutil.exe -addstore -user root foo.crt
 </span></span></code></pre></div><p>This will install the <code>foo.crt</code> certificate to the Trusted Root Certification Authorities store for the current user.</p>
 <h3 id="view-certificates-in-a-store">View certificates in a store</h3>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>certutil.exe -viewstore -user root
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>certutil.exe -viewstore -user root
 </span></span></code></pre></div><p>This will list all the certificates in the Trusted Root Certification Authorities store for the current user. One drawback is that it throws up a Window to list as opposed to using STDOUT for output.</p>
 <h3 id="list-certificates-in-a-store">List certificates in a store</h3>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>certutil.exe -user -store root
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>certutil.exe -user -store root
 </span></span></code></pre></div><p>This will list all the certificates in the Trusted Root Certification Authorities store for the current user to STDOUT.</p>
 <p>There are more detailed explanations <a href="http://technet.microsoft.com/en-us/library/cc772898(WS.10).aspx">here</a>.</p>
 <h2 id="mac-os-x">Mac OS X</h2>
 <hr>
 <p>Mac OS X ships the <a href="https://developer.apple.com/library/mac/#documentation/Darwin/Reference/Manpages/man1/security.1.html">security</a> tool to let the user manage certificates and keychains.</p>
 <h3 id="adding-a-certificate-1">Adding a certificate</h3>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>security add-certificate foo.crt
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>security add-certificate foo.crt
 </span></span><span style="display:flex;"><span>security add-trusted-cert foo.crt
 </span></span></code></pre></div><p>The first line will add <code>foo.crt</code> to the current user&rsquo;s keychain, while the second line ensures that the newly added certificate is trusted. This would mean that the certificate will be trusted for SSL, EAP and Code Signing. To get more fine grained control over what to trust the certificate for, the <code>-p (policy)</code> flag can be used.</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>security add-trusted-cert -p ssl foo.crt
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>security add-trusted-cert -p ssl foo.crt
 </span></span></code></pre></div><p>This will trust the certificate only for SSL interactions.</p>
 <h3 id="listing-certificates">Listing certificates</h3>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>security find-certificates -a -e foo@bar.com
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>security find-certificates -a -e foo@bar.com
 </span></span></code></pre></div><p>This would list all the certificates where e-mail address of the issuer <code>foo@bar.com</code>. Other fields that can be used for matching include <code>-c (name)</code>.</p>
 <h2 id="linux">Linux</h2>
 <hr>
 <p>On Linux, the best we could find was [certutil](<a href="http://www.mozilla.org/projects/security/pki/nss/tools/certutil.html">http://www.mozilla.org/projects/security/pki/nss/tools/certutil.html</a> certutil) which is part of Mozilla&rsquo;s NSS project.</p>
 <h3 id="adding-a-certificate-2">Adding a certificate</h3>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>certutil -A -d sql:~/.pki/nssdb -t C -n <span style="color:#c30">&#34;Certificate Common Name&#34;</span> -i foo.crt
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>certutil -A -d sql:~/.pki/nssdb -t C -n <span style="color:#2aa198">&#34;Certificate Common Name&#34;</span> -i foo.crt
 </span></span></code></pre></div><p>This will add <code>foo.crt</code> to the certificate database <code>~/.pki/nssdb</code>. This is where applications like Chromium look for certificates.</p>
 <h3 id="listing-certificates-1">Listing certificates</h3>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>certutil -L -d sql:~/.pki/nssdb -n <span style="color:#c30">&#34;Certificate Common Name&#34;</span>
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>certutil -L -d sql:~/.pki/nssdb -n <span style="color:#2aa198">&#34;Certificate Common Name&#34;</span>
 </span></span></code></pre></div><p>This will list the certificates in the <code>~/.pki/nssdb</code> with the common name &ldquo;Certificate Common Name&rdquo;.</p>
 <h2 id="firefox">Firefox</h2>
 <hr>

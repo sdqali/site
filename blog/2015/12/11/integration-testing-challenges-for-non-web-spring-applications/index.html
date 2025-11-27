@@ -90,80 +90,80 @@
         <div>
           <p>We are building a command line data loader application at work that uses Spring. One of the things that I took us more time that it should have to figure out was how to write an integration test that invokes the command line application with the right command line arguments. This blog post describes this scenario and a potential solution to this problem.</p>
 <p>Let&rsquo;s consider a simple command line application implemented using Spring Boot&rsquo;s <code>CommandLineRunner</code>. The main application class is fairly simple.</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@Configuration</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@EnableAutoConfiguration</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@ComponentScan</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">Application</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">implements</span><span style="color:#bbb"> </span>CommandLineRunner<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Autowired</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>DataService<span style="color:#bbb"> </span>dataService;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">static</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">main</span>(String<span style="color:#555">[]</span><span style="color:#bbb"> </span>args)<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>SpringApplication.<span style="color:#309">run</span>(Application.<span style="color:#309">class</span>,<span style="color:#bbb"> </span>args);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">run</span>(String...<span style="color:#bbb"> </span>args)<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>dataService.<span style="color:#309">perform</span>(args<span style="color:#555">[</span>0<span style="color:#555">]</span>);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><p>In addition to this, there is a configuration class <code>AppConfiguration</code>.</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Configuration</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">AppConfiguration</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Bean</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>DataService<span style="color:#bbb"> </span><span style="color:#c0f">dataService</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>DataService();<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><p>The <code>DataService</code> simply prints the argument it receives.</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">DataService</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">perform</span>(String<span style="color:#bbb"> </span>arg)<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>System.<span style="color:#309">out</span>.<span style="color:#309">println</span>(arg);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><p>If we were to attempt writing an integration test for this application, it would look like this:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@RunWith</span>(SpringJUnit4ClassRunner.<span style="color:#309">class</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@SpringApplicationConfiguration</span>(classes<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>{Application.<span style="color:#309">class</span>})<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">ApplicationIntegrationTest</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Autowired</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span>Application<span style="color:#bbb"> </span>application;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Rule</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>OutputCapture<span style="color:#bbb"> </span>outputCapture<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">new</span><span style="color:#bbb"> </span>OutputCapture();<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Test</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">shouldGenerateResultFiles</span>()<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>application.<span style="color:#309">run</span>(<span style="color:#c30">&#34;sampleOutPut&#34;</span>);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>assertTrue(outputCapture.<span style="color:#309">toString</span>().<span style="color:#309">contains</span>(<span style="color:#c30">&#34;sampleOutput&#34;</span>));<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><p>That test is straightforward—it loads the Spring context with all the beans, runs the application with parameters and expects the parameter to be printed to the console.</p>
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#268bd2">@Configuration</span>
+</span></span><span style="display:flex;"><span><span style="color:#268bd2">@EnableAutoConfiguration</span>
+</span></span><span style="display:flex;"><span><span style="color:#268bd2">@ComponentScan</span>
+</span></span><span style="display:flex;"><span><span style="color:#859900">public</span> <span style="color:#859900">class</span> <span style="color:#cb4b16">Application</span> <span style="color:#859900">implements</span> <span style="color:#268bd2">CommandLineRunner</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#268bd2">@Autowired</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#268bd2">DataService</span> <span style="color:#268bd2">dataService</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#859900">public</span> <span style="color:#859900">static</span> <span style="color:#859900;font-weight:bold">void</span> <span style="color:#268bd2">main</span>(<span style="color:#268bd2">String</span>[] <span style="color:#268bd2">args</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#268bd2">SpringApplication</span>.<span style="color:#268bd2">run</span>(<span style="color:#268bd2">Application</span>.<span style="color:#268bd2">class</span>, <span style="color:#268bd2">args</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#268bd2">@Override</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#859900">public</span> <span style="color:#859900;font-weight:bold">void</span> <span style="color:#268bd2">run</span>(<span style="color:#268bd2">String</span>... <span style="color:#268bd2">args</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#268bd2">dataService</span>.<span style="color:#268bd2">perform</span>(<span style="color:#268bd2">args</span>[<span style="color:#268bd2">0</span>]);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>In addition to this, there is a configuration class <code>AppConfiguration</code>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#268bd2">@Configuration</span>
+</span></span><span style="display:flex;"><span><span style="color:#859900">public</span> <span style="color:#859900">class</span> <span style="color:#cb4b16">AppConfiguration</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#268bd2">@Bean</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#859900">public</span> <span style="color:#268bd2">DataService</span> <span style="color:#268bd2">dataService</span>() {
+</span></span><span style="display:flex;"><span>        <span style="color:#859900">return</span> <span style="color:#859900">new</span> <span style="color:#268bd2">DataService</span>();
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The <code>DataService</code> simply prints the argument it receives.</p>
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#859900">public</span> <span style="color:#859900">class</span> <span style="color:#cb4b16">DataService</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#859900">public</span> <span style="color:#859900;font-weight:bold">void</span> <span style="color:#268bd2">perform</span>(<span style="color:#268bd2">String</span> <span style="color:#268bd2">arg</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#268bd2">System</span>.<span style="color:#268bd2">out</span>.<span style="color:#268bd2">println</span>(<span style="color:#268bd2">arg</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>If we were to attempt writing an integration test for this application, it would look like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#268bd2">@RunWith</span>(<span style="color:#268bd2">SpringJUnit4ClassRunner</span>.<span style="color:#268bd2">class</span>)
+</span></span><span style="display:flex;"><span><span style="color:#268bd2">@SpringApplicationConfiguration</span>(<span style="color:#268bd2">classes</span> = {<span style="color:#268bd2">Application</span>.<span style="color:#268bd2">class</span>})
+</span></span><span style="display:flex;"><span><span style="color:#859900">public</span> <span style="color:#859900">class</span> <span style="color:#cb4b16">ApplicationIntegrationTest</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#268bd2">@Autowired</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#859900">private</span> <span style="color:#268bd2">Application</span> <span style="color:#268bd2">application</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#268bd2">@Rule</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#859900">public</span> <span style="color:#268bd2">OutputCapture</span> <span style="color:#268bd2">outputCapture</span> = <span style="color:#859900">new</span> <span style="color:#268bd2">OutputCapture</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#268bd2">@Test</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#859900">public</span> <span style="color:#859900;font-weight:bold">void</span> <span style="color:#268bd2">shouldGenerateResultFiles</span>() <span style="color:#859900">throws</span> <span style="color:#268bd2">Exception</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#268bd2">application</span>.<span style="color:#268bd2">run</span>(<span style="color:#2aa198">&#34;sampleOutPut&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#268bd2">assertTrue</span>(<span style="color:#268bd2">outputCapture</span>.<span style="color:#268bd2">toString</span>().<span style="color:#268bd2">contains</span>(<span style="color:#2aa198">&#34;sampleOutput&#34;</span>));
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>That test is straightforward—it loads the Spring context with all the beans, runs the application with parameters and expects the parameter to be printed to the console.</p>
 <p>Except, it does not work. If we were to execute the above test, we will get the following error:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>...
-</span></span><span style="display:flex;"><span>Caused by: java.lang.ArrayIndexOutOfBoundsException: <span style="color:#f60">0</span>
-</span></span><span style="display:flex;"><span>at in.sdqali.springapps.Application.run<span style="color:#555">(</span>Application.java:24<span style="color:#555">)</span> ~<span style="color:#555">[</span>main/:na<span style="color:#555">]</span>
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>Caused by: java.lang.ArrayIndexOutOfBoundsException: <span style="color:#2aa198;font-weight:bold">0</span>
+</span></span><span style="display:flex;"><span>at in.sdqali.springapps.Application.run(Application.java:24) ~[main/:na]
 </span></span><span style="display:flex;"><span>...
 </span></span></code></pre></div><p>What happened? It looks like the <code>run</code> method was called with out any arguments while the test configuration was loaded.</p>
 <p>Let‘s try and understand wh
 y this happens. Remember how we annotated the test with <code>@SpringApplicationConfiguration</code>? This annotation is a meta-annotation <sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> specified as:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@ContextConfiguration</span>(loader<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>SpringApplicationContextLoader.<span style="color:#309">class</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@Documented</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@Inherited</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@Retention</span>(RetentionPolicy.<span style="color:#309">RUNTIME</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#99f">@Target</span>(ElementType.<span style="color:#309">TYPE</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#99f">@interface</span><span style="color:#bbb"> </span>SpringApplicationConfiguration<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>...<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><p><code>ContextConfiguration</code> is an annotation that allows tests to specify the information used to load and configure the application context. From the Java doc for this annotation:</p>
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#268bd2">@ContextConfiguration</span>(<span style="color:#268bd2">loader</span> = <span style="color:#268bd2">SpringApplicationContextLoader</span>.<span style="color:#268bd2">class</span>)
+</span></span><span style="display:flex;"><span><span style="color:#268bd2">@Documented</span>
+</span></span><span style="display:flex;"><span><span style="color:#268bd2">@Inherited</span>
+</span></span><span style="display:flex;"><span><span style="color:#268bd2">@Retention</span>(<span style="color:#268bd2">RetentionPolicy</span>.<span style="color:#268bd2">RUNTIME</span>)
+</span></span><span style="display:flex;"><span><span style="color:#268bd2">@Target</span>(<span style="color:#268bd2">ElementType</span>.<span style="color:#268bd2">TYPE</span>)
+</span></span><span style="display:flex;"><span><span style="color:#859900">public</span> <span style="color:#268bd2">@interface</span> <span style="color:#268bd2">SpringApplicationConfiguration</span> {
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><code>ContextConfiguration</code> is an annotation that allows tests to specify the information used to load and configure the application context. From the Java doc for this annotation:</p>
 <pre tabindex="0"><code> * {@code @ContextConfiguration} defines class-level metadata that is used to determine
  * how to load and configure an {@link org.springframework.context.ApplicationContext
  * ApplicationContext} for integration tests.
 </code></pre><p>This brings us to <code>SpringApplicationContextLoader</code>‘s <code>loadContext</code> method and buried deep inside are these line:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>application.<span style="color:#309">setInitializers</span>(initializers);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>ConfigurableApplicationContext<span style="color:#bbb"> </span>applicationContext<span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>application.<span style="color:#309">run</span>();<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>applicationContext;<span style="color:#bbb">
-</span></span></span></code></pre></div><p>So, regardless of how many arguments our command line application was supposed to take, this loader always call the application without any arguments.</p>
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#268bd2">application</span>.<span style="color:#268bd2">setInitializers</span>(<span style="color:#268bd2">initializers</span>);
+</span></span><span style="display:flex;"><span><span style="color:#268bd2">ConfigurableApplicationContext</span> <span style="color:#268bd2">applicationContext</span> = <span style="color:#268bd2">application</span>.<span style="color:#268bd2">run</span>();
+</span></span><span style="display:flex;"><span><span style="color:#859900">return</span> <span style="color:#268bd2">applicationContext</span>;
+</span></span></code></pre></div><p>So, regardless of how many arguments our command line application was supposed to take, this loader always call the application without any arguments.</p>
 <p>There are two solutions I have been able to think of for this problem:</p>
 <ul>
 <li>Override the<code>SpringApplicationContextLoader</code> and pass the necessary arguments in <code>application.run()</code>. This is definitely not an elegant or easy solution.</li>

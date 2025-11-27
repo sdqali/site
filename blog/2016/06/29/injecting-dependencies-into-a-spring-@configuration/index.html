@@ -87,58 +87,58 @@
           <p>This is one of those blog posts about things I wish I had known before I spent a lot of time figuring out when something was not working as expected. Recently, we have been trying to extend a <code>WebMvcConfigurerAdapter</code> to wire up an HTTP request interceptor. And things did not work as we expected it to and we learned that our understanding of how Spring behaved under this situation was wrong. This is a write up to refer back to if and when we encounter this issue again.</p>
 <p>Spring&rsquo;s <code>@Configuration</code> annotation allows us to create a class that provides a set of beans. Because we wanted to wire up interceptors when the application started, it felt reasonable to annotate the extended <code>WebMvcConfigurerAdapter</code> adaptor as a <code>@Configuration</code>.</p>
 <p>So we ended up with code that looked as follows:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Configuration</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">Config</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">extends</span><span style="color:#bbb"> </span>WebMvcConfigurerAdapter<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span>HandlerInterceptor<span style="color:#bbb"> </span>handlerInterceptor;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@SuppressWarnings</span>(<span style="color:#c30">&#34;unused&#34;</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#c0f">Config</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Autowired</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#c0f">Config</span>(HandlerInterceptor<span style="color:#bbb"> </span>handlerInterceptor)<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">this</span>.<span style="color:#309">handlerInterceptor</span><span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>handlerInterceptor;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">addInterceptors</span>(InterceptorRegistry<span style="color:#bbb"> </span>registry)<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>registry.<span style="color:#309">addInterceptor</span>(handlerInterceptor);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">super</span>.<span style="color:#309">addInterceptors</span>(registry);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><p>The interceptor itself is declared a <code>@Component</code> of the following form:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Component</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">SessionCheckInterceptor</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">implements</span><span style="color:#bbb"> </span>HandlerInterceptor<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">boolean</span><span style="color:#bbb"> </span><span style="color:#c0f">preHandle</span>(HttpServletRequest<span style="color:#bbb"> </span>request,<span style="color:#bbb"> </span>HttpServletResponse<span style="color:#bbb"> </span>response,<span style="color:#bbb"> </span>Object<span style="color:#bbb"> </span>handler)<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">if</span>(request.<span style="color:#309">getHeader</span>(<span style="color:#c30">&#34;session&#34;</span>)<span style="color:#bbb"> </span><span style="color:#555">==</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">null</span>)<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span>response.<span style="color:#309">setStatus</span>(HttpServletResponse.<span style="color:#309">SC_BAD_REQUEST</span>);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">false</span>;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">else</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">            </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">true</span>;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">postHandle</span>(HttpServletRequest<span style="color:#bbb"> </span>request,<span style="color:#bbb"> </span>HttpServletResponse<span style="color:#bbb"> </span>response,<span style="color:#bbb"> </span>Object<span style="color:#bbb"> </span>handler,<span style="color:#bbb"> </span>ModelAndView<span style="color:#bbb"> </span>modelAndView)<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">afterCompletion</span>(HttpServletRequest<span style="color:#bbb"> </span>request,<span style="color:#bbb"> </span>HttpServletResponse<span style="color:#bbb"> </span>response,<span style="color:#bbb"> </span>Object<span style="color:#bbb"> </span>handler,<span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>ex)<span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">throws</span><span style="color:#bbb"> </span>Exception<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><p>As you can see, the interceptor checks every request for a <code>session</code> header and responds with a <code>BAD_REQUEST (400)</code> in the absence of it.</p>
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#268bd2">@Configuration</span>
+</span></span><span style="display:flex;"><span><span style="color:#859900">public</span> <span style="color:#859900">class</span> <span style="color:#cb4b16">Config</span> <span style="color:#859900">extends</span> <span style="color:#268bd2">WebMvcConfigurerAdapter</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#859900">private</span> <span style="color:#268bd2">HandlerInterceptor</span> <span style="color:#268bd2">handlerInterceptor</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#268bd2">@SuppressWarnings</span>(<span style="color:#2aa198">&#34;unused&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#859900">public</span> <span style="color:#268bd2">Config</span>() {
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#268bd2">@Autowired</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#859900">public</span> <span style="color:#268bd2">Config</span>(<span style="color:#268bd2">HandlerInterceptor</span> <span style="color:#268bd2">handlerInterceptor</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#859900">this</span>.<span style="color:#268bd2">handlerInterceptor</span> = <span style="color:#268bd2">handlerInterceptor</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#268bd2">@Override</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#859900">public</span> <span style="color:#859900;font-weight:bold">void</span> <span style="color:#268bd2">addInterceptors</span>(<span style="color:#268bd2">InterceptorRegistry</span> <span style="color:#268bd2">registry</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#268bd2">registry</span>.<span style="color:#268bd2">addInterceptor</span>(<span style="color:#268bd2">handlerInterceptor</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#859900">super</span>.<span style="color:#268bd2">addInterceptors</span>(<span style="color:#268bd2">registry</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The interceptor itself is declared a <code>@Component</code> of the following form:</p>
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#268bd2">@Component</span>
+</span></span><span style="display:flex;"><span><span style="color:#859900">public</span> <span style="color:#859900">class</span> <span style="color:#cb4b16">SessionCheckInterceptor</span> <span style="color:#859900">implements</span> <span style="color:#268bd2">HandlerInterceptor</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#268bd2">@Override</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#859900">public</span> <span style="color:#859900;font-weight:bold">boolean</span> <span style="color:#268bd2">preHandle</span>(<span style="color:#268bd2">HttpServletRequest</span> <span style="color:#268bd2">request</span>, <span style="color:#268bd2">HttpServletResponse</span> <span style="color:#268bd2">response</span>, <span style="color:#268bd2">Object</span> <span style="color:#268bd2">handler</span>) <span style="color:#859900">throws</span> <span style="color:#268bd2">Exception</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#859900">if</span>(<span style="color:#268bd2">request</span>.<span style="color:#268bd2">getHeader</span>(<span style="color:#2aa198">&#34;session&#34;</span>) == <span style="color:#859900;font-weight:bold">null</span>) {
+</span></span><span style="display:flex;"><span>            <span style="color:#268bd2">response</span>.<span style="color:#268bd2">setStatus</span>(<span style="color:#268bd2">HttpServletResponse</span>.<span style="color:#268bd2">SC_BAD_REQUEST</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#859900">return</span> <span style="color:#859900;font-weight:bold">false</span>;
+</span></span><span style="display:flex;"><span>        } <span style="color:#859900">else</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#859900">return</span> <span style="color:#859900;font-weight:bold">true</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#268bd2">@Override</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#859900">public</span> <span style="color:#859900;font-weight:bold">void</span> <span style="color:#268bd2">postHandle</span>(<span style="color:#268bd2">HttpServletRequest</span> <span style="color:#268bd2">request</span>, <span style="color:#268bd2">HttpServletResponse</span> <span style="color:#268bd2">response</span>, <span style="color:#268bd2">Object</span> <span style="color:#268bd2">handler</span>, <span style="color:#268bd2">ModelAndView</span> <span style="color:#268bd2">modelAndView</span>) <span style="color:#859900">throws</span> <span style="color:#268bd2">Exception</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#268bd2">@Override</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#859900">public</span> <span style="color:#859900;font-weight:bold">void</span> <span style="color:#268bd2">afterCompletion</span>(<span style="color:#268bd2">HttpServletRequest</span> <span style="color:#268bd2">request</span>, <span style="color:#268bd2">HttpServletResponse</span> <span style="color:#268bd2">response</span>, <span style="color:#268bd2">Object</span> <span style="color:#268bd2">handler</span>, <span style="color:#268bd2">Exception</span> <span style="color:#268bd2">ex</span>) <span style="color:#859900">throws</span> <span style="color:#268bd2">Exception</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>As you can see, the interceptor checks every request for a <code>session</code> header and responds with a <code>BAD_REQUEST (400)</code> in the absence of it.</p>
 <p>This code compiles fine, but when you run it, you will be confronted with the following stack trace:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>Factory method <span style="color:#c30">&#39;requestMappingHandlerMapping&#39;</span> threw exception; nested exception is java.lang.IllegalArgumentException: Interceptor is required
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>Factory method <span style="color:#2aa198">&#39;requestMappingHandlerMapping&#39;</span> threw exception; nested exception is java.lang.IllegalArgumentException: Interceptor is required
 </span></span></code></pre></div><p>So, what happened? Looking at the stack trace reveals the following:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>Caused by: java.lang.IllegalArgumentException: Interceptor is required
-</span></span><span style="display:flex;"><span>    at org.springframework.util.Assert.notNull<span style="color:#555">(</span>Assert.java:115<span style="color:#555">)</span>
-</span></span><span style="display:flex;"><span>    at org.springframework.web.servlet.config.annotation.InterceptorRegistration.&lt;init&gt;<span style="color:#555">(</span>InterceptorRegistration.java:51<span style="color:#555">)</span>
-</span></span><span style="display:flex;"><span>    at org.springframework.web.servlet.config.annotation.InterceptorRegistry.addInterceptor<span style="color:#555">(</span>InterceptorRegistry.java:45<span style="color:#555">)</span>
-</span></span><span style="display:flex;"><span>    at in.sdqali.spring.config.Config.addInterceptors<span style="color:#555">(</span>Config.java:30<span style="color:#555">)</span>
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>Caused by: java.lang.IllegalArgumentException: Interceptor is required
+</span></span><span style="display:flex;"><span>    at org.springframework.util.Assert.notNull(Assert.java:115)
+</span></span><span style="display:flex;"><span>    at org.springframework.web.servlet.config.annotation.InterceptorRegistration.&lt;init&gt;(InterceptorRegistration.java:51)
+</span></span><span style="display:flex;"><span>    at org.springframework.web.servlet.config.annotation.InterceptorRegistry.addInterceptor(InterceptorRegistry.java:45)
+</span></span><span style="display:flex;"><span>    at in.sdqali.spring.config.Config.addInterceptors(Config.java:30)
 </span></span></code></pre></div><p>Evidently, the interceptor we wired up is <code>null</code>. After a spending a lot of time on this, we discovered this line on the java doc for <code>@Configuration</code>:</p>
 <pre tabindex="0"><code>@Configuration is meta-annotated with @Component, therefore
 @Configuration classes are candidates for component scanning (typically using
@@ -146,26 +146,26 @@ Spring XML&#39;s &lt;context:component-scan/&gt; element) and therefore may also
 advantage of @Autowired/@Inject
 at the field and method level (but not at the constructor level).
 </code></pre><p>A simple fix is to inject the interceptor through a setter as follows:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@Configuration</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">Config</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">extends</span><span style="color:#bbb"> </span>WebMvcConfigurerAdapter<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">private</span><span style="color:#bbb"> </span>HandlerInterceptor<span style="color:#bbb"> </span>handlerInterceptor;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@SuppressWarnings</span>(<span style="color:#c30">&#34;unused&#34;</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#c0f">Config</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Autowired</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">setHandlerInterceptor</span>(HandlerInterceptor<span style="color:#bbb"> </span>handlerInterceptor)<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">this</span>.<span style="color:#309">handlerInterceptor</span><span style="color:#bbb"> </span><span style="color:#555">=</span><span style="color:#bbb"> </span>handlerInterceptor;<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#99f">@Override</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#078;font-weight:bold">void</span><span style="color:#bbb"> </span><span style="color:#c0f">addInterceptors</span>(InterceptorRegistry<span style="color:#bbb"> </span>registry)<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>registry.<span style="color:#309">addInterceptor</span>(handlerInterceptor);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#069;font-weight:bold">super</span>.<span style="color:#309">addInterceptors</span>(registry);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><p>It took us a lot of time debugging and stepping through Spring code before we finally figured out what the issue was, but we could have discovered it in seconds from the java doc. There is a lesson in there for us.</p>
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#268bd2">@Configuration</span>
+</span></span><span style="display:flex;"><span><span style="color:#859900">public</span> <span style="color:#859900">class</span> <span style="color:#cb4b16">Config</span> <span style="color:#859900">extends</span> <span style="color:#268bd2">WebMvcConfigurerAdapter</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#859900">private</span> <span style="color:#268bd2">HandlerInterceptor</span> <span style="color:#268bd2">handlerInterceptor</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#268bd2">@SuppressWarnings</span>(<span style="color:#2aa198">&#34;unused&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#859900">public</span> <span style="color:#268bd2">Config</span>() {
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#268bd2">@Autowired</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#859900">public</span> <span style="color:#859900;font-weight:bold">void</span> <span style="color:#268bd2">setHandlerInterceptor</span>(<span style="color:#268bd2">HandlerInterceptor</span> <span style="color:#268bd2">handlerInterceptor</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#859900">this</span>.<span style="color:#268bd2">handlerInterceptor</span> = <span style="color:#268bd2">handlerInterceptor</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#268bd2">@Override</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#859900">public</span> <span style="color:#859900;font-weight:bold">void</span> <span style="color:#268bd2">addInterceptors</span>(<span style="color:#268bd2">InterceptorRegistry</span> <span style="color:#268bd2">registry</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#268bd2">registry</span>.<span style="color:#268bd2">addInterceptor</span>(<span style="color:#268bd2">handlerInterceptor</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#859900">super</span>.<span style="color:#268bd2">addInterceptors</span>(<span style="color:#268bd2">registry</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>It took us a lot of time debugging and stepping through Spring code before we finally figured out what the issue was, but we could have discovered it in seconds from the java doc. There is a lesson in there for us.</p>
 <p>The example code to demonstrate this is available on <a href="https://github.com/sdqali/config-constructor-poc">GitHub</a>.</p>
         </div>
         <aside id="gh-comments-list">

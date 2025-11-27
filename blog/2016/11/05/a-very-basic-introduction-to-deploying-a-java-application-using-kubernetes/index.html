@@ -128,14 +128,14 @@ One of the first things I did was to try and see what it would take to go from a
 &gt; minikube start --vm-driver=&#34;virtualbox&#34; --insecure-registry=192.168.99.100:80
 </code></pre><h2 id="create-a-container-image-for-the-application">Create a container image for the application</h2>
 <p>The application in this case is a simple Spring Boot application that has exactly one controller.</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#99f">@RestController</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span><span style="color:#069;font-weight:bold">class</span> <span style="color:#0a8;font-weight:bold">HelloController</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#99f">@RequestMapping</span>(<span style="color:#c30">&#34;/hello&#34;</span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#069;font-weight:bold">public</span><span style="color:#bbb"> </span>Map<span style="color:#bbb"> </span><span style="color:#c0f">hello</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#069;font-weight:bold">return</span><span style="color:#bbb"> </span>singletonMap(<span style="color:#c30">&#34;message&#34;</span>,<span style="color:#bbb"> </span><span style="color:#c30">&#34;hello&#34;</span>);<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><p>In order to create a docker container from this application, we will use the <a href="https://github.com/spotify/docker-maven-plugin">Maven Docker Plugin</a>. We will need to set a prefix for our docker image. This can be done with this maven property:</p>
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#268bd2">@RestController</span>
+</span></span><span style="display:flex;"><span><span style="color:#859900">public</span> <span style="color:#859900">class</span> <span style="color:#cb4b16">HelloController</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#268bd2">@RequestMapping</span>(<span style="color:#2aa198">&#34;/hello&#34;</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#859900">public</span> <span style="color:#268bd2">Map</span> <span style="color:#268bd2">hello</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#859900">return</span> <span style="color:#268bd2">singletonMap</span>(<span style="color:#2aa198">&#34;message&#34;</span>, <span style="color:#2aa198">&#34;hello&#34;</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>In order to create a docker container from this application, we will use the <a href="https://github.com/spotify/docker-maven-plugin">Maven Docker Plugin</a>. We will need to set a prefix for our docker image. This can be done with this maven property:</p>
 <pre tabindex="0"><code>&lt;docker.image.prefix&gt;sadiqueio&lt;/docker.image.prefix&gt;
 </code></pre><p>This plugin expects a <code>Dockerfile</code> to be present in the <code>src/main/docker</code> directory. Our <code>Dockerfile</code> will look like this:</p>
 <pre tabindex="0"><code>FROM frolvlad/alpine-oraclejdk8:slim

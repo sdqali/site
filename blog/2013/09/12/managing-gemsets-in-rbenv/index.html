@@ -106,7 +106,7 @@ This works well, until you have to manage Gemsets 3. Often, one is working on tw
 <ul>
 <li>Specify the gemset by adding it&rsquo;s name to a <code>rbenv-gemsets</code> file in the root directory of the project.</li>
 </ul>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>cat rbenv-gemsets
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>cat rbenv-gemsets
 </span></span><span style="display:flex;"><span>$ .gems
 </span></span></code></pre></div><ul>
 <li>Install the gems, by using <code>gem install</code> or with bundler.</li>
@@ -118,16 +118,16 @@ This works well, until you have to manage Gemsets 3. Often, one is working on tw
 <ul>
 <li>Install gems to a <code>.gems</code> directory using bundler</li>
 </ul>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>bundle install --path .gems
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>bundle install --path .gems
 </span></span></code></pre></div><ul>
 <li>Wrap calls with <code>bundle exec</code></li>
 </ul>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>bundle <span style="color:#366">exec</span> rake --version
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>bundle <span style="color:#cb4b16">exec</span> rake --version
 </span></span></code></pre></div><h2 id="use-a-devenv-file">Use a devenv file</h2>
 <p>This is a hacky way doing things and it was the first that came to my mind when I was looking at this problem. This approach involves adding a project specific <code>devenv</code> file that is sourced when one starts to work on that project. This file will set the <code>GEM_HOME</code> and <code>GEM_PATH</code> environment variables to the directory where the gemset is supposed to live as well as prepend the <code>gems/bin</code> directory of the gemset to <code>PATH</code>. An example <code>devenv</code> file will be as follows</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#366">export</span> <span style="color:#033">GEM_PATH</span><span style="color:#555">=</span>./.gems
-</span></span><span style="display:flex;"><span><span style="color:#366">export</span> <span style="color:#033">GEM_HOME</span><span style="color:#555">=</span>./.gems
-</span></span><span style="display:flex;"><span><span style="color:#366">export</span> <span style="color:#033">PATH</span><span style="color:#555">=</span>./.gems/bin:<span style="color:#033">$PATH</span>
+<div class="highlight"><pre tabindex="0" style="color:#586e75;background-color:#eee8d5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#cb4b16">export</span> <span style="color:#268bd2">GEM_PATH</span>=./.gems
+</span></span><span style="display:flex;"><span><span style="color:#cb4b16">export</span> <span style="color:#268bd2">GEM_HOME</span>=./.gems
+</span></span><span style="display:flex;"><span><span style="color:#cb4b16">export</span> <span style="color:#268bd2">PATH</span>=./.gems/bin:<span style="color:#268bd2">$PATH</span>
 </span></span></code></pre></div><p>In the end, I ended up choosing the <code>bundler</code> approach. I use bundler in most of my Ruby projects anyway. The downside to this is that every invocation will be spawning a <code>bundler</code> process, in addition to whatever we intend to do.</p>
 <div class="footnotes" role="doc-endnotes">
 <hr>
