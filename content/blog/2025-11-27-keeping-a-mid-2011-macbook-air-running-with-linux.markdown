@@ -7,7 +7,8 @@ tags:
 ghissueid: 152
 bbissueid: 145
 ---
-I have a 2011 vintage MacBook Air that has not seen much usage. I purchased it from a previous employer's auction of used computers. It did just enough things - browsing, watching videos, working on documents, and writing some code in a pinch. Somewhere along the way, the battery stopped holding a charge and the MacBook became tethered to a power cable. This led me to replacing the battery, following tools, replacement battery and excellent instructions from iFixit[^1].
+
+I have a 2011 vintage MacBook Air that has not seen much usage recently. It was originally purchased from a previous employer's auction of used computers. It did just enough things right - browsing, watching videos, working on documents, and writing some code in a pinch. Somewhere along the way, the battery stopped holding a charge and the MacBook became tethered to a power cable. This led me to replacing the battery - it was easy enough using tools, replacement battery and excellent instructions from iFixit[^1].
 
 <!--more-->
 
@@ -35,7 +36,7 @@ I decided to install Linux Mint Mate, which came with a reputation for being mor
 - Bluetooth works, although playing Audio through Bluetooth is still a nightmare, as it is on my other Linux desktops. [^2]
 - Audio, brightness, keyboard backlight controls worked out of the box, although I had to modify Function key behavior, as described later in this post.
 
-## Things that needed tweaking
+## Tweaks and Customizations
 
 ### Key bindings
 I have, over the years become so used to Mac keybindings that I set all my Linux desktops to use the same keybindings. I typically use `kinto.sh` [^3] for this, even though it is not perfect [^4]. It turned out that I simply couldn't get it working on Linux Mint Mate, no matter how much Python venv wrangling I did. I have used `gnome-macos-remap-wayland` [^5] before when running Wayland, so I decided to switch to Gnome desktop instead of Mate. The default installation of `gnome-macos-remap-wayland` didn't start on login, and I ended up with this Systemd entry that worked:
@@ -55,8 +56,35 @@ ExecStart=xremap /etc/gnome-macos-remap/config.yml
 WantedBy=default.target
 ```
 
+It is important to note here that `gnome-macos-remap-wayland` works by running `xremap` [^8] with a heavily customized configuration. 
+
 ### Start-up Chime
-I needed a way to turn off the loud Startup Chime at boot time. After trying various approaches, I found something that just works[^6].
+I needed a way to turn off the loud Startup Chime at boot time. Start up chime on a MacBook is controlled by the EFI [^9] variables. On Linux, these variables are exposed as a filesystem, at `/sys/firmware/efi/efivars` [^10]. This can be inspected with the `efivar` utility.
+
+```shell
+❯ efivar -l | grep Volume
+
+7c436110-ab2a-4bbb-a880-fe41995c9f82-SystemAudioVolume
+7c436110-ab2a-4bbb-a880-fe41995c9f82-SystemAudioVolumeDB
+```
+
+The `SystemAudioVolume` entry controls start up audio volume level, while `SystemAudioVolumeDB` controls system audio volume level[^11]. Setting `StartupMute` was my original plan, but since that variable was not present in this MacBook's eifvarfs, `SystemAudioVolume` was the next best option. Initial attempts to set it didn't succeed, as it turns out these files are immutable [^10].
+
+```shell
+❯ lsattr /sys/firmware/efi/efivars/SystemAudioVolume-7c436110-ab2a-4bbb-a880-fe41995c9f82
+----i----------------- /sys/firmware/efi/efivars/SystemAudioVolume-7c436110-ab2a-4bbb-a880-fe41995c9f82
+```
+
+And from `man chattr`
+
+```man
+...
+       i      A file with the 'i' attribute cannot be modified: it cannot be deleted or renamed, no link can be created to this file, most of the file's metadata can not be modified, and the file can not be opened in write mode.  Only the superuser or  a  process possessing the CAP_LINUX_IMMUTABLE capability can set or clear this attribute.
+...
+
+```
+
+The solution is to temporarily remove the `i` attribute, update the value, and reinstate the `i` attribute.
 
 ```shell
 sudo su
@@ -69,7 +97,7 @@ sudo chattr +i /sys/firmware/efi/efivars/SystemAudioVolume-7c436110-ab2a-4bbb-a8
 ```
 
 ### Function Key
-I want to be able to use the Function keys as plain Function keys by default. I was able to get that working by modifying the `hid_apple` module parameters[^7]:
+I want to be able to use the Function keys as plain Function keys by default. I was able to get that working by modifying the `hid_apple` kernel module's parameters[^7] [^12].
 
 ```shell
 echo options hid_apple fnmode=2 | sudo tee -a /etc/modprobe.d/hid_apple.conf
@@ -89,3 +117,8 @@ Linux Mint feels snappier than High Sierra, and I am able to run Firefox and Neo
 [^5]: [gnome-macos-remap-wayland](https://github.com/petrstepanov/gnome-macos-remap-wayland) is like `kinto.sh`, but works in Wayland.
 [^6]: For some time, it looked like the only way to do this was to enter macOS's Internet Recovery option, enter the macOS Terminal and make changes, since I was not dual booting and had wiped the macOS volume. Eventually, I found this [approach that works from Linux](https://gist.github.com/0xbb/ae298e2798e1c06d0753?permalink_comment_id=4296049#gistcomment-4296049).
 [^7]: Linux Mint Forums - [[SOLVED] MacBook fn keys](https://forums.linuxmint.com/viewtopic.php?t=417982)
+[^8]: `xremap` is a Key remapper for X11 and Wayland [written in Rust](https://github.com/xremap/xremap).
+[^9]: UEFI, or Unified Extensible Firmware Interface, is a modern replacement for the traditional BIOS that provides the initial software to start a computer.
+[^10]: efivarfs - a (U)EFI variable filesystem loads variables [as a filesystem](https://docs.kernel.org/filesystems/efivarfs.html).
+[^11]: Insanely Mac - [SystemAudioVolumeDB](https://www.insanelymac.com/forum/topic/360250-systemaudiovolumedb/)
+[^12]: Linux Kernel - HID quirks support for Linux - [fnmode](https://github.com/torvalds/linux/blob/master/drivers/hid/hid-apple.c#L59)
