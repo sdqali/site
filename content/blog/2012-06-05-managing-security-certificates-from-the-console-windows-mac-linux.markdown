@@ -87,7 +87,7 @@ This would list all the certificates where e-mail address of the issuer `foo@bar
 
 ## Linux
 ----
-On Linux, the best we could find was [certutil](http://www.mozilla.org/projects/security/pki/nss/tools/certutil.html certutil) which is part of Mozilla's NSS project.
+On Linux, the best we could find was [certutil](http://www.mozilla.org/projects/security/pki/nss/tools/certutil.html) which is part of Mozilla's NSS project.
 
 ### Adding a certificate
 ```bash
@@ -105,7 +105,7 @@ This will list the certificates in the `~/.pki/nssdb` with the common name "Cert
 
 ## Firefox
 ----
-While the above steps work fine for pretty much all applications on the three OSes, Firefox does things in it's own way. Firefox implements [NSS](https://www.mozilla.org/projects/security/pki/nss/ NSS) and hence does not look at the certificates the OS knows about. One solution to manage certificates from the command line will be to install certutil and point it at the `cert.db` certificate database in your Firefox profile directory. Alternatively, one could do the following
+While the above steps work fine for pretty much all applications on the three OSes, Firefox does things in it's own way. Firefox implements [NSS](https://www.mozilla.org/projects/security/pki/nss/) and hence does not look at the certificates the OS knows about. One solution to manage certificates from the command line will be to install certutil and point it at the `cert.db` certificate database in your Firefox profile directory. Alternatively, one could do the following
 
 1. Launch Firefox with a blank profile
 * Accept the certificates we are interested in.

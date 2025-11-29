@@ -59,7 +59,7 @@ WantedBy=default.target
 It is important to note here that `gnome-macos-remap-wayland` works by running `xremap` [^8] with a heavily customized configuration. 
 
 ### Start-up Chime
-I needed a way to turn off the loud Startup Chime at boot time. Start up chime on a MacBook is controlled by the EFI [^9] variables. On Linux, these variables are exposed as a filesystem, at `/sys/firmware/efi/efivars` [^10]. This can be inspected with the `efivar` utility.
+I needed a way to turn off the loud Startup Chime at boot time. Start up chime on a MacBook is controlled by EFI [^9] variables. On Linux, these variables are exposed as a filesystem, at `/sys/firmware/efi/efivars` [^10]. This can be inspected with the `efivar` utility.
 
 ```shell
 ❯ efivar -l | grep Volume
