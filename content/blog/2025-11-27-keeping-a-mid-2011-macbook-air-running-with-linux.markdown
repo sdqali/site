@@ -4,6 +4,7 @@ date: 2025-11-27T08:05:17-08:00
 tags:
   - macbook
   - linux
+  - xremap
 ghissueid: 152
 bbissueid: 145
 ---
