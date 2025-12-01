@@ -19,10 +19,8 @@ Modern day football has become a professional game of the highest order, where m
 
 Amidst all these there still stand a club, who recruit players from their locality, born to their tribe and is even ready to forsake their top-flight status, in order to stick to their principles. Athletic Bilbao, the Spanish club, is a Basque institution that adheres to their 'la cantera' policy so passionately that, no non-Basque player has played for them since 1912.
 
-!["For now and forever, Hooray Athletic !"](http://lh6.ggpht.com/_bZ_kjFIgY0w/SRVbQyFlrRI/AAAAAAAAAj0/zIOTJ0x1f1Y/athletic.jpg "For now and forever, Hooray Athletic !")
 
-"For now and forever, Hooray Athletic !" Image courtesy : www.athletic-club.net
-
+{{< figure src="/images/athletic.jpg" alt="For now and forever, Hooray Athletic !" caption="For now and forever, Hooray Athletic !" >}}
 
 The Basque People are a group of people inhabiting northern parts of Spain and France, areas around the Bay of Biscay. Historically the Basque people have always been in conflict with the Castilles of Central Spain. Athletic Bilbao was started by British workers in the Basque region, in 1902. The club still uses the English version of the word "Athletic" rather than "Atletico" more common is Spain, and used by Atletico Madrid. History has it that their red and white stripes were adopted from the shirts worn by Southampton FC in England. Bilbao play their games at the Estadio San Mames, better known as 'El Catredal' because of its vicinity to the Cathredal of San Mames.
 

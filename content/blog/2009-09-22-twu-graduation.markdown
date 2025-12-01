@@ -29,7 +29,7 @@ We had a graduation ceremony at the office. Receiving the certificate from the M
 
 ![TWU-14 graduates](http://2.bp.blogspot.com/_bZ_kjFIgY0w/Srh7h88cjtI/AAAAAAAABQA/uq5OEtmKWkc/s320/DSC06527.JPG "TWU-14 graduates")
 
-*TWU-14 graduates. I am somewhere in there, even I dont know where I am!*
+*TWU-14 graduates. I am somewhere in there*
 
 In the evening, we had a graduation party at a nice place called 'Take5'. The food was great, and all souls who enjoy alcohol had an even better time. I sat there with my glass of orange juice. While there was party around us in full flow, I had a nice conversation with a co-worker about philosophy and how life is sometimes very unfair. Intellectually stimulating conversation in a not-so-simulating environment! But I had to leave early, as I had to head home and appear at the Regional Passport Office, Malappuram to prove that I was indeed Sadique Ali K M. More about the passport story later!
 

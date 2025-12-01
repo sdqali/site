@@ -25,6 +25,6 @@ A visibly moved Barkha Dutt, lost for words tried to conclude the discussions, e
 
 As Barkha Dutt, having regained her composure concluded the discussions, Shantanu Saikia's words still echoed in my hearts, and I am sure that anybody who happened to watch the show would have felt the same. In these times of anger and hatred, one man has demonstrated that we can still raise above the common theme of hatred, spreading rays of love.
 
-Shantanu Saikia, hats off to you !
+Shantanu Saikia, hats off to you.
 
 PS: I personally think that Qasab should be given the highest punishment possible. It may not change the minds of these terrorists, but it will certainly remind them of the consequences of carrying out attacks against innocent people.

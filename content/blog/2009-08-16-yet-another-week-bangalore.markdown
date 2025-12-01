@@ -25,4 +25,4 @@ Today, I watched the first day of English Premier Leagues. Chelsea seems to have
 
 Arsenal ran riot against Everton, and they won 6-1. It was sad to see some of the Goodison Park faithful booing David Moyes's team. Wigan beat Aston Villa to earn the first surprise result of the season.
 
-My friends had a get together back at Manjeri. Talked to them while the party was on. Really miss those guys! Wanted to be there.
+My friends had a get together back at Manjeri. I talked to them while the party was on. I really miss those guys and wanted to be there.
