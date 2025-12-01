@@ -1,13 +1,12 @@
 ---
 title: Configuring WezTerm on my Linux MacBook Air
 date: 2025-11-30T15:08:03-08:00
-draft: true
 tags:
   - macbook
   - wezterm
   - xremap
 ---
-After setting up Linux on the [MacBook Air](/blog/2025/11/27/keeping-a-mid-2011-macbook-air-running-with-linux/) as we discussed in the last blog post, the next item to sort out was making sure that the keyboard shortcuts that I have always used continue to work. Since the macOS key bindings I set up using `gnome-macos-remap-wayland` had special configurations in place to handle `Ctrl+` shortcuts in Gnome Terminal [^1], that is where I started. It became apparent that configuring it to handle all the shortcuts is too painful and I decided to switch to WezTerm [^2] instead.
+After setting up Linux on the [MacBook Air](/blog/2025/11/27/keeping-a-mid-2011-macbook-air-running-with-linux/) as we discussed in the last blog post, the next item to sort out was making sure that the keyboard shortcuts that I have always used continue to work. Since the macOS key bindings I set up using `gnome-macos-remap-wayland` had special configurations in place to handle `Ctrl+` shortcuts in Gnome Terminal [^1], that is where I started. It became apparent that configuring Gnome Terminal to handle all the shortcuts is too painful and I decided to switch to WezTerm [^2] instead.
 
 ## Configuring xremap for WezTerm
 
@@ -42,7 +41,7 @@ The first configuration changes were needed to be made for `xremap`. Since `Ctrl
       Super-KEY_SLASH: Ctrl-KEY_SLASH
 ```
 
-The next part configures `Cmd` (now mapped to `Ctrl`) to be used for non Terminal commands.
+The next part configures `Super` (now mapped to `Ctrl`) to be used for non Terminal commands.
 ```yaml
   - name: Console shortcuts
     application:
@@ -61,7 +60,7 @@ The next part configures `Cmd` (now mapped to `Ctrl`) to be used for non Termina
 
 ## Numbered Tab Navigation
 
-I use `Cmd+<number>` to switch to Console tab numbered `<number>`. This can be configured with WezTerm's `ActivateTab` action.
+I use `Super+<number>` to switch to Console tab numbered `<number>`. This can be configured with WezTerm's `ActivateTab` action.
 
 ```lua
 for i = 1, 9 do
@@ -73,7 +72,7 @@ for i = 1, 9 do
 end
 ```
 
-Note the use of `CTRL` as the modifier to accommodate `xremap` sending `Cmd` as `Ctrl`.
+Note the use of `CTRL` as the modifier to accommodate `xremap` sending `Super` as `Ctrl`.
 
 ## Undo Operation
 
