@@ -5,6 +5,8 @@ tags:
   - macbook
   - wezterm
   - xremap
+ghissueid: 153
+bbissueid: 146
 ---
 After setting up Linux on the [MacBook Air](/blog/2025/11/27/keeping-a-mid-2011-macbook-air-running-with-linux/) as we discussed in the last blog post, the next item to sort out was making sure that the keyboard shortcuts that I have always used continue to work. Since the macOS key bindings I set up using `gnome-macos-remap-wayland` had special configurations in place to handle `Ctrl+` shortcuts in Gnome Terminal [^1], that is where I started. It became apparent that configuring Gnome Terminal to handle all the shortcuts is too painful and I decided to switch to WezTerm [^2] instead.
 
