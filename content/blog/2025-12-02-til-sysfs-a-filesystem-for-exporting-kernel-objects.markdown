@@ -8,6 +8,8 @@ While tweaking kernel parameters on the [MacBook running Linux](/blog/2025/11/27
 
 Looking at the `hid_apple` module [^3], it's state is available at `/sys/module/hid_apple/`
 
+<!--more-->
+
 ```shell
 > tree /sys/module/hid_apple/
 
