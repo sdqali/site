@@ -5,7 +5,8 @@ draft: true
 ---
 In this blog post, we will explore Linux capabilities, which is a way to ensure that processes and executables have just enough rights to perform the actions they are deemed safe to perform, without giving them _carte blanche_ to anything and everything by running as the `root` user.
 
-{{ .Page.TableOfContents }}
+{{< toc >}}
+
 
 ## Basic Privilege model
 To state the basics - the classic Unix model of privilege is built around the concept of granting a `super user` (via their UID) the right to do pretty much anything - read and modify any data, open connections etc. This root user typically has the `UID` set to `0`. 
@@ -87,8 +88,9 @@ The POSIX proposal included the concept of Capability sets, for both Files and P
 - The `inheritable` set contains Capabilities that the process launched by executing the program may choose to use from the Capabilities it's parent process passed to it and the process may pass to child processes.
 
 
+### Linux-Privs
 
-Even though these Standards were proposed and then withdrawn, this effort inspired the `Linux-Privs` proposal [^5]. This specification lists Capabilities that are specific to Linux that are not part of the POSIX proposal.
+Even though these POSIX Standards were proposed and then withdrawn, this effort inspired the `Linux-Privs` proposal [^5]. This specification lists Capabilities that are specific to Linux that are not part of the POSIX proposal.
 
 {{< details summary="Linux-specific Capabilities proposed in Linux-Privs" >}}
 - CAP_LINUX_IMMUTABLE - _Allow modification of S_IMMUTABLE and S_APPEND file attributes._
@@ -131,14 +133,15 @@ There are some interesting things to note here:
 - This entry was never corrected `CAP_NET_SETID - CAP.FIXME: what is this about?`. This appears to be a typo.
 - Some of the capabilities noted in other systems eventually made it in to Linux, for example `CAP_NET_BIND_SERVICE` and `CAP_NET_RAW`.
 
-## Capability Sets
+#### Capability Sets
 
-The POSIX proposal and the Linux-Privs proposal included the concept of Capability sets - `effective`, `permitted` and `inheritable`. 
-- The `effective` set contains Capabilities that the process currently has. The process can drop a Capability any time it wants.
-- The `permitted` set contains Capabilities that a process could activate. At any point, the process can acquire any Capability in the `permitted` list.
-- The `inheritable` 
+Linux-Privs took the Capability Sets idea from the POSIX proposals and defined how Process Capabilities would be computed from the parent's Process Capabilities and the File's Capabilities.
 
-It was first proposed in the Linux mailing lists in 1998 [^6], with the first implementation releasing in Kernel version `2.2.11` [^3] [^4]. At this point, Capabilities were configurable only on processes, using `libcap`'s `capsh` utility or using syscalls `capset()` and `capget()`.
+- `effective` - pE' = pP' & fE _i.e._ the new effective set is the new permitted set masked with the executed file's effective set.
+- `inheritable` - pI' = pI _i.e._ inheritable set is passed unchanged.
+- `permitted` - pP' = fP | ( fI & pI ) _i.e._ the permitted set becomes the combination of the permitted set of the executed file and those inheritable capabilities of the executing file that are also inheritable by the file.
+
+It was first proposed in the Linux mailing lists in 1998 [^6], with the first implementation releasing in Kernel version `2.2.11` [^3] [^4]. At this point, Capabilities were configurable only on Processes and not Files, using `libcap`'s `capsh` utility or using the syscalls `capset()` and `capget()`.
 
 
 systemd - https://0pointer.de/blog/projects/security.html
