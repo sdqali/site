@@ -105,28 +105,28 @@ Even though these POSIX Standards were proposed and then withdrawn, this effort 
 The proposal also lists Capabilities present in other systems that are not part of the POSIX proposal or the Linux-Privs proposal.
 
 {{< details summary="Capabilities found in other systems" >}}
-CAP_NET_BIND_SERVICE - _Allows binding to TCP/UDP sockets below 1024._
-CAP_NET_BROADCAST - _Allow broadcasting._
-CAP_NET_DEBUG - _Allow setting debug option on sockets._
-CAP_NET_FIREWALL - _Allow configuring of firewall stuff._
-CAP_NET_IFCONFIG - _Allow interface configuration._
-CAP_NET_PACKET - _Allow use of PACKET sockets._
-CAP_NET_RAW - _Allow use of RAW sockets._
-CAP_NET_ROUTE - _Allow modification of routing tables._
-CAP_NET_SETID - _CAP.FIXME: what is this about?._
-CAP_IPC_LOCK - _Allow locking of segments in memory._
-CAP_IPC_OWNER - _Override IPC ownership checks._
-CAP_SYS_CHROOT - _Allow use of chroot()._
-CAP_SYS_PTRACE - _Allow ptrace() of any process._
-CAP_SYS_ACCOUNT - _Allow configuration of process accounting._
-CAP_SYS_ADMIN - _System Admin functions: mount et al._
-CAP_SYS_BOOT - _Allow use of reboot()._
-CAP_SYS_DEVICES - _Allow device administration._
-CAP_SYS_NICE - _Allow use of renice() on others, and raising of priority._
-CAP_SYS_RESOURCE - _Override resource limits._
-CAP_SYS_TIME - _Allow manipulation of system clock._
-CAP_SYS_TTY_CONFIG - _Allow configuration of tty devices._
-CAP_SYS_QUOTA - _Allow examination and configuration of disk quotas._
+- CAP_NET_BIND_SERVICE - _Allows binding to TCP/UDP sockets below 1024._
+- CAP_NET_BROADCAST - _Allow broadcasting._
+- CAP_NET_DEBUG - _Allow setting debug option on sockets._
+- CAP_NET_FIREWALL - _Allow configuring of firewall stuff._
+- CAP_NET_IFCONFIG - _Allow interface configuration._
+- CAP_NET_PACKET - _Allow use of PACKET sockets._
+- CAP_NET_RAW - _Allow use of RAW sockets._
+- CAP_NET_ROUTE - _Allow modification of routing tables._
+- CAP_NET_SETID - _CAP.FIXME: what is this about?._
+- CAP_IPC_LOCK - _Allow locking of segments in memory._
+- CAP_IPC_OWNER - _Override IPC ownership checks._
+- CAP_SYS_CHROOT - _Allow use of chroot()._
+- CAP_SYS_PTRACE - _Allow ptrace() of any process._
+- CAP_SYS_ACCOUNT - _Allow configuration of process accounting._
+- CAP_SYS_ADMIN - _System Admin functions: mount et al._
+- CAP_SYS_BOOT - _Allow use of reboot()._
+- CAP_SYS_DEVICES - _Allow device administration._
+- CAP_SYS_NICE - _Allow use of renice() on others, and raising of priority._
+- CAP_SYS_RESOURCE - _Override resource limits._
+- CAP_SYS_TIME - _Allow manipulation of system clock._
+- CAP_SYS_TTY_CONFIG - _Allow configuration of tty devices._
+- CAP_SYS_QUOTA - _Allow examination and configuration of disk quotas._
 {{< /details >}}
 
 There are some interesting things to note here:
